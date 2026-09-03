@@ -7,7 +7,6 @@
 ### 📦 Programa Pronto para Usar (Executável / Instalador)
 > Baixe a versão compilada, instale e comece a converter seus arquivos imediatamente:
 * **MEGA:** [Baixar LaFirma Remux Forge](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
-* **GOOGLE DRIVE:** [Baixar LaFirma Remux Forge](https://drive.google.com/file/d/1DLqDK9lt9PNOIDqNUDd2F2z0qmzWfNIB/view?usp=sharing)
 * **GOFILE:** [Baixar LaFirma Remux Forge](https://gofile.io/d/YE2isutz)
 
 ---
@@ -15,7 +14,6 @@
 ### 💻 Código-Fonte Completo & Pasta do Projeto (Para Compilar)
 > Para desenvolvedores ou usuários que desejam acessar a estrutura inteira de arquivos:
 * **MEGA (Pasta Completa):** [Acessar Pasta do Projeto](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
-* **GOOGLE DRIVE (Pasta Completa):** [Acessar Pasta do Projeto](https://drive.google.com/drive/folders/1WW4aLPPmamNi_A6vZmQNoKTJzFMwNgvh?usp=sharing)
 
 ---
 

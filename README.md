@@ -62,32 +62,32 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, it integrate
 ### 1. Seleção de Arquivo e Fila
 Análise da fila, cálculo automático de espaço em disco e diagnóstico automático do arquivo.
 
-![Análise Inicial](https://i.ibb.co/NdBdGZ42/image.png)
+<img src="https://i.ibb.co/NdBdGZ42/image.png" alt="Análise Inicial" width="700" style="max-width: 100%; height: auto;" />
 
 ---
 
 ### 2. Processo em Andamento
 Acompanhamento em tempo real da conversão por etapas com métricas de desempenho.
 
-![Processo sendo Realizado](https://i.ibb.co/G4crhCS1/image.png)
+<img src="https://i.ibb.co/G4crhCS1/image.png" alt="Processo sendo Realizado" width="700" style="max-width: 100%; height: auto;" />
 
 ---
 
 ### 3. Resumo da Conversão
 Relatório final detalhado com verificação de integridade e qualidade da legenda.
 
-![Finalização e Log Final](https://i.ibb.co/LhHmtqWZ/image.png)
+<img src="https://i.ibb.co/LhHmtqWZ/image.png" alt="Finalização e Log Final" width="700" style="max-width: 100%; height: auto;" />
 
 ---
 
 ### 4. Modo Automático de Mapeamento
 Visualização detalhada do mapeamento de faixas no Modo Automático.
 
-![Confirmação do Processo Automático](https://i.ibb.co/h1V3dKRK/image.png)
+<img src="https://i.ibb.co/h1V3dKRK/image.png" alt="Confirmação do Processo Automático" width="700" style="max-width: 100%; height: auto;" />
 
 ---
 
 ### 5. Modo Manual de Mapeamento
 Modo Manual: controle total para manter, converter ou excluir cada áudio e legenda.
 
-![Confirmação do Processo Manual](https://i.ibb.co/G3r5TRrc/image.png)
+<img src="https://i.ibb.co/G3r5TRrc/image.png" alt="Confirmação do Processo Manual" width="700" style="max-width: 100%; height: auto;" />

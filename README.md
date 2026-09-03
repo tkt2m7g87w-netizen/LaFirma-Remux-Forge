@@ -90,6 +90,8 @@ Visualização detalhada do mapeamento de faixas no Modo Automático.
 
 [![Confirmação do Processo Manual](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
 
+![Finalização / Log Final](https://i.ibb.co/LhHmtqWZ/image.png)
+
 
 ---
 

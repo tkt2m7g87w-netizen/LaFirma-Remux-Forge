@@ -64,7 +64,7 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, it integrate
 ### 1. Seleção de Arquivo e Fila
 Análise da fila, cálculo automático de espaço em disco e diagnóstico automático do arquivo.
 
-[![Baixar Programa no MEGA](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
+https://ibb.co/NdBdGZ42
 
 
 ---
@@ -72,27 +72,33 @@ Análise da fila, cálculo automático de espaço em disco e diagnóstico autom�
 ### 2. Processo em Andamento
 Acompanhamento em tempo real da conversão por etapas com métricas de desempenho.
 
-[![Baixar Programa no GoFile](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-GOFILE-yellow?style=for-the-badge)](https://gofile.io/d/YE2isutz)
+https://ibb.co/h1V3dKRK
 
 ---
 
 ### 3. Resumo da Conversão
 Relatório final detalhado com verificação de integridade e qualidade da legenda.
 
-[![Acessar Código Fonte no MEGA](https://img.shields.io/badge/📂_PASTA_PROJETO-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
+
+https://ibb.co/G4crhCS1
+
 
 ---
 
 ### 4. Modo Automático de Mapeamento
 Visualização detalhada do mapeamento de faixas no Modo Automático.
 
-[![Baixar Programa no MEGA](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
+
+
+https://ibb.co/G4crhCS1
+
 
 ---
 
 ### 5. Modo Manual de Mapeamento
 Modo Manual: controle total para manter, converter ou excluir cada áudio e legenda.
 
-[![Baixar Programa no Google Drive](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-GOOGLE_DRIVE-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1DLqDK9lt9PNOIDqNUDd2F2z0qmzWfNIB/view?usp=sharing)
+
+https://ibb.co/G4crhCS1
 
 </div>

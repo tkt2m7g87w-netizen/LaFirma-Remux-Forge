@@ -64,7 +64,7 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, it integrate
 ### 1. Seleção de Arquivo e Fila
 Análise da fila, cálculo automático de espaço em disco e diagnóstico automático do arquivo.
 
-https://ibb.co/NdBdGZ42
+[![Análise Inicial](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
 
 
 ---
@@ -72,16 +72,14 @@ https://ibb.co/NdBdGZ42
 ### 2. Processo em Andamento
 Acompanhamento em tempo real da conversão por etapas com métricas de desempenho.
 
-https://ibb.co/h1V3dKRK
-
+[![Processo sendo Realizado](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
 ---
 
 ### 3. Resumo da Conversão
 Relatório final detalhado com verificação de integridade e qualidade da legenda.
 
 
-https://ibb.co/G4crhCS1
-
+[![Finalização / Log Final](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
 
 ---
 
@@ -90,7 +88,7 @@ Visualização detalhada do mapeamento de faixas no Modo Automático.
 
 
 
-https://ibb.co/G4crhCS1
+[![Confirmação do Processo Manual](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
 
 
 ---
@@ -99,6 +97,6 @@ https://ibb.co/G4crhCS1
 Modo Manual: controle total para manter, converter ou excluir cada áudio e legenda.
 
 
-https://ibb.co/G4crhCS1
+![Confirmação do Processo Automático](https://i.ibb.co/h1V3dKRK/image.png)
 
 </div>

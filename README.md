@@ -2,6 +2,23 @@
 
 ---
 
+## 📥 Downloads & Links Oficiais
+
+### 📦 Programa Pronto para Usar (Executável / Instalador)
+> Baixe a versão compilada, instale e comece a converter seus arquivos imediatamente:
+* **MEGA:** [Baixar LaFirma Remux Forge](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
+* **GOOGLE DRIVE:** [Baixar LaFirma Remux Forge](https://drive.google.com/file/d/1DLqDK9lt9PNOIDqNUDd2F2z0qmzWfNIB/view?usp=sharing)
+* **GOFILE:** [Baixar LaFirma Remux Forge](https://gofile.io/d/YE2isutz)
+
+---
+
+### 💻 Código-Fonte Completo & Pasta do Projeto (Para Compilar)
+> Para desenvolvedores ou usuários que desejam acessar a estrutura inteira de arquivos:
+* **MEGA (Pasta Completa):** [Acessar Pasta do Projeto](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
+* **GOOGLE DRIVE (Pasta Completa):** [Acessar Pasta do Projeto](https://drive.google.com/drive/folders/1WW4aLPPmamNi_A6vZmQNoKTJzFMwNgvh?usp=sharing)
+
+---
+
 ## 🇵🇹 Português
 
 O **LaFirma Remux Forge** foi criado para resolver de forma definitiva os problemas de incompatibilidade de mídia em Smart TVs (LG, Samsung) e servidores de mídia (**Plex**, **Jellyfin**, **Emby**).
@@ -42,29 +59,43 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, it integrate
 
 ---
 
-## 📸 Screenshots / Galeria
+## 🖼️ Interface & Demonstração (Clique nos botões abaixo para baixar)
 
-<p align="center">
-  <img src="./SELECIONANDO%20O%20ARQUIVO.png" alt="Fila de Processamento e Seleção" width="800"/><br/>
-  <i>Análise da fila, cálculo automático de espaço em disco e diagnóstico automático do arquivo.</i>
-</p>
+<div align="center">
 
-<p align="center">
-  <img src="./PROCESSO%20SENDO%20REALIZADO.png" alt="Processo em Andamento" width="800"/><br/>
-  <i>Acompanhamento em tempo real da conversão por etapas com métricas de desempenho.</i>
-</p>
+### 1. Seleção de Arquivo e Fila
+Análise da fila, cálculo automático de espaço em disco e diagnóstico automático do arquivo.
 
-<p align="center">
-  <img src="./CONVERSAO%20CONCLUIDA.png" alt="Resumo da Conversão" width="800"/><br/>
-  <i>Relatório final detalhado com verificação de integridade e qualidade da legenda.</i>
-</p>
+[![Baixar Programa no MEGA](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
+[![Baixar Programa no Google Drive](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-GOOGLE_DRIVE-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1DLqDK9lt9PNOIDqNUDd2F2z0qmzWfNIB/view?usp=sharing)
 
-<p align="center">
-  <img src="./SELECAO%20AUTOMATICO.png" alt="Modo Automático de Faixas" width="800"/><br/>
-  <i>Visualização detalhada do mapeamento de faixas no Modo Automático.</i>
-</p>
+---
 
-<p align="center">
-  <img src="./SELECAO%20MANUAL.png" alt="Modo Manual de Faixas" width="800"/><br/>
-  <i>Modo Manual: controle total para manter, converter ou excluir cada áudio e legenda.</i>
-</p>
+### 2. Processo em Andamento
+Acompanhamento em tempo real da conversão por etapas com métricas de desempenho.
+
+[![Baixar Programa no GoFile](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-GOFILE-yellow?style=for-the-badge)](https://gofile.io/d/YE2isutz)
+
+---
+
+### 3. Resumo da Conversão
+Relatório final detalhado com verificação de integridade e qualidade da legenda.
+
+[![Acessar Código Fonte no MEGA](https://img.shields.io/badge/📂_PASTA_PROJETO-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
+[![Acessar Código Fonte no Drive](https://img.shields.io/badge/📂_PASTA_PROJETO-GOOGLE_DRIVE-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/drive/folders/1WW4aLPPmamNi_A6vZmQNoKTJzFMwNgvh?usp=sharing)
+
+---
+
+### 4. Modo Automático de Mapeamento
+Visualização detalhada do mapeamento de faixas no Modo Automático.
+
+[![Baixar Programa no MEGA](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
+
+---
+
+### 5. Modo Manual de Mapeamento
+Modo Manual: controle total para manter, converter ou excluir cada áudio e legenda.
+
+[![Baixar Programa no Google Drive](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-GOOGLE_DRIVE-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1DLqDK9lt9PNOIDqNUDd2F2z0qmzWfNIB/view?usp=sharing)
+
+</div>

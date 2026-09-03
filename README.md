@@ -65,7 +65,7 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, it integrate
 Análise da fila, cálculo automático de espaço em disco e diagnóstico automático do arquivo.
 
 [![Baixar Programa no MEGA](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
-[![Baixar Programa no Google Drive](https://img.shields.io/badge/⬇️_BAIXAR_AGORA-GOOGLE_DRIVE-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1DLqDK9lt9PNOIDqNUDd2F2z0qmzWfNIB/view?usp=sharing)
+
 
 ---
 
@@ -80,7 +80,6 @@ Acompanhamento em tempo real da conversão por etapas com métricas de desempenh
 Relatório final detalhado com verificação de integridade e qualidade da legenda.
 
 [![Acessar Código Fonte no MEGA](https://img.shields.io/badge/📂_PASTA_PROJETO-MEGA-red?style=for-the-badge&logo=mega)](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
-[![Acessar Código Fonte no Drive](https://img.shields.io/badge/📂_PASTA_PROJETO-GOOGLE_DRIVE-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/drive/folders/1WW4aLPPmamNi_A6vZmQNoKTJzFMwNgvh?usp=sharing)
 
 ---
 

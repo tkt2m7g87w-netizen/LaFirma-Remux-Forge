@@ -1,0 +1,92 @@
+PASTA redist\  -  O .NET DESKTOP RUNTIME 8.0 (OPCIONAL)
+================================================================================
+
+ESTA PASTA VEM VAZIA DE PROPOSITO, e o instalador compila do mesmo jeito.
+
+O QUE VAI AQUI
+
+    windowsdesktop-runtime-8.0.30-win-x64.exe   (~58 MB)
+
+    https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/8.0.30/windowsdesktop-runtime-8.0.30-win-x64.exe
+
+    Tem que ser o WINDOWS DESKTOP RUNTIME, x64. Nao serve o "ASP.NET Core
+    Runtime" nem o ".NET Runtime" puro - o PgsToSrt usa a parte desktop.
+
+QUAL VERSAO FUNCIONA - E COMO DESCOBRIR SEM INSTALAR NADA
+
+    Diego, 03/09: "no dia q eu fiz esse teste eu instalei todas versoes dessa
+    merda e so um deles deu certo [...] como diabos vamos saber disso sem
+    fazer toda build, perde tempo desinstalando, instalando e tal?"
+
+    NAO PRECISA. A resposta esta na propria maquina:
+
+        dir "C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App"
+
+    Cada versao instalada e uma PASTA com o numero no nome. A pasta 8.0.*
+    que aparecer ali e a que funciona. Na maquina do Diego, em 03/09:
+
+        6.0.24    8.0.29    9.0.5    10.0.10    11.0.0-preview
+
+    Uma unica 8.0.x: a 8.0.29. A partir da 1.7.3 o padrao do projeto passou
+    a ser a 8.0.30, por escolha do Diego - mesma familia, mesmo efeito.
+
+    POR QUE SO UMA FUNCIONOU. Nao e versao magica. O PgsToSrt.runtimeconfig
+    .json pede:
+
+        "framework": { "name": "Microsoft.NETCore.App", "version": "8.0.0" }
+
+    sem rollForward declarado. O .NET faz roll-forward DENTRO da mesma versao
+    MAIOR, nunca entre maiores: um app net8.0 aceita 8.0.29, 8.0.31, qualquer
+    8.0.x - e RECUSA a 6.0, a 9.0 e a 10.0, mesmo sendo mais novas. Das que
+    foram instaladas naquele dia, so a familia 8.0 podia servir.
+
+    Ou seja: qualquer 8.0.x resolve. O que nao resolve e outra familia.
+
+
+ATENCAO AO NOME DO ARQUIVO
+
+    O .iss procura o NOME EXATO que esta no "#define Runtime" dele - hoje
+    "windowsdesktop-runtime-8.0.30-win-x64.exe". Se voce baixar outra versao
+    8.0.x, o arquivo tem OUTRO nome, e o instalador compila EM SILENCIO sem
+    o runtime dentro.
+
+    A partir da 1.7.1 a compilacao AVISA na tela do Inno quando nao acha o
+    arquivo esperado. Se aparecer esse aviso e voce quer o runtime embutido,
+    edite o "#define Runtime" no topo do LaFirma_Setup.iss com o nome do
+    arquivo que voce baixou.
+
+    Qualquer 8.0.x serve: o PgsToSrt pede "net8.0" no runtimeconfig e o .NET
+    faz roll-forward dentro da mesma versao maior.
+
+    De onde veio o 8.0.29: era o arquivo que ja estava nesta pasta, antes de
+    o passo a passo errado que eu dei fazer o Diego apaga-lo. A 8.0.30 e a
+    escolha dele para daqui em diante.
+
+
+PARA QUE SERVE
+
+    O PgsToSrt (o OCR de legenda RESERVA, que entra quando o seconv falha)
+    precisa do .NET Desktop Runtime 8.0 instalado no Windows.
+
+    COM o arquivo aqui:  o instalador carrega o runtime dentro dele e o
+                         instala sozinho, se a maquina precisar. Funciona
+                         offline.
+
+    SEM o arquivo:       o instalador e gerado igual, 58 MB menor. Se a
+                         maquina de destino nao tiver o .NET 8, ele oferece
+                         BAIXAR da Microsoft na hora de instalar - o que
+                         exige internet naquele momento.
+
+    Em nenhum dos dois casos o programa deixa de converter video: sem o
+    .NET 8 o OCR continua funcionando pelo seconv (caminho preferencial,
+    que nao depende de nada instalado). Perde-se so o segundo caminho.
+
+POR QUE ESTE ARQUIVO EXISTE
+
+    1.7.1 - o passo a passo que eu (Claude) dei ao Diego dizia "apague tudo
+    dentro de LaFirma_Setup menos a pasta fonte, e cole o zip por cima". A
+    pasta redist\ estava nesse "tudo", e o runtime dele foi junto. O zip que
+    eu mando nao carrega os 58 MB do runtime - e eu nunca tinha dito isso.
+
+    Agora a pasta vem no zip com este aviso dentro. Colar o zip por cima
+    nunca mais faz a pasta sumir sem explicacao.

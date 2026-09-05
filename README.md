@@ -1,7 +1,7 @@
 # LaFirma Remux Forge (Black Edition)
 
 > **Automated MKV Remuxing & Transcoding Engine**  
-> *Convert Dolby Vision (Profile 7 to 8.1), transcode Atmos audio to E-AC-3, and process PT-BR PGS OCR subtitles with a smooth PowerShell GUI.*
+> *Convert Dolby Vision Profile 7 (MEL/FEL) to 8.1, transcode Atmos audio to E-AC-3, and process PT-BR PGS OCR subtitles with a smooth PowerShell GUI.*
 
 [![Language: PT-BR](https://img.shields.io/badge/Language-Portuguese-green.svg)](#-português)
 [![Language: EN](https://img.shields.io/badge/Language-English-blue.svg)](#-english)
@@ -33,8 +33,13 @@ O **LaFirma Remux Forge** foi criado para resolver de forma definitiva os proble
 
 Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos remux, o software atua como uma ponte de orquestração: desenvolvemos toda a interface gráfica (GUI) fluida, as regras de decisão automatizadas e o motor em PowerShell que integra e automatiza ferramentas consagradas da comunidade (`ffmpeg`, `mkvmerge`, `dovi_tool`, `DDVT`, `PgsToSrt`, `Tesseract`, `DeeZy`, `seconv`). É a solução ideal tanto para arquivos individuais quanto para o processamento em lote de temporadas completas de séries.
 
-### 💡 Problemas que o programa resolve
-* **Dolby Vision Incompatível:** Converte automaticamente perfis incompatíveis (Perfil 5 / 7) para **Perfil 8.1**, garantindo reprodução sem tela preta ou cores alteradas, mantendo a qualidade de imagem 100% intacta.
+### 💡 Tratamento Transparente de Perfis Dolby Vision (P7 e P5)
+* **Dolby Vision Perfil 7 para 8.1 (Remux Lossless):** O programa injeta e converte RPU de arquivos P7 oriundos de Blu-ray UHD para o Perfil 8.1 de forma 100% *lossless* no vídeo.
+  * **Perfil 7 MEL (Minimum Enhancement Layer):** Contém apenas metadados. A conversão para P8.1 é perfeita e idêntica ao original.
+  * **Perfil 7 FEL (Full Enhancement Layer):** Na vasta maioria dos casos (onde a EL não expande o brilho de forma crítica), o descarte da EL mantém a imagem intacta. O programa processa a conversão de metadados mantendo o arquivo compatível com players nativos sem recodificação.
+* **Por que NÃO convertemos Perfil 5 diretamente via Remux?** O Perfil 5 (nativo do Web-DL / serviços de streaming) utiliza o espaço de cores patenteado **IPTPQc2** e não possui camada de fallback HDR10 padrão. Tentar convertê-lo via simples remux para P8 ou HDR10 gera cores roxas/esverdeadas ou exige re-encode total do vídeo. Para preservar a filosofia *lossless* e a velocidade do projeto, o programa preserva e identifica a estrutura do P5 sem mentir sobre capacidades de conversão sem re-encode.
+
+### 💡 Outros Problemas que o programa resolve
 * **Incompatibilidade de Áudio:** Transcodifica faixas pesadas (TrueHD, DTS, DTS-HD, DTS:X) para **E-AC-3 (Dolby Digital Plus)** preservando os canais Atmos via DeeZy, mantendo a compatibilidade sem perda perceptível.
 * **Legendas PGS em PT-BR (TVs não leem):** Realiza OCR automático convertendo faixas PGS para `.SRT` exclusivamente em Português (PT-BR) com correção ortográfica baseada em dicionário, além de preservar a faixa de legenda original em inglês.
 * **Processamento em Lote e Espaço em Disco:** Adicione uma temporada inteira e deixe o programa trabalhar. Ele calcula o espaço necessário antes de iniciar para evitar falhas por falta de armazenamento.
@@ -53,8 +58,13 @@ Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos r
 
 Created to streamline the workflow for Blu-ray encodes and remuxes, the software serves as an orchestration bridge: we designed the smooth graphical user interface (GUI), decision logic, and PowerShell-driven engine that connects and automates established community utilities (`ffmpeg`, `mkvmerge`, `dovi_tool`, `DDVT`, `PgsToSrt`, `Tesseract`, `DeeZy`, `seconv`). Perfect for single files or batch processing entire TV show seasons.
 
-### 💡 Problems Solved
-* **Incompatible Dolby Vision:** Automatically converts Dolby Vision profiles (Profile 5 / 7) to **Profile 8.1**, ensuring flawless playback on Smart TVs and media servers with zero image or color degradation.
+### 💡 Transparent Dolby Vision Profile Handling (P7 & P5)
+* **Dolby Vision Profile 7 to 8.1 (Lossless Remux):** Extracts and converts RPU metadata from UHD Blu-ray P7 releases into Profile 8.1 with 100% video bit-exact preservation.
+  * **Profile 7 MEL (Minimum Enhancement Layer):** Contains metadata only. Conversion to P8.1 is 100% identical and loss-free.
+  * **Profile 7 FEL (Full Enhancement Layer):** In the vast majority of releases (where EL does not carry critical brightness expansion), stripping the EL leaves the underlying video stream untouched while preserving dynamic metadata for TV compatibility.
+* **Why we do NOT convert Profile 5 via simple Remux:** Profile 5 (native to Web-DL / streaming) uses **IPTPQc2** color space without a standard HDR10 fallback layer. Forcing a remux-only conversion to P8 or HDR10 causes severe color distortion (purple/green tint) or requires full video re-encoding. To maintain our "zero video re-encode" speed and fidelity commitment, P5 is handled appropriately without false conversion claims.
+
+### 💡 Other Problems Solved
 * **Audio Codec Issues:** Transcodes unsupported high-bitrate audio formats (TrueHD, DTS, DTS-HD, DTS:X) into **E-AC-3 (Dolby Digital Plus)** with spatial Atmos support via DeeZy, preserving high compatibility across all player devices.
 * **PGS Subtitles to SRT (PT-BR Focused):** Performs automated OCR conversion of image-based PGS subtitles to clean `.SRT` format specifically for Portuguese (PT-BR) with dictionary spellchecking, while retaining primary English subtitle tracks.
 * **Batch Processing & Disk Management:** Queues multiple files or full series seasons. The app calculates required temp/output disk space prior to processing to prevent storage overhead failures.

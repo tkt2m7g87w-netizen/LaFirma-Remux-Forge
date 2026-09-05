@@ -1,0 +1,2 @@
+The compiled installer will appear here: LaFirma_Setup_X.X.exe
+O instalador compilado aparece aqui: LaFirma_Setup_X.X.exe

@@ -1,0 +1,440 @@
+﻿================================================================================
+ [LaFirma] Dolby Vision PROFILE Converter [8.1] + PGS SUBTITLE Converter [srt]
+           + AUDIO Converter [Dolby TrueHD / DTS:HD / DTS:X -> E-AC-3]
+ Profile 7/5/8 to Profile 8.1  (with automatic PT-BR PGS subtitle OCR)
+ --------------------------------------------------------------------------
+ WINDOW (GUI) 16.75  ·  ENGINE 14.36  ·  CORRECTOR 2.27  ·  REOCR 1.29
+ Installer 1.7.3                                   -   "LaFirma"
+================================================================================
+
+HOW TO OPEN
+--------------------------------------------------------------------------------
+If you installed via the installer (LaFirma_Setup): click the
+"LaFirma Remux Forge" shortcut on the Desktop or in the Start Menu.
+
+If you are using the portable folder: double-click
+"Abrir_LaFirma_JANELA.vbs".
+
+Either way the window opens on its own, with no black console window
+behind it, reads the "00_Arquivos_Base" folder, and already builds the
+queue with each episode's diagnosis - nothing is converted until you click
+Start.
+
+If the shortcut ever fails to open, there are TWO plan Bs, and they do
+different things:
+
+  "Abrir_LaFirma_JANELA.bat"     - opens the SAME window, but with the black
+                                   console behind it. That console is where
+                                   you see the error the normal mode swallows.
+  "Converter_AUTO_DIRETO.bat"    - skips the window and runs the engine
+                                   straight in the console. Use it when the
+                                   window itself won't open.
+
+
+WHAT THIS PROGRAM DOES
+--------------------------------------------------------------------------------
+For every .mkv file inside the "00_Arquivos_Base" folder, it runs a
+DIAGNOSIS and then 5 WORK STEPS, each with its own progress bar:
+
+  ·  DIAGNOSIS - reads the frame rate, the duration and the tracks, and
+     decides what will be done. It changes nothing and takes 2 to 4 seconds.
+     That is why it has no number: it is not the work, it is the decision
+     about the work.
+
+  1. Extracts the raw video from the MKV (no re-encoding - zero quality loss)
+  2. Converts the Dolby Vision to Profile 8.1.
+     - If the video is ALREADY Profile 8.x (no Enhancement Layer), this step
+       is SKIPPED automatically and the video is reused ("[NOT NEEDED]
+       Already Profile 8.1"). Profiles 5 and 7 are converted normally.
+  3. Converts the MAIN audio track to E-AC-3, following this rule:
+     - Dolby TrueHD/MLP  -> E-AC-3 Atmos (via DeeZy), if DeeZy is available.
+     - DTS / DTS-HD / DTS:X -> standard E-AC-3 (via ffmpeg).
+     - If the main track is ALREADY E-AC-3, AC-3 or AAC (formats modern TVs
+       already play natively), the conversion is SKIPPED ("[NOT NEEDED]
+       Already ... (Compatible)").
+     The decision looks at the movie's MAIN audio track (TrueHD/Atmos in any
+     language -> English track -> the track flagged default by the remux ->
+     first track; always ignoring director's commentary), and IGNORES tracks
+     in a different language than the main one when deciding whether a
+     ready-made track already exists to reuse - a PT-BR dub never cancels
+     the conversion of the original English audio.
+  4. If a Brazilian Portuguese subtitle exists, it is prepared as the
+     player's DEFAULT: ready text (.srt/.ass) is used directly; PGS
+     (image-based) is converted via OCR. If neither exists, the step is
+     skipped.
+     OCR has TWO paths, and the program picks on its own:
+       - seconv / BinaryOCR (preferred) - ships with the program, needs
+         nothing installed. This is the one that gives the best results.
+       - PgsToSrt / Tesseract + Corretor_Legenda (safety net) - kicks in by
+         itself if seconv is missing, fails, or returns the wrong track.
+         Corretor_Legenda then runs and repairs blocks that came out as
+         garbage. Only this path needs .NET 8 installed.
+     There is nothing to choose or configure: if the preferred path's result
+     isn't trustworthy, the program falls through to the next one.
+
+     This is the only step that runs SEVERAL programs in a row, and each one
+     is named on screen while it works:
+
+         Fast OCR (seconv / BinaryOCR)
+         Full OCR (PgsToSrt / Tesseract)      - only if the first one fails
+         Garbage-block review (Corretor_Legenda)
+         Short-line re-OCR (Reocr_Legenda / Tesseract PSM 6)
+
+     The RE-OCR is the last one and fixes OCR's worst case: a one or two word
+     line. It is what turns "INF TOL" into "Não!". It only touches blocks
+     that look suspicious, and only replaces one when the new reading passes
+     its own check - a good line is never touched. Tesseract ships inside the
+     package (tools\Tesseract\), so this works on a freshly formatted
+     machine with nothing installed.
+
+  5. Remuxes the final MKV keeping only what matters: main audio + the
+     new/reused track (director's commentary, extra dubs and other tracks
+     are discarded); new PT-BR subtitle + full English subtitle (other
+     languages, forced and SDH tracks are discarded). Video and chapters
+     are always kept intact. SAFE MODE: if the audio conversion fails or
+     there is no PT-BR subtitle to generate, nothing is discarded on that
+     front.
+
+  ·  VERIFICATION - the program actually DECODES 10 short excerpts spread
+     from the start to the end of the file it has just built. This is not a
+     header read: the video is really opened. If any excerpt fails, the same
+     test runs at the SAME points on the SOURCE file, and the program tells
+     you which of the two is at fault - instead of you finding out while
+     watching. Nothing is deleted or rejected: what to do with the file is
+     your call. It has no number (it stays off the ruler) and takes a few
+     seconds, because seeking uses the file index.
+
+  ·  CLEANUP - deletes that episode's temporary files. Also has no number:
+     it is instantaneous on every file measured so far.
+
+A STEP WITH NOTHING TO DO IS SKIPPED, and you can see it: its slice
+disappears from the progress ruler instead of sitting there as a gap. Real
+example: a file already in Profile 8.1 whose audio you chose to keep runs
+only 3 of the 5 steps, and the ruler shows 3 slices.
+
+Incompatible files (non-HEVC, or with no Dolby Vision at all) are skipped
+with a clear message, without wasting time on a file that isn't a
+candidate.
+
+The final result is placed in "01_Arquivos_Finalizados", keeping the
+original file name. Nothing inside "00_Arquivos_Base" is ever deleted or
+modified.
+
+
+THE WINDOW - QUEUE AND TRACKS
+--------------------------------------------------------------------------------
+The "Fila" (Queue) tab lists every episode found, one per row, with SIZE,
+what will happen to DOLBY VISION / AUDIO / PT-BR SUBTITLE (shown as
+"A → B" when it will convert), and the STATUS of each. Episodes that have
+real work to do are auto-checked; episodes already done (nothing to
+convert) come unchecked, but can be checked manually to reprocess.
+
+Click an episode and open the "Faixas do Vídeo" (Tracks) tab to see the
+track-by-track diagnosis (video, audio, subtitles, chapters) exactly as
+the engine will decide it - it's the same decision that goes into the
+conversion, not a separate prediction.
+
+Toolbar buttons: "Iniciar F1", "Pausar F2", "Cancelar ESC", "Abrir Origem"
+and "Abrir Saída" (open the folders in Explorer), "Atualizar" (re-scan the
+folder), "Log" (shows this session's log live - this is what to send me when
+something looks off) and "Ferramentas" (checks each tool one by one and shows
+WHERE each one is).
+
+Right below the toolbar sit the two paths - INPUT folder and OUTPUT folder.
+CLICK ON THE PATH ITSELF to change the folder: it opens the Windows folder
+picker, with a tree, path typing and search. No button needed.
+
+On the right-hand side, during a conversion, sit the six that decide whether
+a piece of the work happens at all:
+
+    dovi_tool   DeeZy   seconv   PgsToSrt   Tesseract   mkvmerge
+
+    green  = found
+    amber  = OPTIONAL and missing - that part is skipped, the rest runs
+    red    = REQUIRED and missing - the conversion will not run
+
+The SITUAÇÃO column in the queue also follows along live: the row being
+converted shows "Convertendo · Etapa n/5", finished ones show "Convertido".
+
+
+MANUAL MODE - FORCE A DIFFERENT CHOICE ON ONE VIDEO
+--------------------------------------------------------------------------------
+By default the engine decides everything on its own (rule above). To
+change the outcome for a specific episode:
+
+1. Check the video in the Fila tab and click "Marque o vídeo p/ editar".
+2. In the Faixas do Vídeo tab, every audio and subtitle row gets a
+   selector with three options:
+     CONVERTER - force conversion even if a ready-made track already
+                 exists to reuse.
+     MANTER    - keep the track as-is from the source file, no
+                 conversion (e.g. keep a dub the automatic rule would
+                 have discarded).
+     EXCLUIR   - remove the track from the final file.
+3. If you don't touch any verb, the episode follows the automatic rule
+   normally - Manual only kicks in where you chose something different.
+
+The video track itself is never editable (the Dolby Vision profile is the
+engine's decision, not the user's).
+
+
+CONTROLS DURING CONVERSION  ([F1] / [F2] / [ESC])
+--------------------------------------------------------------------------------
+  [F1]  START - begins converting the checked queue. Only works while
+        nothing is running (the button is disabled during conversion).
+
+  [F2]  PAUSE / RESUME (single key, toggles) - pausing actually freezes
+        the running process (ffmpeg, dovi_tool, DeeZy, mkvmerge or the
+        OCR); while paused it uses no CPU and no disk. The screen shows a
+        large PAUSED banner. Resuming continues exactly where it left
+        off; paused time doesn't count toward progress.
+
+  [ESC] CANCEL - asks for confirmation before acting (the keyboard
+        default is NO, so a reflex Enter won't cancel by accident). If
+        confirmed, it stops the current process, deletes the
+        half-finished output and that episode's temporary files, and
+        stops the batch (remaining episodes are not processed).
+
+Closing the window with the X during a conversion asks the same
+confirmation - closing mid-run is cancelling by another name. And if the
+conversion finishes on its own right while you're reading the question,
+the program notices and won't act on work that's already done.
+
+
+THE TIME REMAINING
+--------------------------------------------------------------------------------
+The footer shows three clocks: STEP, VIDEO and QUEUE. The queue line also
+shows "Deve Terminar por Volta das HH:MM · Tempo Restante".
+
+That number is counted from the current step forward: what is left of the
+current step (measured by ITS OWN pace, not from a table), plus the steps
+still to come, plus the final file check, plus the remaining videos in the
+queue. If a step runs late the number goes up - slowly, never in jumps. And
+it does not vanish at the end: while the program verifies and cleans up, it
+keeps counting down.
+
+In practice, on an idle machine, it is off by about 3% from start to finish.
+If you open a game or another heavy program midway, the conversion takes
+longer and the estimate falls short - there is no way to predict that.
+
+The program also MEASURES the source disk speed before starting (three short
+reads, the best one wins) and adjusts the math: a film on a mechanical HDD
+takes longer than the same film on an SSD, and the estimate already knows it.
+
+
+HOW MUCH DISK SPACE DO I NEED?
+--------------------------------------------------------------------------------
+It depends on whether the video needs Dolby Vision conversion. There are two
+factors, and the program uses the right one per file:
+
+    3.15x the episode size   when DV is converted (7.x -> 8.1). Extracted
+                             video + converted RPU + final file coexist on
+                             disk for a while.
+
+    1.6x  the episode size   when the video is already Profile 8.1 and never
+                             leaves the container. The two loose video files
+                             simply do not exist.
+
+The DOLBY VISION column in the queue tells you which case it is: an arrow
+(->) means 3.15x.
+
+The screen shows, live, the space needed, the free space now and what would
+be left - with a red warning if it isn't enough. That number is the LARGER of
+two calculations: the batch one (sum of estimated outputs + 2.15x the biggest
+file) and the peak of a single episode. It shows the larger on purpose: until
+16.60 the screen used only the loose calculation and said "it fits" three
+seconds before the engine refused for lack of space.
+
+The real check happens again, per file, when each episode's turn comes: if a
+specific episode doesn't have enough space by then, it is skipped with a
+warning, without blocking the rest of the batch.
+
+Each episode's temporary files are deleted when that episode finishes -
+success, failure or cancellation. The exception is the machine crashing or
+the process being killed mid-run: then nobody is left to delete them and the
+_ddvt_temp_* folder stays. The program sweeps those orphan folders away by
+itself at the start of the next run, logging the path and size of what it
+removed.
+
+
+THE SESSION LOG
+--------------------------------------------------------------------------------
+Every time the window opens, it creates a new file:
+
+    LaFirma_motor_log_<date>_<time>.txt
+
+saved inside the "_logs" folder, next to LaFirma_JANELA.ps1 (created
+automatically the first time). The engine writes its own log there too,
+as "log_conversao_<date>_<time>.txt" - both logs from a conversion
+session live together in "_logs", without mixing in with the finished
+episodes in "01_Arquivos_Finalizados". It records the environment, every
+state change, every click/key press and any error - it's the proof of
+everything that happened in the session. The "Log" button shows the same
+content live inside the program.
+
+If something looks off, this is the file to send - it tells the whole
+story without needing anything described on top of it.
+
+
+IF AN EPISODE FAILS
+--------------------------------------------------------------------------------
+The program doesn't stop at the first error - it moves to the next one
+and shows, in the final summary, which episode failed and why. Running it
+again automatically skips episodes that already have a finished result in
+"01_Arquivos_Finalizados".
+
+
+REQUIRED FOLDER STRUCTURE
+--------------------------------------------------------------------------------
+Everything must be inside the SAME main folder:
+
+    <season folder>\
+    |
+    |-- Abrir_LaFirma_JANELA.vbs        <- double-click this file
+    |-- Abrir_LaFirma_JANELA.bat        <- same window, console visible
+    |                                      (this is where errors show up)
+    |-- LaFirma_JANELA.ps1              <- the window (do not edit)
+    |-- Converter_AUTO_DIRETO.ps1      <- the engine underneath (do not edit)
+    |-- Converter_AUTO_DIRETO.bat      <- plan B: the engine in console mode
+    |-- Corretor_Legenda.ps1           <- the engine calls this (do not edit)
+    |-- Reocr_Legenda.ps1              <- the engine calls this (do not edit)
+    |-- LaFirma_PTBR_1.3M.dic.gz       <- PT-BR dictionary, 1.29M words
+    |-- Auditor_OCR.dic.gz             <- 50,000-word dictionary. The name is
+    |                                     misleading: the ENGINE uses it, for
+    |                                     accent repair on seconv output.
+    |                                     Do not delete (do not edit)
+    |-- HOW_TO_USE_EN.txt              <- this file
+    |-- COMO_USAR_PT.txt               <- the same, in Portuguese
+    |-- Changelog.txt                  <- what changed in each version
+    |
+    |-- icone\                         <- the program icon
+    |-- _logs\                         <- created automatically, per-session logs
+    |-- _corretor\                     <- only appear when a subtitle comes out
+    |-- _reocr\                           with defects (see below)
+    |
+    |-- tools\                         <- required tools (included)
+    |     |-- ffmpeg.exe
+    |     |-- ffprobe.exe
+    |     |-- dovi_tool.exe
+    |     |-- mkvmerge.exe
+    |     |-- mkvextract.exe
+    |     |-- MediaInfo.exe
+    |     |-- nvcuda.dll / nvcuvid.dll / LIBCURL.DLL
+    |     |
+    |     |-- SubtitleEdit\           <- preferred OCR (needs nothing)
+    |     |     |-- seconv.exe
+    |     |     |-- Latin.db
+    |     |     |-- libSkiaSharp.dll  (seconv will not start without it)
+    |     |
+    |     |-- PgsToSrt\               <- backup OCR (.NET 8 ships with the
+    |     |     |-- PgsToSrt.exe          installer)
+    |     |     |-- x64\
+    |     |     |-- tessdata\
+    |     |           |-- por.traineddata
+    |     |
+    |     |-- Tesseract\              <- short-line RE-OCR. INCLUDED:
+    |     |     |-- tesseract.exe         nothing to install separately
+    |     |     |-- tessdata\
+    |     |           |-- por.traineddata
+    |     |           |-- osd.traineddata
+    |     |
+    |     |-- DeeZy\                  <- TrueHD/Atmos audio -> E-AC-3 Atmos
+    |           |-- deezy.exe
+    |           |-- apps\             (DeeZy's internal dee and truehdd)
+    |                                 since 1.7 ffmpeg is NOT here any
+    |                                 more: DeeZy uses tools\ffmpeg.exe
+    |                                 above, which is the same file
+    |
+    |-- 00_Arquivos_Base\              <- PUT YOUR SOURCE EPISODES HERE
+    |     |-- Episode.S01E01....mkv
+    |     |-- (etc)
+    |
+    |-- 01_Arquivos_Finalizados\       <- created automatically
+          |-- Episode.S01E01....mkv    <- final result
+
+
+REQUIREMENTS FOR SUBTITLE OCR TO WORK
+--------------------------------------------------------------------------------
+If you installed via the installer: NOTHING. Everything the OCR uses ships
+inside the program. This section used to tell you to install Tesseract via
+winget and download .NET 8 by hand - it was out of date and was rewritten.
+
+  - seconv / BinaryOCR (preferred path) - ships in tools\SubtitleEdit\ with
+    Latin.db and libSkiaSharp.dll. It depends on nothing installed on
+    Windows and gives the best result.
+
+  - TESSERACT - the engine behind the short-line RE-OCR, the one that turns
+    "INF TOL" into "Não!", "tejlorL" into "Suba!", "BIOININNICIO)" into
+    "DOMINGO". Ships in tools\Tesseract\ with por.traineddata and
+    osd.traineddata. The program looks in that folder FIRST and only falls
+    back to a system Tesseract (PATH or Program Files) if it is missing.
+    Note: this is NOT the same as PgsToSrt's tessdata. That one is the data
+    library; this one is the program - and now both ship together.
+
+  - .NET DESKTOP RUNTIME 8.0 (x64) - only the safety net (PgsToSrt +
+    Corretor_Legenda) needs it. The installer checks whether the machine
+    already has it and installs it from its own payload if not. There is
+    nothing to download by hand. It has to be version 8.0 specifically.
+
+The only case where something can still be missing is running the loose
+.ps1 files without the installer: then .NET 8 may not be on the machine.
+Even so the program converts normally through seconv - you just lose the
+second OCR path.
+
+If NEITHER path is available (no tools\SubtitleEdit\ with seconv.exe +
+Latin.db, and no tools\PgsToSrt\ with por.traineddata), the program simply
+SKIPS the subtitle step and converts the video normally, saying so on
+screen.
+
+
+THE _corretor\ AND _reocr\ FOLDERS (they only show up when something is wrong)
+--------------------------------------------------------------------------------
+During step 4, the Corrector and the Re-OCR write their working material
+into those two folders: the corrected .srt, the reports and, when a block
+could not be read, the PNG of the strip taken from the video.
+
+At the end of the conversion the program looks at the subtitle grade and
+decides:
+
+  · subtitle EXCELENTE or BOA -> it deletes all of that. The good subtitle is
+    already INSIDE the final .mkv; that material was evidence for a problem
+    that does not exist.
+
+  · subtitle RAZOAVEL or RUIM, or a subtitle that failed -> it deletes
+    NOTHING, and says in the log that it kept them on purpose. Those files
+    are how you find out what went wrong - and where you should look.
+
+It only deletes what THAT conversion created. A file from another movie, or
+from an earlier run you have not looked at yet, is never touched.
+
+In short: if those folders are empty (or not even there), everything is fine.
+If there is something inside, that is where the explanation is.
+
+
+IF YOU CLOSE THE PROGRAM MID-CONVERSION
+--------------------------------------------------------------------------------
+Closing via the X during a conversion asks for confirmation (same rule as
+ESC). If confirmed, Windows automatically terminates the ffmpeg/
+dovi_tool/DeeZy/mkvmerge processes that were running alongside it - no need
+to end anything through Task Manager.
+
+
+IS THIS PORTABLE? CAN I TAKE IT TO ANOTHER PC?
+--------------------------------------------------------------------------------
+Almost 100% yes. Copying the ENTIRE folder (the .vbs, the .bat files, both
+.ps1 files, tools\ and 00_Arquivos_Base\ together, same structure) to a USB
+drive, external drive, or another PC, the program works the same way - it
+uses paths relative to its own folder.
+
+Subtitle OCR is now portable too: seconv.exe (the preferred path) carries
+everything it needs inside itself, so it works on any PC with nothing
+installed.
+
+The only part that still depends on the destination PC is the SAFETY NET:
+PgsToSrt.exe needs .NET Desktop Runtime 8.0 installed on WINDOWS itself
+(not inside the folder). If it's missing, the program detects this
+automatically and keeps using seconv normally - you just lose the second
+path.
+
+ffmpeg, ffprobe, dovi_tool, mkvmerge, MediaInfo and DeeZy are 100% portable,
+nothing to install.

@@ -11,9 +11,10 @@
 
 ---
 
-### 💻 Código-Fonte Completo & Pasta do Projeto (Para Compilar)
-> Para desenvolvedores ou usuários que desejam acessar a estrutura inteira de arquivos:
-* **MEGA (Pasta Completa):** [Acessar Pasta do Projeto](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
+### 💻 Código-Fonte Completo & Guia do Desenvolvedor
+> Para desenvolvedores que desejam acessar a estrutura inteira de arquivos ou compilar o instalador (.iss):
+* **MEGA (Pasta Completa do Projeto):** [Acessar Pasta do Projeto](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
+* **Guia de Compilação do Instalador (.ISS):** [Consulte README_INSTALLER.txt](./README_INSTALLER.txt)
 
 ---
 
@@ -26,14 +27,14 @@ Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos r
 ### 💡 Problemas que o programa resolve
 * **Dolby Vision Incompatível:** Converte automaticamente perfis incompatíveis (Perfil 5 / 7) para **Perfil 8.1**, garantindo reprodução sem tela preta ou cores alteradas, mantendo a qualidade de imagem 100% intacta.
 * **Incompatibilidade de Áudio:** Transcodifica faixas pesadas (TrueHD, DTS, DTS-HD, DTS:X) para **E-AC-3 (Dolby Digital Plus)** preservando os canais Atmos via DeeZy, mantendo a compatibilidade sem perda perceptível.
-* **Legendas PGS (TVs não leem):** Realiza OCR automático convertendo faixas PGS para `.SRT` em PT-BR (com verificação de qualidade final), além de manter a faixa de áudio e legenda principal em inglês.
+* **Legendas PGS em PT-BR (TVs não leem):** Realiza OCR automático convertendo faixas PGS para `.SRT` exclusivamente em Português (PT-BR) com correção ortográfica baseada em dicionário, além de preservar a faixa de legenda original em inglês.
 * **Processamento em Lote e Espaço em Disco:** Adicione uma temporada inteira e deixe o programa trabalhar. Ele calcula o espaço necessário antes de iniciar para evitar falhas por falta de armazenamento.
 * **Modo Automático ou Manual:** Permite ajustar faixa por faixa ou deixar o motor de decisão inteligente cuidar de tudo.
 
 ### 🛠️ Instalação e Requisitos
-* **Instalador (`LaFirma_Setup`):** Instala o programa no sistema como qualquer aplicativo nativo e cria atalhos no Menu Iniciar e Área de Trabalho.
-* **Pré-requisito único:** O programa gerencia suas dependências, exigindo apenas o **.NET Runtime 8.0** para o módulo de OCR de legendas (caso o sistema não possua, o instalador fará o download/instalação automaticamente).
-* **Observação sobre Legendas:** O motor de OCR (PGS para SRT) utiliza uma cadeia de ferramentas automatizadas. A precisão pode variar dependendo do release do Blu-ray, e o software emite um diagnóstico de qualidade ao final do processo. Os processos de vídeo e áudio são 100% precisos e sem perda de qualidade.
+* **Instalador (`LaFirma_Setup_1.0.exe`):** Instala o programa no sistema como qualquer aplicativo nativo e cria atalhos no Menu Iniciar e Área de Trabalho.
+* **Pré-requisito (Opcional):** O programa traz suas próprias ferramentas portáteis. O **.NET Desktop Runtime 8.0** é utilizado apenas pelo motor de OCR reserva (`PgsToSrt`). Caso o sistema não o possua e o instalador seja gerado sem o runtime embutido, o download poderá ser feito automaticamente durante a instalação.
+* **Observação sobre Legendas:** O motor de OCR (PGS para SRT) utiliza uma cadeia de ferramentas automatizadas focadas em PT-BR. A precisão pode variar dependendo do release do Blu-ray, e o software emite um diagnóstico de qualidade ao final do processo. Os processos de vídeo e áudio são 100% precisos e sem perda de qualidade.
 
 ---
 
@@ -46,14 +47,14 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, it integrate
 ### 💡 Problems Solved
 * **Incompatible Dolby Vision:** Automatically converts Dolby Vision profiles (Profile 5 / 7) to **Profile 8.1**, ensuring flawless playback on Smart TVs and media servers with zero image or color degradation.
 * **Audio Codec Issues:** Transcodes unsupported high-bitrate audio formats (TrueHD, DTS, DTS-HD, DTS:X) into **E-AC-3 (Dolby Digital Plus)** with spatial Atmos support via DeeZy, preserving high compatibility across all player devices.
-* **PGS Subtitles to SRT:** Performs automated OCR conversion of image-based PGS subtitles to clean `.SRT` format (optimized for PT-BR subtitles while retaining primary English tracks).
+* **PGS Subtitles to SRT (PT-BR Focused):** Performs automated OCR conversion of image-based PGS subtitles to clean `.SRT` format specifically for Portuguese (PT-BR) with dictionary spellchecking, while retaining primary English subtitle tracks.
 * **Batch Processing & Disk Management:** Queues multiple files or full series seasons. The app calculates required temp/output disk space prior to processing to prevent storage overhead failures.
 * **Auto or Manual Control:** Use smart auto-detection rules or manually select/exclude specific audio tracks and subtitle streams.
 
 ### 🛠️ Installation & Requirements
-* **Installer (`LaFirma_Setup`):** Installs natively with standard Windows integration and Start Menu / Desktop shortcuts.
-* **Dependencies:** Self-contained toolset requiring only the **.NET Runtime 8.0** (used for OCR subtitle operations).
-* **Subtitle OCR Note:** PGS-to-SRT conversion relies on automated OCR engines (`seconv`/`PgsToSrt`/`Tesseract`). Accuracy depends on font styling and source release quality; an automated evaluation report is displayed upon completion. Video and audio processing pipelines remain 100% lossy-free and intact.
+* **Installer (`LaFirma_Setup_1.0.exe`):** Installs natively with standard Windows integration and Start Menu / Desktop shortcuts.
+* **Dependencies (Optional):** Self-contained toolset. **.NET Desktop Runtime 8.0** is only required for the secondary fallback OCR engine (`PgsToSrt`). If missing and not bundled into the installer, it will offer to download it automatically.
+* **Subtitle OCR Note:** PGS-to-SRT conversion relies on automated OCR engines (`seconv`/`PgsToSrt`/`Tesseract`) configured for PT-BR text processing. Accuracy depends on font styling and source release quality; an automated evaluation report is displayed upon completion. Video and audio processing pipelines remain 100% lossy-free and intact.
 
 ---
 

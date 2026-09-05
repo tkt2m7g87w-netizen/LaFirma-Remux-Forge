@@ -14,7 +14,8 @@
 ### 💻 Código-Fonte Completo & Guia do Desenvolvedor
 > Para desenvolvedores que desejam acessar a estrutura inteira de arquivos ou compilar o instalador (.iss):
 * **MEGA (Pasta Completa do Projeto):** [Acessar Pasta do Projeto](https://mega.nz/folder/XL5ExRaC#rUepdnN0domt5MUaaugQhQ)
-* **Guia de Compilação do Instalador (.ISS):** [Consulte README_INSTALLER.txt](./README_INSTALLER.txt)
+* **Guia de Compilação do Instalador (PT-BR):** [Consulte LEIA-ME_INSTALADOR[PT-BR].txt](./LEIA-ME_INSTALADOR[PT-BR].txt)
+* **Guia de Compilação do Instalador (EN):** [Consulte README_INSTALLER[ENGLISH].txt](./README_INSTALLER[ENGLISH].txt)
 
 ---
 

@@ -52,7 +52,7 @@ Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos r
 
 ---
 
-## 🇬🇧 English
+## 🌐 English
 
 **LaFirma Remux Forge** was designed to eliminate media playback incompatibility issues on Smart TVs (LG, Samsung, etc.) and media servers (**Plex**, **Jellyfin**, **Emby**).
 
@@ -116,12 +116,22 @@ Relatório final detalhado com verificação de integridade e qualidade da legen
 
 ## 🙏 Agradecimentos & Créditos / Credits & Acknowledgments
 
-Este projeto não existiria sem o trabalho incrível dos desenvolvedores e da comunidade open-source por trás das ferramentas que integramos em nosso motor de automação:
+### 🇵🇹 Português
+Este projeto não existiria sem o trabalho incrível dos desenvolvedores e da comunidade open-source por trás das ferramentas fundamentais que integramos em nosso motor de automação:
 
-* **FFmpeg**: O motor fundamental para processamento e manipulação de mídia.
-* **MKVToolNix (`mkvmerge`)**: A referência definitiva para multiplexação de arquivos Matroska (MKV).
-* **dovi_tool & DDVT**: Ferramentas essenciais criadas pela comunidade para manipulação e conversão de metadados Dolby Vision.
-* **DeeZy**: Utilitário para codificação e preservação de áudio espacial Dolby Digital Plus / Atmos.
-* **PgsToSrt, Tesseract & seconv**: O ecossistema responsável por extração, renderização e conversão OCR de alta precisão para legendas PGS.
+* **FFmpeg**: O motor fundamental para processamento, extração e manipulação de fluxos de mídia.
+* **MKVToolNix (`mkvmerge`)**: A referência definitiva e o padrão da indústria para multiplexação e manipulação de arquivos Matroska (MKV).
+* **dovi_tool (por `quietvoid`) & DDVT (por `DonaldFaQ`)**: Ferramentas e rotinas essenciais criadas pela comunidade para parsing, extração, edição e conversão de metadados RPU do Dolby Vision.
+* **DeeZy**: Utilitário de codificação e preservação do áudio espacial Dolby Digital Plus com suporte a Dolby Atmos.
+* **PgsToSrt, Tesseract OCR & seconv**: O ecossistema técnico responsável pela extração, renderização de imagem e conversão OCR de alta precisão para legendas PGS em texto `.SRT`.
 
-*This project would not be possible without the incredible work of the open-source community and developers behind the core binaries integrated into our automation engine.*
+---
+
+### 🌐 English
+This project would not be possible without the incredible dedication and hard work of the open-source community and original developers behind the core utilities integrated into our automation engine:
+
+* **FFmpeg**: The foundational backbone engine for multimedia processing, stream extraction, and media transcoding.
+* **MKVToolNix (`mkvmerge`)**: The definitive industry-standard suite for Matroska (MKV) container demuxing, remuxing, and stream header manipulation.
+* **dovi_tool (by `quietvoid`) & DDVT (by `DonaldFaQ`)**: Critical community tools and workflow logic for Dolby Vision RPU metadata parsing, extraction, editing, and Profile 7-to-8.1 conversions.
+* **DeeZy**: Advanced encoding utility for Dolby Digital Plus audio transcoding with native spatial Dolby Atmos metadata preservation.
+* **PgsToSrt, Tesseract OCR & seconv**: The dedicated OCR ecosystem enabling high-accuracy image rendering, character recognition, and PGS-to-SRT text subtitle conversion.

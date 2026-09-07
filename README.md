@@ -1,7 +1,7 @@
 # LaFirma Remux Forge (Black Edition)
 
 > **Automated MKV Remuxing & Transcoding Engine**  
-> *Convert Dolby Vision Profile 7 (MEL/FEL) to 8.1, transcode Atmos audio to E-AC-3, and process PT-BR PGS OCR subtitles with a smooth PowerShell GUI.*
+> *Convert Dolby Vision Profile 7 (MEL/FEL) to 8.1 without video re-encoding, transcode audio to E-AC-3 with Atmos, and process PT-BR PGS OCR subtitles with a smooth PowerShell GUI.*
 
 [![Language: PT-BR](https://img.shields.io/badge/Language-Portuguese-green.svg)](#-português)
 [![Language: EN](https://img.shields.io/badge/Language-English-blue.svg)](#-english)
@@ -34,10 +34,10 @@ O **LaFirma Remux Forge** foi criado para resolver de forma definitiva os proble
 Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos remux, o software atua como uma ponte de orquestração: desenvolvemos toda a interface gráfica (GUI) fluida, as regras de decisão automatizadas e o motor em PowerShell que integra e automatiza ferramentas consagradas da comunidade (`ffmpeg`, `mkvmerge`, `dovi_tool`, `DDVT`, `PgsToSrt`, `Tesseract`, `DeeZy`, `seconv`). É a solução ideal tanto para arquivos individuais quanto para o processamento em lote de temporadas completas de séries.
 
 ### 💡 Tratamento Transparente de Perfis Dolby Vision (P7 e P5)
-* **Dolby Vision Perfil 7 para 8.1 (Remux Lossless):** O programa injeta e converte RPU de arquivos P7 oriundos de Blu-ray UHD para o Perfil 8.1 de forma 100% *lossless* no vídeo.
-  * **Perfil 7 MEL (Minimum Enhancement Layer):** Contém apenas metadados. A conversão para P8.1 é perfeita e idêntica ao original.
-  * **Perfil 7 FEL (Full Enhancement Layer):** Na vasta maioria dos casos (onde a EL não expande o brilho de forma crítica), o descarte da EL mantém a imagem intacta. O programa processa a conversão de metadados mantendo o arquivo compatível com players nativos sem recodificação.
-* **Por que NÃO convertemos Perfil 5 diretamente via Remux?** O Perfil 5 (nativo do Web-DL / serviços de streaming) utiliza o espaço de cores patenteado **IPTPQc2** e não possui camada de fallback HDR10 padrão. Tentar convertê-lo via simples remux para P8 ou HDR10 gera cores roxas/esverdeadas ou exige re-encode total do vídeo. Para preservar a filosofia *lossless* e a velocidade do projeto, o programa preserva e identifica a estrutura do P5 sem mentir sobre capacidades de conversão sem re-encode.
+* **Dolby Vision Perfil 7 para 8.1 (Sem Re-encoding):** Converte arquivos P7 oriundos de Blu-ray UHD para o Perfil 8.1 mantendo a Camada Base (BL) e os metadados dinâmicos (RPU) intactos, sem realizar re-encode no fluxo principal de vídeo.
+  * **Perfil 7 MEL (Minimum Enhancement Layer):** Contém apenas metadados. A conversão para P8.1 preserva 100% das informações originais de vídeo e metadados.
+  * **Perfil 7 FEL (Full Enhancement Layer):** O fluxo de conversão descarta a camada de extensão de vídeo (EL) para garantir compatibilidade nativa em players de camada única (*single-layer*), extraindo e injetando a RPU no Perfil 8.1 sem recodificar a imagem base HDR10.
+* **Por que NÃO convertemos Perfil 5 diretamente via Remux?** O Perfil 5 (nativo de Web-DL / serviços de streaming) utiliza o espaço de cores patenteado **IPTPQc2** e não possui camada de fallback HDR10 padrão. Tentar convertê-lo via simples remux para P8 ou HDR10 gera cores roxas/esverdeadas ou exige re-encode total do vídeo. Para preservar a velocidade e a proposta sem perda de qualidade por re-encodamento, o programa preserva e identifica a estrutura do P5 mantendo o arquivo intacto.
 
 ### 💡 Outros Problemas que o programa resolve
 * **Incompatibilidade de Áudio:** Transcodifica faixas pesadas (TrueHD, DTS, DTS-HD, DTS:X) para **E-AC-3 (Dolby Digital Plus)** preservando os canais Atmos via DeeZy, mantendo a compatibilidade sem perda perceptível.
@@ -48,7 +48,7 @@ Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos r
 ### 🛠️ Instalação e Requisitos
 * **Instalador (`LaFirma_Setup_1.0.exe`):** Instala o programa no sistema como qualquer aplicativo nativo e cria atalhos no Menu Iniciar e Área de Trabalho.
 * **Pré-requisito (Opcional):** O programa traz suas próprias ferramentas portáteis. O **.NET Desktop Runtime 8.0** é utilizado apenas pelo motor de OCR reserva (`PgsToSrt`). Caso o sistema não o possua e o instalador seja gerado sem o runtime embutido, o download poderá ser feito automaticamente durante a instalação.
-* **Observação sobre Legendas:** O motor de OCR (PGS para SRT) utiliza uma cadeia de ferramentas automatizadas focadas em PT-BR. A precisão pode variar dependendo do release do Blu-ray, e o software emite um diagnóstico de qualidade ao final do processo. Os processos de vídeo e áudio são 100% precisos e sem perda de qualidade.
+* **Observação sobre Legendas:** O motor de OCR (PGS para SRT) utiliza uma cadeia de ferramentas automatizadas focadas em PT-BR. A precisão pode variar dependendo do release do Blu-ray, e o software emite um diagnóstico de qualidade ao final do processo. Os processos de vídeo e áudio são sem perda por re-encode no vídeo.
 
 ---
 
@@ -59,10 +59,10 @@ Desenvolvido para automatizar o processamento de encodes de Blu-ray e arquivos r
 Created to streamline the workflow for Blu-ray encodes and remuxes, the software serves as an orchestration bridge: we designed the smooth graphical user interface (GUI), decision logic, and PowerShell-driven engine that connects and automates established community utilities (`ffmpeg`, `mkvmerge`, `dovi_tool`, `DDVT`, `PgsToSrt`, `Tesseract`, `DeeZy`, `seconv`). Perfect for single files or batch processing entire TV show seasons.
 
 ### 💡 Transparent Dolby Vision Profile Handling (P7 & P5)
-* **Dolby Vision Profile 7 to 8.1 (Lossless Remux):** Extracts and converts RPU metadata from UHD Blu-ray P7 releases into Profile 8.1 with 100% video bit-exact preservation.
-  * **Profile 7 MEL (Minimum Enhancement Layer):** Contains metadata only. Conversion to P8.1 is 100% identical and loss-free.
-  * **Profile 7 FEL (Full Enhancement Layer):** In the vast majority of releases (where EL does not carry critical brightness expansion), stripping the EL leaves the underlying video stream untouched while preserving dynamic metadata for TV compatibility.
-* **Why we do NOT convert Profile 5 via simple Remux:** Profile 5 (native to Web-DL / streaming) uses **IPTPQc2** color space without a standard HDR10 fallback layer. Forcing a remux-only conversion to P8 or HDR10 causes severe color distortion (purple/green tint) or requires full video re-encoding. To maintain our "zero video re-encode" speed and fidelity commitment, P5 is handled appropriately without false conversion claims.
+* **Dolby Vision Profile 7 to 8.1 (No Video Re-encoding):** Converts UHD Blu-ray Profile 7 releases into Profile 8.1 by preserving the HDR10 base layer (BL) and dynamic metadata (RPU) without re-encoding the video stream.
+  * **Profile 7 MEL (Minimum Enhancement Layer):** Contains metadata only. Conversion to P8.1 is 100% bit-exact and loss-free.
+  * **Profile 7 FEL (Full Enhancement Layer):** The process strips the enhancement layer (EL) video data to ensure native Direct Play compatibility on single-layer decoders, while preserving the underlying HDR10 base video stream and dynamic Dolby Vision RPU metadata.
+* **Why we do NOT convert Profile 5 via simple Remux:** Profile 5 (native to Web-DL / streaming) uses the **IPTPQc2** color space without a standard HDR10 fallback layer. Forcing a remux-only conversion to P8 or HDR10 causes severe color distortion (purple/green tint) or requires full video re-encoding. To maintain our commitment to avoiding full video re-encodes, P5 files are kept intact and correctly identified.
 
 ### 💡 Other Problems Solved
 * **Audio Codec Issues:** Transcodes unsupported high-bitrate audio formats (TrueHD, DTS, DTS-HD, DTS:X) into **E-AC-3 (Dolby Digital Plus)** with spatial Atmos support via DeeZy, preserving high compatibility across all player devices.
@@ -73,7 +73,7 @@ Created to streamline the workflow for Blu-ray encodes and remuxes, the software
 ### 🛠️ Installation & Requirements
 * **Installer (`LaFirma_Setup_1.0.exe`):** Installs natively with standard Windows integration and Start Menu / Desktop shortcuts.
 * **Dependencies (Optional):** Self-contained toolset. **.NET Desktop Runtime 8.0** is only required for the secondary fallback OCR engine (`PgsToSrt`). If missing and not bundled into the installer, it will offer to download it automatically.
-* **Subtitle OCR Note:** PGS-to-SRT conversion relies on automated OCR engines (`seconv`/`PgsToSrt`/`Tesseract`) configured for PT-BR text processing. Accuracy depends on font styling and source release quality; an automated evaluation report is displayed upon completion. Video and audio processing pipelines remain 100% lossy-free and intact.
+* **Subtitle OCR Note:** PGS-to-SRT conversion relies on automated OCR engines (`seconv`/`PgsToSrt`/`Tesseract`) configured for PT-BR text processing. Accuracy depends on font styling and source release quality; an automated evaluation report is displayed upon completion. Video stream conversion avoids video re-encoding entirely.
 
 ---
 

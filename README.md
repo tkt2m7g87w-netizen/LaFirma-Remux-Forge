@@ -8,30 +8,53 @@
 
 ---
 
-## 📥 Downloads & Official Links / Links Oficiais
+## 📥 Downloads
 
-> ### ⚠️ Onde está o mais atual / Where the newest version lives
-> **Este repositório é a fonte mais completa e mais atual do projeto.** Os espelhos abaixo (Proton Drive, MEGA, GoFile) continuam no ar e funcionam, mas **estão desatualizados** — eles trazem uma versão anterior do programa. Para o código, os manuais e o registro de mudanças mais recentes, use o que está aqui no GitHub.
->
-> **This repository is the most complete and most up-to-date source for the project.** The mirrors below (Proton Drive, MEGA, GoFile) are still online and working, but **they are out of date** — they carry an earlier version of the program. For the latest code, manuals and changelog, use what is here on GitHub.
+> **⚠️ O GitHub é a fonte mais atual.** Os espelhos abaixo continuam no ar e funcionam, mas trazem uma versão anterior do programa.
+> **⚠️ GitHub is the most up-to-date source.** The mirrors below still work but carry an earlier version.
 
-### 📦 Standalone Installer / Programa Pronto para Usar
-> Download the compiled setup to install and use immediately / Baixe a versão compilada para instalar e usar imediatamente:
-* **PROTON DRIVE:** [Download / Baixar LaFirma Remux Forge](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J)
-* **MEGA:** [Download / Baixar LaFirma Remux Forge](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I)
-* **GOFILE:** [Download / Baixar LaFirma Remux Forge](https://gofile.io/d/YE2isutz)
+| | Onde / Where | Estado / Status |
+|---|---|---|
+| **Código-fonte, guias, changelog**<br>*Source code, guides, changelog* | Aqui neste repositório / Right here | ✅ sempre o mais novo / always newest |
+| **Instalador pronto**<br>*Ready-made installer* | [Releases](../../releases) | ✅ atual / current |
+| Instalador — espelho / mirror | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | ⚠️ desatualizado / outdated |
+| Pasta completa — espelho / mirror | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | ⚠️ desatualizado / outdated |
+
+**Guia de compilação do instalador / Installer compilation guide:**
+[🇵🇹 LEIA-ME_INSTALADOR[PT-BR].txt](./LEIA-ME_INSTALADOR[PT-BR].txt) · [🌐 README_INSTALLER[ENGLISH].txt](./README_INSTALLER[ENGLISH].txt)
+
+<details>
+<summary><b>Por que os binários não estão no repositório · Why the binaries are not in the repo</b></summary>
+
+**🇵🇹** A pasta `tools\` tem centenas de MB de programas de **outras pessoas**, cada um com a sua licença. Não republicamos o trabalho dos outros como se fosse nosso — o repositório diz de onde cada um vem, e o pacote pronto existe para quem só quer usar.
+
+**🌐** The `tools\` folder holds hundreds of MB of **other people's** programs, each under its own licence. We do not republish other people's work as our own — the repo says where each one comes from, and the ready-made package exists for those who just want to use it.
+
+</details>
 
 ---
 
-### 💻 Full Source Code & Dev Guides / Código-Fonte & Guias
-> Access the complete project directory or installer compilation guides / Para desenvolvedores e compilação do .iss:
-* **AQUI NESTE REPOSITÓRIO / RIGHT HERE IN THIS REPO** — código-fonte completo, sempre o mais novo / complete source code, always the newest
-* **PROTON DRIVE (Full Folder / Pasta Completa):** [Access / Acessar](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) *(desatualizado / outdated)*
-* **MEGA (Full Folder / Pasta Completa):** [Access / Acessar](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) *(desatualizado / outdated)*
-* **Installer Compilation Guide (PT-BR):** [Consulte LEIA-ME_INSTALADOR[PT-BR].txt](./LEIA-ME_INSTALADOR[PT-BR].txt)
-* **Installer Compilation Guide (EN):** [Check README_INSTALLER[ENGLISH].txt](./README_INSTALLER[ENGLISH].txt)
+## 📖 Entenda a conversão · Understand the conversion
 
-> **Por que os binários não estão no repositório / Why the binaries are not in the repo:** a pasta `tools\` tem centenas de MB de programas de **outras pessoas**, cada um com a sua licença. Não republicamos o trabalho dos outros como se fosse nosso — o repositório diz de onde cada um vem, e o pacote pronto existe para quem só quer usar. / The `tools\` folder holds hundreds of MB of **other people's** programs, each under its own licence. We do not republish other people's work as our own — the repo says where each one comes from, and the ready-made package exists for those who just want to use it.
+O programa traz um botão **Entenda / Learn** com 14 seções que explicam o que a conversão faz — e o que ela **não** faz. O texto vive em [`fonte/FAQ_PT.txt`](./fonte/FAQ_PT.txt) e [`fonte/FAQ_EN.txt`](./fonte/FAQ_EN.txt), e pode ser lido aqui sem instalar nada.
+*The program has a **Learn** button with 14 sections explaining what the conversion does — and what it does **not** do. Readable here without installing anything.*
+
+| # | 🇵🇹 Português | 🌐 English |
+|---|---|---|
+| 1 | O que é BL, EL e RPU | What BL, EL and RPU are |
+| 2 | Perfil 7, 8.1 e 5 — o que muda | Profile 7, 8.1 and 5 — what changes |
+| 3 | MEL, Simple FEL e Complex FEL | MEL, Simple FEL and Complex FEL |
+| 4 | **Quem realmente perde com o descarte da EL** | **Who actually loses when the EL is dropped** |
+| 5 | Por que a ressalva existe (o L1 não é recalculado) | Why the caveat exists (L1 is not recomputed) |
+| 6 | Vermelho não quer dizer que estraga | Red does not mean it ruins anything |
+| 7 | A amostra não é o filme inteiro | The sample is not the whole film |
+| 8 | Perfil 5 → MP4 | Profile 5 → MP4 |
+| 9 | Áudio: TrueHD, DTS e o que sai com Atmos | Audio: TrueHD, DTS and what keeps Atmos |
+| 10 | Legenda PGS → SRT, só PT-BR | PGS → SRT subtitles, PT-BR only |
+| 11 | Espaço em disco e a fila | Disk space and the queue |
+| 12 | Área ativa (L5) | Active area (L5) |
+| 13 | Créditos das ferramentas | Tool credits |
+| 14 | **Onde conferir e aprender mais** — as fontes | **Where to check and learn more** — the sources |
 
 ---
 
@@ -83,7 +106,7 @@ Nesse caminho: o áudio é copiado quando cabe no MP4 (E-AC-3, AC-3, AAC) e vira
 * **Legendas PGS em PT-BR (TVs não leem):** OCR automático convertendo faixas PGS para `.SRT` em Português (PT-BR) com correção por dicionário, e uma **nota de qualidade conferida no arquivo gerado** — EXCELENTE, BOA, RAZOÁVEL ou RUIM. A faixa PGS original continua no arquivo final: o `.SRT` é uma faixa a mais, não uma troca.
 * **Processamento em Lote e Espaço em Disco:** adicione uma temporada inteira e deixe o programa trabalhar. Antes de começar ele **simula a fila inteira na ordem** e diz quantos arquivos cabem, qual é o primeiro que fica de fora e quanto faltaria na vez dele. Quem não cabe **nem chega a começar**.
 * **Modo Automático ou Manual:** ajuste faixa por faixa ou deixe o motor de decisão cuidar de tudo.
-* **Interface em Português e Inglês**, com bandeira, sem reiniciar o programa.
+* **Interface em Português e Inglês**, com uma bandeira ao lado do botão Entenda. A escolha fica guardada entre as sessões.
 
 ### 🛠️ Instalação e Requisitos
 * **Instalador:** instala o programa no sistema como qualquer aplicativo nativo e cria atalhos no Menu Iniciar e na Área de Trabalho.
@@ -141,7 +164,7 @@ On that path: audio is copied when it fits in MP4 (E-AC-3, AC-3, AAC) and conver
 * **PGS Subtitles to SRT (PT-BR Focused):** automated OCR conversion of image-based PGS subtitles to clean `.SRT` with dictionary spellchecking, plus a **quality grade checked on the generated file** — EXCELLENT, GOOD, FAIR or POOR. The original PGS track stays in the final file: the `.SRT` is one extra track, not a replacement.
 * **Batch Processing & Disk Management:** queue multiple files or full seasons. Before starting, the app **simulates the whole queue in order** and says how many files fit, which is the first one left out, and how much would be missing on its turn. A file that does not fit **never even starts**.
 * **Auto or Manual Control:** smart auto-detection rules, or manually select/exclude specific audio tracks and subtitle streams.
-* **Portuguese and English interface**, with a flag toggle, no restart needed.
+* **Portuguese and English interface**, a flag next to the Learn button. The choice is remembered between sessions.
 
 ### 🛠️ Installation & Requirements
 * **Installer:** installs natively with standard Windows integration and Start Menu / Desktop shortcuts.

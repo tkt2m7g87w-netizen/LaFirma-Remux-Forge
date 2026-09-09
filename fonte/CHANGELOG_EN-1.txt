@@ -1,0 +1,347 @@
+﻿==============================================================================
+ LaFirma Remux Forge - Black Edition
+ CHANGELOG (English)
+==============================================================================
+
+ ABOUT THIS FILE
+ --------------------------------------------------------------------------
+ The program is bilingual, so the changelog is too. This is the English
+ edition; `Changelog.txt`, next to it, is the Portuguese one.
+
+ The two are NOT identical, and that is on purpose. The Portuguese file is
+ the project's working record - it carries every version since 1.4, with the
+ reasoning, the measurements and the mistakes written out at length, because
+ that is where the project remembers why it did things. This file covers the
+ CURRENT release in full and summarises what came before. If you need the
+ archaeology of an old decision, the Portuguese file is where it lives.
+
+
+==============================================================================
+ INSTALLER 1.8  -  09/09/2026    *** IT MEASURES, IT NO LONGER ASSUMES ***
+==============================================================================
+ Components: ENGINE 14.48 | WINDOW 17.02 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
+             TESTAR_LAFIRMA 3.10 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+ Tool changed: dovi_tool 2.3.2 -> 2.3.3
+
+ It goes to 1.8 and not 1.7.4 because BEHAVIOUR changed: the program stopped
+ treating every Profile 7 the same way.
+
+
+ 0. THE LANGUAGE CHOICE ACTUALLY REACHES THE DISK  (17.02 / 14.48)
+ --------------------------------------------------------------------------
+   Three defects reported after using 1.8 as installed.
+
+   1) "I OPENED IT IN ENGLISH, CLOSED IT, IT CAME BACK IN PORTUGUESE."
+      16.93 saved the choice to IDIOMA.txt in the PROGRAM'S OWN FOLDER. That
+      works when LaFirma lives in C:\LaFirma and fails SILENTLY when it lives
+      in Program Files - Windows refuses the write and the catch swallowed
+      the error. The choice never reached the disk.
+      The program now tests the folder with a real write, not a guess based
+      on the path. If it is writable, it keeps saving there. If not, it falls
+      back to %LOCALAPPDATA%\LaFirma, which belongs to the user and always
+      accepts. Reading looks in both places, and a failure is now written to
+      the log - failing in silence was the defect.
+      The timing calibration (16.99) wrote to the same place and had the same
+      problem; it was fixed with it.
+
+   2) "COMING BACK TO PORTUGUESE LOOKS WRONG."
+      Switching language redraws what is built at runtime: the queue and the
+      diagnosis. The DISK PANEL is built at runtime too and was not on that
+      list, so it stayed in the previous language until the next folder read.
+      Two languages on one screen - exactly what 17.01 had just fixed
+      everywhere else. It now comes back with the rest.
+
+   3) "MEASURING IS TAKING TOO LONG."
+      True, and 14.47 is the cause: the sample went from 3 to up to 11
+      points. It grew for one reason - the L1 census, which counts how many
+      scenes ask for more brightness than the mastering display delivers.
+      That census can only be done when the file DECLARES the master peak.
+      Without that ruler nothing is counted, so the extra points were reading
+      scenes nobody would count.
+      Now: WITH a ruler, the full sample. WITHOUT one, three points - which
+      is all MEL vs FEL needs, since el_type does not change across a film.
+      No answer is lost; what goes is reading that was not becoming a number.
+      And the time each measurement costs is now MEASURED and logged,
+      alongside how many points were asked for and how many were read.
+
+ 1. MEL, SIMPLE FEL AND COMPLEX FEL - measured before converting
+ --------------------------------------------------------------------------
+   Up to 1.7.3, converting a Profile 7 always looked the same on screen. The
+   program now reads the enhancement layer FIRST, through the RPU's el_type
+   field, and separates three cases:
+
+     MEL          green    the layer carries no picture; discarded losslessly
+     SIMPLE FEL   orange   carries picture, but refinement only
+     COMPLEX FEL  red      raises brightness - conversion not recommended
+
+   What separates Simple from Complex is one number: the file's L1 against
+   the mastering display peak. Without that peak declared, the program says
+   it does not know instead of picking a side.
+
+   Measured on the test machine: Troy 2004 is MEL (303 of 1,000 nits), GoT
+   S08E01 is Simple FEL (153 of 1,000) and Saving Private Ryan is Complex FEL
+   (1,608 of 1,000). The Ryan was found by measurement, from no list.
+
+   Since 17.01 the scale is the same everywhere on screen: the [EL: ...] tag
+   in the diagnosis, the DOLBY VISION column text and the row chip all read
+   from one function. Before that the rule was written in one place and
+   half-copied in the other, so the same measured verdict could come out in
+   two different colours.
+
+
+ 2. WHY THE CAVEAT EXISTS, said precisely
+ --------------------------------------------------------------------------
+   This is the point most writing on the subject leaves vague:
+
+   - dovi_tool in MODE 2, which is what this program uses, REMOVES the
+     Profile 7 FEL luma/chroma mapping from the RPU - the part of the
+     instructions that makes no sense without the second layer. What comes
+     out is a legitimate Profile 8.1.
+   - What NO dovi_tool mode does is RECOMPUTE L1. The per-scene brightness
+     number stays whatever the original analysis measured, and that analysis
+     looked at the picture with the EL added in.
+
+   That, and only that, is where the Complex FEL caveat comes from. It is not
+   a limitation of this program: it is the state of the tooling, and it is in
+   dovi_tool's own documentation.
+
+
+ 3. dovi_tool 2.3.2 -> 2.3.3
+ --------------------------------------------------------------------------
+   Validated on a purpose-built bench: 5 files, 3 profiles, 2 CM versions,
+   ZERO divergence in DM version, scenes, L1 MaxCLL, L1 MaxFALL and RPU
+   bytes. 2.3.3 brings `export --levels`, used to read each scene's L1 and
+   the active area (L5) in the same pass.
+
+   Bench finding: on a valid HEVC cut in half, both versions exit with code 0
+   and leave a partial RPU saying "Done." dovi_tool does not guard against a
+   truncated file - the one that distrusts the output size is LaFirma.
+
+   2.3.3 IS NOW THE MINIMUM. Earlier versions lack `export --levels`, and
+   without it the program cannot measure MEL vs FEL.
+
+
+ 4. ACTIVE AREA (L5)
+ --------------------------------------------------------------------------
+   Read and checked against the real resolution, with the format named. It
+   only reaches the screen when the declared border results in no cinema
+   format at all - an RPU with the wrong crop, which came that way from the
+   source.
+
+   Checked against Dolby's own manual (Dolby Vision Professional Tools User
+   Manual 5.4.0): the four L5 numbers are the LETTERBOX area, in the order
+   left, right, top, bottom, and the active area is the resolution minus
+   them - exactly how the program reads it. And the check the program runs
+   mirrors a validation Dolby itself treats as a metadata ERROR: an aspect
+   ratio declared in L5 that does not match the frame's.
+
+
+ 5. THE "LEARN" BUTTON - in both languages
+ --------------------------------------------------------------------------
+   Opens the full text about the conversion - 14 sections, from BL/EL/RPU to
+   why the binaries are not on GitHub. It lives in FAQ_PT.txt and FAQ_EN.txt,
+   outside the .ps1, so a sentence can be fixed without touching code.
+
+   The file is chosen AT CLICK TIME, by the current language: switching the
+   flag mid-session takes effect immediately, with no restart.
+
+   Section 4 is the one that matters most and does not exist ready-made
+   anywhere else: Shield, Apple TV, Zidoo, Dune and TVs already discard the
+   EL, so on those devices Profile 7 already plays the way the converted file
+   will. Who loses something is whoever has a dual-layer decoder. Without
+   that, the red warning frightens more than it should.
+
+   Section 14 is new: the sources behind every claim in the text - the
+   repository, dovi_tool, Dolby's professional support, two community
+   spreadsheets (measured brightness by title, and players with MEL/FEL
+   support), a folder of FEL vs base layer comparisons, and DoViBaker.
+
+
+ 6. LANGUAGE: PORTUGUESE AND ENGLISH
+ --------------------------------------------------------------------------
+   A flag next to the Learn button. The translation is a layer on top - the
+   program stays entirely in Portuguese if IDIOMA_EN.txt goes missing. The
+   choice is remembered between sessions.
+
+   Since 17.01 the translation also reaches text ASSEMBLED AT RUNTIME
+   ("Queue (3)", "VIDEOS IN QUEUE (2 of 3 Selected)", "Converting - Step
+   3/5", the whole diagnosis block), which used to stay in Portuguese on an
+   English screen. IDIOMA_EN.txt accepts PATTERN RULES (a line starting with
+   ~), so a new phrase needs a new line in the .txt, not new code.
+
+   A trap worth knowing, because it bit once: the rules run IN ORDER. The
+   generic "...Convertido -> ...Converted" matched "Já Convertido" first and
+   returned the hybrid "Já Converted". More specific rules come first.
+
+
+ 7. PROFILE 5 -> MP4
+ --------------------------------------------------------------------------
+   Profile 5 cannot reach 8.1 without re-encoding the video, and re-encoding
+   is exactly what this program refuses to do. But P5 no longer just sits
+   there: what it needs is not a profile conversion, it is a container
+   devices will read.
+
+   The program now remuxes P5 to MP4 with the dvh1 tag, video COPIED frame by
+   frame. Audio is copied when it fits in MP4 (E-AC-3, AC-3, AAC, MP3, ALAC,
+   FLAC, Opus) and becomes E-AC-3 640k when it does not (TrueHD, DTS). Text
+   subtitles become mov_text. PGS subtitles are discarded WITH A WARNING -
+   image subtitles have no representation in MP4, and there is no OCR on this
+   path.
+
+   The output is verified by DURATION, not by size. Two attempts to verify by
+   size failed on the first real test: a short clip legitimately weighs
+   little, and a remux that drops the DTS track comes out much smaller than
+   the source with nothing having gone wrong. Duration does not lie - a remux
+   cut in half leaves a file that exists, opens, and lies about being
+   complete. If it does not match, the .mp4 is deleted.
+
+
+ 8. THE TIME ESTIMATE CALIBRATES ITSELF
+ --------------------------------------------------------------------------
+   The first-second estimate was off by a lot and the bar jumped mid-run:
+
+     Troy         predicted 1697s   real 1091s   +56%
+     Se7en        predicted  910s   real  655s   +39%
+     Spider-Man   predicted 1200s   real 1121s    +7%
+
+   Changing the constant does NOT fix it - already measured: the average
+   improves Troy and Se7en and makes Spider-Man UNDERESTIMATE by 20%. The
+   problem was never the value: one fixed number has to serve different
+   machines, disks and films.
+
+   So it stopped being fixed. Every converted file appends a line to
+   CALIBRAGEM.txt with what it actually cost per GB per weight unit, and the
+   next estimate uses the p75 of the last five runs.
+
+   WHY p75 AND NOT THE MEDIAN - the four options were run against the three
+   real films:
+
+     fixed 0.0153   mean error 33.8%   worst 55.5%   underestimates 0 of 3
+     median         mean error 11.6%   worst 22.9%   underestimates 1 (-23%)
+     p75            mean error 18.3%   worst 28.6%   underestimates 1 (-11%)
+     maximum        mean error 25.0%   worst 45.3%   underestimates 0 of 3
+
+   The median is the most accurate on average AND the one that errs worst
+   where it hurts: it would promise Spider-Man 23% less time than it takes.
+   Promising a time that will not be met is a message that lies.
+
+   WHAT THIS DOES NOT FIX, written down so it does not become a promise: the
+   three films are from the SAME machine and still spread from 0.0098 to
+   0.0143. Much of the error is not the machine - it is the WEIGHT MODEL,
+   which describes different films with the same shape. Calibration kills the
+   systematic error; the per-file variation only goes away by revising the
+   weights. When the spread exceeds 30%, the log says so rather than letting
+   it look solved.
+
+   Dirty history does not get in: a run cancelled halfway, or any figure
+   outside the sanity limits (0.004 to 0.060), is refused with the reason in
+   the log. A missing or unreadable file falls back to the factory number -
+   nobody is left without an estimate for lack of history.
+
+
+ 9. DISK SPACE
+ --------------------------------------------------------------------------
+   Before starting, the program simulates the WHOLE QUEUE IN ORDER and says
+   how many files fit, which is the first one left out, and how much would be
+   missing on its turn. It warns; it does not block.
+
+   And the file that does not fit NEVER STARTS. The queue used to announce
+   "FILE 2/2", run the whole diagnosis (~20s) and only then discover 72 GB
+   were missing. The refusal was always correct; the ORDER was wrong. The
+   check moved to before the file is announced: it opens no block, creates no
+   temp folder and never appears as "converting" for a single second.
+
+   The factor lives in one place now (1.6x when the video does not leave the
+   container, 3.15x when dovi_tool will touch it), and a P5 no longer pays
+   3.15x - it does not go through dovi_tool at all.
+
+
+ 10. BEHAVIOUR FIXES
+ --------------------------------------------------------------------------
+   - "Keep" on the subtitle really turns the OCR off
+   - The audio track name is the codec, not the track_name
+   - A truncated output does not count as finished (cut at 60%)
+   - An interrupted measurement becomes "EL not measured", in amber
+   - "MAIN AUDIO" now says whose choice it is: the program IGNORES the file's
+     default flag on purpose (in Dual Audio remuxes that flag usually points
+     at the dub), and when the chosen track is not the flagged one, the line
+     says which the other is and why it was not followed
+   - Discarding extra audio and subtitle tracks became a green seal:
+     discarding is an action
+   - One thing, one text: a single source for the Dolby Vision wording
+
+
+ 11. TEST BATTERY: 99 -> 497
+ --------------------------------------------------------------------------
+   Families that change what it is:
+
+   - STRUCTURAL - fails a window function called inside a runspace, and
+     requires every seal the engine produces to have its own branch in the
+     window
+   - EXECUTING - loads the real function and runs it against real numbers
+     from the logs (the disk maths, the colour scale, the translation rules,
+     the P5 path, the PGS subtitle choice with Troy's real track list, and
+     the time calibration)
+   - LOOKING AT ITSELF - fails if the battery itself had an execution error,
+     and forbids a block comment that closes early
+
+   The installer family was rebuilt too. The most valuable test in it READS
+   the .ps1 files, collects every path under tools\ the code actually uses,
+   and fails if any of them is in the .iss Excludes. That test is what caught
+   DeeZy's ffmpeg being excluded WHILE the engine still called it - it would
+   have compiled green and broken audio on the user's machine.
+
+   Placebo tests were fixed too: one demanded frozen August versions and
+   passed through a missing file; another read only half the versions and
+   compared empty strings.
+
+
+ WHAT THIS VERSION STILL DOES NOT DO, and it is written inside the program
+ --------------------------------------------------------------------------
+   - It does not measure the base layer's real brightness. The Simple/Complex
+     split is a comparison against the declared master peak: a good
+     indication, not a proof.
+   - It does not regenerate the RPU's L1 for the base layer brightness. That
+     would be the real fix for Complex FEL. No dovi_tool mode does it.
+   - It does not keep the discarded EL.
+   - It does not read the whole film during analysis - the reading is sampled
+     from short pieces (five up to one hour, seven up to two, nine up to
+     three, eleven above that).
+   - It does not convert Profile 5 to 8.1 (its path is MP4).
+   - It does not delete or alter your original file.
+
+
+==============================================================================
+ EARLIER VERSIONS - summary
+==============================================================================
+ Full detail, version by version, is in Changelog.txt (Portuguese).
+
+ 1.7.3  03/09/2026  Validated on a clean machine. 297 MB of dead weight left
+                    the installer without losing a function (DeeZy's ffmpeg
+                    was byte-for-byte identical to tools\ffmpeg.exe - proven
+                    by MD5 before anything was touched). The .NET runtime was
+                    bundled with a safety net. Both manuals were rewritten
+                    against the code. Predicted vs real: 1.1% error.
+
+ 1.7.2  03/09/2026  Installer and manual corrections.
+ 1.7    03/09/2026  The manual became part of the delivery.
+ 1.6.9  03/09/2026  Disk space: the screen started showing the LARGER of the
+                    two calculations instead of the more optimistic one.
+ 1.6.8  03/09/2026  Progress bar measured over 12 real conversions.
+ 1.6.7  02/09/2026  Seven stages became five: two of them were text markers,
+                    not work, and were taking 29% of the ruler.
+ 1.5.8  01/09/2026  Re-OCR: detecting is not fixing. A block was being
+                    replaced whole and eating the good line.
+ 1.5.7  28/08/2026  Subtitle: the vertical-bar family (capital I identical to
+                    lowercase l and to |) was never caught, because a
+                    1.3-million-word dictionary accepts "la", "tr", "ol".
+ 1.5.6  27/08/2026  Verification decodes 10 real segments after remuxing.
+ 1.5.5  27/08/2026  The false alarm in the safety net: "anything on stderr =
+                    failed" confuses a decoder COMPLAINING with one FAILING.
+ 1.4    20/08/2026  Se7en freezing at 47 min: the engine was extracting 62 GB
+                    to a loose .hevc even when dovi_tool had nothing to do.
+                    Since then, with no DV conversion the video never leaves
+                    the container.
+
+==============================================================================

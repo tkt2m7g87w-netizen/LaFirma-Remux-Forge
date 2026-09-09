@@ -4,7 +4,7 @@
 #  ffmpeg + dovi_tool + mkvmerge (+ OCR de legenda PT-BR opcional via PgsToSrt)
 # ============================================================================
 #
-#  VERSAO: 14.36 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
+#  VERSAO: 14.47 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
 #  ----------------------------------------------------------------------
 #  REGRA DE VERSIONAMENTO (definida com o usuario):
 #    - Atualizacao GRANDE (muda comportamento/logica): sobe o numero maior
@@ -15,6 +15,120 @@
 #
 #  Historico (v1.0 -> v2.0 reconstruido a partir das evidencias documentadas
 #  nos proprios comentarios do script; v3.0 em diante e registrado na hora).
+#
+#   v14.37 (2.0 / item 1: o motor passou a dizer MEL x FEL - 04/09/2026)
+#   v14.38 (o log passou a guardar o CONTEXTO do L1: pico do master e o
+#           MaxCLL/MaxFALL do container, cada um na sua regua - 04/09/2026)
+#   v14.40 (LegendaPgs = -1 desliga o OCR: 'MANTER' na tela agora e uma
+#           ordem para o motor, nao silencio - 05/09/2026)
+#   v14.47 (uma amostra so, e do tamanho do filme - 09/09/2026)
+#
+#        A janela chamava Get-TipoCamadaDV com -Pontos 3 e o motor usava o
+#        padrao 5. Mesmo arquivo, mesma pergunta, DUAS amostras - e portanto
+#        a possibilidade de duas respostas para o mesmo fato, escondida num
+#        parametro que ninguem olhava.
+#        E 3 pontos era pouco para o CENSO do L1: lia 3 a 4 cenas de um filme
+#        inteiro, e a propria tela ja tinha tirado esse numero por nao
+#        significar nada. Para dizer MEL x FEL, 3 bastam - o el_type nao muda
+#        ao longo do filme. Para contar cenas acima do master, nao.
+#        Agora quem decide e Get-PontosDaAmostra, pela duracao, e os dois
+#        lados chamam ela. Um filme de 2h vai a 7 pontos; um de 3h, a 9.
+#
+#   v14.46 (as duas reguas, e qual delas falou - 09/09/2026)
+#
+#        So existe UMA regua comparavel com o L1: o pico do mastering
+#        display. O MaxCLL/MaxFALL do container e medido por HISTOGRAMA e o
+#        L1 e MaxRGB - grandezas diferentes, e compara-las e o erro que a
+#        licao 15 proibiu aqui. O container NAO virou regua de reserva, e nao
+#        vai virar.
+#        O que faltava nao era uma segunda regua: era DIZER qual falou.
+#        Agora a medida carrega ReguaUsada ("master" ou "nenhuma") e, quando
+#        nao ha regua, a frase traz os numeros do container marcados como o
+#        que sao - outra medida, para comparar arquivo com arquivo, nunca com
+#        o L1 deste. O veredicto Expande continua saindo so do master.
+#
+#   v14.45 (o Profile 5 ganhou o caminho que a tela ja prometia - 09/09/2026)
+#
+#        Desde a 16.92 a janela dizia, com razao, que o P5 nao vira 8.1 sem
+#        recodificar e que "o caminho dele e o remux para MP4". So que esse
+#        caminho nao existia no motor: o arquivo era identificado e ficava
+#        parado. Promessa na tela sem execucao atras e a mesma familia de
+#        defeito que este projeto persegue, so que invertida.
+#        Agora existe. O P5 sai do laco por um ramo proprio, ANTES das 5
+#        etapas - nao ha dovi_tool a rodar, nao ha camada de melhoria a medir
+#        e nao ha remontagem em .mkv. E uma passada de ffmpeg: video COPIADO
+#        com a tag dvh1, audio copiado quando cabe no MP4 (E-AC-3, AC-3, AAC)
+#        e convertido para E-AC-3 640k quando nao cabe (TrueHD, DTS), legenda
+#        de texto para mov_text, PGS descartada com aviso - legenda de imagem
+#        nao tem representacao em MP4, e nao ha OCR neste caminho.
+#        A saida e conferida pela DURACAO, nao pelo tamanho: um remux cortado
+#        no meio deixa um arquivo que existe, abre e mente sobre estar
+#        inteiro. Falhou, o .mp4 e apagado.
+#
+#   v14.44 (o arquivo que nao cabe nem comeca - 09/09/2026)
+#
+#        O Diego viu a fila terminar o Ryan e ANUNCIAR o Troy: "ARQUIVO 2/2",
+#        diagnostico rodando, tela em "Convertendo - Etapa 1/5". Vinte
+#        segundos depois o motor descobriu que faltavam 72 GB e pulou, certo,
+#        limpo, com o motivo no log. A pergunta dele foi a certa: "em que
+#        momento ele descobre isso?".
+#        Descobria tarde. A conferencia de espaco estava depois do
+#        diagnostico, porque so ali se sabia se o video sairia do container
+#        (1,6x) ou passaria pelo dovi_tool (3,15x). Mas esse dado sai de um
+#        ffprobe rapido, nao do censo. Entao a trava subiu para antes do
+#        anuncio: quem nao cabe nao abre bloco, nao cria pasta temporaria e
+#        nao aparece como "em conversao" um segundo sequer. A trava antiga
+#        continua onde estava, como segunda linha de defesa.
+#
+#   v14.43 (um veredicto so para o console e para a janela - 08/09/2026)
+#           O motor imprimia um paragrafo unico que juntava FEL comum e
+#           FEL com expansao e ainda mandava procurar outra ferramenta,
+#           enquanto a janela ja separava os dois. Duas vozes para o
+#           mesmo fato. Agora Get-TipoCamadaDV devolve 'Expande' e os
+#           dois lados so mostram. Selo novo: [CONVERSAO NAO
+#           RECOMENDADA]. Entrou o laranja na paleta do console.
+#   v14.42 (o nome do formato ja carrega o numero - 08/09/2026)
+#           A 14.41 escrevia "Scope 2,39:1 (2.39:1)": a mesma proporcao
+#           duas vezes, e a segunda com ponto em vez de virgula. Agora a
+#           proporcao crua so aparece quando ela NAO tem nome - o caso do
+#           crop errado, o unico em que o numero sozinho informa algo.
+#   v14.41 (censo do L1 e area ativa (L5) pelo 'export --levels' da
+#           2.3.3 - 08/09/2026)
+#           O 'info --summary' devolve UM pico por trecho. O 'export
+#           --levels level1,level5' devolve o L1 de CADA cena do MESMO
+#           RPU, e a area ativa junto - custo zero, o RPU ja esta
+#           extraido. Entraram ConvertFrom-PQ (codigo PQ de 12 bits ->
+#           nits, conferida contra o proprio dovi_tool em 8 trechos de
+#           3 filmes, batendo na segunda casa) e Get-NomeDoFormato.
+#           ARMADILHA: o 'export' ignora o '-o' e grava os CSV no
+#           diretorio ATUAL - por isso ele roda numa pasta so dele.
+#   v14.39 (a tela passou a separar o FEL comum do FEL com brightness
+#           expansion - eram duas coisas numa ressalva so - 04/09/2026)
+#     Uma critica publica, tecnica e correta abriu o buraco: num Profile 7
+#     FEL a imagem final e BL+EL, e o L1 do RPU descreve a COMPOSTA.
+#     Descartada a EL, o L1 continua prometendo um pico que nao existe mais
+#     no arquivo - e a TV tone mapeia para ele. Ate a 14.36 o motor tratava
+#     todo P7 igual e nao dizia uma palavra sobre isso. Omitir tambem e
+#     mentir, e este e o mesmo defeito de sempre em roupa nova.
+#     Entrou Get-TipoCamadaDV. Ela MEDE, nao supoe: corta trechos curtos do
+#     video com '-c copy' (nao recodifica, custa segundos), extrai o RPU de
+#     cada trecho e le o 'dovi_tool info --summary'. Quem classifica MEL ou
+#     FEL e o proprio dovi_tool, pelo campo el_type do RPU - nao ha
+#     heuristica nossa no meio do caminho.
+#     O diagnostico ganhou o selo honesto por arquivo:
+#         MEL          -> [CONVERSAO LIMPA]
+#         FEL sem expansao -> [CONVERSAO COM RESSALVA]
+#         FEL com expansao -> [CONVERSAO NAO RECOMENDADA]
+#         sem leitura  -> [NAO MEDIDO] - que NUNCA vira 'limpo por falta de
+#                         prova'; nao medir e um terceiro estado e aparece
+#                         com esse nome.
+#     O que ela NAO faz: nao mede o brilho real da base layer, entao nao
+#     PROVA brightness expansion. Por isso FEL sai como ressalva, nunca como
+#     defeito - medir a BL e regenerar o L1 e a fase 2.
+#     Profile 5 sai como 'nao se aplica' de proposito: ele nao tem EL, e
+#     deixar cair no ramo 'sem EL = conversao limpa' seria a mentira do
+#     outro lado - chegar a 8.1 a partir do P5 recodifica o video.
+#     A amostra e assumida na tela: ela diz em quantos trechos leu.
 #
 #   v14.33 (um 'else' vazio que engolia tres ramos - 01/09/2026)
 #     Havia um "} else { }" vazio antes do elseif do tratamento de erro do
@@ -380,6 +494,7 @@
 #                  AudioDefault       = 1        # id padrao ($null = a nova)
 #                  LegendaManter      = @(28,4)  # ids que vao pro remux
 #                  LegendaPgs         = 28       # id da PGS que vai pro OCR
+#                                     = -1       # (14.40) NAO converter nenhuma
 #               } }
 #         * O que isto DESTRAVA e o que o motor sozinho nao sabia fazer:
 #           manter uma segunda faixa de audio que nao seja a reaproveitada
@@ -815,7 +930,7 @@
 #         de video via ffmpeg, conversao Dolby Vision para Profile 8.1 via
 #         dovi_tool, remux final via mkvmerge, log via Start-Transcript.
 # ============================================================================
-$SCRIPT_VERSION  = "14.36"
+$SCRIPT_VERSION  = "14.47"
 $SCRIPT_CODINOME = "LaFirma"
 #
 #  PASTA TEMPORARIA: SEMPRE NO MESMO DISCO DO ARQUIVO DE ORIGEM
@@ -1044,6 +1159,10 @@ $script:Paleta = @{
     "src"   = (New-Cor 133 183 235)
     "dst"   = (New-Cor 159 225 203)
     "warn"  = (New-Cor 250 199 117)
+    # 14.43: o laranja da janela (#F08C3C), trazido para o console. E o degrau
+    # entre "atencao" e "nao faca" - existia so na janela e o console ficava
+    # sem como mostrar o FEL sem expansao com a mesma cor da tela.
+    "lar"   = (New-Cor 240 140  60)
     "err"   = (New-Cor 226  75  74)
     "dim"   = (New-Cor 136 135 128)
     "dim2"  = (New-Cor  95  94  90)
@@ -1335,12 +1454,30 @@ function Say-Deteccao($Texto) {
 function SayResposta($Estado, $Texto) {
     $t = [string]$Texto
     if (-not $script:AnsiOn) {
-        $corLegada = switch ($Estado) { "ok" { "Green" } "err" { "Red" } default { "Yellow" } }
+        $corLegada = switch ($Estado) { "ok" { "Green" } "err" { "Red" } "alerta" { "Red" }
+                                        "lar" { "DarkYellow" } default { "Yellow" } }
         Write-Host ("        " + $t) -ForegroundColor $corLegada
         return
     }
-    $sim = switch ($Estado) { "ok" { $script:SimOk } "err" { $script:SimErr } default { $script:SimSkip } }
-    $cor = switch ($Estado) { "ok" { "ok" }         "err" { "err" }         default { "warn" } }
+    <#  14.43: "alerta" e vermelho SEM ser falha.
+        O FEL com expansao de brilho nao e um erro do programa - a conversao
+        acontece, o arquivo sai inteiro. E um aviso forte sobre o RESULTADO.
+        Por isso ele usa a cor do erro com o SIMBOLO de atencao: a bolinha
+        vermelha de falha continua reservada para o que quebrou de verdade. #>
+    $sim = switch ($Estado) {
+        "ok"     { $script:SimOk }
+        "err"    { $script:SimErr }
+        "alerta" { $script:SimWarn }
+        "lar"    { $script:SimWarn }
+        default  { $script:SimSkip }
+    }
+    $cor = switch ($Estado) {
+        "ok"     { "ok" }
+        "err"    { "err" }
+        "alerta" { "err" }
+        "lar"    { "lar" }
+        default  { "warn" }
+    }
     $m = [regex]::Match($t, '^(\[[^\]]+\])\s*(.*)$')
     if ($m.Success) {
         # O texto depois da tag sai em "dim": a resposta e o degrau de baixo
@@ -2614,6 +2751,24 @@ function Find-PtBrPgsTrack {
     # da faixa de audio principal: id que nao existe no arquivo cai na regra
     # normal em vez de devolver nada.
     $escManual = Get-EscolhaManual $MkvPath
+    <#  14.40 - "MANTER" NA LEGENDA NAO DESLIGAVA O OCR.
+
+        BUG MEDIDO (Troy, 05/09): o Diego marcou MANTER na PGS pt-BR, a aba
+        Faixas mostrou "MANTER [ESCOLHA MANUAL]", o diagnostico escreveu
+        "PGS Mantida a Pedido - Conversao Desligada" - e a etapa 3/4 fez o
+        OCR assim mesmo. A tela dizia uma coisa e o motor fazia outra.
+
+        A causa e a MESMA da 16.31, sobrevivendo no outro ramo: a janela so
+        mandava a chave 'LegendaPgs' quando alguem escolhia CONVERTER. Quando
+        a escolha era MANTER, a chave nao ia - e chave ausente aqui quer dizer
+        "o motor decide", nao "nao converta". O motor decidia, e convertia.
+
+        Agora existe um valor que significa NAO: LegendaPgs = -1. Ausencia
+        continua sendo "voce decide"; -1 e uma ordem. #>
+    if ($escManual -and $escManual.ContainsKey('LegendaPgs') -and
+        $null -ne $escManual['LegendaPgs'] -and [int]$escManual['LegendaPgs'] -lt 0) {
+        return $null
+    }
     if ($escManual -and $escManual.ContainsKey('LegendaPgs') -and $null -ne $escManual['LegendaPgs']) {
         $jm = Get-MkvJson -MkvPath $MkvPath
         if ($jm) {
@@ -2833,6 +2988,163 @@ function Get-FaixaLegendaIngles {
     return $ingles[0]
 }
 
+function Test-CodecCabeEmMp4 {
+    <#  14.45: MP4 nao aceita qualquer trilha. TrueHD e DTS nao tem lugar
+        definido no container - o ffmpeg recusa o "copy" e o arquivo nem sai.
+        Esta lista e a dos codecs que entram COPIADOS, sem recodificar. #>
+    param([string]$Codec)
+    return ("$Codec" -match "(?i)^(aac|ac3|eac3|mp3|alac|flac|opus)$")
+}
+
+function Convert-Perfil5ParaMp4 {
+    <#  14.45 - O CAMINHO PROPRIO DO PROFILE 5.
+
+        Ate a 14.44 o Profile 5 era so IDENTIFICADO: a tela dizia "P5 -> MP4"
+        e o motor nao fazia nada com ele. Metade da verdade, que e o defeito
+        que este projeto mais persegue - a tela prometia um caminho que nao
+        existia.
+
+        Por que MP4 e nao 8.1: o Profile 5 usa espaco de cor proprio
+        (IPTPQc2) e nao tem camada HDR10 de reserva. Remuxar para 8.1 devolve
+        imagem roxa/esverdeada, e fazer direito exigiria RECODIFICAR o video
+        inteiro - exatamente o que este programa se recusa a fazer. O que o
+        P5 precisa nao e de conversao de perfil: e de um container que os
+        aparelhos leiam. Em MP4, com a tag dvh1, o Profile 5 toca no Apple TV,
+        no Infuse e nos players de MP4 que hoje ignoram o .mkv.
+
+        O video sai COPIADO, quadro por quadro. Nada e recodificado no video.
+
+        O audio depende do que entra: E-AC-3, AC-3, AAC e companhia sao
+        copiados; TrueHD e DTS nao tem lugar no MP4 e viram E-AC-3 640k, do
+        mesmo jeito que o caminho normal ja trata a familia DTS. Isso quase
+        nunca acontece num P5, que vem de streaming - mas quando acontecer, o
+        motor diz o que fez em vez de falhar mudo.
+
+        A legenda que ja e TEXTO vira mov_text. A legenda PGS e IMAGEM e nao
+        tem representacao em MP4: ela e descartada, e a tela diz isso. Nao ha
+        OCR neste caminho - o OCR e uma etapa do caminho do .mkv, e prometer
+        ele aqui seria a mesma meia-verdade de novo.
+    #>
+    param(
+        [string]$Origem, [string]$Destino, [string]$Nome,
+        [double]$DuracaoSegundos, $InfoDV
+    )
+    $r = @{ Ok = $false; Motivo = ""; AudioFeito = "-"; LegendaFeita = "-"; Descartes = @() }
+
+    SayTitulo "  PROFILE 5: O CAMINHO DELE E O CONTAINER, NAO O PERFIL"
+    Write-Host ""
+    Say-Deteccao ("        Dolby VISION: {0} [{1}] [{2}] [DETECTADO]" -f $InfoDV.Nome, $InfoDV.Codec, $InfoDV.Camadas)
+    SayResposta "skip" "[NAO SERA CONVERTIDO PARA 8.1] Profile 5 Nao Vira 8.1 sem Recodificar o Video"
+    SayResposta "ok"   "Sera Remuxado para MP4 (Video Copiado, Tag dvh1) - O Formato que os Players de MP4 Leem"
+    Write-Host ""
+
+    # ---- Escolhe as faixas -------------------------------------------------
+    $jsonProbe = $null
+    try {
+        $raw = & $ffprobe -v quiet -print_format json -show_streams "$Origem" 2>$null
+        if ($raw) { $jsonProbe = $raw | ConvertFrom-Json }
+    } catch { }
+    if (-not $jsonProbe) {
+        $r.Motivo = "o ffprobe nao conseguiu listar as faixas deste arquivo"
+        return $r
+    }
+    $fxAudio = @($jsonProbe.streams | Where-Object { $_.codec_type -eq "audio" })
+    $fxLeg   = @($jsonProbe.streams | Where-Object { $_.codec_type -eq "subtitle" })
+
+    if ($fxAudio.Count -eq 0) {
+        $r.Motivo = "o arquivo nao tem faixa de audio"
+        return $r
+    }
+    $audioEscolhido = $fxAudio[0]
+    $codecAudio     = "$($audioEscolhido.codec_name)"
+    $copiaAudio     = Test-CodecCabeEmMp4 $codecAudio
+
+    # Legenda: so a que ja e TEXTO. PGS e imagem e nao existe em MP4.
+    $legTexto = @($fxLeg | Where-Object { "$($_.codec_name)" -match "(?i)^(subrip|ass|ssa|mov_text|webvtt)$" })
+    $legPgs   = @($fxLeg | Where-Object { "$($_.codec_name)" -match "(?i)pgs|hdmv" })
+
+    # ---- Monta o comando ---------------------------------------------------
+    $argsFf = @("-hide_banner", "-loglevel", "error", "-y", "-i", "$Origem",
+              "-map", "0:v:0", "-c:v", "copy", "-tag:v", "dvh1",
+              "-map", ("0:" + [string]$audioEscolhido.index))
+    if ($copiaAudio) {
+        $argsFf += @("-c:a", "copy")
+        $r.AudioFeito = ("{0} copiado" -f $codecAudio.ToUpper())
+        SayResposta "skip" ("[MANTIDO] Audio {0} Copiado - Ja Cabe no MP4" -f $codecAudio.ToUpper())
+    } else {
+        $argsFf += @("-c:a", "eac3", "-b:a", "640k")
+        $r.AudioFeito = ("{0} -> E-AC-3 640k" -f $codecAudio.ToUpper())
+        SayResposta "ok" ("[SERA CONVERTIDO] Audio {0} Nao Cabe no MP4 - Vira E-AC-3 640k" -f $codecAudio.ToUpper())
+    }
+    if ($legTexto.Count -gt 0) {
+        foreach ($lg in $legTexto) { $argsFf += @("-map", ("0:" + [string]$lg.index)) }
+        $argsFf += @("-c:s", "mov_text")
+        $r.LegendaFeita = ("{0} faixa(s) de texto -> mov_text" -f $legTexto.Count)
+        SayResposta "ok" ("[SERA CONVERTIDA] {0} Legenda(s) de Texto para mov_text" -f $legTexto.Count)
+    } else {
+        $r.LegendaFeita = "nenhuma legenda de texto"
+        SayResposta "skip" "[SEM LEGENDA] Nenhuma Faixa de Legenda em Texto Neste Arquivo"
+    }
+    if ($legPgs.Count -gt 0) {
+        $r.Descartes += ("{0} legenda(s) PGS (imagem nao existe em MP4)" -f $legPgs.Count)
+        SayWarn ("{0} Legenda(s) PGS Serao Descartadas - Legenda de Imagem Nao Tem Lugar no MP4. Nao Ha OCR Neste Caminho." -f $legPgs.Count)
+    }
+    if ($fxAudio.Count -gt 1) {
+        $r.Descartes += ("{0} faixa(s) de audio extra" -f ($fxAudio.Count - 1))
+        SayWarn ("{0} Faixa(s) de Audio Extra Serao Descartadas - o MP4 Leva a Faixa Principal." -f ($fxAudio.Count - 1))
+    }
+    $argsFf += @("-movflags", "+faststart", "$Destino")
+
+    # ---- Executa -----------------------------------------------------------
+    Write-Host ""
+    SayStep "[1/1] Remuxando para MP4 (ffmpeg, Video Sem Recodificar):"
+    $est = if ($DuracaoSegundos -gt 0) { [math]::Max(20.0, $DuracaoSegundos / 60.0) } else { 60.0 }
+    $res = Invoke-ProcessoComBarraEstimada -Exe $ffmpeg -ArgList $argsFf -EstimativaSegundos $est
+    if ($res.ExitCode -ne 0) {
+        $r.Motivo = ("o ffmpeg terminou com codigo {0}" -f $res.ExitCode)
+        if ("$($res.ErrorText)" -ne "") { SayWarn ("Saida do ffmpeg: " + ("$($res.ErrorText)" -replace "\s+", " ")) }
+        return $r
+    }
+    if (-not (Test-Path -LiteralPath $Destino)) {
+        $r.Motivo = "o ffmpeg terminou bem mas o arquivo nao apareceu"
+        return $r
+    }
+    <#  14.45 - COMO SE CONFERE QUE O MP4 SAIU INTEIRO.
+
+        A primeira versao deste teste olhava o TAMANHO ("menos de 1 MB e
+        suspeito"). Errado por dois motivos, e os dois apareceram no primeiro
+        teste real: um trecho curto legitimamente pesa pouco, e um remux que
+        descarta a faixa DTS sai MUITO menor que a origem sem que nada tenha
+        dado errado.
+
+        O que prova que o remux aconteceu inteiro e a DURACAO. Se o ffmpeg
+        parou no meio, o arquivo existe, tem tamanho e mente. A duracao nao
+        mente: ou ela bate com a origem, ou o remux foi interrompido.
+        Tolerancia de 2 segundos, que absorve arredondamento de container. #>
+    $tam = (Get-Item -LiteralPath $Destino).Length
+    if ($tam -lt 4KB) {
+        $r.Motivo = ("o arquivo final saiu com {0} - praticamente vazio" -f (Format-Tamanho $tam))
+        return $r
+    }
+    if ($DuracaoSegundos -gt 0) {
+        $durSaida = 0.0
+        try {
+            $dRaw = & $ffprobe -v error -show_entries "format=duration" -of "default=nw=1:nk=1" "$Destino" 2>$null
+            [double]::TryParse("$dRaw", [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$durSaida) | Out-Null
+        } catch { }
+        if ($durSaida -le 0) {
+            $r.Motivo = "nao foi possivel ler a duracao do MP4 gerado - nao da para afirmar que ele saiu inteiro"
+            return $r
+        }
+        if ([math]::Abs($durSaida - $DuracaoSegundos) -gt 2.0) {
+            $r.Motivo = ("o MP4 saiu com {0} e a origem tem {1} - o remux nao terminou" -f (Format-Duracao $durSaida), (Format-Duracao $DuracaoSegundos))
+            return $r
+        }
+    }
+    $r.Ok = $true
+    return $r
+}
+
 function Get-InfoDolbyVision {
     # Le os metadados completos do Dolby Vision (perfil, level, camadas
     # presentes e compatibilidade) do side-data do stream de video, via
@@ -2886,6 +3198,567 @@ function Get-InfoDolbyVision {
         }
         return $script:CacheInfoDV
     } catch { $script:CacheInfoDV = $null; return $null }
+}
+
+function Get-BrilhoDoContainer {
+    <#  14.38 - O CONTEXTO QUE FALTAVA PARA LER O L1 (pedido do Diego, 04/09).
+
+        O L1 do RPU sozinho nao diz se a conversao vai escurecer a imagem.
+        Ele so ganha sentido AO LADO do que o container declara:
+
+          - MASTERING DISPLAY LUMINANCE: o pico do monitor em que o filme foi
+            masterizado. E a regua contra a qual o L1 se compara. L1 bem
+            ABAIXO do pico do master = a EL nao esta empurrando brilho para
+            cima de nada; e o sinal (nao a prova) de que nao ha brightness
+            expansion, que e o unico caso em que descartar uma FEL doi.
+          - MaxCLL / MaxFALL DO CONTAINER (HDR10, SMPTE ST 2086): medidos por
+            HISTOGRAMA. Regua DIFERENTE da do L1, que e MaxRGB (licao 15).
+            Ficam no log para comparar arquivo com arquivo, NUNCA para
+            comparar com o L1 do mesmo arquivo.
+
+        Le do ffprobe, que ja e obrigatorio aqui. Nao abre o video: sao os
+        side_data do primeiro frame. Falhar nao custa nada - devolve zeros e
+        o log sai sem esta linha, como saia antes.
+    #>
+    param([string]$MkvPath)
+    $ErrorActionPreference = "Continue"
+    $res = New-Object PSObject -Property ([ordered]@{
+        MasterMax = 0.0; MasterMin = 0.0; MaxCLL = 0; MaxFALL = 0; Lido = $false
+    })
+    if (-not (Test-Path -LiteralPath $MkvPath)) { return $res }
+    try {
+        $saida = & $ffprobe -v quiet -select_streams v:0 -read_intervals "%+#1" `
+                    -show_frames -show_entries "frame=side_data_list" -of json `
+                    -i "$MkvPath" 2>$null
+        $txt = ($saida -join "`n")
+        if (-not $txt) { return $res }
+        $j = $txt | ConvertFrom-Json
+        foreach ($fr in @($j.frames)) {
+            foreach ($sd in @($fr.side_data_list)) {
+                $tipo = "$($sd.side_data_type)"
+                if ($tipo -match "Mastering display") {
+                    # ffprobe entrega fracao ("10000000/10000"); nits = num/den.
+                    foreach ($par in @(@("max_luminance","MasterMax"), @("min_luminance","MasterMin"))) {
+                        $bruto = "$($sd.($par[0]))"
+                        if ($bruto -match '^\s*([0-9]+)\s*/\s*([0-9]+)\s*$') {
+                            $den = [double]$Matches[2]
+                            if ($den -ne 0) { $res.($par[1]) = [double]$Matches[1] / $den; $res.Lido = $true }
+                        } elseif ($bruto -match '^[0-9.]+$') {
+                            $res.($par[1]) = [double]$bruto; $res.Lido = $true
+                        }
+                    }
+                } elseif ($tipo -match "Content light level") {
+                    if ("$($sd.max_content)" -match '^[0-9]+$') { $res.MaxCLL  = [int]$sd.max_content; $res.Lido = $true }
+                    if ("$($sd.max_average)" -match '^[0-9]+$') { $res.MaxFALL = [int]$sd.max_average; $res.Lido = $true }
+                }
+            }
+        }
+    } catch { }
+    return $res
+}
+
+function ConvertFrom-PQ {
+    <#  14.41 - O CODIGO PQ DE 12 BITS VIRA NITS.
+
+        O "export --levels level1" da 2.3.3 entrega min_pq/max_pq/avg_pq como
+        CODIGO PQ de 12 bits (0..4095), nao como nits. O "info --summary" ja
+        entrega em nits. Sao o MESMO dado em unidades diferentes.
+
+        CONFERIDO CONTRA O PROPRIO dovi_tool, em 8 trechos de 3 filmes: o
+        MaxCLL que o "info" imprime e exatamente esta conta aplicada ao maior
+        max_pq do trecho. Bateu na segunda casa nos 8 (2384 -> 205,90;
+        3428 -> 2186,23; 2081 -> 100,10; ...). Nao e aproximacao nossa.
+
+        Formula: EOTF inversa do SMPTE ST 2084 (PQ).
+    #>
+    param([double]$CodigoPQ)
+    if ($CodigoPQ -le 0) { return 0.0 }
+    $m1 = 2610.0 / 16384.0
+    $m2 = (2523.0 / 4096.0) * 128.0
+    $c1 = 3424.0 / 4096.0
+    $c2 = (2413.0 / 4096.0) * 32.0
+    $c3 = (2392.0 / 4096.0) * 32.0
+    $v  = [math]::Pow(($CodigoPQ / 4095.0), (1.0 / $m2))
+    $num = $v - $c1
+    if ($num -lt 0) { $num = 0.0 }
+    $den = $c2 - ($c3 * $v)
+    if ($den -le 0) { return 0.0 }
+    return (10000.0 * [math]::Pow(($num / $den), (1.0 / $m1)))
+}
+
+function Get-NomeDoFormato {
+    <#  14.41 - A PROPORCAO DA AREA ATIVA VIRA NOME.
+
+        O L5 do RPU diz quantas linhas/colunas sao BORDA. A area ativa e a
+        resolucao menos essas bordas, e a proporcao dela e o formato em que o
+        filme foi enquadrado. Faixas largas porque o master nao e exato: um
+        Scope real aparece como 2,39 e como 2,40 no mesmo filme.
+    #>
+    param([double]$Proporcao)
+    if ($Proporcao -ge 2.30 -and $Proporcao -le 2.45) { return "Scope 2,39:1" }
+    if ($Proporcao -ge 1.83 -and $Proporcao -le 1.88) { return "Flat 1,85:1" }
+    if ($Proporcao -ge 1.74 -and $Proporcao -le 1.80) { return "16:9" }
+    if ($Proporcao -ge 1.30 -and $Proporcao -le 1.38) { return "4:3" }
+    if ($Proporcao -ge 1.99 -and $Proporcao -le 2.01) { return "Univisium 2,00:1" }
+    return "fora dos formatos comuns"
+}
+
+function Get-PontosDaAmostra {
+    <#  14.47 - O TAMANHO DA AMOSTRA NUM LUGAR SO, E MAIOR.
+
+        DUAS COISAS ESTAVAM ERRADAS, E A PRIMEIRA E A PIOR.
+
+        1) A JANELA E O MOTOR PEDIAM AMOSTRAS DIFERENTES. A janela chamava
+           com -Pontos 3 e o motor usava o padrao 5. Mesmo arquivo, mesma
+           pergunta, duas amostras - e portanto a POSSIBILIDADE de duas
+           respostas. E o defeito que este projeto mais persegue, escondido
+           num parametro. Agora os dois chamam esta funcao.
+
+        2) A AMOSTRA ERA PEQUENA DEMAIS PARA O CENSO. Para dizer MEL x FEL
+           tres pontos bastam e sempre bastaram: o el_type nao muda ao longo
+           do filme, entao ler um trecho ja responde. Mas o CENSO DO L1 -
+           quantas cenas pedem mais que o master - com 3 pontos lia 3 a 4
+           cenas de um filme inteiro. Isso nao e estatistica, e o proprio
+           programa ja tirou esse numero da tela por nao significar nada.
+
+        Entao a amostra passou a acompanhar a duracao: um filme de duas horas
+        rende mais pontos que um episodio de 40 minutos. O teto existe para o
+        custo nao fugir - a medida roda durante a leitura da pasta, e leitura
+        que demora e leitura que atrapalha.
+
+        CUSTO, medido em maquina: cada ponto custa por volta de 6 a 7
+        segundos (corte com -c copy, extract-rpu, info -s, export). Um filme
+        de 2h30 sai de 3 pontos (~20s) para 9 (~60s). E tempo de LEITURA, em
+        segundo plano, nao de conversao - a fila continua utilizavel.
+    #>
+    param([double]$DuracaoSeg)
+    if ($DuracaoSeg -le 30)   { return 1 }   # curto demais para espalhar
+    if ($DuracaoSeg -le 600)  { return 3 }   # ate 10 min: episodio curto
+    if ($DuracaoSeg -le 3600) { return 5 }   # ate 1h
+    if ($DuracaoSeg -le 7200) { return 7 }   # ate 2h
+    if ($DuracaoSeg -le 10800){ return 9 }   # ate 3h
+    return 11
+}
+
+function Get-TipoCamadaDV {
+    <#  2.0 / ITEM 1 - DIAGNOSTICO DE DOLBY VISION DE VERDADE (MEL x FEL).
+
+        POR QUE EXISTE (04/09/2026, critica publica, tecnica e correta):
+        num Profile 7 a imagem final e BL + EL. Quando a EL nao carrega
+        imagem (MEL), descartar a EL e mesmo sem perda. Quando ela carrega
+        (FEL), o L1 do RPU continua descrevendo a imagem COMPOSTA - e a TV
+        tone mapeia para um pico que nao existe mais no arquivo convertido.
+        Ate a 14.36 o motor tratava todo P7 igual e nao dizia uma palavra
+        sobre isso. Omitir tambem e mentir (licao 12).
+
+        COMO MEDE, E ELA MEDE - NAO SUPOE: corta N trechos curtos do video
+        com "-c copy" (nao recodifica nada, custa segundos), extrai o RPU de
+        cada trecho com "dovi_tool extract-rpu" e le "dovi_tool info -s".
+        Quem classifica MEL ou FEL e o proprio dovi_tool, pelo campo el_type
+        do RPU - nao ha heuristica nossa no meio do caminho.
+
+        A AMOSTRA E ASSUMIDA, NAO ESCONDIDA: sao pontos espalhados pelo
+        filme, nao o arquivo inteiro (mesma escolha do dovi_convert). Todos
+        os pontos lidos dizendo a mesma coisa = essa coisa. Dizendo coisas
+        diferentes = MISTO, tratado como FEL. Nenhum ponto lido = NAO_MEDIDO.
+        NAO_MEDIDO nunca vira "limpo por falta de prova".
+
+        O QUE ELA NAO FAZ: nao mede o brilho real da base layer, entao nao
+        PROVA brightness expansion. Por isso FEL sai como "conversao com
+        ressalva", nunca como "defeito". Medir a BL e regenerar o L1 e a
+        fase 2 - ver DV_L1_o_problema_e_a_2.0.md.
+
+        REGUA CONTRA REGUA (licao 15): o MaxCLL devolvido aqui e o do L1 do
+        RPU (MaxRGB, convencao da Dolby). NAO comparar com o MaxCLL de HDR10
+        ou HDR10+ do container, que e histograma - no mesmo filme os dois
+        deram 480,45 e 291,60 nits, e nenhum dos dois esta errado.
+    #>
+    param(
+        [string]$MkvPath,
+        [double]$DuracaoSeg = 0,
+        [int]$Pontos = 0,   # 0 = decidir pela duracao (Get-PontosDaAmostra)
+        [double]$SegundosPorPonto = 2.0,
+        [string]$PastaTemp = "",
+        [int]$Largura = 0,
+        [int]$Altura = 0
+    )
+    # Mesma armadilha ja documentada em Test-VideoDecodavel: com
+    # $ErrorActionPreference = "Stop", uma linha qualquer no stderr de um
+    # programa externo vira erro terminante e a funcao morre justamente
+    # quando encontra o que veio procurar. Copia local: ao sair, o "Stop"
+    # do script volta sozinho.
+    $ErrorActionPreference = "Continue"
+
+    if ($script:CacheTipoELPath -eq $MkvPath -and $script:CacheTipoEL) { return $script:CacheTipoEL }
+    $script:CacheTipoELPath = $MkvPath
+
+    $res = New-Object PSObject -Property ([ordered]@{
+        Tipo           = "NAO_MEDIDO"
+        Selo           = "NAO MEDIDO"
+        Motivo         = ""
+        MaxCLL         = 0.0
+        MaxFALL        = 0.0
+        CenasNaAmostra = 0
+        DmVersion      = ""
+        PontosPedidos  = 0
+        PontosLidos    = 0
+        CenasNoCenso   = 0
+        CenasAcimaDoMaster = 0
+        PicoDeCena     = 0.0
+        MasterMax      = 0.0
+        <#  14.46 - AS DUAS REGUAS, E QUAL DELAS FALOU.
+
+            So existe UMA regua comparavel com o L1: o pico do mastering
+            display. O MaxCLL/MaxFALL do container e medido por HISTOGRAMA e
+            o L1 e MaxRGB - sao grandezas diferentes, e compara-las e o erro
+            que a licao 15 proibiu neste projeto. Ele NAO vira regua de
+            reserva, e nao vai virar.
+
+            O que faltava nao era uma segunda regua: era DIZER qual falou.
+            Quando o arquivo nao declara o pico do master, ate a 14.45 a
+            frase terminava em "nao da para dizer" e o usuario ficava sem
+            nada - mesmo com os numeros do container ali, lidos, no mesmo
+            ffprobe. Agora eles aparecem, marcados como o que sao: outra
+            regua, para comparar arquivo com arquivo, nunca com o L1 deste. #>
+        ReguaUsada     = "nenhuma"   # "master" | "nenhuma"
+        CtnMaxCLL      = 0
+        CtnMaxFALL     = 0
+        L5Lido         = $false
+        L5Bordas       = ""
+        L5Formato      = ""
+        L5AreaAtiva    = ""
+        Expande        = $null   # $true / $false / $null (sem regua para dizer)
+    })
+
+    $dv = Get-InfoDolbyVision -MkvPath $MkvPath
+    if (-not $dv) {
+        $res.Tipo = "NAO_APLICAVEL"; $res.Selo = "-"
+        $res.Motivo = "Sem Dolby Vision neste arquivo"
+        $script:CacheTipoEL = $res
+        return $res
+    }
+    # Profile 5 vem ANTES da checagem de EL de proposito: ele nao tem
+    # Enhancement Layer, entao cairia em "sem EL = conversao limpa" - e isso
+    # seria mentira, porque P5 -> 8.1 recodifica o video. Mensagem que mente
+    # e bug (licao 2). O caso dele e o item 3 da fila da 2.0.
+    if ($dv.Perfil -eq 5) {
+        $res.Tipo = "NAO_APLICAVEL"; $res.Selo = "-"
+        $res.Motivo = "Profile 5 nao tem Enhancement Layer - o caso dele e outro (chegar a 8.1 exige re-encode)"
+        $script:CacheTipoEL = $res
+        return $res
+    }
+    if ($dv.Camadas -notmatch "EL") {
+        $res.Tipo = "SEM_EL"; $res.Selo = "LIMPA"
+        $res.Motivo = "Sem Enhancement Layer: nao ha camada nenhuma para descartar"
+        $script:CacheTipoEL = $res
+        return $res
+    }
+    if ($dv.Perfil -ne 7) {
+        $res.Tipo = "NAO_APLICAVEL"; $res.Selo = "-"
+        $res.Motivo = ("Perfil {0} com EL - MEL x FEL e classificacao de Profile 7" -f $dv.Perfil)
+        $script:CacheTipoEL = $res
+        return $res
+    }
+    if (-not (Test-Path -LiteralPath $doviTool)) {
+        $res.Motivo = "dovi_tool.exe nao encontrado - sem ele nao da para ler o RPU"
+        $script:CacheTipoEL = $res
+        return $res
+    }
+
+    if ($DuracaoSeg -le 0) { $DuracaoSeg = Get-DuracaoDoArquivo -Caminho $MkvPath }
+    <#  14.47: quem nao pediu um numero recebe o da duracao. Quem pediu
+        continua mandando - mas o teto de arquivo curto vale para os dois,
+        porque espalhar 9 pontos num arquivo de 20 segundos e pedir nove
+        vezes o mesmo trecho. #>
+    if ($Pontos -le 0) { $Pontos = Get-PontosDaAmostra -DuracaoSeg $DuracaoSeg }
+    if ($DuracaoSeg -le 30) { $Pontos = 1 }
+    if ($Pontos -lt 1) { $Pontos = 1 }
+    $res.PontosPedidos = $Pontos
+
+    $base = $PastaTemp
+    if ([string]::IsNullOrWhiteSpace($base)) { $base = $env:TEMP }
+    $tmpDir = Join-Path $base ("_ddvt_el_" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+    try {
+        [System.IO.Directory]::CreateDirectory($tmpDir) | Out-Null
+    } catch {
+        $res.Motivo = "Nao consegui criar a pasta temporaria da amostra"
+        $script:CacheTipoEL = $res
+        return $res
+    }
+
+    $inv        = [System.Globalization.CultureInfo]::InvariantCulture
+    # O pico do mastering display e a REGUA do censo: sem ele da para dizer
+    # o pico de cada cena, mas nao da para dizer se ele e alto DEMAIS.
+    try {
+        $brilhoCtx = Get-BrilhoDoContainer -MkvPath $MkvPath
+        if ($brilhoCtx -and $brilhoCtx.MasterMax -gt 0) {
+            $res.MasterMax  = $brilhoCtx.MasterMax
+            $res.ReguaUsada = "master"
+        }
+        # Guardados para CONTEXTO, nunca para comparar com o L1 (licao 15).
+        if ($brilhoCtx) {
+            $res.CtnMaxCLL  = [int]$brilhoCtx.MaxCLL
+            $res.CtnMaxFALL = [int]$brilhoCtx.MaxFALL
+        }
+    } catch { }
+    # A resolucao real e a REGUA do L5: o RPU diz quantas linhas sao borda,
+    # e so a resolucao diz que imagem sobra. Quem chamou pode passar; se nao
+    # passou, custa um ffprobe que nao abre o video.
+    if ($Largura -le 0 -or $Altura -le 0) {
+        try {
+            $wh = & $ffprobe -v error -select_streams v:0 `
+                    -show_entries "stream=width,height" -of csv=p=0 -i "$MkvPath" 2>$null
+            if ("$wh" -match '^\s*(\d+)\s*,\s*(\d+)') {
+                $Largura = [int]$Matches[1]; $Altura = [int]$Matches[2]
+            }
+        } catch { }
+    }
+    $tipos      = New-Object System.Collections.ArrayList
+    $ultimoErro = ""
+    $inicio     = $DuracaoSeg * 0.05
+    $fim        = $DuracaoSeg * 0.92
+    $passo      = 0.0
+    if ($Pontos -gt 1) { $passo = ($fim - $inicio) / ($Pontos - 1) }
+
+    try {
+        for ($i = 0; $i -lt $Pontos; $i++) {
+            if ($script:CancelamentoSolicitado) { break }
+            $t = $inicio + ($passo * $i)
+            if ($t -lt 0) { $t = 0.0 }
+            $trecho = Join-Path $tmpDir ("t" + $i.ToString("D2") + ".hevc")
+            $rpuBin = Join-Path $tmpDir ("t" + $i.ToString("D2") + ".bin")
+
+            # Mesma receita de extracao da etapa [1/5], com "-ss" e "-t":
+            # "-c copy" copia os NALs do trecho, nao recodifica nada. O
+            # "-ss" antes do "-i" posiciona no keyframe igual ou anterior.
+            $argsFf = @("-hide_banner", "-nostdin", "-v", "error", "-y",
+                        "-ss", ([double]$t).ToString("0.000", $inv),
+                        "-i", "$MkvPath", "-map", "0:v:0", "-c", "copy",
+                        "-t", ([double]$SegundosPorPonto).ToString("0.000", $inv),
+                        "-bsf:v", "hevc_mp4toannexb", "-f", "hevc", "$trecho")
+            $nada = @(& $ffmpeg @argsFf 2>&1)
+            if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $trecho) -or
+                (Get-Item -LiteralPath $trecho).Length -eq 0) {
+                $ultimoErro = ("o ffmpeg nao conseguiu cortar o trecho de {0}s" -f [int]$t)
+                continue
+            }
+
+            $nada = @(& $doviTool "extract-rpu" "-i" "$trecho" "-o" "$rpuBin" 2>&1)
+            if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $rpuBin) -or
+                (Get-Item -LiteralPath $rpuBin).Length -eq 0) {
+                $ultimoErro = ("o dovi_tool nao achou RPU no trecho de {0}s" -f [int]$t)
+                continue
+            }
+
+            $bruto = @(& $doviTool "info" "-i" "$rpuBin" "--summary" 2>&1)
+            $texto = (($bruto | ForEach-Object { "$_" }) -join "`n")
+            if ([string]::IsNullOrWhiteSpace($texto)) {
+                $ultimoErro = ("o dovi_tool info nao devolveu resumo do trecho de {0}s" -f [int]$t)
+                continue
+            }
+            $res.PontosLidos = $res.PontosLidos + 1
+
+            # "Profile(s): 7 (FEL)" - o dovi_tool imprime o subperfil entre
+            # parenteses ao lado do 7, tirado do campo el_type do RPU.
+            $mEl = [regex]::Match($texto, '7\s*\((MEL|FEL)\)')
+            if ($mEl.Success) { [void]$tipos.Add($mEl.Groups[1].Value.ToUpperInvariant()) }
+
+            $mCll = [regex]::Match($texto, 'MaxCLL:\s*([0-9]+(?:\.[0-9]+)?)')
+            if ($mCll.Success) {
+                $v = 0.0
+                [double]::TryParse($mCll.Groups[1].Value, [System.Globalization.NumberStyles]::Float, $inv, [ref]$v) | Out-Null
+                if ($v -gt $res.MaxCLL) { $res.MaxCLL = $v }
+            }
+            $mFall = [regex]::Match($texto, 'MaxFALL:\s*([0-9]+(?:\.[0-9]+)?)')
+            if ($mFall.Success) {
+                $v = 0.0
+                [double]::TryParse($mFall.Groups[1].Value, [System.Globalization.NumberStyles]::Float, $inv, [ref]$v) | Out-Null
+                if ($v -gt $res.MaxFALL) { $res.MaxFALL = $v }
+            }
+            # Cena da AMOSTRA, nao do filme: somar cortes de 2s nao da o
+            # numero de cenas do titulo, e o nome do campo diz isso.
+            $mCena = [regex]::Match($texto, 'Scene/shot count:\s*(\d+)')
+            if ($mCena.Success) { $res.CenasNaAmostra = $res.CenasNaAmostra + [int]$mCena.Groups[1].Value }
+            $mDm = [regex]::Match($texto, 'DM version:\s*([^\r\n]+)')
+            if ($mDm.Success -and $res.DmVersion -eq "") { $res.DmVersion = $mDm.Groups[1].Value.Trim() }
+
+            <#  14.41 - DE AMOSTRA PARA CENSO, NO MESMO RPU QUE JA ESTA NA MAO.
+
+                O "info --summary" devolve UM MaxCLL por trecho: o maior. O
+                "export --levels level1" da 2.3.3 devolve o L1 de CADA CENA
+                do mesmo RPU. Mesmo arquivo, mesma leitura, zero custo a
+                mais - e a diferenca entre "o pico deste trecho e 2186 nits"
+                e "3 das 47 cenas lidas pedem mais que o master entrega".
+
+                ARMADILHA CONFERIDA NA BANCADA: o "export" IGNORA o "-o" e
+                grava L1_export.csv / L5_export.csv NO DIRETORIO ATUAL. Por
+                isso ele roda dentro de uma pasta so dele. Sem isso os CSV
+                caem na pasta de trabalho do programa - lixo na pasta do
+                usuario, exatamente o que o Limpar_Testes existe para evitar.
+
+                Falhar aqui NAO invalida a medicao: MEL x FEL ja foi decidido
+                pelo el_type acima. O censo e informacao a mais.
+            #>
+            $pastaEx = Join-Path $tmpDir ("ex" + $i.ToString("D2"))
+            try {
+                [System.IO.Directory]::CreateDirectory($pastaEx) | Out-Null
+                $voltarPara = (Get-Location).Path
+                try {
+                    Set-Location -LiteralPath $pastaEx
+                    $nada = @(& $doviTool "export" "-i" "$rpuBin" "--levels" "level1,level5" 2>&1)
+                } finally {
+                    Set-Location -LiteralPath $voltarPara
+                }
+
+                $csvL1 = Join-Path $pastaEx "L1_export.csv"
+                if (Test-Path -LiteralPath $csvL1) {
+                    $linhas = @(Import-Csv -LiteralPath $csvL1)
+                    # Cada CENA e um bloco de quadros com o mesmo trio
+                    # min/max/avg. Contar os trios distintos conta cenas.
+                    $cenas = @($linhas | Select-Object -Property min_pq, max_pq, avg_pq -Unique)
+                    foreach ($cena in $cenas) {
+                        $codigo = 0.0
+                        [double]::TryParse("$($cena.max_pq)", [System.Globalization.NumberStyles]::Float, $inv, [ref]$codigo) | Out-Null
+                        if ($codigo -le 0) { continue }
+                        $nits = ConvertFrom-PQ -CodigoPQ $codigo
+                        $res.CenasNoCenso = $res.CenasNoCenso + 1
+                        if ($nits -gt $res.PicoDeCena) { $res.PicoDeCena = $nits }
+                        if ($res.MasterMax -gt 0 -and $nits -gt $res.MasterMax) {
+                            $res.CenasAcimaDoMaster = $res.CenasAcimaDoMaster + 1
+                        }
+                    }
+                }
+
+                $csvL5 = Join-Path $pastaEx "L5_export.csv"
+                if ((-not $res.L5Lido) -and (Test-Path -LiteralPath $csvL5)) {
+                    $l5 = @(Import-Csv -LiteralPath $csvL5)
+                    if ($l5.Count -gt 0) {
+                        $e0 = [int]("0" + "$($l5[0].active_area_left_offset)")
+                        $d0 = [int]("0" + "$($l5[0].active_area_right_offset)")
+                        $t0 = [int]("0" + "$($l5[0].active_area_top_offset)")
+                        $b0 = [int]("0" + "$($l5[0].active_area_bottom_offset)")
+                        $res.L5Lido   = $true
+                        $res.L5Bordas = ("esq {0} / dir {1} / topo {2} / base {3}" -f $e0, $d0, $t0, $b0)
+                        if ($Largura -gt 0 -and $Altura -gt 0) {
+                            $la = $Largura - $e0 - $d0
+                            $al = $Altura  - $t0 - $b0
+                            if ($la -gt 0 -and $al -gt 0) {
+                                $prop = [math]::Round(($la / [double]$al), 2)
+                                $res.L5AreaAtiva = ("{0}x{1}" -f $la, $al)
+                                <#  14.42 - O NOME JA CARREGA O NUMERO.
+                                    A 14.41 escrevia "Scope 2,39:1 (2.39:1)":
+                                    a mesma proporcao duas vezes, e a segunda
+                                    com ponto em vez de virgula. O nome basta;
+                                    a proporcao medida so aparece quando ela
+                                    NAO tem nome, que e o caso do crop errado
+                                    e o unico em que o numero cru informa. #>
+                                $nomeProp = Get-NomeDoFormato -Proporcao $prop
+                                if ($nomeProp -eq "fora dos formatos comuns") {
+                                    $res.L5Formato = ("{0} ({1}:1)" -f $nomeProp, $prop.ToString("0.00", $inv).Replace(".", ","))
+                                } else {
+                                    $res.L5Formato = $nomeProp
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch { }
+        }
+    } finally {
+        try { Remove-Item -LiteralPath $tmpDir -Recurse -Force -ErrorAction SilentlyContinue } catch { }
+    }
+
+    $unicos = @($tipos | Sort-Object -Unique)
+    if ($unicos.Count -eq 1) {
+        $res.Tipo = "$($unicos[0])"
+    } elseif ($unicos.Count -gt 1) {
+        $res.Tipo = "MISTO"
+    } else {
+        $res.Tipo = "NAO_MEDIDO"
+        $res.Motivo = $ultimoErro
+        if ($res.Motivo -eq "") { $res.Motivo = "o dovi_tool nao disse MEL nem FEL em nenhum dos trechos lidos" }
+    }
+
+    <#  14.43 - O VEREDICTO PASSOU A SER UM SO, PARA OS DOIS LADOS.
+
+        Ate a 14.42 o motor (console) e a janela diziam coisas diferentes
+        sobre o MESMO arquivo: a janela ja separava FEL comum de FEL com
+        expansao, e aqui continuava saindo um paragrafo unico que juntava os
+        dois casos e ainda mandava o usuario procurar outra ferramenta. Duas
+        vozes para um fato so - a queixa mais antiga do Diego.
+
+        Agora quem decide e ESTA funcao, uma vez, e os dois apenas mostram.
+        O criterio e o mesmo de sempre: o L1 e o pico de brilho que a TV vai
+        receber como instrucao; o mastering display e o pico para o qual o
+        filme foi feito. L1 dentro do master = a EL nao levantava brilho.
+        L1 acima = levantava, e sem ela a instrucao fica maior que a imagem.
+
+        Sem o pico do master declarado nao ha regua, e ai Expande fica $null:
+        nao da para afirmar nem negar, e a frase diz isso. #>
+    if ($res.Tipo -eq "FEL" -or $res.Tipo -eq "MISTO") {
+        if ($res.MasterMax -gt 0 -and $res.MaxCLL -gt 0) {
+            $res.Expande = ([double]$res.MaxCLL -ge [double]$res.MasterMax)
+        }
+    }
+
+    if ($res.Tipo -eq "MEL") {
+        $res.Selo   = "LIMPA"
+        $res.Motivo = "MEL: a camada extra nao tem imagem. Descartar nao muda nada no video."
+    } elseif ($res.Tipo -eq "FEL") {
+        $res.Selo   = "RESSALVA"
+        <#  14.39 - OS DOIS FEL, SEPARADOS NA TELA (pedido do Diego, 04/09).
+
+            Ate aqui a frase juntava duas coisas muito diferentes numa
+            ressalva so, e quem lia entendia "FEL = perda". Nao e isso.
+
+            FEL COMUM (a maioria esmagadora dos P7 de Blu-ray): a EL carrega
+            o RESIDUAL fino da imagem - o que sobra entre a base de 10 bits e
+            a precisao maior do master. Descartar isso custa detalhe em
+            gradiente e em sombra que so aparece em quadro parado, olhando de
+            perto, em poucas cenas. Em movimento, nao se ve.
+
+            FEL COM BRIGHTNESS EXPANSION (o caso raro, o unico que doi de
+            verdade): a EL nao esta so refinando, esta LEVANTANDO o brilho, e
+            o L1 que fica no arquivo descreve esse pico maior. Ai a TV recebe
+            a instrucao de tone mapear para um brilho que nao existe mais no
+            arquivo - e isso aparece, em cena clara, sem precisar procurar.
+
+            O PROBLEMA NUNCA FOI O PIXEL, FOI A INSTRUCAO. O L1 e o recado de
+            nits que vai para a TV; o que estraga a imagem e ele estar
+            errado, nao a EL ter sumido.
+
+            Esta versao NAO mede a base layer, entao nao sabe em qual dos dois
+            o arquivo esta. Por isso a frase diz os dois casos e nao acusa
+            nenhum - o selo continua RESSALVA, nunca DEFEITO. Distinguir os
+            dois exige medir a BL e regenerar o L1: e a fase 2. #>
+        if ($res.Expande -eq $true) {
+            $res.Selo   = "EXPANDE"
+            $res.Motivo = ("FEL com expansao de brilho: o arquivo pede {0} nits e foi masterizado para {1}. Sem a camada extra a TV recebe uma instrucao de brilho que o video nao entrega - a imagem pode sair errada." -f `
+                ([double]$res.MaxCLL).ToString("0", $inv), ([double]$res.MasterMax).ToString("0", $inv))
+        } elseif ($res.Expande -eq $false) {
+            $res.Motivo = ("FEL sem expansao de brilho: a camada extra tem imagem, mas so refino - o arquivo pede {0} nits, dentro dos {1} do master. A conversao perde detalhe fino, visivel so em quadro parado." -f `
+                ([double]$res.MaxCLL).ToString("0", $inv), ([double]$res.MasterMax).ToString("0", $inv))
+        } else {
+            $res.Motivo = "FEL: a camada extra tem imagem. O arquivo nao declara o pico do mastering display, entao nao da para dizer se ela levantava o brilho - trate como ressalva."
+            <#  14.46: sem regua, o usuario nao fica sem informacao nenhuma.
+                Os numeros do container entram AQUI, e entram rotulados: eles
+                nao respondem a pergunta (regua diferente), mas dizem quao
+                claro o filme e, e isso e util para decidir na mao. #>
+            if ($res.CtnMaxCLL -gt 0) {
+                $res.Motivo += (" O container declara MaxCLL {0} e MaxFALL {1} nits - outra regua (histograma), que serve para comparar este arquivo com outro, nao com o L1 dele mesmo." -f `
+                    $res.CtnMaxCLL, $res.CtnMaxFALL)
+            }
+        }
+    } elseif ($res.Tipo -eq "MISTO") {
+        $res.Selo   = "RESSALVA"
+        $res.Motivo = "a amostra achou MEL e FEL no mesmo arquivo - tratado como FEL, que e o lado seguro"
+        if ($res.Expande -eq $true) { $res.Selo = "EXPANDE" }
+    } else {
+        $res.Selo = "NAO MEDIDO"
+    }
+
+    $script:CacheTipoEL = $res
+    return $res
 }
 
 function Format-Tamanho($Bytes) {
@@ -4197,6 +5070,55 @@ foreach ($f in $files) {
     $outFile = Join-Path $OutputDir ($name + ".mkv")
     $tIni    = Get-Date
 
+    <#  14.44: A CONFERENCIA DE ESPACO SUBIU PARA ANTES DO ANUNCIO.
+        Achado do usuario (08/09): a fila terminou o primeiro filme e
+        ANUNCIOU "ARQUIVO 2/2" do segundo, rodou o diagnostico inteiro
+        (~20s, com censo de camada no RPU) e so entao descobriu que
+        faltavam 72 GB e pulou. Nada foi escrito errado e a limpeza foi
+        certa - mas a tela dizia "Convertendo - Etapa 1/5" de um arquivo
+        que nunca teve chance. A pergunta dele foi exatamente essa: "em
+        que momento ele descobre isso?".
+        Agora descobre ANTES de abrir o bloco do arquivo. O unico dado
+        que faltava aqui era o fator (1,6x quando o video nao sai do
+        container, 3,15x quando o dovi_tool vai mexer nele), e isso sai
+        de um ffprobe rapido - nao do censo. A conta pesada continua la
+        embaixo, intacta, como segunda trava. #>
+    $puloPorEspaco = $false
+    try {
+        $driveWorkPre = [System.IO.Path]::GetPathRoot($f.DirectoryName)
+        $livrePre = $null
+        try {
+            $livrePre = (Get-PSDrive -Name ($driveWorkPre.TrimEnd('\','/').TrimEnd(':')) -ErrorAction Stop).Free
+        } catch { }
+        if ($null -ne $livrePre) {
+            $dvPre = $null
+            try { $dvPre = Get-InfoDolbyVision -MkvPath $f.FullName } catch { }
+            <#  14.45: o Profile 5 tambem NAO passa pelo dovi_tool - ele sai
+                por uma passada so de ffmpeg para MP4. Cobrar 3,15x dele era
+                recusar arquivo por espaco que o motor nem ia usar. #>
+            $diretoPre = ($dvPre -and (
+                            ($dvPre.Perfil -eq 8 -and ($dvPre.Camadas -notmatch "EL")) -or
+                             $dvPre.Perfil -eq 5))
+            $fatorPre = if ($diretoPre) { 1.6 } else { 3.15 }
+            $precisaPre = [double]$f.Length * $fatorPre
+            if ([double]$livrePre -lt $precisaPre) {
+                $faltaPre = $precisaPre - [double]$livrePre
+                Write-Host ""
+                Line "#" "DarkMagenta"
+                SayTitulo ("  ARQUIVO {0}/{1}: {2}" -f $numero, $files.Count, $name)
+                Line "#" "DarkMagenta"
+                SayWarn ("[NAO INICIADO] Espaco Insuficiente em {0}. Necessario ~{1} (~{2}x o Tamanho do Arquivo), Disponivel {3}. Faltam ~{4}." -f `
+                            $driveWorkPre, (Format-Tamanho $precisaPre), `
+                            ($fatorPre.ToString("0.##", [System.Globalization.CultureInfo]::InvariantCulture)), `
+                            (Format-Tamanho $livrePre), (Format-Tamanho $faltaPre))
+                SayWarn "Este Arquivo Nem Chegou a Comecar - Nenhuma Pasta Temporaria Foi Criada e Nenhuma Etapa Rodou."
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = ("espaco insuficiente - faltam ~" + (Format-Tamanho $faltaPre)) }
+                $puloPorEspaco = $true
+            }
+        }
+    } catch { }
+    if ($puloPorEspaco) { continue }
+
     Write-Host ""
     Line "#" "DarkMagenta"
     SayTitulo ("  ARQUIVO {0}/{1}: {2}" -f $numero, $files.Count, $name)
@@ -4274,6 +5196,71 @@ foreach ($f in $files) {
                 # vira 8 (compat 1) e o Enhancement Layer e descartado (BL+RPU).
                 $codecAlvo = "dvhe.08.{0:D2}" -f $diagDV.Level
                 SayResposta "ok" ("Sera Convertido para Profile 8.1 [{0}] [BL+RPU] [OK]" -f $codecAlvo)
+            }
+            <#  2.0 / ITEM 1: O SELO HONESTO POR ARQUIVO.
+                Ate aqui o diagnostico dizia "sera convertido para 8.1" e
+                parava. Isso e verdade e e incompleto: num Profile 7 com FEL,
+                a EL descartada carregava imagem, e o L1 que fica no arquivo
+                descreve BL+EL. Dizer so "convertido" deixa o usuario achar
+                que o resultado e sempre sem perda (licao 12).
+                Nada aqui muda o que a conversao faz - so conta o que ela e. #>
+            $diagEL = Get-TipoCamadaDV -MkvPath $f.FullName -PastaTemp $WorkDir
+            $rotuloEL = switch ($diagEL.Tipo) {
+                "MEL"           { "MEL (Enhancement Layer Minima, Sem Imagem)" }
+                "FEL"           { "FEL (Enhancement Layer Completa, Com Imagem)" }
+                "MISTO"         { "MEL e FEL na Mesma Amostra" }
+                "SEM_EL"        { "Nenhuma (BL+RPU)" }
+                "NAO_APLICAVEL" { "Nao se Aplica" }
+                default         { "Nao Medida" }
+            }
+            Say-Deteccao ("        Camada de Melhoria: {0}" -f $rotuloEL)
+            if ($diagEL.PontosLidos -gt 0) {
+                Say ("          Lida do RPU em {0} de {1} trecho(s) da amostra - L1 MaxCLL {2} nits, MaxFALL {3} nits{4}" -f `
+                        $diagEL.PontosLidos, $diagEL.PontosPedidos, `
+                        ([double]$diagEL.MaxCLL).ToString("0.00", [System.Globalization.CultureInfo]::InvariantCulture), `
+                        ([double]$diagEL.MaxFALL).ToString("0.00", [System.Globalization.CultureInfo]::InvariantCulture), `
+                        $(if ($diagEL.DmVersion -ne "") { " - DM " + $diagEL.DmVersion } else { "" })) "DarkGray"
+            }
+            <#  14.38: O CONTEXTO DO L1, NO LOG.
+                Uma FEL so machuca quando ha brightness expansion - quando o
+                L1 aponta um pico que a base layer sozinha nao entrega. Sem o
+                pico do MASTER escrito ao lado, o numero do L1 nao diz nada, e
+                era exatamente isso que estava faltando para comparar um
+                arquivo com o outro depois. Esta linha e informativa: ela NAO
+                muda o selo, porque medir a base layer de verdade e a fase 2. #>
+            if ($diagEL.PontosLidos -gt 0) {
+                $brilho = Get-BrilhoDoContainer -MkvPath $f.FullName
+                if ($brilho.Lido) {
+                    $inv = [System.Globalization.CultureInfo]::InvariantCulture
+                    $partes = @()
+                    if ($brilho.MasterMax -gt 0) {
+                        $partes += ("master {0} nits" -f ([double]$brilho.MasterMax).ToString("0", $inv))
+                        $folga = [double]$brilho.MasterMax - [double]$diagEL.MaxCLL
+                        if ($folga -gt 0) {
+                            $partes += ("L1 {0} nits ABAIXO do pico do master" -f ([double]$folga).ToString("0", $inv))
+                        } else {
+                            $partes += ("L1 NO/ACIMA do pico do master - olhar este caso de perto")
+                        }
+                    }
+                    if ($brilho.MaxCLL -gt 0) {
+                        $partes += ("container HDR10 MaxCLL {0} / MaxFALL {1} nits (regua de histograma, nao se compara com o L1)" -f $brilho.MaxCLL, $brilho.MaxFALL)
+                    }
+                    if ($partes.Count -gt 0) { Say ("          Contexto do brilho: " + ($partes -join " | ")) "DarkGray" }
+                }
+            }
+            if ($diagEL.Selo -eq "LIMPA") {
+                SayResposta "ok" ("[CONVERSAO LIMPA] {0}" -f $diagEL.Motivo)
+            } elseif ($diagEL.Selo -eq "EXPANDE") {
+                # 14.43: o unico caso que estraga a imagem tem selo proprio.
+                SayResposta "alerta" ("[CONVERSAO NAO RECOMENDADA] {0}" -f $diagEL.Motivo)
+            } elseif ($diagEL.Selo -eq "RESSALVA") {
+                SayResposta "lar" ("[CONVERSAO COM RESSALVA] {0}" -f $diagEL.Motivo)
+            } elseif ($diagEL.Tipo -eq "NAO_MEDIDO") {
+                # Nunca virar "limpo por falta de prova": nao medir e um
+                # terceiro estado, e ele aparece com esse nome.
+                SayResposta "skip" ("[NAO MEDIDO] Nao Consegui Classificar a EL - {0}" -f $diagEL.Motivo)
+            } else {
+                Say ("          " + $diagEL.Motivo) "DarkGray"
             }
         } else {
             # FIX: antes essa mensagem dizia "Sera Convertido" mesmo sem
@@ -4429,6 +5416,39 @@ foreach ($f in $files) {
         $infoDV = Get-InfoDolbyVision -MkvPath $f.FullName
         if (-not $infoDV) {
             throw "Nenhum Dolby Vision Foi Identificado Neste Arquivo (o ffprobe Nao Encontrou RPU de Dolby Vision no Video). O DDVT E Especifico para Conversao de Perfil Dolby Vision - Este Arquivo Nao E um Candidato Valido para a Ferramenta. Pulando Este Episodio."
+        }
+
+        <#  14.45: O PROFILE 5 SAI POR OUTRA PORTA, AQUI.
+
+            Ele nao passa pelas 5 etapas: nao ha dovi_tool a rodar (converter
+            para 8.1 recodificaria o video), nao ha camada de melhoria a
+            medir e nao ha remontagem em .mkv. O que ele precisa e de
+            container, e isso e uma passada so de ffmpeg.
+
+            O ramo fica aqui, DEPOIS da deteccao confiavel de DV e ANTES da
+            decisao sobre o video, porque e exatamente onde se sabe o perfil
+            pela primeira vez de forma confiavel. #>
+        if ($infoDV.Perfil -eq 5) {
+            $destinoMp4 = Join-Path $OutputDir ($name + ".mp4")
+            if (Test-Path -LiteralPath $destinoMp4) {
+                SayWarn "Ja Existe o .mp4 na Pasta de Saida. Pulando."
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = "ja existia na pasta de saida" }
+                continue
+            }
+            $p5 = Convert-Perfil5ParaMp4 -Origem $f.FullName -Destino $destinoMp4 `
+                                         -Nome $name -DuracaoSegundos $duracaoTotal -InfoDV $infoDV
+            $tempoP5 = (Get-Date) - $tIni
+            if ($p5.Ok) {
+                $tamP5 = (Get-Item -LiteralPath $destinoMp4).Length
+                Write-Host ""
+                SayOk ("MP4 Pronto: {0} ({1})" -f ([System.IO.Path]::GetFileName($destinoMp4)), (Format-Tamanho $tamP5))
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "OK"; StatusDV = "P5_MP4"; StatusAudio = "OK"; MotivoAudio = $p5.AudioFeito; CodecAudio = "-"; TipoConvAudio = "P5/MP4"; StatusLegenda = "OK"; MotivoLegenda = $p5.LegendaFeita; DescarteAudio = ($p5.Descartes.Count -gt 0); DescarteLegenda = ($p5.Descartes.Count -gt 0); FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = $fpsRaw; Tamanho = (Format-Tamanho $tamP5); DuracaoVideo = (Format-Duracao $duracaoTotal); Tempo = (Format-Duracao $tempoP5.TotalSeconds); Motivo = "Profile 5 remuxado para MP4" }
+            } else {
+                SayErr ("Nao Foi Possivel Gerar o MP4: {0}." -f $p5.Motivo)
+                if (Test-Path -LiteralPath $destinoMp4) { Remove-Item -LiteralPath $destinoMp4 -Force -ErrorAction SilentlyContinue }
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "FALHA"; StatusDV = "P5_MP4"; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = $p5.Motivo }
+            }
+            continue
         }
 
         <#  v14.16: A DECISAO SOBRE O VIDEO PASSOU A SER TOMADA AQUI.

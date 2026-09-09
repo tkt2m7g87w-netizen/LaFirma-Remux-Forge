@@ -1,0 +1,536 @@
+﻿==============================================================================
+ LaFirma Remux Forge - UNDERSTAND THE CONVERSION
+ What the program does, what it does not do, and what you gain or lose
+==============================================================================
+
+ This text exists because Dolby Vision conversion is full of details that
+ change the result and are almost never explained. Here is what we know,
+ with the separation that matters: what the program MEASURED in your file,
+ what is in the tool documentation, and what is community report that we did
+ not test ourselves. Where we do not know, it says we do not know.
+
+
+------------------------------------------------------------------------------
+ 1. THE PROBLEM THE PROGRAM SOLVES
+------------------------------------------------------------------------------
+
+ A UHD Blu-ray with Dolby Vision usually comes in Profile 7. That profile
+ has TWO video layers inside the same file, and most digital devices do not
+ know what to do with the second one. The result is a picture with no Dolby
+ Vision, or with wrong colour, or a file that simply will not play.
+
+ Profile 8.1 solves it: a single layer, with the dynamic metadata inside,
+ and compatible with anything that only understands HDR10. It is the format
+ that Plex, Jellyfin, Emby, Apple TV, Shield and modern TVs play without
+ complaining.
+
+ The conversion does NOT re-encode the video. The picture that comes out is
+ the same one that went in, frame by frame. What changes is the wrapper.
+
+
+------------------------------------------------------------------------------
+ 2. THE PIECES: BL, EL AND RPU
+------------------------------------------------------------------------------
+
+ BL (Base Layer)
+   The ordinary 10-bit HDR10 video. It is the picture you see. The
+   conversion never touches it.
+
+ EL (Enhancement Layer)
+   A second video layer that exists ONLY in Profile 7. It is the one that
+   disappears in the conversion - and the whole rest of this text is about
+   what it has inside.
+
+ RPU
+   The dynamic metadata. Brightness instructions, scene by scene, that the
+   file sends to the TV: "here the peak is 400 nits, here it is 1,200". The
+   RPU does NOT disappear in the conversion - it goes whole into Profile 8.1.
+
+ Keep this in mind, because it is the key to everything that follows: the
+ conversion throws away the EL and keeps the RPU.
+
+ And here precision matters, because the detail changes what can be claimed.
+ dovi_tool does not copy the RPU raw: in mode 2, which is what this program
+ uses, it REMOVES from the RPU the luma and chroma mapping that only exists
+ in Profile 7 with FEL - the part of the instructions that makes no sense at
+ all without the second layer. What comes out is a legitimate Profile 8.1
+ RPU, not a patched Profile 7.
+
+ What dovi_tool does NOT do - and none of its modes do - is recompute L1,
+ the per-scene brightness number. That stays whatever the original analysis
+ measured, and the original analysis looked at the picture with the EL added
+ in. Everything this text discusses from here on comes from that.
+
+
+------------------------------------------------------------------------------
+ 3. MEL, SIMPLE FEL AND COMPLEX FEL - what the program measures
+------------------------------------------------------------------------------
+
+ Not every EL carries the same thing. There are three cases, and the program
+ measures which one your file is before converting. It does not guess: it
+ reads the el_type field inside the RPU with dovi_tool, the same source any
+ serious tool uses.
+
+ MEL - Minimal Enhancement Layer            [on screen: GREEN]
+   The EL carries no picture at all. It exists only so the disc player will
+   fire up its second decoder. Discarding an empty EL does not change a
+   single pixel of the video. Clean conversion, no caveat.
+
+ SIMPLE FEL - full layer, no brightness expansion    [on screen: ORANGE]
+   The EL carries picture, but it is refinement: compression residual,
+   grain, finer gradients. The brightness the RPU asks for fits inside what
+   the base layer delivers on its own. You lose fine detail, the kind that
+   only shows up on a paused frame, looking closely, in a few scenes. In
+   motion, it is not visible.
+
+ COMPLEX FEL - full layer, WITH brightness expansion  [on screen: RED]
+   Here the EL is not refining: it is RAISING the brightness. The RPU
+   declares a peak the base layer alone does not reach. When the EL is gone,
+   the TV still receives the old instruction - and tries to map to a
+   brightness that no longer exists in the file. This is the only case that
+   genuinely matters.
+
+ WHAT SEPARATES SIMPLE FROM COMPLEX
+
+   One number, and only one. The program compares the L1 (the brightness
+   peak the RPU asks for) with the mastering display peak (the monitor the
+   film was graded on, declared inside the file itself).
+
+   L1 below the master  ->  the extra layer was not raising brightness
+   L1 equal or above    ->  it was, and what it raised is going away
+
+ EXAMPLES MEASURED HERE, NOT INVENTED
+
+   Troy (2004) Director's Cut  ->  MEL              303 nits of 1,000
+   Game of Thrones S08E01      ->  SIMPLE FEL       153 nits of 1,000
+   Saving Private Ryan (1998)  ->  COMPLEX FEL    1,608 nits of 1,000
+
+ Saving Private Ryan asks for 60% more brightness than the master declares.
+ It was found by measurement, without consulting any list.
+
+
+------------------------------------------------------------------------------
+ 4. RED DOES NOT MEAN THE CONVERSION RUINS THE FILE
+------------------------------------------------------------------------------
+
+ This is the part that is almost never said, and without it the red warning
+ is more frightening than it should be.
+
+ MOST DEVICES ALREADY DISCARD THE EXTRA LAYER
+
+   NVIDIA Shield, Apple TV with Infuse, Zidoo, Dune HD, Fire TV, LG and Sony
+   TVs playing the file directly: they all read only the base layer and the
+   RPU, and ignore the second track. That is exactly what the conversion
+   does - only permanently.
+
+   If you watch on those devices, Profile 7 already looks today the way the
+   converted file will look. You lose nothing by converting, not even on a
+   Complex FEL. You gain compatibility and a smaller file.
+
+ WHO DOES LOSE SOMETHING
+
+   Anyone with a dual-decoder device that combines both layers in hardware.
+   According to the community, that means the OPPO UDP-203/205, Panasonic
+   UB820/UB9000, Sony X700 and X800M2 disc players, the OPPO clones
+   (M9201/M9203/M9205) and the Ugoos AM6B Plus running CoreELEC.
+
+   We tested none of them - this list is report, not our own measurement.
+
+ SO WHAT DOES RED MEAN
+
+   "This file has a layer that some devices make use of, and converting
+   gives it up for good." If you do not have one of those devices and do not
+   plan to, convert without fear.
+
+ THE HONEST RECOMMENDATION
+
+   When it comes out red, keep the original file if you have the space. Not
+   because of today's picture, but because the conversion is one-way and you
+   do not know what device you will own three years from now.
+
+
+------------------------------------------------------------------------------
+ 5. HOW THE MEASUREMENT IS DONE, AND HOW FAR IT GOES
+------------------------------------------------------------------------------
+
+ WHAT THE PROGRAM DOES
+
+   It cuts a few short pieces of the film, two seconds each, copying the data
+   without re-encoding anything, and reads the RPU of each one. It does not
+   touch your file.
+
+   How many pieces depends on the running time: five up to one hour, seven up
+   to two, nine up to three, eleven above that. A longer film has more scenes
+   to represent, and the sample follows.
+
+ WHAT THE READING GIVES FOR CERTAIN
+
+   Whether it is MEL or FEL. That field is the same from beginning to end of
+   the film, so reading one piece is already enough to know.
+
+ WHAT THE READING GIVES BY SAMPLE
+
+   The brightness numbers. The pieces read are not the whole film, and a
+   peak that happens only in a scene outside them can go unnoticed. When the
+   pieces disagree with each other, the program takes the safe side and
+   treats the file as FEL.
+
+ THE LIMIT, SAID PLAINLY
+
+   The program does not measure the real brightness of the base layer. The
+   separation between Simple and Complex is a comparison against the
+   mastering display peak: a good indication, not a proof.
+
+   Measuring video brightness is perfectly possible - a colour grading
+   program such as DaVinci Resolve shows it frame by frame in the scopes,
+   and people who work with HDR do it every day. What does not exist, as far
+   as we looked, is an automatic command-line measurement that runs over the
+   whole file and returns a number a program can use to decide on its own.
+
+   So: measuring the base layer can be done by hand, with a trained eye and
+   professional tooling. Automating that is another job, and it is what is
+   missing here. If one day LaFirma does it, it will be because we wrote the
+   meter - and this text will say so when that happens.
+
+ WHEN THERE IS NO RULER
+
+   If the file does not declare the mastering display peak, there is nothing
+   to compare against. In that case the program says it does not know,
+   instead of inventing a number.
+
+   You will then see the program show the container's MaxCLL and call it "a
+   different ruler". That is not hedging. The RPU's L1 is MaxRGB - the
+   largest of the three colour channels, pixel by pixel. The container's
+   MaxCLL is measured by histogram. They are two different calculations over
+   the same picture, and one's number does not answer the other's question:
+   comparing them would give a verdict that looks like a measurement and is
+   not one.
+
+   So it appears for what it is good for: giving a sense of how bright the
+   film is, and letting you compare this file with another. To decide whether
+   the extra layer was raising brightness, only the master peak will do - and
+   when it is not there, the honest answer is that it cannot be known.
+
+
+------------------------------------------------------------------------------
+ 6. AUDIO
+------------------------------------------------------------------------------
+
+ TrueHD, DTS-HD MA and DTS:X are disc formats. Many TVs and many servers do
+ not play them, or play them without all the channels, or force the server
+ to re-encode on the fly - which is worse than converting once, because it
+ happens every single time.
+
+ The program converts to E-AC-3 (Dolby Digital Plus), and the path depends
+ on what goes in. It is not the same thing for everyone:
+
+   TrueHD (with or without Atmos)  ->  E-AC-3 Atmos, 1152 kbps, via DeeZy
+      Atmos lives inside TrueHD, and DeeZy knows how to carry the audio
+      objects over to E-AC-3 (the format called JOC). What was Atmos stays
+      Atmos: the same sound scene, in a format everyone plays.
+
+   DTS, DTS-HD MA and DTS:X        ->  plain E-AC-3, 640 kbps, via ffmpeg
+      There is NO Atmos in the output here, and it is not a settings
+      limitation: DTS and Atmos are technologies from different companies.
+      DTS:X audio objects do not become Dolby objects - no converter does
+      that. What comes out is the channel mix (5.1 or 7.1), with no
+      object-based audio.
+
+   E-AC-3, AC-3 and AAC            ->  not converted
+      They already play on any device. Touching them would lose quality for
+      nothing.
+
+   Other codecs                    ->  kept as they are
+
+ To sum up what you gain and what you lose: coming from TrueHD Atmos, you
+ keep the Atmos. Coming from DTS:X, you lose the objects - you get a 7.1 in
+ channels. In both cases it is lossy conversion, as any move from lossless
+ audio to compressed audio is.
+
+ The original audio is not erased from your source file. What comes out is a
+ new copy.
+
+------------------------------------------------------------------------------
+ 7. SUBTITLES
+------------------------------------------------------------------------------
+
+ Blu-ray PGS subtitles are IMAGE, not text. Many TVs do not render them, and
+ when they do they will not let you change size or colour.
+
+ The program runs OCR on the subtitles and generates a text .SRT, with
+ dictionary correction. At the end it gives a quality grade - EXCELLENT,
+ GOOD, FAIR or POOR - checked on the generated file, not estimated. The
+ original PGS subtitle stays inside the final file: the .SRT is one extra
+ track, not a replacement.
+
+ OCR accuracy depends on the font used in the release. No subtitle OCR is
+ 100% accurate, and the program would rather tell you the grade than pretend
+ it came out perfect.
+
+
+------------------------------------------------------------------------------
+ 8. PROFILE 5 - its path is the container, not the profile
+------------------------------------------------------------------------------
+
+ Profile 5 comes from streaming and uses its own colour space (IPTPQc2),
+ with no HDR10 fallback layer. Remuxing a P5 to P8 does not work: the
+ picture comes out purple or greenish. Doing it properly would require
+ RE-ENCODING the whole video, and that is exactly what this program refuses
+ to do.
+
+ But P5 does not just sit there. What it needs is not a profile conversion:
+ it is a container devices will read. In MP4, with the dvh1 tag, Profile 5
+ plays on Apple TV, on Infuse and on the players that ignore .mkv today.
+
+ So the program remuxes P5 to MP4, and the video comes out COPIED - frame by
+ frame, nothing re-encoded. What changes is the wrapper, exactly as with
+ Profile 7.
+
+ What changes track by track on that path:
+
+   Audio that fits in MP4     copied as it is (E-AC-3, AC-3, AAC)
+   TrueHD and DTS             become E-AC-3 640k - they have no place in MP4
+   Text subtitles             become mov_text, MP4's subtitle format
+   PGS subtitles              discarded - image has no representation in MP4,
+                              and there is no OCR on this path
+
+ The program announces each of these on screen before doing it, and checks
+ the generated file's duration against the original's: a remux interrupted
+ halfway leaves a file that opens and lies about being complete. If they do
+ not match, the .mp4 is deleted.
+
+
+------------------------------------------------------------------------------
+ 9. BORDERS (L5)
+------------------------------------------------------------------------------
+
+ The RPU also stores the active area of the picture - how many lines of the
+ frame are black bar. The program reads that and checks it against the real
+ resolution, and can name the format: Scope 2.39:1, Flat 1.85:1, 16:9, 4:3.
+
+ The four L5 numbers are the LETTERBOX area - left, right, top, bottom, in
+ that order - and not the picture area. The active area is the resolution
+ minus those borders. That is how it is defined in Dolby's own professional
+ tools manual, and it is how the program reads it.
+
+ It only becomes a warning when the declared border does not result in any
+ cinema format at all, which is a sign of an RPU with the wrong crop. The
+ check is not our invention: Dolby itself validates the aspect ratio declared
+ in L5 against the frame's aspect ratio and treats a mismatch as a metadata
+ ERROR. When that happens, it came that way from the source file: the
+ conversion does not touch the border blocks.
+
+
+------------------------------------------------------------------------------
+ 10. WHAT THE PROGRAM DOES NOT DO
+------------------------------------------------------------------------------
+
+ - It does not re-encode video. Ever.
+ - It does not measure the real brightness of the base layer (see section 5).
+ - It does not regenerate the RPU's L1 for the base layer brightness. That
+   would be the real fix for Complex FEL, and it needs the meter that does
+   not exist yet. No dovi_tool mode does it either - this is not a limitation
+   of this program, it is the state of the tool.
+ - It does not keep the discarded EL. It is in the queue: a mode that
+   extracts the EL to a separate file, allowing Profile 7 to be rebuilt
+   later.
+ - It does not read the whole film during analysis.
+ - It does not convert Profile 5 to 8.1 (its path is MP4 - see section 8).
+ - It does not delete or alter your original file.
+
+
+------------------------------------------------------------------------------
+ 11. WHERE WHAT WE KNOW CAME FROM
+------------------------------------------------------------------------------
+
+ This program discovered nothing on its own. What it knows about Dolby
+ Vision was learned by using, reading and listening to other people's work.
+
+ dovi_tool, by quietvoid
+
+   It is the tool that does the profile conversion, here and just about
+   everywhere else. Reading the RPU, knowing whether the layer is MEL or
+   FEL, exporting L1 and L5 - all of that is it. LaFirma reimplements none
+   of it: it organises the work around it and shows the result in a way you
+   can decide from.
+
+ DDVT, by DonaldFaQ
+
+   It was with DDVT that this project learned the subject. Before LaFirma,
+   it was what we converted with - and it was by using DDVT that we came to
+   understand what an RPU is, what an enhancement layer is, what changes
+   between one profile and another, and why Profile 7 is troublesome. The
+   idea of automating this conversion was born there. Without that learning,
+   nothing here would have been written.
+
+ dovi_convert, by cryptochrome
+
+   Its author asked publicly how LaFirma handled the enhancement layer:
+   whether it simply discarded it, or checked first whether there was
+   brightness expansion beyond the base layer. The question was right, and
+   the answer at the time was uncomfortable - the program discarded without
+   checking.
+
+   It was that challenge that made LaFirma start measuring before
+   converting, and it is where the vocabulary this text uses comes from:
+   MEL, Simple FEL and Complex FEL. Technical criticism, direct and correct,
+   the kind that improves other people's software. Our thanks.
+
+ The community
+
+   The spreadsheet maintained by Reset9999, cataloguing title by title which
+   is MEL and which is FEL, and the forum discussions about what each device
+   does with the enhancement layer. Much of what is in section 4 came from
+   reports by people who own the hardware.
+
+------------------------------------------------------------------------------
+ 12. WHY THE TOOLS ARE NOT ON GITHUB
+------------------------------------------------------------------------------
+
+ The GitHub repository carries the source code: the scripts, the installer,
+ the manuals. The tools\ folder with the binaries (ffmpeg, dovi_tool,
+ mkvmerge, DeeZy, Tesseract, PgsToSrt and company) lives on external
+ mirrors.
+
+ Two reasons:
+
+ - Size. Hundreds of megabytes of third-party binaries, which GitHub was not
+   built to host and which change version on their own.
+ - Authorship. They are other people's programs, each with its own licence.
+   We do not republish other people's work as if it were ours: the
+   repository says where each one comes from and how to obtain it, and the
+   ready-made package exists for whoever just wants to use it without
+   assembling anything.
+
+ Anyone who wants to assemble the folder by hand will find the complete
+ list, with the official link for each tool, in the installation guide.
+
+
+------------------------------------------------------------------------------
+ 13. CREDITS
+------------------------------------------------------------------------------
+
+ This program is a shell around other people's work. Each of them solved a
+ hard problem and left the result available to anyone who wanted it. Without
+ that, nothing here would exist.
+
+ ffmpeg / ffprobe
+   Media processing, extraction and analysis. It is what cuts the sample
+   pieces without re-encoding, reads duration and FPS, and converts DTS
+   audio.
+
+ MKVToolNix (mkvmerge)
+   The standard for Matroska files. It assembles the final file, track by
+   track, preserving chapters, flags and names.
+
+ dovi_tool (quietvoid)
+   Reading and converting Dolby Vision metadata. It is what identifies the
+   profile, says whether the layer is MEL or FEL, exports L1 and L5, and
+   performs the Profile 7 to 8.1 conversion.
+
+ DDVT (DonaldFaQ)
+   RPU work and crop correction. It is the tool that taught this project how
+   to exist: before LaFirma, it was what we converted with, and it was by
+   using it that we came to understand the subject.
+
+ DeeZy
+   Conversion to E-AC-3 with Atmos preserved. It is what lets a TrueHD Atmos
+   track come out the other side still carrying Atmos.
+
+ seconv / BinaryOCR
+   OCR of the PGS subtitles, the main path.
+
+ PgsToSrt / Tesseract
+   Fallback OCR, for when the main path cannot cope.
+
+ And two acknowledgements that are not code:
+
+ cryptochrome, author of dovi_convert
+   For the public question about the enhancement layer that made this program
+   stop discarding and start measuring.
+
+ Reset9999 and the community
+   For the MEL x FEL spreadsheet by title. Manual, patient work that serves
+   as a second opinion for everybody.
+
+
+------------------------------------------------------------------------------
+ 14. WHERE TO CHECK AND LEARN MORE
+------------------------------------------------------------------------------
+
+ Nothing in this text asks you to take our word for it. Below are the sources
+ that support what is written here, in the order in which they matter. The
+ list is deliberately short: only what answers a question this text raises
+ made it in.
+
+ THE PROGRAM
+
+ LaFirma Remux Forge
+   https://github.com/tkt2m7g87w-netizen/LaFirma-Remux-Forge
+   Source code, installer, manuals and the change log. A question about what
+   the program does is settled by reading what it does. It is also where to
+   report a problem or ask for something.
+
+ THE TOOL THAT DOES THE CONVERSION
+
+ dovi_tool, by quietvoid
+   https://github.com/quietvoid/dovi_tool
+   The conversion mode documentation is there. Mode 2, which this program
+   uses, is described as "converts the RPU to be profile 8.1 compatible,
+   removes mapping for profile 7 FEL". No mode recomputes L1 - that is what
+   backs section 10.
+
+ WHAT DOLBY PUBLISHES
+
+ Dolby Professional Support
+   https://professionalsupport.dolby.com/s/?language=en_US
+   The professional support portal. Worth it for the Professional Tools
+   manual and the master QC articles, which describe what Dolby itself
+   validates in metadata: the L1 range, the CM version, L5 consistency with
+   the frame. It is the ruler section 9 uses.
+
+ Dolby Vision Post Production Forum
+   https://professionalsupport.dolby.com/s/dolby-vision-post-production-forum?language=en_US
+   The forum of people who master. Workflow, trims and analysis discussed
+   from the side that creates the file - not the side that converts it.
+
+ Dolby Learning
+   https://learning.dolby.com/
+   Dolby's training material, for anyone who wants to understand the whole
+   system rather than just the conversion.
+
+ THE COMMUNITY'S SECOND OPINION
+
+ Measured brightness by title (madVR)
+   https://docs.google.com/spreadsheets/d/15i0a84uiBtWiHZ5CXZZ7wygLFXwYOd84/
+   Real brightness measurements, frame by frame, taken from the decoded
+   picture of one film after another - CLL, FALL, peaks and the distribution
+   across nit ranges. It is the kind of measurement section 5 says exists and
+   that LaFirma does not yet automate. If you want a second opinion on a
+   specific title, it is here.
+
+ Players and MEL/FEL support
+   https://docs.google.com/spreadsheets/d/1Uyuw_1dADsRw7u1LGW6qTSZDLLNXWVK82gmHX7L6M3I/
+   A device catalogue with its own column for Dolby Vision MEL/FEL. It is the
+   source for the practical question in section 4: "does my device make use
+   of the extra layer or not?".
+
+ FEL vs base layer comparisons
+   https://drive.google.com/drive/folders/1FS42T95TOSpoy4xtwUBIQmziCe_R_IKe
+   A community-maintained folder of side-by-side comparisons between what the
+   enhancement layer adds and what the base layer delivers on its own. It is
+   the picture-form answer to section 3's question: "in practice, how much
+   does it change?".
+
+ FOR ANYONE WHO WANTS TO GO DEEP
+
+ DoViBaker, by erazortt
+   https://github.com/erazortt/DoViBaker
+   It combines base layer, enhancement layer and RPU and delivers the final
+   picture in PQ12. It is the proof that what the extra layer adds to a
+   specific title can be seen, not merely assumed. It also ships an RPU
+   analyser.
+
+==============================================================================
+ A question this text did not answer is a failure of this text, not yours.
+==============================================================================

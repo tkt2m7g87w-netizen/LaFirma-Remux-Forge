@@ -45,6 +45,58 @@ barra de progresso:
        PULADA automaticamente - não há o que converter, e ele reaproveita o
        vídeo ("[NÃO NECESSÁRIO] Já é Profile 8.1"). Perfis 5 e 7 convertem
        normalmente.
+     - O diagnóstico agora diz QUE TIPO de camada de melhoria o Profile 7
+       tem, porque isso muda o que a conversão significa. Ele lê essa
+       informação do próprio arquivo, em alguns trechos curtos do vídeo:
+
+         MEL   ->  [SERÁ CONVERTIDO], em verde. A camada de melhoria não
+                   carrega imagem; descartá-la não muda o vídeo.
+
+         SIMPLE FEL -> [SERÁ CONVERTIDO COM RESSALVA], em laranja. A camada
+                   carrega imagem, mas é refino: o residual fino entre a
+                   base de 10 bits e a precisão maior do master. Descartar
+                   custa detalhe de gradiente e de sombra que só aparece em
+                   quadro parado, olhando de perto. Assistindo, você não vê.
+
+         COMPLEX FEL -> [CONVERSÃO NÃO RECOMENDADA], em vermelho. Aqui a
+                   camada extra não está refinando, está LEVANTANDO o
+                   brilho, e o L1 que fica no arquivo descreve esse pico
+                   maior. A TV recebe a instrução de mapear para um brilho
+                   que não existe mais ali.
+
+                   O PROBLEMA NUNCA FOI O PIXEL, FOI A INSTRUÇÃO. O L1 é o
+                   recado de nits que vai para a TV; o que estraga a imagem
+                   é ele estar errado, não a camada ter sumido.
+
+                   Vermelho NÃO bloqueia: se você mandar, ele converte. E
+                   vale saber que a maioria dos aparelhos digitais (Shield,
+                   Apple TV, Zidoo, as TVs) já descarta essa camada de
+                   qualquer jeito - neles, o arquivo já toca hoje como o
+                   convertido vai tocar. O botão ENTENDA, na barra de cima,
+                   explica isso por extenso - e, na seção final dele, dá
+                   os endereços onde conferir cada afirmação por conta
+                   própria. Ele abre no idioma que estiver escolhido na
+                   bandeira, ao lado do próprio botão.
+
+                   Quem separa Simple de Complex é um número: o L1 do
+                   arquivo contra o pico do mastering display. Se o arquivo
+                   não declara esse pico, o programa diz que não sabe, em
+                   vez de escolher um lado.
+
+         [NÃO MEDIDO] -> não deu para ler a camada nesse arquivo. Não quer
+                   dizer que está limpo; quer dizer que não foi medido.
+
+     - Profile 5 é um caso à parte, e tem caminho próprio. Chegar a
+       Profile 8.1 a partir dele exigiria RECODIFICAR o vídeo - não é
+       remux, e tem perda. O que o P5 precisa não é de conversão de perfil:
+       é de um container que os aparelhos leiam. Então o programa remuxa
+       ele para MP4, com o vídeo COPIADO e a marca dvh1 - é assim que um P5
+       toca no Apple TV, no Infuse e nos players que ignoram o .mkv.
+       Nesse caminho: o áudio é copiado quando cabe no MP4 (E-AC-3, AC-3,
+       AAC) e vira E-AC-3 640k quando não cabe (TrueHD, DTS); a legenda de
+       texto vira mov_text; a legenda PGS é descartada, porque legenda de
+       imagem não existe em MP4 - e não há OCR neste caminho. O programa
+       avisa cada uma dessas coisas antes de fazer.
   3. Converte o ÁUDIO da faixa principal para E-AC-3, seguindo esta regra:
      - Dolby TrueHD/MLP  -> E-AC-3 Atmos (via DeeZy), se o DeeZy estiver
        disponível.
@@ -306,6 +358,12 @@ Tudo precisa estar dentro da MESMA pasta principal:
     |-- Changelog.txt                  <- o que mudou em cada versão
     |
     |-- icone\                         <- o ícone do programa
+    |-- CALIBRAGEM.txt                 <- criado sozinho, uma linha por
+    |                                     arquivo convertido: é com ele que a
+    |                                     estimativa de tempo aprende o ritmo
+    |                                     desta máquina. Apagar não quebra
+    |                                     nada - o programa volta ao número
+    |                                     de fábrica e recomeça a aprender.
     |-- _logs\                         <- criada sozinha, log de cada sessão
     |-- _corretor\                     <- só aparece quando a legenda sai com
     |-- _reocr\                           defeito (ver abaixo)

@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 16.75
+#  LaFirma - JANELA 17.01
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,308 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    17.01  09/09/2026  A TELA EM INGLES PAROU DE SER METADE EM CADA.
+#           Print do Diego com a bandeira em EN: ele olhou "VIDEOS IN
+#           QUEUE" e perguntou "que lingua e essa?". A frase esta certa -
+#           o que estava errado era a tela ser metade em cada lingua.
+#           O que faltava, e por que:
+#             Atualizar        o CODIGO reescreve este rotulo em dois
+#                              pontos (vira "Parar" na leitura e volta).
+#                              A varredura da arvore traduz UMA vez,
+#                              quando a bandeira troca - qualquer escrita
+#                              depois desfaz em silencio.
+#             Modo: Automatico o valor guardado nao tem acento e a tabela
+#                              tinha "Modo: Automático". Nunca casava.
+#             titulo da janela havia um SEGUNDO titulo ("... na Fila") que
+#                              eu nao vi ao cobrir o primeiro. Agora
+#                              NENHUM titulo escreve portugues direto, e a
+#                              bateria reprova se algum voltar a escrever.
+#             painel de disco  quatro linhas montadas com numero dentro.
+#             Ja Convertido    ramo proprio da coluna SITUACAO.
+#             DIAGNOSTICO - x  montado com o nome do arquivo.
+#           LICAO: rotulo que o codigo reescreve nao pode depender da
+#           varredura da arvore - tem que traduzir na hora em que e
+#           escrito.
+#
+#    17.00 09/09/2026  O DEFEITO QUE EU MESMO PLANTEI, NA REVISAO.
+#           A calibragem olhava so o relogio do video (T0Video) para saber
+#           que um arquivo tinha terminado. Mas o T0Video ja e preenchido
+#           no INICIAR, antes de qualquer arquivo comecar - entao no
+#           primeiro anuncio da fila ela acharia que o arquivo 0 acabou e
+#           gravaria como tempo real o segundo e meio entre o Iniciar e o
+#           anuncio. Os limites de sanidade recusariam o numero, mas a
+#           tela ganharia um aviso de calibragem recusada em TODA
+#           conversao - e ruido que aparece sempre e ruido que ninguem le
+#           mais. Entrou o estado MedidaAberta: relogio ligado nao quer
+#           dizer arquivo rodando.
+#
+#    16.99  09/09/2026  A ESTIMATIVA DE TEMPO SE CALIBRA SOZINHA.
+#           Item de fila desde 03/09, e o de maior efeito visivel: a
+#           estimativa do primeiro segundo errava (+56% no Troy, +39% no
+#           Se7en) e a barra dava saltos. Ja estava medido que trocar a
+#           constante NAO resolve - a media melhora dois filmes e faz o
+#           terceiro subestimar 20%, e subestimar e o pior erro aqui.
+#           Entao a constante deixou de ser constante. A cada arquivo
+#           convertido o programa grava quanto ele custou por GB e por
+#           peso (CALIBRAGEM.txt, uma linha por arquivo), e a proxima
+#           estimativa usa o p75 das ultimas cinco rodadas.
+#           p75 e nao mediana, e a escolha esta medida: a mediana e mais
+#           exata na media (11,6% x 18,3%) e subestimaria o Spider-Man em
+#           23%; o p75 reduz essa subestimacao para 11%. A regra do
+#           projeto e que prometer tempo que nao se cumpre e pior.
+#           O que isto NAO resolve, e o log diz: os tres filmes sao da
+#           mesma maquina e se espalham 45% entre si. Boa parte do erro e
+#           do MODELO DE PESOS, nao da maquina - e isso so sai revisando
+#           os pesos.
+#
+#    16.98  09/09/2026  "AUDIO PRINCIPAL" SEGUNDO QUEM.
+#           O rotulo dizia "AUDIO PRINCIPAL" e quem lia entendia "a faixa
+#           que vai tocar". Nao e isso: a escolha aqui IGNORA de proposito
+#           a marca de padrao do arquivo, porque em remux Dual Audio essa
+#           marca costuma apontar a dublagem que o grupo de release
+#           preferiu, e o programa quer o TrueHD/Atmos esteja ele marcado
+#           ou nao. A regra esta certa e continua. Errado era o NOME - e o
+#           silencio sobre a divergencia, que e exatamente quando o
+#           usuario se surpreende. Agora a linha diz de quem e a escolha
+#           e, quando a faixa escolhida nao e a marcada como padrao, diz
+#           qual e a outra e por que ela nao foi seguida.
+#
+#    16.97  09/09/2026  A JANELA PAROU DE PEDIR UMA AMOSTRA PROPRIA.
+#           Ela chamava Get-TipoCamadaDV com -Pontos 3 e o motor usava o
+#           padrao 5. Mesmo arquivo, mesma pergunta, duas amostras - e
+#           portanto a possibilidade de duas respostas para o mesmo fato.
+#           Agora nenhum dos dois escolhe: quem decide e a duracao.
+#
+#    16.96  09/09/2026  AS DUAS REGUAS, E QUAL DELAS FALOU.
+#           Item de fila desde 04/09. Quando o arquivo nao declara o pico
+#           do mastering display, a linha parava em "pico do master nao
+#           declarado" e o usuario ficava com um numero solto e nenhuma
+#           referencia - com os numeros do container ali, lidos no mesmo
+#           ffprobe, sem aparecer em lugar nenhum.
+#           Agora eles aparecem, DITOS COMO SAO. O MaxCLL do container e
+#           medido por histograma e o L1 e MaxRGB: grandezas diferentes,
+#           e compara-las e o erro que a licao 15 proibiu neste projeto.
+#           Entao nao entrou uma segunda regua - entrou o nome da regua
+#           que falou, e o container como CONTEXTO, marcado como outra
+#           medida. O veredicto Expande continua saindo so do master.
+#
+#    16.95  09/09/2026  O P5 DEIXOU DE SER SO UMA FRASE.
+#           Na 16.92 esta tela passou a dizer a verdade sobre o Profile 5
+#           (nao vira 8.1 sem recodificar) e prometeu um remux para MP4
+#           que o motor nao fazia. Verdade pela metade, so que do outro
+#           lado: em vez de prometer demais sobre a conversao, apontava
+#           uma porta que nao existia.
+#           Na 14.45 o motor passou a executar esse remux. Entao o P5
+#           volta a TER trabalho: DVprecisa e $true, a linha diz
+#           "[SERA REMUXADO]" em verde, e ele deixa de cair em "Nada a
+#           Converter".
+#
+#    16.94  09/09/2026  UMA ESCALA DE COR SO, E O TEXTO SEGUINDO A LINGUA.
+#           Quatro achados do Diego na mesma rodada, e os quatro sao a
+#           mesma queixa: "vc ta se perdendo em todos lugares como sempre
+#           em padronizar ne?". Ele tem razao - em todos.
+#           1) A COR. A sigla [EL: FEL] do diagnostico saia vermelha num
+#           Complex FEL e a coluna DOLBY VISION da MESMA linha saia ambar.
+#           A regra verde/laranja/vermelho estava escrita DENTRO da
+#           Pintar-RotuloDV e copiada pela metade na fila. Agora ela mora
+#           na Get-NomeCorEL, e a sigla, o texto da coluna e o chip leem
+#           todos dela. Uma escala, um lugar.
+#           2) O TEXTO DO ENTENDA. O rotulo do botao virava "Learn" e o
+#           texto que abria continuava em portugues. Agora existe o
+#           FAQ_EN.txt e o arquivo e escolhido no CLIQUE, pela lingua
+#           atual - trocar a bandeira no meio da sessao ja vale.
+#           3) A TRADUCAO PELA METADE. "Fila (3)", "VÍDEOS NA FILA (2 de
+#           3 Selecionados)", "Convertendo · Etapa 3/5" e o diagnostico
+#           inteiro ficavam em portugues numa tela em ingles. Nao era
+#           esquecimento: a traducao varria a ARVORE VISUAL e so alcanca
+#           rotulo fixo; essas frases sao montadas com numero dentro, a
+#           cada redesenho. Entrou a Traduzir-Frase, com regras de padrao
+#           no proprio IDIOMA_EN.txt (linha comecando com ~).
+#           4) O FAQ ganhou a secao 14, com as fontes que sustentam cada
+#           afirmacao do texto, e os creditos deixaram de ser tabela de
+#           duas colunas coladas.
+#
+#    16.93  09/09/2026  A PERGUNTA DO DISCO PASSOU A FALAR DESTA FILA.
+#           A 16.91 dizia a regra geral: "o motor vai converter o que
+#           couber e pular o que nao couber". Verdade, e inutil para
+#           decidir - o Diego comecou, viu um filme de 82 GB entrar em
+#           conversao e parou no meio achando que nunca terminaria.
+#           Ele estava certo em desconfiar e o programa estava certo em
+#           comecar: o Ryan CABIA sozinho (258 GB de pico contra 276
+#           livres); quem nao cabia era o Troy, DEPOIS dele. A informacao
+#           existia e nao estava na tela.
+#           Agora a janela percorre a fila na ordem, do jeito que o motor
+#           decide, e a pergunta diz quantos cabem, qual e o primeiro que
+#           fica de fora e quanto faltaria na vez dele.
+#           Junto: a escolha de idioma passou a ser guardada (IDIOMA.txt)
+#           - escolher ingles e o programa voltar em portugues na proxima
+#           vez seria escolha que nao vale de nada.
+#
+#    16.92  09/09/2026  IDIOMA PT/EN, E O PROFILE 5 PAROU DE MENTIR.
+#           1) Botao de bandeira ao lado do Entenda. A traducao e uma
+#              TABELA em IDIOMA_EN.txt (portugues TAB ingles) e uma
+#              varredura na arvore visual - nada de reescrever o XAML em
+#              chaves. Corrigir uma traducao e editar uma linha de texto.
+#              Sem o arquivo, o programa continua em portugues INTEIRO: a
+#              traducao e camada por cima, nunca a fonte.
+#              Esta camada cobre os rotulos fixos (barra, abas, colunas,
+#              titulos). As frases montadas na hora entram na proxima.
+#           2) O Profile 5 caia no mesmo ramo do Profile 7: a coluna
+#              dizia "5.0 -> 8.1" e a linha prometia "[SERA CONVERTIDO]
+#              Profile 8.1". O motor, no mesmo programa, ja dizia ha
+#              semanas que isso RECODIFICA o video. A tela prometia o que
+#              o motor ia negar. Agora ele tem ramo proprio e a resposta
+#              diz o caminho que existe: remux para MP4.
+#
+#    16.91  09/09/2026  COMECAR SABENDO QUE NAO CABE.
+#           A tela dizia "Espaco Insuficiente" em vermelho e o Iniciar
+#           comecava assim mesmo; o motor recusava arquivo por arquivo
+#           23 segundos depois, com a MESMA conta que ja estava na tela.
+#           Agora Test-PodeIniciar pergunta antes, com os tres numeros e
+#           o NAO pre-selecionado. AVISA, nao bloqueia: a estimativa e do
+#           pior caso e ha quem queira converter o que couber.
+#
+#    16.90  09/09/2026  O TEXTO DO ENTENDA PAROU DE COMPARAR E PASSOU A
+#           AGRADECER - e ganhou estrutura.
+#           O Diego: "comparar nao faz sentido, nao queremos competir e
+#           nem mostrar o que um programa ou outro faz; se usamos o de
+#           alguem, damos os creditos e agradecemos pelo aprendizado".
+#           A secao 11 deixou de ser "Comparando com outras ferramentas"
+#           e virou "De onde veio o que sabemos". Sumiram a tabela de
+#           nos-contra-eles e a frase que reduzia o DDVT a bordas e L5.
+#           As secoes 3, 4 e 5 ganharam subtitulos e respiro - estavam
+#           num paragrafo unico, sem hierarquia nenhuma.
+#
+#    16.89  09/09/2026  CONSERTOS NO TEXTO DO ENTENDA (achados do Diego).
+#           1) Audio: o texto dizia "preservando o Atmos quando ele
+#              existe", como se DTS tambem saisse com Atmos. Nao sai, e
+#              nunca vai: DTS e Atmos sao de empresas diferentes. Agora o
+#              texto separa os dois caminhos - TrueHD vai para E-AC-3
+#              Atmos pelo DeeZy (1152k) e a familia DTS vai para E-AC-3
+#              comum pelo ffmpeg (640k), sem objetos.
+#           2) "nenhuma ferramenta publica mede a camada base" era
+#              absoluto e de duplo sentido. O DaVinci Resolve mede brilho
+#              quadro a quadro; o que nao existe e uma ferramenta de
+#              LINHA DE COMANDO que faca isso sozinha e devolva um numero
+#              para um script decidir. O texto agora diz exatamente isso.
+#           3) O DDVT passou a ser creditado como a origem do projeto, e
+#              o autor do dovi_convert pela critica que fez o programa
+#              parar de descartar a EL em silencio.
+#
+#    16.88  08/09/2026  BOTAO "ENTENDA" - o texto que nao cabe na tela.
+#           MEL x FEL, Simple x Complex, o que cada player faz com a EL,
+#           audio, legenda, Perfil 5, bordas, o que o programa NAO faz e
+#           a comparacao honesta com dovi_convert e DDVT. Inclui as
+#           duvidas reais que chegaram ao Diego - a do autor do
+#           dovi_convert entre elas. Texto em FAQ_PT.txt, fora do .ps1.
+#
+#    16.87  08/09/2026  O QUE O USUARIO LE, LIDO POR UM USUARIO.
+#           Tudo aqui saiu de perguntas do Diego olhando a tela pronta:
+#           1) A sigla [EL: MEL] no rotulo agora e PINTADA na mesma
+#              escala do resto (Pintar-RotuloDV, via Inlines).
+#           2) "em 1/3 cenas" SAIU da tela. Ele leu e perguntou se o
+#              filme tinha tres cenas - eram tres cenas da AMOSTRA. O
+#              numero volta ao log, escrito por extenso.
+#           3) A resposta da legenda dizia "Brazilian / PGS .SRT (OCR)":
+#              anunciava PGS na linha do RESULTADO, e PGS e o que deixa
+#              de existir. Agora so o que sai.
+#           4) Os selos de descarte eram cinza. Descartar E acao: verdes.
+#           5) Quem decide se ha expansao de brilho passou a ser o MOTOR
+#              (campo Expande). A tela refazia a conta por conta propria.
+#
+#    16.86  08/09/2026  TRES NIVEIS, TRES CORES - E O DISCO PAROU DE
+#           PROMETER SOBRA QUE NAO EXISTE.
+#           1) FEL nao e um estado so. O Diego apontou: "o GOT e FEL
+#              tanto quanto o Ryan, mas o do Ryan e mais forte" - e os
+#              numeros concordam (153/1.000 contra 1.608/1.000). Agora
+#              verde = MEL, laranja = FEL sem expansao, vermelho = FEL
+#              com expansao. Vermelho aqui nao bloqueia nada; diz "este
+#              e o caso que estraga a imagem".
+#           2) A frase do diagnostico encolheu: ela tem UMA linha de
+#              largura e estava vazando por cima da linha de baixo.
+#           3) "Espaco Livre Apos Converter: -47,52 GB" era mentira -
+#              sobra negativa nao existe. Agora, quando nao cabe, a
+#              linha diz "Falta Liberar: 47,52 GB", que e o numero que
+#              resolve o problema.
+#
+#    16.85  08/09/2026  O CENSO DO L1 E A AREA ATIVA (L5) NA TELA.
+#           A frase do FEL dizia SE o pico passa do master; agora diz
+#           QUANTAS das cenas lidas passam, que e o que muda a decisao.
+#           O L5 so aparece na tela quando a borda declarada no RPU nao
+#           resulta em formato de cinema nenhum - crop errado que ja veio
+#           da origem. O LaFirma nao cria esse defeito: "convert
+#           --discard" nao toca nos blocos L5. O caso normal fica no log.
+#
+#    16.84  08/09/2026  UMA COISA, UM TEXTO - a queixa mais antiga.
+#           A mesma informacao de Dolby Vision saia escrita de OITO jeitos,
+#           um em cada canto da tela. Agora quem escreve e uma funcao so
+#           (Format-DolbyVision), com o vocabulario oficial da Dolby, e a
+#           sigla MEL/FEL aparece nas QUATRO formas - coluna, rotulo,
+#           resposta e nome da faixa. A aba Faixas ganhou a identificacao
+#           completa no video quando o release nao nomeou a faixa.
+#    16.83  05/09/2026  EU QUEBREI O 'JA EXISTE NA SAIDA' NA 16.82.
+#           Tirei a marca da leitura e escrevi no comentario que
+#           Update-JaExiste 'ja roda depois de toda leitura'. Nao rodava:
+#           so era chamado ao TROCAR a pasta de saida. O GOT ja convertido
+#           deixava clicar Iniciar e quem barrava era o motor la na frente.
+#           Agora a leitura chama, e a bateria EXECUTA a funcao contra
+#           arquivos reais em vez de so ler o fonte.
+#    16.82  05/09/2026  CONSERTO DO 'ERRO NA LEITURA' QUE EU CAUSEI.
+#           A 16.79 chamava Test-SaidaCompleta (funcao DA JANELA) dentro
+#           do runspace de leitura, que nao a enxerga: TODO arquivo com
+#           pasta de saida existente virava 'Erro na Leitura'. Mesma
+#           armadilha do $doviTool na 16.76. Agora quem decide 'ja existe
+#           na saida' e so a janela, e a bateria tem um teste ESTRUTURAL
+#           que reprova qualquer funcao da janela chamada num runspace.
+#    16.81  05/09/2026  A TELA PROMETIA E O MOTOR NAO CUMPRIA.
+#           BUG: marcar MANTER numa legenda PGS mostrava 'Conversao
+#           Desligada' e o motor fazia o OCR do mesmo jeito - a chave
+#           LegendaPgs nao era enviada, e chave ausente quer dizer 'voce
+#           decide', nao 'nao converta'. Agora manda -1, que e uma ordem.
+#           E o par L1/master virou frase com conclusao: 'L1 pede 153 de
+#           1.000 nits: sem expansao de brilho'.
+#    16.80  05/09/2026  O CONSERTO DO AUDIO ESTAVA PELA METADE.
+#           A 16.79 arrumou o ROTULO e deixou a RESPOSTA com o mesmo
+#           defeito: '[REAPROVEITADO] E-AC-3 Atmos' tambem era o
+#           track_name - e num arquivo ja convertido essa etiqueta foi o
+#           NOSSO motor que escreveu, entao o programa estava lendo de
+#           volta a propria etiqueta em vez do codec. A regra de nomear
+#           faixa de audio passou a morar numa funcao so (Rotular-Audio),
+#           chamada pelos dois lados.
+#    16.79  05/09/2026  CINCO DEFEITOS ACHADOS USANDO O PROGRAMA.
+#           1. o audio saia com o NOME DA FAIXA ('Surround') no lugar do
+#              codec - agora e sempre o codec, com Atmos e canais.
+#           2. a legenda prometia 'OCR: seconv/BinaryOCR' antes de o motor
+#              escolher (e no GOT ele recusou o seconv) - agora diz 'OCR'.
+#           3. a linha do DV virou dado outra vez: sigla + L1/master, sem
+#              paragrafo e sem nome de ferramenta de terceiro.
+#           4. BUG: Iniciar no meio da fase B derrubava o runspace e a
+#              linha ficava presa em 'medindo' pela conversao inteira.
+#           5. BUG: .mkv truncado na saida (PC reiniciou no mkvmerge)
+#              contava como 'Ja Existe na Saida' e travava o arquivo.
+#    16.78  04/09/2026  ENQUANTO MEDE, A LINHA E CINZA - NAO VERDE.
+#           Verde aqui quer dizer "e o melhor resultado possivel", e
+#           isso nao esta provado antes de a medida chegar. Cinza e a cor
+#           de "ainda nao ha veredicto"; vira verde (MEL) ou ambar (FEL)
+#           quando a fase B responde.
+#    16.77  04/09/2026  A MEDICAO SAIU DA LEITURA DA PASTA.
+#           Medir MEL x FEL custa de 2 a 5s POR ARQUIVO, e a 16.76 fazia
+#           isso dentro da leitura: 20 filmes = quase 2 minutos de tela
+#           parada. Agora a leitura volta a ser instantanea e a medicao
+#           roda em segundo plano, preenchendo cada linha conforme mede.
+#           Enquanto nao mediu, a tela diz que esta medindo - nunca que
+#           esta limpa.
+#    16.76  04/09/2026  A JANELA PASSOU A DIZER MEL x FEL (2.0 / item 1).
+#                       A coluna DOLBY VISION mostra "7.6 FEL → 8.1", o
+#                       diagnóstico traz o selo do arquivo (conversão limpa,
+#                       com ressalva, ou não medida) e o chip da coluna
+#                       deixou de ser verde quando há ressalva — verde é
+#                       afirmação, e num FEL a afirmação seria falsa.
+#                       De brinde, uma armadilha real: o motor chama a
+#                       ferramenta de $doviTool e a janela só tinha
+#                       $dovi_tool. Função carregada pela AST enxerga só as
+#                       variáveis da janela — sem a ponte, todo arquivo sairia
+#                       "não medido" sem um único erro na tela.
 #    16.75  03/09/2026  O CHIP DIZIA "Tesseract standalone". Desde a 14.23
 #                       o Tesseract vai EMPACOTADO em tools\Tesseract\, e a
 #                       janela procura la primeiro. O rotulo continuava
@@ -276,7 +578,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "16.75"
+$SCRIPT_VERSION = "17.01"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -664,7 +966,44 @@ function Get-FatorDaEtapa([string]$Etapa) {
     Conferido contra o Game of Thrones do HD: com o fator o total previsto
     fica em 1.947s para 2.037s reais (-4,4%); sem ele, 1.296s (-36%). #>
 $script:MbPorSegReferencia = 445.0
+
+<#  16.99 - A CONSTANTE VIROU PONTO DE PARTIDA, NAO VERDADE.
+
+    Este numero e o que traduz "peso" em segundos, e ele era fixo desde que a
+    barra existe. O sintoma esta medido em tres filmes, e nao e pequeno:
+
+      Troy         previsto 1697s   real 1091s   +56%
+      Se7en        previsto  910s   real  655s   +39%
+      Spider-Man   previsto 1200s   real 1121s    +7%
+
+    E ja esta medido que TROCAR A CONSTANTE NAO RESOLVE: usar a media (0,0115)
+    melhora Troy e Se7en e faz o Spider-Man SUBESTIMAR 20% - e subestimar e o
+    pior erro aqui, porque promete um tempo que nao vai ser cumprido. O
+    problema nunca foi o valor: e que UM numero fixo tem que servir para
+    maquinas, discos e filmes diferentes.
+
+    Entao ele deixou de ser fixo. A cada arquivo convertido o programa grava
+    quanto aquele arquivo REALMENTE custou por GB e por peso, e a proxima
+    estimativa usa a MEDIANA das ultimas cinco rodadas. Auto-calibra na
+    maquina de quem esta usando, com o disco de quem esta usando.
+
+    Mediana e nao media de proposito: uma conversao interrompida no meio, ou
+    uma que pegou o computador ocupado, entra na lista como um numero absurdo
+    - a media iria atras dele, a mediana ignora.
+
+    O valor abaixo continua sendo o de partida: e o que vale na primeira
+    execucao, e o que volta se o arquivo de calibragem sumir ou vier ilegivel.
+    Ninguem fica sem estimativa por falta de historico. #>
+$script:SegPorGbPorPesoPadrao = 0.0153
 $script:SegPorGbPorPeso = 0.0153
+# Limites de sanidade: fora disto a medida nao e calibragem, e acidente.
+# 0,004 seria um disco NVMe irreal para o trabalho todo; 0,060 seria quatro
+# vezes o pior caso ja medido. Os dois lados existem para que um numero
+# estragado no arquivo nao contamine a proxima estimativa.
+$script:CalibMin = 0.004
+$script:CalibMax = 0.060
+$script:CalibArquivo = "CALIBRAGEM.txt"
+$script:CalibUsadas = @()
 
 # --- pesos antigos, guardados so pra nao perder a referencia do Fallout ---
 $script:PesosComAudio  = @(1, 60, 65, 921, 1, 143, 1)
@@ -1059,6 +1398,15 @@ $script:TrabalhoLeitura = {
         $ffprobe   = & $achar "ffprobe.exe"
         $ffmpeg    = & $achar "ffmpeg.exe"
         $dovi_tool = & $achar "dovi_tool.exe"
+        <#  16.76: O MOTOR CHAMA ESTA FERRAMENTA DE $doviTool.
+            A janela sempre batizou a variavel de $dovi_tool, e ate agora
+            nenhuma FUNCAO do motor precisava dela - o dovi_tool so era usado
+            no fluxo principal, que a janela nao executa. Get-TipoCamadaDV
+            (2.0 / item 1) precisa, e funcao carregada pela AST enxerga so as
+            variaveis que existem AQUI. Sem esta linha ela nao acharia a
+            ferramenta e todo arquivo sairia como "nao medido" - sem erro
+            nenhum na tela, que e o pior jeito de quebrar. #>
+        $doviTool  = $dovi_tool
         $mediainfo = & $achar "MediaInfo.exe"
         $deezy     = & $achar "deezy.exe"
         $pgstosrt  = & $achar "PgsToSrt.dll"
@@ -1166,7 +1514,8 @@ $script:TrabalhoLeitura = {
                       "Get-SinaisAtmosMediaInfo","Test-EhAtmosOuJoc","Test-EhTrueHD","Test-EhDts",
                       "Test-EhCompativelC2","Get-FaixaAtmosJocExistente","Get-FaixaLegendaPtBrTexto",
                       "Find-PtBrPgsTrack","Get-InfoDolbyVision","Get-FaixaLegendaIngles",
-                      "Get-FaixaCompativelC2Externa","Test-IdiomaConflitante")
+                      "Get-FaixaCompativelC2Externa","Test-IdiomaConflitante",
+                      "Get-TipoCamadaDV")
         $faltam = @($exigidas | Where-Object { -not (Get-Command $_ -CommandType Function -ErrorAction SilentlyContinue) })
         if ($faltam.Count -gt 0) {
             Avisar ("FALTARAM funcoes no motor: {0}" -f ($faltam -join ", ")) "ERRO"
@@ -1199,6 +1548,9 @@ $script:TrabalhoLeitura = {
 
         $cron = [System.Diagnostics.Stopwatch]::StartNew()
         $bons = 0; $ruins = 0
+        # 16.77: quem a FASE B vai medir. Preenchida durante a leitura,
+        # consumida depois que a fila ja esta na tela.
+        $pendentesEL = @()
         for ($i = 0; $i -lt $arquivos.Count; $i++) {
             if ($Controle.Cancelar) { break }
             $a = $arquivos[$i]
@@ -1208,6 +1560,7 @@ $script:TrabalhoLeitura = {
             $script:CacheMkvJsonPath = $null; $script:CacheMkvJson = $null
             $script:CacheInfoDVPath  = $null; $script:CacheInfoDV  = $null
             $script:CacheSinaisAtmosPath = $null; $script:CacheSinaisAtmos = $null
+            $script:CacheTipoELPath  = $null; $script:CacheTipoEL  = $null
 
             $d = @{ Nome = $a.BaseName; Arquivo = $a.Name; Caminho = $a.FullName
                     Bytes = $a.Length; Ignorar = $false; MotivoIgnorar = ""
@@ -1218,6 +1571,28 @@ $script:TrabalhoLeitura = {
                     # a coluna quebraria em vez de so nao mostrar o detalhe.
                     AudioModo = ""; PrincipalCanais = 0; PrincipalTrueHD = $false
                     DiagDVcor = "cinza"; DiagAucor = "cinza"; DiagLgcor = "cinza"
+                    # 16.76: declarados aqui pelo mesmo motivo dos demais -
+                    # arquivo que nem chega a ser lido nao pode deixar a tela
+                    # com o selo do arquivo anterior.
+                    ELtipo = "NAO_APLICAVEL"; ELselo = "-"; ELmotivo = ""
+                    # 16.77: o container e lido na fase A (instantaneo) e
+                    # guardado, porque a FASE B precisa remontar as mesmas
+                    # frases depois, ja com o tipo de camada medido.
+                    DVnome = ""; DVcodec = ""; DVcamadas = ""; DVperfil = 0; DVlevel = ""
+                    ELmaxcll = 0.0; ELmaxfall = 0.0; ELdm = ""; ELpontos = ""
+                    ELcenas = 0; ELcenasAcima = 0; ELpicoCena = 0.0; ELexpande = $null
+                    P5 = $false
+                    # 16.96: qual regua respondeu ("master" ou "nenhuma") e os
+                    # numeros do container, que sao CONTEXTO e nunca regua.
+                    ELregua = "nenhuma"; ELctnMaxCLL = 0; ELctnMaxFALL = 0
+                    L5bordas = ""; L5formato = ""; L5area = ""
+                    # 16.79: o pico do master e a UNICA referencia que da
+                    # sentido ao L1. Sem ele, "153 nits" nao decide nada.
+                    DVmaster = 0.0
+                    # 16.84: a string do MediaInfo COM a sigla medida, para a
+                    # coluna NOME DA FAIXA do video na aba Faixas - que no GOT
+                    # vinha vazia porque o release nao nomeou a faixa.
+                    DVtextoFaixa = ""
                     JocCanais = 0; JocBytes = 0 }
             try {
                 $json = Get-MkvJson -MkvPath $a.FullName
@@ -1312,16 +1687,103 @@ $script:TrabalhoLeitura = {
                 # ---- DOLBY VISION ----
                 $dv = Get-InfoDolbyVision -MkvPath $a.FullName
                 if ($dv) {
+                    <#  16.77: A MEDICAO DE MEL x FEL SAIU DA LEITURA DA PASTA.
+
+                        A 16.76 media aqui dentro, arquivo por arquivo. Medido
+                        na maquina do Diego (log 04/09 16:40): 4 arquivos em
+                        17,57s; GOT de 20 GB em 12,57s no HD e 7,72s no SSD;
+                        Troy de 87 GB em ~9s. O TAMANHO DO ARQUIVO QUASE NAO
+                        PESA - o corte e "-c copy" -, o custo e fixo por
+                        arquivo: 3 cortes + 3 extract-rpu + 3 info. Numa pasta
+                        de 20 filmes isso vira quase dois minutos de tela
+                        parada antes de dar para clicar em Iniciar, e a
+                        leitura da pasta e justamente o momento em que o
+                        programa precisa ser rapido.
+
+                        Agora a fase A le so o container (instantaneo) e a
+                        medicao vai para a FASE B, que roda DEPOIS da fila
+                        aparecer e preenche cada linha conforme mede. Ninguem
+                        espera por ela. Se o usuario mandar converter antes de
+                        terminar, nao perde nada: o motor mede de novo no
+                        inicio da conversao, que e onde a decisao acontece e
+                        onde 11s dentro de 19 minutos nao sao nada.
+
+                        O que NAO mudou: enquanto nao mediu, a tela nao afirma
+                        que a conversao e limpa. Ela diz que esta medindo. #>
+                    try {
+                        $br = Get-BrilhoDoContainer -MkvPath $a.FullName
+                        if ($br -and $br.MasterMax -gt 0) { $d.DVmaster = [double]$br.MasterMax }
+                    } catch { }
+                    $d.DVnome = "$($dv.Nome)"; $d.DVcodec = "$($dv.Codec)"
+                    $d.DVcamadas = "$($dv.Camadas)"; $d.DVlevel = "$($dv.Level)"
+                    $d.DVperfil = [int]$dv.Perfil
                     $d.DiagDVrot = "Dolby VISION: $($dv.Nome) [$($dv.Codec)] [$($dv.Camadas)] [DETECTADO]"
                     if ($dv.Perfil -eq 8 -and $dv.Camadas -notmatch "EL") {
                         $d.DiagDVres = "→ [NÃO NECESSÁRIO] Já Está em Profile 8.1"; $d.DiagDVcor = "cinza"
                         # Mesmo formato do outro ramo: so o numero do perfil.
                         # "Profile 8.1 - ok" nao cabia e saia cortado.
                         $d.ColDV = "{0} OK" -f ($dv.Nome -replace '^\s*Profile\s*', '')
+                    } elseif ($dv.Perfil -eq 5) {
+                        <#  16.92 - O PERFIL 5 TINHA RAMO NENHUM, E A TELA MENTIA.
+
+                            Ate aqui o P5 caia no ramo "senao" junto com o
+                            Profile 7: a coluna dizia "5.0 -> 8.1" e a linha
+                            dizia "[SERA CONVERTIDO] Profile 8.1". O motor,
+                            no mesmo programa, ja dizia o contrario ha
+                            semanas: chegar a 8.1 a partir do P5 RECODIFICA
+                            o video, e recodificar e o que este programa se
+                            recusa a fazer. A tela prometia o que o motor ia
+                            negar - a mesma familia do bug da legenda.
+
+                            Agora ele tem ramo proprio, e a resposta diz o
+                            caminho que existe de verdade: remux para MP4,
+                            sem recodificar, que e como um P5 toca em TV. #>
+                        <#  16.95: O CAMINHO DEIXOU DE SER SO UMA FRASE.
+
+                            Na 16.92 esta linha ja dizia a verdade sobre o
+                            8.1 - e prometia um remux para MP4 que o motor
+                            nao fazia. Meia-verdade e a mesma familia de
+                            defeito, so que do outro lado: a tela apontava
+                            uma porta que nao existia.
+                            Na 14.45 o motor passou a executar esse remux
+                            (video copiado, tag dvh1, audio copiado quando
+                            cabe no MP4). Entao o P5 volta a TER trabalho:
+                            DVprecisa e $true de novo, e ele deixa de cair em
+                            "Nada a Converter". #>
+                        $d.DiagDVres = "→ [SERÁ REMUXADO] Profile 5 não vira 8.1 sem recodificar o vídeo — o caminho dele é o MP4, com o vídeo copiado"
+                        $d.DiagDVcor = "verde"
+                        $d.ColDV = "P5 → MP4"
+                        $d.DVprecisa = $true
+                        $d.P5 = $true
                     } else {
+                        <#  A frase de resposta passa a carregar o selo. Ela e a
+                            unica linha da tela que o usuario le antes de mandar
+                            converter - dizer so "SERA CONVERTIDO" num FEL deixa
+                            ele achar que o resultado e sempre sem perda, que e
+                            justamente a omissao que a 2.0 veio fechar. #>
                         $d.DiagDVres = "→ [SERÁ CONVERTIDO] Profile 8.1 [dvhe.08.06] [BL+RPU]"; $d.DiagDVcor = "verde"
                         $d.ColDV = "$($dv.Perfil).$($dv.Level) → 8.1"
                         $d.DVprecisa = $true
+                        # So Profile 7 COM EL tem MEL x FEL a medir. Nos outros
+                        # casos nao ha camada nenhuma para classificar, e a
+                        # fase B nem toca no arquivo.
+                        if ($dv.Perfil -eq 7 -and $dv.Camadas -match "EL") {
+                            $d.ELtipo = "MEDINDO"; $d.ELselo = "-"
+                            $d.ELmotivo = "medindo a camada de melhoria"
+                            $d.ColDV = "$($dv.Perfil).$($dv.Level) ⋯ → 8.1"
+                            $d.DiagDVres = "→ [SERÁ CONVERTIDO] Profile 8.1 [dvhe.08.06] [BL+RPU] — medindo a camada de melhoria (MEL x FEL)…"
+                            <#  16.78: E CINZA ENQUANTO MEDE, NAO VERDE.
+                                Verde neste programa quer dizer "vai acontecer
+                                e o resultado e o melhor possivel". Enquanto a
+                                fase B nao respondeu, isso nao esta provado -
+                                pintar de verde e afirmar antes de saber, que
+                                e a mesma omissao que a 2.0 veio fechar. Cinza
+                                e a cor de "ainda nao ha veredicto"; a linha
+                                troca para verde (MEL) ou ambar (FEL) quando a
+                                medida chega. #>
+                            $d.DiagDVcor = "cinza"
+                            $pendentesEL += ,@{ Idx = $i; Path = $a.FullName; Dur = [double]$d.DurSeg; Nome = $a.Name }
+                        }
                     }
                 } else {
                     $d.DiagDVrot = "Dolby VISION: NÃO DETECTADO"
@@ -1348,9 +1810,71 @@ $script:TrabalhoLeitura = {
                     $sinal = $null
                     if ($sinais -and $idxA -lt @($sinais).Count) { $sinal = @($sinais)[$idxA] }
                     $ehAtmos = Test-EhAtmosOuJoc -Track $pr -SinalMediaInfo $sinal
-                    $rot = "$($pr.codec)"
-                    if ($pr.properties.track_name) { $rot = "$($pr.properties.track_name)" }
-                    $d.DiagAurot = "ÁUDIO PRINCIPAL: $rot [DETECTADO]"
+                    <#  16.80 - A REGRA DE NOMEAR FAIXA DE AUDIO, NUM LUGAR SO.
+
+                        A 16.79 consertou o ROTULO ("Surround" -> "TrueHD
+                        Atmos 7.1") e deixou a RESPOSTA com o mesmo defeito:
+                        "[REAPROVEITADO] E-AC-3 Atmos" tambem era o track_name,
+                        nao o codec. Conserto pela metade e o mesmo bug de pe -
+                        e o Diego achou em 10 minutos.
+
+                        Agora existe UMA funcao que da nome a uma faixa de
+                        audio, e os dois lados chamam ela. Nao da mais para
+                        consertar um e esquecer o outro. #>
+                    function Rotular-Audio($Faixa, [bool]$EhAtmos) {
+                        if (-not $Faixa) { return "" }
+                        $r = "$($Faixa.codec)"
+                        if ($EhAtmos -and $r -notmatch "(?i)atmos") { $r = "$r Atmos" }
+                        $c = 0
+                        if ($Faixa.properties.audio_channels) { $c = [int]$Faixa.properties.audio_channels }
+                        if ($c -ge 2) {
+                            $l = switch ($c) { 8 { "7.1" } 6 { "5.1" } 2 { "2.0" } default { "$c ch" } }
+                            $r = "$r $l"
+                        }
+                        return $r
+                    }
+                    <#  16.79 - O DIAGNOSTICO MOSTRAVA O NOME DA FAIXA NO
+                        LUGAR DO CODEC. No GOT a faixa se chama "Surround", e
+                        a tela dizia "AUDIO PRINCIPAL: Surround" enquanto o
+                        motor, no mesmo arquivo, dizia "Dolby TrueHD Atmos".
+                        Duas telas do mesmo programa, dois nomes para a mesma
+                        faixa - e o que a janela mostrava nao era informacao
+                        tecnica nenhuma: "Surround" e um rotulo que o release
+                        escolheu, nao diz codec, nem canais, nem Atmos.
+                        Agora quem manda e o CODEC, sempre. Canais e Atmos
+                        entram porque mudam a decisao; o nome do release fica
+                        de fora - quem quiser ve-lo abre a aba Faixas. #>
+                    $rot = Rotular-Audio $pr $ehAtmos
+                    <#  16.98 - "PRINCIPAL" SEGUNDO QUEM? (item de fila)
+
+                        Este rotulo dizia "ÁUDIO PRINCIPAL" e o usuario lia
+                        "a faixa que vai tocar". Nao e isso que ele quer
+                        dizer, e a diferenca nao e detalhe.
+
+                        A escolha aqui IGNORA de proposito a marca de padrao
+                        do arquivo: em remux Dual Audio, a marca costuma
+                        apontar a dublagem que o grupo de release preferiu,
+                        e o programa quer o TrueHD/Atmos, esteja ele marcado
+                        ou nao. A regra esta certa e vai continuar.
+
+                        Errado era o NOME. Agora a linha diz de quem e a
+                        escolha - e, quando a faixa escolhida NAO e a que o
+                        arquivo marca como padrao, diz isso tambem. Esse e
+                        exatamente o caso em que o usuario se surpreende, e
+                        e o unico em que a frase precisa crescer. #>
+                    $marcadaPadrao = $null
+                    try {
+                        # $json ja foi lido no comeco deste bloco (mkvmerge -J):
+                        # nao custa uma segunda leitura do arquivo.
+                        $marcadaPadrao = @(@($json.tracks) | Where-Object {
+                            $_.type -eq "audio" -and $_.properties.default_track -eq $true }) | Select-Object -First 1
+                    } catch { }
+                    $notaPadrao = ""
+                    if ($null -ne $marcadaPadrao -and $null -ne $pr -and
+                        [int]$marcadaPadrao.id -ne [int]$pr.id) {
+                        $notaPadrao = (" · o arquivo marca outra faixa como padrão ({0}) — a escolha aqui é pelo codec, não pela marca" -f (Rotular-Audio $marcadaPadrao $false))
+                    }
+                    $d.DiagAurot = "ÁUDIO PRINCIPAL (o que o programa converte): $rot [DETECTADO]$notaPadrao"
 
                     $pronta = Get-FaixaAtmosJocExistente -MkvPath $a.FullName -FaixaExcluir $pr
                     $prontaEhJoc = [bool]$pronta
@@ -1376,7 +1900,12 @@ $script:TrabalhoLeitura = {
                     $d.PrincipalCanais = if ($pr.properties.audio_channels) { [int]$pr.properties.audio_channels } else { 0 }
                     $d.PrincipalTrueHD = [bool](Test-EhTrueHD $pr)
                     if ($pronta) {
-                        $nomeP = if ($pronta.properties.track_name) { $pronta.properties.track_name } else { $pronta.codec }
+                        # 16.80: MESMA regra do rotulo - codec, nunca o
+                        # track_name. Num arquivo ja convertido a faixa se
+                        # chama "E-AC-3 Atmos" porque o NOSSO motor batizou
+                        # assim; ler esse nome de volta e o programa
+                        # acreditando na propria etiqueta em vez do codec.
+                        $nomeP = Rotular-Audio $pronta $prontaEhJoc
                         if ($prontaEhJoc) {
                             $d.DiagAures = "→ [REAPROVEITADO] $nomeP"; $d.DiagAucor = "cinza"
                             $d.ColAudio = "E-AC-3[ATMOS] OK"
@@ -1386,7 +1915,7 @@ $script:TrabalhoLeitura = {
                             # "E-AC-3[ATMOS]" aqui seria a mesma mentira do resumo
                             # do Troy, onde um AC-3 448k dublado apareceu como
                             # Atmos reaproveitado. O codec vai escrito como ele e.
-                            $d.DiagAures = "→ [REAPROVEITADO] $nomeP ($($pronta.codec))"; $d.DiagAucor = "cinza"
+                            $d.DiagAures = "→ [REAPROVEITADO] $nomeP"; $d.DiagAucor = "cinza"
                             $d.ColAudio = "{0} OK" -f $pronta.codec
                             $d.AudioModo = "prontaext"
                         }
@@ -1437,12 +1966,22 @@ $script:TrabalhoLeitura = {
                         de implementacao e nao diz nada ao usuario. Agora ela
                         segue o mesmo padrao: o nome da faixa e o formato de
                         saida, com o motor de OCR entre parenteses no fim. #>
-                    $nomeSaidaLeg = $n
-                    if ($temSeconvJanela) {
-                        $d.DiagLgres = "→ [SERÁ CONVERTIDA] $nomeSaidaLeg .SRT (OCR: seconv/BinaryOCR)"; $d.DiagLgcor = "verde"
-                    } else {
-                        $d.DiagLgres = "→ [SERÁ CONVERTIDA] $nomeSaidaLeg .SRT (OCR: PgsToSrt)"; $d.DiagLgcor = "verde"
-                    }
+                    <#  16.87 - A RESPOSTA DIZIA O QUE ENTRA, NAO O QUE SAI.
+
+                        Ela saia como "[SERÁ CONVERTIDA] Brazilian / PGS .SRT
+                        (OCR)", porque colava o NOME DA FAIXA de origem antes
+                        do formato de saida - e o nome dessa faixa, no Troy,
+                        e literalmente "Brazilian / PGS". Resultado: a linha
+                        do resultado anunciava PGS, que e justamente o que
+                        deixa de existir. O Diego: "está sendo convertido
+                        para .SRT, então isso é um resultado".
+
+                        A esquerda ja diz de onde vem, com o nome real da
+                        faixa. A direita diz so onde chega. Os dois ramos do
+                        if antigo eram identicos - codigo morto desde a 16.79,
+                        quando os dois pararam de prometer a ferramenta. #>
+                    $d.DiagLgres = "→ [SERÁ CONVERTIDA] Legenda em Português no formato .SRT (por OCR)"
+                    $d.DiagLgcor = "verde"
                     $d.ColLegenda = "PGS → SRT"; $d.LGprecisa = $true
                 } else {
                     $d.DiagLgrot = "LEGENDA PT-BR: NÃO ENCONTRADA"
@@ -1571,13 +2110,28 @@ $script:TrabalhoLeitura = {
                     }
                 }
 
-                # ---- ja existe na saida? ----
-                if (-not $d.Ignorar -and $PastaSaida -and (Test-Path -LiteralPath $PastaSaida)) {
-                    $alvo = Join-Path $PastaSaida $a.Name
-                    if (Test-Path -LiteralPath $alvo) {
-                        $d.Ignorar = $true; $d.MotivoIgnorar = "Já Existe na Saída"
-                    }
-                }
+                <#  ---- ja existe na saida? ----
+
+                    16.82 - BUG QUE EU MESMO CRIEI NA 16.79, E QUE O LOG DO
+                    DIEGO PEGOU DE PRIMEIRA:
+
+                      Erro lendo Troy...: O termo 'Test-SaidaCompleta' nao e
+                      reconhecido como nome de cmdlet, funcao...
+
+                    Eu escrevi Test-SaidaCompleta como funcao da JANELA e a
+                    chamei AQUI DENTRO, no runspace da leitura - que so
+                    enxerga as funcoes do motor carregadas pela AST e as
+                    definidas dentro deste bloco. Efeito: TODO arquivo com
+                    pasta de saida existente caiu em "Erro na Leitura".
+                    E a mesmissima armadilha do $doviTool na 16.76 - o
+                    runspace e outro mundo - cometida de novo por mim.
+
+                    A licao nao e "declara nos dois lugares": duplicar regra
+                    foi o que causou o bug do audio da 16.79/16.80. A licao e
+                    NAO DECIDIR AQUI. Quem responde "ja existe na saida?" e a
+                    janela, em Update-JaExiste, que ja roda depois de toda
+                    leitura (via Update-Selecao) e ja tem a funcao. A leitura
+                    so junta os dados. Uma regra, um lugar. #>
                 # m3c15: "Nada a Converter" NAO trava mais o video (Ignorar
                 # ficava reservado pra "Ja Existe na Saida"/"Erro na Leitura",
                 # onde mexer e inutil ou perigoso). Aqui e so um AVISO - o
@@ -1601,7 +2155,112 @@ $script:TrabalhoLeitura = {
             Enviar @{ T = "video"; Dados = $d }
         }
         $cron.Stop()
-        Enviar @{ T = "leitura_fim"; Ok = $bons; Erros = $ruins; Seg = ($cron.ElapsedMilliseconds / 1000.0) }
+        Enviar @{ T = "leitura_fim"; Ok = $bons; Erros = $ruins; Seg = ($cron.ElapsedMilliseconds / 1000.0)
+                  MedirEL = $pendentesEL.Count }
+
+        <#  ---------------- FASE B: MEDIR MEL x FEL (16.77) ----------------
+            Roda com a fila JA na tela e o botao Iniciar JA liberado. Cada
+            arquivo medido vira uma mensagem "el" que atualiza aquela linha -
+            a tela se preenche sozinha, ninguem fica esperando.
+            So Profile 7 com EL entra aqui; os outros nem sao tocados. #>
+        <#  16.83: checar o cancelamento ANTES de anunciar. No log de 05/09
+            01:32:28 sairam, no MESMO milissegundo, "Medindo a camada de 1
+            arquivo(s)" e "Medicao interrompida" - o usuario tinha clicado
+            "Parar leitura" e a fase B nasceu ja cancelada, mas mesmo assim
+            avisou que ia medir. Nao mediu nada; so mentiu por um instante. #>
+        if ($pendentesEL.Count -gt 0 -and -not $Controle.Cancelar) {
+            $cronEL = [System.Diagnostics.Stopwatch]::StartNew()
+            Avisar ("Medindo a camada de melhoria (MEL x FEL) de {0} arquivo(s) em segundo plano..." -f $pendentesEL.Count)
+            $medidos = 0
+            foreach ($pe in $pendentesEL) {
+                if ($Controle.Cancelar) { break }
+                $c1 = [System.Diagnostics.Stopwatch]::StartNew()
+                $script:CacheTipoELPath = $null; $script:CacheTipoEL = $null
+                $script:CacheInfoDVPath = $null; $script:CacheInfoDV = $null
+                $el = $null
+                try {
+                    <#  16.97: o -Pontos 3 SAIU daqui. A janela pedia 3 e o
+                        motor usava 5 - mesmo arquivo, mesma pergunta, duas
+                        amostras, e portanto a possibilidade de duas
+                        respostas. Agora nenhum dos dois escolhe: quem decide
+                        e Get-PontosDaAmostra, no motor, pela duracao. #>
+                    $el = Get-TipoCamadaDV -MkvPath $pe.Path -DuracaoSeg ([double]$pe.Dur)
+                } catch {
+                    Avisar ("Erro medindo a camada de {0}: {1}" -f $pe.Nome, $_.Exception.Message) "ERRO"
+                }
+                $c1.Stop()
+                if (-not $el) { continue }
+                $medidos++
+                <#  O LOG GUARDA A MEDIDA, NAO SO O VEREDICTO (pedido do Diego,
+                    04/09): sem os numeros nao da para comparar um caso com o
+                    outro depois. O L1 MaxCLL/MaxFALL sao a regua da Dolby
+                    (MaxRGB do RPU) - NAO se comparam com o MaxCLL do HDR10 do
+                    container, que e histograma (licao 15). O que se compara
+                    com o L1 e o pico do MASTERING DISPLAY: L1 bem abaixo dele
+                    e o sinal de que a EL nao esta expandindo brilho. #>
+                Avisar ("EL de '{0}': {1} | L1 MaxCLL {2:N2} nits, MaxFALL {3:N2} nits | DM {4} | {5} de {6} trecho(s) | {7:N2}s" -f `
+                    $pe.Nome, $el.Tipo, [double]$el.MaxCLL, [double]$el.MaxFALL, "$($el.DmVersion)",
+                    $el.PontosLidos, $el.PontosPedidos, ($c1.ElapsedMilliseconds / 1000.0))
+                <#  16.85 - O CENSO E O L5 TAMBEM VAO PARA O LOG.
+
+                    O MaxCLL acima e UM numero: o pico do trecho mais claro.
+                    O censo diz QUANTAS cenas passam do que o master entrega -
+                    a diferenca entre "teve um pico alto" e "isso acontece o
+                    tempo todo". Sem o pico do master a conta nao existe, e a
+                    linha diz isso em vez de inventar regua. #>
+                if ([int]$el.CenasNoCenso -gt 0) {
+                    if ([double]$el.MasterMax -gt 0) {
+                        <#  16.87: a linha antiga dizia "1 cena(s) acima do
+                            master" e o Diego perguntou, com razao, se o filme
+                            tinha 3 cenas. A amostra sao 3 trechos curtos, nao
+                            o filme - e a linha tem que dizer isso, senao o
+                            numero parece falar do titulo inteiro. #>
+                        Avisar ("   Censo do L1: {0} de {1} cena(s) da amostra pedem mais que os {2:N0} nits do master (pico {3:N2} nits). A amostra são {4} trechos curtos, não o filme inteiro." -f `
+                            [int]$el.CenasAcimaDoMaster, [int]$el.CenasNoCenso, [double]$el.MasterMax,
+                            [double]$el.PicoDeCena, "$($el.PontosLidos)")
+                    } else {
+                        Avisar ("   Censo do L1: {0} cena(s) lida(s), pico de cena {1:N2} nits — o container não declarou o pico do mastering display, então não há régua para comparar" -f `
+                            [int]$el.CenasNoCenso, [double]$el.PicoDeCena)
+                    }
+                }
+                if ($el.L5Lido) {
+                    if ("$($el.L5Formato)" -ne "") {
+                        Avisar ("   Área ativa (L5): bordas {0} — imagem de {1}, {2}" -f `
+                            "$($el.L5Bordas)", "$($el.L5AreaAtiva)", "$($el.L5Formato)")
+                        # 16.86: era "Scope 2,39:1 (2.39:1)" - o mesmo numero
+                        # duas vezes, e um deles com ponto em vez de virgula.
+                    } else {
+                        Avisar ("   Área ativa (L5): bordas {0}" -f "$($el.L5Bordas)")
+                    }
+                }
+                Enviar @{ T = "el"; Idx = $pe.Idx
+                          Tipo = "$($el.Tipo)"; Selo = "$($el.Selo)"; Motivo = "$($el.Motivo)"
+                          MaxCLL = [double]$el.MaxCLL; MaxFALL = [double]$el.MaxFALL
+                          Dm = "$($el.DmVersion)"
+                          Pontos = ("{0}/{1}" -f $el.PontosLidos, $el.PontosPedidos)
+                          Expande = $el.Expande
+                          Cenas = [int]$el.CenasNoCenso
+                          CenasAcima = [int]$el.CenasAcimaDoMaster
+                          PicoCena = [double]$el.PicoDeCena
+                          Master = [double]$el.MasterMax
+                          <#  16.96: a janela passa a saber QUAL regua falou, e
+                              a carregar os numeros do container. Eles NAO
+                              respondem se a EL levantava brilho - regua
+                              diferente, licao 15 - mas sao o que sobra para
+                              o usuario decidir quando o master nao existe. #>
+                          Regua = "$($el.ReguaUsada)"
+                          CtnMaxCLL = [int]$el.CtnMaxCLL
+                          CtnMaxFALL = [int]$el.CtnMaxFALL
+                          L5 = "$($el.L5Bordas)"; L5Formato = "$($el.L5Formato)"
+                          L5Area = "$($el.L5AreaAtiva)"
+                          Seg = ($c1.ElapsedMilliseconds / 1000.0) }
+            }
+            $cronEL.Stop()
+            Enviar @{ T = "el_fim"; Medidos = $medidos; Total = $pendentesEL.Count
+                      Seg = ($cronEL.ElapsedMilliseconds / 1000.0) }
+        } else {
+            Enviar @{ T = "el_fim"; Medidos = 0; Total = 0; Seg = 0 }
+        }
     } catch {
         Enviar @{ T = "log"; Texto = ("ERRO na leitura: {0}" -f $_.Exception.Message); Tipo = "ERRO" }
         Enviar @{ T = "leitura_fim"; Ok = 0; Erros = 1; Seg = 0 }
@@ -1609,6 +2268,9 @@ $script:TrabalhoLeitura = {
 }
 
 $script:ReleituraPendente = $false
+# 16.77: true entre o "leitura_fim" e o "el_fim" - a janela ja esta usavel
+# e o runspace ainda esta medindo a camada de melhoria em segundo plano.
+$script:MedindoEL = $false
 
 function Start-Leitura {
     if ($script:Lendo) {
@@ -1629,8 +2291,21 @@ function Start-Leitura {
     # O botao NAO desabilita durante a leitura: vira "Parar" para o usuario
     # poder abortar um reescaneamento em curso (o clique cai no ramo de parada).
     $UI.btnReler.IsEnabled = $true
-    $UI.lblReler.Text = "Parar"
-    $Janela.Title = "$NOME_APP  ·  Lendo a Pasta..."
+    <#  17.01 - POR QUE O "Atualizar" NAO TRADUZIA (achado do Diego, no print).
+
+        Ele estava na tabela desde o comeco: "Atualizar -> Refresh". E ficava
+        em portugues assim mesmo, do lado de "Open Source" e "Open Output"
+        traduzidos - o que parecia sorteio.
+
+        Nao era: este rotulo e ESCRITO DE VOLTA por codigo, em dois pontos
+        (aqui vira "Parar" durante a leitura, e em "leitura_fim" volta para
+        "Atualizar"). A varredura da arvore traduz UMA vez, quando a bandeira
+        troca; qualquer escrita depois disso desfaz a traducao em silencio.
+
+        Licao: rotulo que o codigo reescreve nao pode depender da varredura -
+        ele tem que traduzir na hora em que e escrito. #>
+    $UI.lblReler.Text = Traduzir "Parar"
+    $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Lendo a Pasta...")
 
     $rs = [runspacefactory]::CreateRunspace()
     $rs.ApartmentState = "MTA"; $rs.ThreadOptions = "ReuseThread"; $rs.Open()
@@ -1708,6 +2383,195 @@ function Test-TemReocr {
     da barra sem que o resto do motor de progresso precise mudar.
     $Gb = 0 devolve 0: sem tamanho nao ha conversao possivel, e devolver
     zero e melhor que dividir por zero. #>
+function Get-CaminhoCalibragem {
+    return (Join-Path $script:PastaScript $script:CalibArquivo)
+}
+
+function Get-Percentil([double[]]$Valores, [double]$P) {
+    <#  16.99: percentil por interpolacao linear. P = 0,5 e a mediana.
+        Uma amostra so devolve ela mesma - com um numero nao ha distribuicao,
+        e inventar uma seria pior que usar o unico dado que existe. #>
+    $v = @($Valores | Sort-Object)
+    if ($v.Count -eq 0) { return 0.0 }
+    if ($v.Count -eq 1) { return [double]$v[0] }
+    $i  = ($v.Count - 1) * $P
+    $lo = [int][math]::Floor($i)
+    $hi = [int][math]::Ceiling($i)
+    if ($lo -eq $hi) { return [double]$v[$lo] }
+    return ([double]$v[$lo] + ($i - $lo) * ([double]$v[$hi] - [double]$v[$lo]))
+}
+
+function Fechar-MedidaDoVideo {
+    <#  16.99: chamada nos DOIS pontos em que um arquivo termina - quando o
+        motor anuncia o proximo ("arquivo") e quando a fila acaba ("fim").
+        Sao os dois unicos lugares em que da para saber o tempo real, e
+        esquecer um deles deixaria o ultimo arquivo de toda fila sem entrar
+        na calibragem - justamente o caso da fila de um arquivo so, que e o
+        mais comum.
+
+        So conta arquivo que REALMENTE converteu: cancelado no meio nao serve
+        de medida de nada, e entraria como um numero baixo puxando todas as
+        proximas estimativas para menos. #>
+    param([bool]$Concluido = $true)
+    <#  17.00 - O DEFEITO QUE EU MESMO PLANTEI, ACHADO NA REVISAO.
+
+        A primeira versao disto olhava so o T0Video. Mas o T0Video ja e
+        preenchido no INICIAR (linha "T0Fila = T0Video = agora"), antes de
+        qualquer arquivo comecar - e o motor anuncia "ARQUIVO 1/N" logo
+        depois. Resultado: no primeiro anuncio da fila esta funcao acharia
+        que o arquivo 0 tinha acabado, e gravaria como tempo real o segundo
+        e meio entre o Iniciar e o anuncio.
+
+        Os limites de sanidade recusariam esse numero - ele cairia muito
+        abaixo do CalibMin - entao nada seria gravado. Mas a tela ganharia um
+        aviso de calibragem recusada em TODA conversao, e aviso que aparece
+        sempre e aviso que ninguem le mais. Ruido tambem e defeito.
+
+        A correcao nao e olhar melhor o relogio: e ter um estado que diz "ha
+        um arquivo em andamento". Relogio ligado nao quer dizer arquivo
+        rodando - e o dado que faltava. #>
+    if (-not $Concluido) { $Motor.MedidaAberta = $false; $Motor.T0Video = $null; return }
+    if ($Motor.MedidaAberta -ne $true) { return }
+    $Motor.MedidaAberta = $false
+    if ($null -eq $Motor.T0Video) { return }
+    $idx = [int]$Motor.VideoIdx
+    if ($idx -lt 0 -or $idx -ge @($script:LoteAtual).Count) { $Motor.T0Video = $null; return }
+    $item = $script:LoteAtual[$idx]
+    $seg = ((Get-Date) - $Motor.T0Video).TotalSeconds
+    Registrar-Calibragem -Gb ([double]$item.Gb) -SomaPesos ([double]$item.SomaPesos) `
+                         -SegReais $seg -Nome "$($item.Nome)"
+    $Motor.T0Video = $null
+}
+
+function Registrar-Calibragem {
+    <#  16.99: grava UMA linha por arquivo convertido. E so isto:
+          data, nome, GB, soma dos pesos, segundos reais, e o valor derivado.
+        O valor derivado e o que interessa - segundos por GB por peso, que e
+        exatamente a grandeza que a estimativa usa. Os outros campos ficam
+        para poder auditar depois de onde veio cada numero.
+
+        NAO grava o que nao serve de calibragem: arquivo cancelado no meio,
+        arquivo que falhou, ou qualquer conta que caia fora dos limites de
+        sanidade. Historico sujo e pior que historico curto - um numero
+        errado aqui envenena as proximas cinco estimativas. #>
+    param([double]$Gb, [double]$SomaPesos, [double]$SegReais, [string]$Nome)
+    if ($Gb -le 0 -or $SomaPesos -le 0 -or $SegReais -le 0) { return }
+    $valor = $SegReais / ($Gb * $SomaPesos)
+    if ($valor -lt $script:CalibMin -or $valor -gt $script:CalibMax) {
+        Escrever-Log ("CALIBRAGEM: '{0}' deu {1:N4} s/GB/peso - fora dos limites ({2:N3} a {3:N3}), NAO gravado" -f `
+                      $Nome, $valor, $script:CalibMin, $script:CalibMax) "AVISO"
+        return
+    }
+    try {
+        $linha = ("{0}`t{1}`t{2}`t{3}`t{4}`t{5}" -f `
+                    (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $Nome,
+                    $Gb.ToString("0.000", [System.Globalization.CultureInfo]::InvariantCulture),
+                    $SomaPesos.ToString("0.0", [System.Globalization.CultureInfo]::InvariantCulture),
+                    $SegReais.ToString("0", [System.Globalization.CultureInfo]::InvariantCulture),
+                    $valor.ToString("0.00000", [System.Globalization.CultureInfo]::InvariantCulture))
+        [System.IO.File]::AppendAllText((Get-CaminhoCalibragem), ($linha + "`r`n"),
+                                        (New-Object System.Text.UTF8Encoding($true)))
+        Escrever-Log ("CALIBRAGEM: '{0}' | {1:N2} GB | peso {2:N0} | {3:N0}s reais -> {4:N4} s/GB/peso (gravado)" -f `
+                      $Nome, $Gb, $SomaPesos, $SegReais, $valor) "PROVA"
+    } catch {
+        # Nao poder gravar a calibragem nao pode derrubar uma conversao que
+        # deu certo. Perde-se a linha, nao o arquivo.
+        Escrever-Log ("CALIBRAGEM: nao consegui gravar - {0}" -f $_.Exception.Message) "AVISO"
+    }
+}
+
+function Carregar-Calibragem {
+    <#  16.99: le o historico e passa a estimativa a usar a MEDIANA das
+        ultimas cinco rodadas.
+
+        Cinco porque e o suficiente para o numero parar de pular a cada
+        conversao e pouco o bastante para acompanhar uma mudanca real (disco
+        novo, maquina nova). Mediana e nao media porque uma rodada esquisita
+        - o computador ocupado com outra coisa - entra na lista, e a media
+        iria atras dela.
+
+        Arquivo ausente, ilegivel ou sem linha valida NAO e erro: e a
+        primeira execucao, e o valor de partida vale. Ninguem fica sem
+        estimativa por falta de historico. #>
+    $script:SegPorGbPorPeso = $script:SegPorGbPorPesoPadrao
+    $script:CalibUsadas = @()
+    $arq = Get-CaminhoCalibragem
+    if (-not (Test-Path -LiteralPath $arq)) {
+        Escrever-Log ("CALIBRAGEM: sem historico ainda - usando o valor de partida {0:N4} s/GB/peso" -f $script:SegPorGbPorPeso) "INFO"
+        return
+    }
+    $vals = @()
+    try {
+        foreach ($l in [System.IO.File]::ReadAllLines($arq, [System.Text.Encoding]::UTF8)) {
+            if ("$l" -eq "" -or "$l".StartsWith("#")) { continue }
+            $c = "$l" -split "`t"
+            if ($c.Count -lt 6) { continue }
+            $x = 0.0
+            if ([double]::TryParse($c[5], [System.Globalization.NumberStyles]::Float,
+                                   [System.Globalization.CultureInfo]::InvariantCulture, [ref]$x)) {
+                if ($x -ge $script:CalibMin -and $x -le $script:CalibMax) { $vals += $x }
+            }
+        }
+    } catch {
+        Escrever-Log ("CALIBRAGEM: nao consegui ler o historico ({0}) - usando o valor de partida" -f $_.Exception.Message) "AVISO"
+        return
+    }
+    if ($vals.Count -eq 0) {
+        Escrever-Log ("CALIBRAGEM: historico sem linha aproveitavel - usando o valor de partida {0:N4}" -f $script:SegPorGbPorPeso) "AVISO"
+        return
+    }
+    $ult = @($vals | Select-Object -Last 5)
+    $script:CalibUsadas = $ult
+    <#  16.99 - POR QUE p75 E NAO A MEDIANA (medido, nao escolhido no gosto).
+
+        Rodei as quatro opcoes contra os tres filmes que temos com previsto e
+        real anotados (Troy, Se7en, Spider-Man):
+
+          fixo 0,0153   erro medio 33,8%   pior 55,5%   subestima 0 de 3
+          mediana       erro medio 11,6%   pior 22,9%   subestima 1 (-23%)
+          p75           erro medio 18,3%   pior 28,6%   subestima 1 (-11%)
+          maximo        erro medio 25,0%   pior 45,3%   subestima 0 de 3
+
+        A mediana e a mais exata NA MEDIA e e a que erra pior no unico lugar
+        onde errar dói: ela prometeria ao Spider-Man 23% MENOS tempo do que
+        ele leva. Este projeto ja decidiu que subestimar e pior que
+        superestimar - prometer um tempo que nao vai ser cumprido e mensagem
+        que mente, e mensagem que mente e defeito (licao 2).
+
+        p75 fica no meio: corta o erro medio quase pela metade em relacao ao
+        fixo e reduz a subestimacao de 23% para 11%. E a escolha que respeita
+        a regra sem jogar fora o ganho.
+
+        O QUE ISTO NAO RESOLVE, e esta escrito para nao virar promessa: os
+        tres filmes sao da MESMA maquina e mesmo assim se espalham de 0,0098 a
+        0,0143. Ou seja, boa parte do erro nao e da maquina - e do MODELO DE
+        PESOS, que descreve os tres filmes com a mesma forma. A calibragem
+        mata o erro sistematico (maquina, disco); a variacao entre filmes so
+        sai revisando os pesos. Quando o espalhamento for grande, o log diz
+        isso em vez de deixar parecer que a calibragem resolveu tudo. #>
+    $k = Get-Percentil ([double[]]$ult) 0.75
+    if ($k -lt $script:CalibMin -or $k -gt $script:CalibMax) {
+        Escrever-Log ("CALIBRAGEM: valor calculado {0:N4} fora dos limites - usando o valor de partida" -f $k) "AVISO"
+        return
+    }
+    $script:SegPorGbPorPeso = $k
+    $lista = (($ult | ForEach-Object { "{0:N4}" -f $_ }) -join ", ")
+    $dif = 0.0
+    if ($script:SegPorGbPorPesoPadrao -gt 0) {
+        $dif = (($k - $script:SegPorGbPorPesoPadrao) / $script:SegPorGbPorPesoPadrao) * 100.0
+    }
+    Escrever-Log ("CALIBRAGEM: {0} rodada(s) no historico, usando o p75 das ultimas {1}: {2:N4} s/GB/peso ({3:+0.0;-0.0;0}% do valor de partida) | amostras: {4}" -f `
+                  $vals.Count, $ult.Count, $k, $dif, $lista) "PROVA"
+    if ($ult.Count -ge 3) {
+        $mn = ($ult | Measure-Object -Minimum).Minimum
+        $mx = ($ult | Measure-Object -Maximum).Maximum
+        if ($mn -gt 0 -and (($mx - $mn) / $mn) -gt 0.30) {
+            Escrever-Log ("CALIBRAGEM: as rodadas se espalham {0:N0}% entre si ({1:N4} a {2:N4}). Isso nao e ruido da maquina - e o modelo de pesos descrevendo filmes diferentes com a mesma forma. A estimativa vai continuar errando por arquivo ate os pesos serem revistos." -f `
+                          ((($mx - $mn) / $mn) * 100.0), $mn, $mx) "AVISO"
+        }
+    }
+}
+
 function Get-PesoDeSegundos([double]$Seg, [double]$Gb) {
     $umPeso = $Gb * $script:SegPorGbPorPeso
     if ($umPeso -le 0) { return 0 }
@@ -1989,8 +2853,12 @@ function Set-LoteParaConverter {
             a 16.67 a tela so tinha o peso e era obrigada a acreditar no %
             que a FERRAMENTA reportava - e o deezy reporta um % que nao anda
             junto com o relogio (20% em 3 min de 27, 82% em 17 min de 27). #>
+        # 16.99: Gb e SomaPesos viajam junto porque sao exatamente o que a
+        # calibragem precisa quando este arquivo terminar. Sem eles, a conta
+        # teria que ser refeita do zero na hora do fim - e refazer conta e
+        # como as duas contas do disco divergiram.
         $lote += @{ Caminho = $v.Caminho; Nome = $v.Nome; Pesos = $pesos; SegEstimado = $est
-                    SegEtapas = @($segs) }
+                    SegEtapas = @($segs); Gb = $gb; SomaPesos = $soma }
     }
     # Sem return: a atribuicao direta nao passa pelo pipeline, entao nao ha
     # desmonte (o problema da 16.3) nem aninhamento (o problema da 16.4).
@@ -2037,7 +2905,41 @@ function Start-Motor {
     Escrever-Log "Runspace do motor criado e disparado" "MOTOR"
 }
 
+function Fechar-MedicaoPendente {
+    <#  16.79 - "MEDINDO" NAO PODE FICAR PRESO NA TELA.
+
+        BUG MEDIDO no log do Diego (18:49:57 -> 18:50:01): a fase B comecou a
+        medir, ele clicou Iniciar 3 segundos depois, o Iniciar derrubou o
+        runspace da leitura - e o "el_fim" nunca chegou. Resultado: a linha do
+        Dolby Vision ficou escrita "medindo a camada de melhoria..." durante a
+        CONVERSAO INTEIRA, e depois dela. A tela travada numa frase que nao era
+        mais verdade, que e a pior classe de bug deste projeto.
+
+        Toda saida da fase B passa por Stop-Motor, entao e aqui que o estado se
+        fecha. Quem ficou sem medida NAO volta a ser verde: vira "EL nao
+        medida", em ambar, que e o terceiro estado honesto - a mesma regra de
+        sempre, nao medir nunca vira limpo. #>
+    if (-not $script:Videos) { return }
+    $presos = 0
+    foreach ($v in $script:Videos) {
+        if ("$($v.ELtipo)" -ne "MEDINDO") { continue }
+        $presos++
+        $v.ELtipo = "NAO_MEDIDO"; $v.ELselo = "NAO MEDIDO"
+        $v.ELmotivo = "a medicao foi interrompida antes de terminar"
+        $v.DiagDVrot = "Dolby VISION: $($v.DVnome) [$($v.DVcodec)] [$($v.DVcamadas)] [EL: NÃO MEDIDA] [DETECTADO]"
+        $v.DiagDVres = "→ [SERÁ CONVERTIDO] Profile 8.1 [dvhe.08.06] [BL+RPU] — EL não medida"
+        $v.DiagDVcor = "ambar"
+        $v.ColDV = "$($v.DVperfil).$($v.DVlevel) → 8.1"
+    }
+    if ($presos -gt 0) {
+        Escrever-Log ("Medicao interrompida em {0} arquivo(s) - marcados como EL nao medida (nunca como limpa)" -f $presos) "LEITURA"
+        Fill-Fila "el"
+        Update-Diagnostico
+    }
+}
+
 function Stop-Motor {
+    Fechar-MedicaoPendente
     if (-not $script:MotorPS) { return }
     $script:Controle.Cancelar = $true
     $script:Controle.Pausar = $false
@@ -2346,6 +3248,18 @@ $Xaml = @"
         </Button>
         <Button x:Name="btnLog" Focusable="False" DockPanel.Dock="Right" Style="{StaticResource BtnBarra}">
           <StackPanel><TextBlock Text="&#9776;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock Text="Log" Margin="0,2,0,0"/></StackPanel>
+        </Button>
+        <!-- 16.88: ENTENDA. O programa decide muita coisa sozinho e explicava
+             cada decisao em uma linha de tela, que e onde nao cabe explicacao.
+             Este botao abre o texto inteiro, para quem quiser saber POR QUE.
+             Fica ao lado de Log e Ferramentas: os tres sao "abrir e ler". -->
+        <Button x:Name="btnEntenda" Focusable="False" DockPanel.Dock="Right" Style="{StaticResource BtnBarra}">
+          <StackPanel><TextBlock Text="&#8505;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblEntenda" Text="Entenda" Margin="0,2,0,0"/></StackPanel>
+        </Button>
+        <!-- 16.92: o idioma. Uma bandeira, um clique. O texto vive em
+             IDIOMA_EN.txt, fora do .ps1 - traduzir nao e mexer em codigo. -->
+        <Button x:Name="btnIdioma" Focusable="False" DockPanel.Dock="Right" Style="{StaticResource BtnBarra}">
+          <StackPanel><TextBlock x:Name="lblBandeira" Text="&#127463;&#127479;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblIdioma" Text="Português" Margin="0,2,0,0"/></StackPanel>
         </Button>
       </DockPanel>
     </Border>
@@ -3292,11 +4206,13 @@ function Fill-Fila([string]$Fase) {
             #   ja convertido  -> cinza claro, SEM triangulo (so informa)
             #   nada a fazer   -> amarelo com triangulo (voce PODE querer forcar)
             #   erro           -> vermelho (precisa de atencao)
-            $rotulo = switch ("$($v.MotivoIgnorar)") {
+            # 17.01: este ramo tem rotulo proprio e nao passava pela traducao -
+            # era o "Já Convertido" que ficava em portugues na tela em ingles.
+            $rotulo = Traduzir-Frase $(switch ("$($v.MotivoIgnorar)") {
                 "Já Existe na Saída" { "Já Convertido" }
                 "Erro na Leitura"    { "$($Sim.Err) Não Foi Possível Ler" }
                 default              { "$($Sim.Warn) $($v.MotivoIgnorar)" }
-            }
+            })
             $corRotulo = switch ("$($v.MotivoIgnorar)") {
                 "Já Existe na Saída" { $Cores.dim2 }
                 "Erro na Leitura"    { $Cores.err }
@@ -3311,7 +4227,7 @@ function Fill-Fila([string]$Fase) {
         }
 
         $est = $Normal
-        $sit = "Na Fila"; $corSit = $Cores.txt
+        $sit = Traduzir-Frase "Na Fila"; $corSit = $Cores.txt
         <#  16.38: DÁ PRA VER QUAL VÍDEO ESTÁ CONVERTENDO, OLHANDO A LISTA.
             Com a fila rodando, a coluna SITUAÇÃO dizia "Na Fila" em TODAS as
             linhas - inclusive na que estava sendo convertida naquele exato
@@ -3396,6 +4312,9 @@ function Fill-Fila([string]$Fase) {
         $seloManual = ""
         $corSelo    = "Transparent"
         if ($temEscolhaManual) { $seloManual = "  ·  Manual"; $corSelo = $Cores.marca }
+        # 16.94: a coluna SITUACAO tambem e frase montada ("Convertendo ·
+        # Etapa 3/5"), entao passa pelas regras de padrao como o resto.
+        $sit = Traduzir-Frase $sit
         # m3c19: DV nao entra aqui - nao existe verbo manual pra faixa de video
         # (ela e sempre MANTER/SEM RECODIFICAR), a conversao de perfil e uma
         # etapa do motor, nao uma escolha de faixa. Audio e legenda sim.
@@ -3403,10 +4322,28 @@ function Fill-Fila([string]$Fase) {
         $audioReal = Get-ColunaAudioReal $v
         $colAudio  = Get-ColunaAudioComEscolha $v $audioReal
         $colLeg    = Get-ColunaLegendaComEscolha $v $v.ColLegenda
+        $colAudio = Traduzir-Frase $colAudio
+        $colLeg   = Traduzir-Frase $colLeg
         # O aviso de JOC inferior vale so enquanto o automatico manda. Se ele
         # trocou o verbo no Manual, quem decide e a escolha dele.
         $avisoAudio = (Test-JocInferior $v) -and ($colAudio -eq $audioReal)
-        $chipDV     = if ($v.ColDV -match "→") { Get-ChipVerde } else { Get-ChipVazio }
+        <#  16.76: o chip do DV deixou de ser so "tem seta = verde".
+            Verde quer dizer "converte e o resultado e o melhor possivel".
+            Num FEL isso nao e verdade: a EL descartada carregava imagem e o
+            L1 fica descrevendo BL+EL. Ambar e exatamente a cor que este
+            programa ja usa para "vai acontecer, com perda que voce precisa
+            saber". Nao medido tambem nao pode ser verde - verde e afirmacao. #>
+        <#  16.94: chip e texto da coluna saem da MESMA funcao que pinta a
+            sigla do diagnostico (Get-NomeCorEL). Antes o Complex FEL ficava
+            vermelho no diagnostico e ambar na coluna - duas cores para o
+            mesmo veredicto medido. #>
+        $semEL      = ("$($v.ELtipo)" -eq "NAO_APLICAVEL" -or "$($v.ELtipo)" -eq "")
+        $chipDV     = if ($v.ColDV -notmatch "→") { Get-ChipVazio }
+                      elseif ($semEL) { Get-ChipVerde }
+                      else { Get-ChipEL $v }
+        $corDV      = if ($v.ColDV -notmatch "→") { Get-CorColuna $v.ColDV $false }
+                      elseif ($semEL) { Get-CorColuna $v.ColDV $false }
+                      else { Get-CorEL $v }
         $chipAudio  = if ($avisoAudio)         { Get-ChipAmbar }
                       elseif ($colAudio -match "→") { Get-ChipVerde }
                       else { Get-ChipVazio }
@@ -3415,7 +4352,7 @@ function Fill-Fila([string]$Fase) {
         $chipLeg    = if ($colLeg -match "→") { Get-ChipVerde } else { Get-ChipVazio }
         [void]$script:LinhasFila.Add((New-LinhaFila $v.Nome $v.TamanhoTxt $v.ColDV $colAudio $colLeg `
             $sit $est.Cor `
-            (Get-CorColuna $v.ColDV $false) `
+            $corDV `
             $corAudio `
             (Get-CorColuna $colLeg $false) `
             $corSit $est.Peso `
@@ -3434,6 +4371,132 @@ function Fill-Fila([string]$Fase) {
         $script:Videos.Count, $script:LinhasFila.Count) "FILA"
 }
 
+function Update-TextosDV($v) {
+    <#  16.84: escreve NO REGISTRO DO VIDEO as tres formas que a tela usa.
+        Chamada na leitura (handler "video") e de novo quando a medicao chega
+        (handler "el") - o mesmo caminho nos dois casos, para nao existir
+        "o texto da leitura" e "o texto da medicao" divergindo. #>
+    $fmt  = Format-DolbyVision -Perfil ([int]$v.DVperfil) -Level "$($v.DVlevel)" `
+                               -Codec "$($v.DVcodec)" -Camadas "$($v.DVcamadas)" `
+                               -ELtipo "$($v.ELtipo)"
+    $alvo = Format-DolbyVision -Perfil 8 -Level "$($v.DVlevel)" -Alvo
+    $v.DVtextoFaixa = $fmt.Faixa
+    $v.DiagDVrot    = "Dolby VISION: $($fmt.Longo) [DETECTADO]"
+    if ([int]$v.DVperfil -eq 8 -and "$($v.DVcamadas)" -notmatch "EL") {
+        $v.DiagDVres = "→ [NÃO NECESSÁRIO] Já Está em Profile 8.1"
+        $v.DiagDVcor = "cinza"
+        $v.ColDV     = "$($fmt.Curto) OK"
+        return
+    }
+    $v.ColDV = "$($fmt.Curto) → $($alvo.Curto)"
+    # A frase de resposta e montada por quem tem a medida em maos (handler
+    # "el"); aqui fica so o estado inicial, honesto para cada caso.
+    if ("$($v.ELtipo)" -eq "MEDINDO") {
+        $v.DiagDVres = "→ [SERÁ CONVERTIDO] $($alvo.Longo) — medindo a camada de melhoria (MEL x FEL)…"
+        $v.DiagDVcor = "cinza"
+    } elseif ("$($v.ELtipo)" -eq "NAO_MEDIDO") {
+        $v.DiagDVres = "→ [SERÁ CONVERTIDO] $($alvo.Longo) — EL não medida"
+        $v.DiagDVcor = "ambar"
+    } elseif ("$($v.DiagDVres)" -eq "") {
+        $v.DiagDVres = "→ [SERÁ CONVERTIDO] $($alvo.Longo)"
+        $v.DiagDVcor = "verde"
+    }
+}
+
+function Format-DolbyVision {
+    <#  16.84 - UMA COISA, UM TEXTO. EM TODO LUGAR.
+
+        O Diego cobra isto ha semanas, e estava certo: a MESMA informacao
+        saia escrita de oito jeitos diferentes, cada um num canto da tela.
+        A coluna dizia "7.6 FEL -> 8.1", o diagnostico dizia "Profile 7.6
+        [dvhe.07.06] [BL+EL+RPU] [EL: FEL]", a aba Faixas nao dizia nada, e o
+        resumo final dizia outra coisa ainda. Oito lugares montando string na
+        mao e um deles sempre esquecido a cada mudanca.
+
+        Agora quem escreve Dolby Vision na tela e SO esta funcao. Ela devolve
+        as quatro formas que o programa precisa, todas derivadas dos mesmos
+        campos, com o vocabulario oficial da Dolby:
+
+          Codec   dvhe.07.06                      (o codec, seco)
+          Curto   P7.6 FEL -> P8.1                (coluna da fila)
+          Faixa   Dolby Vision, Version 1.0, dvhe.07.06, BL+EL+RPU [FEL]
+                                                  (aba Faixas - a string do
+                                                   MediaInfo, com a sigla que
+                                                   o MediaInfo nao sabe dizer)
+          Longo   Profile 7.6 [dvhe.07.06] [BL+EL+RPU] [EL: FEL]
+                                                  (rotulo do diagnostico)
+
+        A SIGLA APARECE EM TODAS AS QUATRO. Era a queixa principal: no MEL a
+        tela escrevia "EL vazia - descarte sem perda" e nao dizia "MEL" em
+        lugar nenhum da linha de resposta.
+
+        Sobre acrescentar [FEL] / [MEL] na string do MediaInfo: nao e invencao.
+        O MediaInfo escreve BL+EL+RPU identico nos dois casos porque le so a
+        estrutura do container; quem sabe a diferenca e o dovi_tool, lendo o
+        el_type do RPU - e foi ele que respondeu. A sigla entre colchetes
+        marca que aquele pedaco veio da MEDICAO, nao do container.
+    #>
+    param(
+        [int]$Perfil, [string]$Level, [string]$Codec, [string]$Camadas,
+        [string]$ELtipo = "", [switch]$Alvo
+    )
+    if ($Alvo) {
+        # O destino da conversao, sempre o mesmo: 8.1 de camada unica.
+        return [PSCustomObject]@{
+            Codec = "dvhe.08.{0:D2}" -f ([int]$Level)
+            Curto = "P8.1"
+            Faixa = "Dolby Vision, Version 1.0, dvhe.08.{0:D2}, BL+RPU, HDR10 compatible" -f ([int]$Level)
+            Longo = "Profile 8.1 [dvhe.08.{0:D2}] [BL+RPU]" -f ([int]$Level)
+        }
+    }
+    $cod = "$Codec"
+    if ($cod -eq "") { $cod = "dvhe.{0:D2}.{1:D2}" -f $Perfil, ([int]$Level) }
+    $cam = "$Camadas"; if ($cam -eq "") { $cam = "BL+RPU" }
+    # A sigla so existe onde ela quer dizer alguma coisa: Profile 7 com EL.
+    $sigla = ""
+    switch ("$ELtipo") {
+        "MEL"        { $sigla = "MEL" }
+        "FEL"        { $sigla = "FEL" }
+        "MISTO"      { $sigla = "MEL+FEL" }
+        "MEDINDO"    { $sigla = "medindo" }
+        "NAO_MEDIDO" { $sigla = "EL não medida" }
+    }
+    $curto = "P{0}.{1}" -f $Perfil, $Level
+    if ($sigla -ne "") { $curto = "$curto $sigla" }
+    $faixa = "Dolby Vision, Version 1.0, $cod, $cam"
+    if ($sigla -ne "") { $faixa = "$faixa [$sigla]" }
+    $longo = "Profile {0}.{1} [{2}] [{3}]" -f $Perfil, $Level, $cod, $cam
+    if ($sigla -ne "") { $longo = "$longo [EL: $sigla]" }
+    return [PSCustomObject]@{ Codec = $cod; Curto = $curto; Faixa = $faixa; Longo = $longo }
+}
+
+function Test-SaidaCompleta([string]$Caminho, [double]$BytesOrigem) {
+    <#  16.79 - EXISTIR NAO E ESTAR PRONTO.
+
+        BUG RELATADO: o PC do Diego reiniciou sozinho na etapa 5/5, bem no
+        mkvmerge. Ao voltar, a janela disse "Ja Existe na Saida" e travou o
+        arquivo - so que o que estava la era o .mkv PELA METADE que o mkvmerge
+        nao terminou de escrever. O teste era um Test-Path: existe, logo esta
+        convertido. Um arquivo truncado passava por pronto, e o usuario perdia
+        o filme achando que ja tinha feito.
+
+        O teste barato que separa os dois e o TAMANHO. Nestas conversoes a
+        saida fica em ~94% do original (GOT 20,62 -> 19,48 GB; Troy 87,0 ->
+        81,7 GB) porque o video, que e 90% do arquivo, e copiado sem
+        recodificar. Mesmo descartando faixas de audio e legenda ela nao chega
+        perto de 60%. Um mkvmerge interrompido, sim.
+
+        Nao abre o arquivo: so pergunta o tamanho. Em duvida (origem sem
+        tamanho conhecido), aceita - este teste existe para pegar o truncado
+        obvio, nao para reprovar conversao legitima. #>
+    if (-not (Test-Path -LiteralPath $Caminho)) { return $false }
+    if ($BytesOrigem -le 0) { return $true }
+    try {
+        $b = (Get-Item -LiteralPath $Caminho -ErrorAction Stop).Length
+    } catch { return $true }
+    return ([double]$b -ge ([double]$BytesOrigem * 0.60))
+}
+
 # ---- Diagnostico do video selecionado --------------------------------------
 function Update-JaExiste {
     # Reavalia so a marca "Ja Existe na Saida" - sem tocar no diagnostico,
@@ -3442,9 +4505,25 @@ function Update-JaExiste {
     foreach ($v in $script:Videos) {
         if ($v.MotivoIgnorar -eq "Já Existe na Saída") { $v.Ignorar = $false; $v.MotivoIgnorar = "" }
         if ($v.Ignorar) { continue }   # ignorado por outro motivo: nao mexer
-        if ($temSaida -and (Test-Path -LiteralPath (Join-Path $Cfg.Saida $v.Arquivo))) {
-            $v.Ignorar = $true; $v.MotivoIgnorar = "Já Existe na Saída"
-            continue
+        if ($temSaida) {
+            $alvo = Join-Path $Cfg.Saida $v.Arquivo
+            if (Test-SaidaCompleta $alvo ([double]$v.Bytes)) {
+                $v.Ignorar = $true; $v.MotivoIgnorar = "Já Existe na Saída"
+                continue
+            }
+            <#  16.82: existe na saida mas nao fecha o tamanho = restos de uma
+                conversao interrompida (o PC do Diego reiniciou no mkvmerge).
+                O video CONTINUA na fila, e o usuario fica sabendo por que -
+                antes ele sumia da fila achando que ja estava pronto. Avisa
+                uma vez por arquivo: esta funcao roda a cada troca de pasta
+                de saida, e repetir a linha a cada clique vira ruido. #>
+            if (Test-Path -LiteralPath $alvo) {
+                if (-not $script:AvisouIncompleto) { $script:AvisouIncompleto = @{} }
+                if (-not $script:AvisouIncompleto.ContainsKey($alvo)) {
+                    $script:AvisouIncompleto[$alvo] = $true
+                    Escrever-Log ("Ha um arquivo INCOMPLETO na saida para '{0}' (sobra de conversao interrompida) - o video continua na fila." -f $v.Arquivo) "AVISO"
+                }
+            }
         }
         if (-not $v.DVprecisa -and -not $v.AUprecisa -and -not $v.LGprecisa) {
             $v.MotivoIgnorar = "Nada a Converter"
@@ -3464,7 +4543,7 @@ function Test-PastasIguais {
         $UI.lblDiscoMsg.Text = "$($Sim.Err) Pasta de Saída é a Mesma da Origem - o Arquivo Convertido Sobrescreveria o Original"
         $UI.lblDiscoMsg.Foreground = Pincel $Cores.err
         $UI.btnIniciar.IsEnabled = $false
-        $Janela.Title = "$NOME_APP  ·  Origem e Saída São a Mesma Pasta"
+        $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Origem e Saída São a Mesma Pasta")
         Escrever-Log "AVISO: pasta de origem e de saida sao a mesma - Iniciar bloqueado" "AVISO"
     } else {
         # Desfazer o aviso: sem isto o titulo e o botao ficavam presos no
@@ -3483,7 +4562,9 @@ function Test-PastasIguais {
         $marcadosOk = @(Get-Marcados).Count
         $UI.btnIniciar.IsEnabled = ($marcadosOk -gt 0) -and ($Estado.Atual -eq "inicial")
         if ($Estado.Atual -eq "inicial") {
-            $Janela.Title = "$NOME_APP  ·  Pronto para Converter - $ativos Vídeo(s) na Fila"
+            # 17.01: este titulo tambem e montado - e era o que aparecia na
+            # barra da janela do Diego, em portugues, com a tela em ingles.
+            $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Pronto para Converter - {0} Vídeo(s) na Fila" -f $ativos))
         }
     }
     return $mesma
@@ -3674,7 +4755,9 @@ function Update-BotaoModo {
     # DELA - ele estava marcando outros videos e estranhando o botao apagado.
     # Ficou 3 builds procurando bug onde o comportamento estava certo e a
     # explicacao e que faltava.
-    $UI.txtModoVideo.Text = if ($marcado) { "Modo: $($v.Modo)" } else { "Marque o vídeo p/ editar" }
+    # 17.01: "Modo: Automatico" (o valor guardado nao tem acento) nunca batia
+    # com a entrada "Modo: Automático" da tabela. Passa pelas regras agora.
+    $UI.txtModoVideo.Text = Traduzir-Frase $(if ($marcado) { "Modo: $($v.Modo)" } else { "Marque o vídeo p/ editar" })
     $UI.txtModoVideo.Foreground  = Pincel $(if ($marcado) { $Cores.txt } else { $Cores.dim2 })
     $UI.btnModoVideo.BorderBrush = Pincel $(if (-not $marcado) { $Cores.dim2 }
                                             elseif ($v.Modo -eq "Manual") { $Cores.marca }
@@ -3784,8 +4867,29 @@ function Fill-Faixas {
             $ehPadrao = ($f.Tipo -eq "video") -or ([int]$f.Id -eq $idPadraoAudio) -or ([int]$f.Id -eq $idPadraoLeg)
             $padraoTxt = if ($ehPadrao) { "PADRÃO" } else { "" }
 
+            <#  16.84 - A COLUNA "NOME DA FAIXA" DO VIDEO VINHA VAZIA.
+
+                No Troy o release batizou a faixa de "Dolby Vision P7 MEL CM
+                v4.0" e o Diego gostou de ver aquilo ali. No GOT a mesma
+                coluna estava em branco - porque o release nao escreveu nada,
+                e o programa so repassa o que o arquivo diz.
+
+                Agora, QUANDO E SO QUANDO o release nao nomeou a faixa de
+                video, o campo recebe a identificacao que o proprio programa
+                apurou, no formato oficial do MediaInfo mais a sigla que so a
+                medicao sabe dizer:
+
+                  Dolby Vision, Version 1.0, dvhe.07.06, BL+EL+RPU [FEL]
+
+                Nao sobrescreve nome nenhum: se o release nomeou, o nome dele
+                continua. E nao inventa - cada pedaco veio do container, menos
+                a sigla, que veio do dovi_tool e por isso vai entre colchetes. #>
+            $nomeFx = "$($f.Nome)"
+            if ($f.Tipo -eq "video" -and $nomeFx -eq "" -and "$($v.DVtextoFaixa)" -ne "") {
+                $nomeFx = "$($v.DVtextoFaixa)"
+            }
             [void]$script:LinhasFaixas.Add((New-LinhaFaixa `
-                $f.Id "" $f.Codec $idiomaTxt $f.Nome $tam $f.Marcas `
+                $f.Id "" $f.Codec $idiomaTxt $nomeFx $tam $f.Marcas `
                 $Cores.dim2 $Cores.txt $corIdioma $Cores.okdim $Cores.dim "SemiBold" `
                 $vb $det $corVerbo $(if ($vb -eq "CONVERTER") { "SemiBold" } else { "Normal" }) `
                 $idxF $opcoes $editavel $editavel $padraoTxt))
@@ -3867,7 +4971,7 @@ function Update-Selecao {
     Update-CabecalhoFila
     Update-Disco
     if ($Estado.Atual -eq "inicial") {
-        $Janela.Title = "$NOME_APP  ·  Pronto para Converter - $marcados Vídeo(s) Selecionado(s)"
+        $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Pronto para Converter - {0} Vídeo(s) Selecionado(s)" -f $marcados))
     }
     Test-PastasIguais | Out-Null
     # m3c23: SO o botao (era Fill-Faixas inteiro na m3c21, e foi isso que
@@ -3895,14 +4999,284 @@ function Set-TodosMarcados([bool]$Valor) {
 function Update-CabecalhoFila {
     $tot = $script:Videos.Count
     $ativos = @(Get-Marcados).Count
-    $UI.txtAbaFila.Text = if ($tot -eq 0) { "Fila" } else { "Fila ($tot)" }
+    # 16.94: os tres passam por Traduzir-Frase - sao montados com numero
+    # dentro e por isso a varredura da arvore nunca os alcancou.
+    $UI.txtAbaFila.Text = Traduzir-Frase $(if ($tot -eq 0) { "Fila" } else { "Fila ($tot)" })
     $idxSel = $UI.lstFila.SelectedIndex
-    $UI.txtAbaFaixas.Text = if ($idxSel -ge 0 -and $idxSel -lt $script:Videos.Count) {
+    $UI.txtAbaFaixas.Text = Traduzir-Frase $(if ($idxSel -ge 0 -and $idxSel -lt $script:Videos.Count) {
         "Faixas do Vídeo ($(@($script:Videos[$idxSel].Faixas).Count))"
-    } else { "Faixas do Vídeo" }
-    $UI.colFila.Header = if ($tot -eq 0) { "VÍDEOS NA FILA" }
+    } else { "Faixas do Vídeo" })
+    $UI.colFila.Header = Traduzir-Frase $(if ($tot -eq 0) { "VÍDEOS NA FILA" }
                          elseif ($ativos -eq $tot) { "VÍDEOS NA FILA ($tot)" }
-                         else { "VÍDEOS NA FILA ($ativos de $tot Selecionados)" }
+                         else { "VÍDEOS NA FILA ($ativos de $tot Selecionados)" })
+}
+
+<#  =====================================================================
+    16.92 - IDIOMA: PORTUGUES / INGLES
+    =====================================================================
+
+    COMO ISSO FUNCIONA, E POR QUE ASSIM
+
+    A janela tem centenas de textos, e a maioria e escrita direto no XAML ou
+    montada no codigo. Trocar cada um por uma chave seria reescrever o
+    arquivo inteiro - semanas de trabalho mecanico e uma chance enorme de
+    quebrar coisa que ja funciona.
+
+    Entao o caminho e outro: uma TABELA de pares (portugues -> ingles) num
+    arquivo de texto, e uma varredura na arvore visual que troca o texto de
+    cada rotulo pelo par correspondente. Nada de chaves, nada de reescrever
+    o XAML. Quem quiser corrigir uma traducao abre o IDIOMA_EN.txt e edita
+    uma linha - nao precisa tocar em codigo nem saber PowerShell.
+
+    O QUE E TRADUZIDO NESTA VERSAO
+
+    Os rotulos fixos: barra de botoes, abas, cabecalhos das tabelas, titulos
+    dos paineis. As frases que o programa MONTA na hora (diagnostico, selos
+    do resumo, situacao da fila) ainda saem em portugues - elas passam por
+    T() a partir da proxima camada, e a tabela ja aceita as entradas.
+
+    Isso esta dito na tela, no proprio botao, para nao parecer defeito.
+
+    O PORTUGUES NUNCA DEPENDE DO ARQUIVO
+
+    Se o IDIOMA_EN.txt sumir, o botao avisa e o programa continua em
+    portugues, inteiro. A traducao e uma camada por cima, nunca a fonte. #>
+
+$script:Lang     = "PT"
+$script:MapaEN   = @{}   # portugues -> ingles
+$script:RegrasEN = New-Object System.Collections.ArrayList
+$script:MapaPT   = @{}   # ingles -> portugues (o caminho de volta)
+
+function Carregar-Idioma {
+    $arq = Join-Path $script:PastaScript "IDIOMA_EN.txt"
+    if (-not (Test-Path -LiteralPath $arq)) { return $false }
+    try {
+        $linhas = [System.IO.File]::ReadAllLines($arq, [System.Text.Encoding]::UTF8)
+    } catch { return $false }
+    $script:MapaEN = @{}; $script:MapaPT = @{}
+    $script:RegrasEN = New-Object System.Collections.ArrayList
+    foreach ($l in $linhas) {
+        if ($l -eq "" -or $l.StartsWith("#")) { continue }
+        # O separador e TAB de proposito: nenhum rotulo da tela tem TAB, e
+        # assim a traducao pode conter qualquer sinal de pontuacao.
+        $partes = $l -split "`t", 2
+        if ($partes.Count -ne 2) { continue }
+        <#  16.94: regra de padrao NAO passa por Trim. Varias delas terminam
+            em espaco de proposito ("Convertendo · " -> "Converting · ") e o
+            Trim comia justamente esse espaco, colando as palavras. Rotulo
+            comum continua aparado - ali o espaco sobrando e engano. #>
+        if ($partes[0].StartsWith("~")) {
+            $padrao = $partes[0].Substring(1)
+            if ($padrao -ne "") { [void]$script:RegrasEN.Add(@{ De = $padrao; Para = $partes[1] }) }
+            continue
+        }
+        $pt = $partes[0].Trim(); $en = $partes[1].Trim()
+        if ($pt -eq "" -or $en -eq "") { continue }
+        <#  16.94 - REGRAS DE PADRAO, PARA O TEXTO QUE E MONTADO NA HORA.
+
+            Achado do Diego (09/09, terceira foto): "ta em ingles e varias
+            partes em portugues". Estava certo, e a causa era estrutural: a
+            traducao trocava o TEXTO DOS ROTULOS varrendo a arvore visual, e
+            rotulo fixo era tudo o que ela alcancava. "Fila (3)", "VÍDEOS NA
+            FILA (2 de 3 Selecionados)", "Convertendo · Etapa 3/5" e as
+            frases do diagnostico nao sao rotulos: sao montadas com numero
+            dentro, a cada redesenho, e nunca existiram na tabela.
+
+            Uma linha que comeca com ~ e uma REGRA, nao um rotulo: o lado
+            esquerdo e uma expressao regular e o lado direito a substituicao
+            (com $1, $2... para os pedacos capturados - tipicamente o
+            numero, que nao se traduz). Elas rodam EM ORDEM sobre a frase
+            montada, entao regra mais especifica vem primeiro no arquivo.
+
+            Continua tudo fora do .ps1: uma frase nova so precisa de uma
+            linha nova aqui. #>
+        $script:MapaEN[$pt] = $en
+        if (-not $script:MapaPT.ContainsKey($en)) { $script:MapaPT[$en] = $pt }
+    }
+    return (($script:MapaEN.Count + $script:RegrasEN.Count) -gt 0)
+}
+
+function Traduzir-Frase([string]$Pt) {
+    <#  Como Traduzir, mas para frase MONTADA (com numero, nome de arquivo,
+        percentual dentro). Tenta primeiro a tabela exata - se a frase
+        inteira estiver la, e ela que vale - e so depois aplica as regras,
+        em ordem. Sem regra que case, devolve o portugues: texto na lingua
+        errada e feio, texto em branco e defeito. #>
+    if ($script:Lang -ne "EN") { return $Pt }
+    if ($Pt -eq $null -or $Pt -eq "") { return $Pt }
+    if ($script:MapaEN.ContainsKey($Pt)) { return $script:MapaEN[$Pt] }
+    $r = $Pt
+    foreach ($re in $script:RegrasEN) {
+        try { $r = [regex]::Replace($r, $re.De, $re.Para) } catch { }
+    }
+    return $r
+}
+
+function Traduzir([string]$Pt) {
+    <#  Traduz UMA frase, se houver traducao e se o idioma for ingles.
+        Sem traducao, devolve o portugues - texto faltando aparece na lingua
+        original, que e feio mas legivel; texto em branco seria pior. #>
+    if ($script:Lang -ne "EN") { return $Pt }
+    if ($script:MapaEN.ContainsKey($Pt)) { return $script:MapaEN[$Pt] }
+    return $Pt
+}
+
+function Traduzir-Arvore($Raiz, [hashtable]$Mapa) {
+    <#  Percorre a arvore visual e troca o texto dos rotulos. So mexe em
+        TextBlock, cabecalho de coluna e aba - nada de caixa de texto, que
+        guarda caminho de pasta, nem de conteudo montado na hora. #>
+    if ($null -eq $Raiz) { return }
+    $fila = New-Object System.Collections.Generic.Queue[object]
+    $fila.Enqueue($Raiz)
+    while ($fila.Count -gt 0) {
+        $o = $fila.Dequeue()
+        if ($o -is [System.Windows.Controls.TextBlock]) {
+            $t = "$($o.Text)"
+            if ($t -ne "" -and $Mapa.ContainsKey($t)) { $o.Text = $Mapa[$t] }
+        } elseif ($o -is [System.Windows.Controls.GridViewColumnHeader]) {
+            $t = "$($o.Content)"
+            if ($t -ne "" -and $Mapa.ContainsKey($t)) { $o.Content = $Mapa[$t] }
+        } elseif ($o -is [System.Windows.Controls.TabItem]) {
+            $t = "$($o.Header)"
+            if ($t -ne "" -and $Mapa.ContainsKey($t)) { $o.Header = $Mapa[$t] }
+        }
+        $n = [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($o)
+        for ($i = 0; $i -lt $n; $i++) {
+            $fila.Enqueue([System.Windows.Media.VisualTreeHelper]::GetChild($o, $i))
+        }
+    }
+    # Os cabecalhos do GridView nao aparecem na arvore visual antes de a
+    # lista ser desenhada; por isso eles tambem sao trocados direto no modelo.
+    try {
+        foreach ($lst in @($UI.lstFila, $UI.lstFaixas)) {
+            if ($null -eq $lst -or $null -eq $lst.View) { continue }
+            foreach ($col in @($lst.View.Columns)) {
+                $t = "$($col.Header)"
+                if ($t -ne "" -and $Mapa.ContainsKey($t)) { $col.Header = $Mapa[$t] }
+            }
+        }
+    } catch { }
+}
+
+function Set-Idioma([string]$Novo) {
+    if ($Novo -eq $script:Lang) { return }
+    if ($Novo -eq "EN" -and $script:MapaEN.Count -eq 0) {
+        if (-not (Carregar-Idioma)) {
+            [System.Windows.MessageBox]::Show(
+                ("O arquivo de tradução não foi encontrado.`n`nEle deveria estar em:`n{0}`n`n" +
+                 "Sem ele o programa continua em português, inteiro - a tradução é uma camada por cima, nunca a fonte." -f `
+                 (Join-Path $script:PastaScript "IDIOMA_EN.txt")),
+                "LaFirma - tradução indisponível", "OK", "Warning") | Out-Null
+            return
+        }
+    }
+    $mapa = if ($Novo -eq "EN") { $script:MapaEN } else { $script:MapaPT }
+    $script:Lang = $Novo
+    Traduzir-Arvore $Janela $mapa
+    $UI.lblBandeira.Text = $(if ($Novo -eq "EN") { [char]::ConvertFromUtf32(0x1F1FA) + [char]::ConvertFromUtf32(0x1F1F8) }
+                             else { [char]::ConvertFromUtf32(0x1F1E7) + [char]::ConvertFromUtf32(0x1F1F7) })
+    $UI.lblIdioma.Text = $(if ($Novo -eq "EN") { "English" } else { "Português" })
+    Escrever-Log ("IDIOMA: {0}" -f $Novo) "ACAO"
+    <#  16.93: a escolha fica guardada. O Diego perguntou se nao daria para
+        simplesmente reiniciar o programa ao trocar - a troca ao vivo ja
+        funciona e nao precisa disso, mas a preocupacao dele estava certa:
+        de nada adianta escolher ingles e o programa voltar em portugues na
+        proxima vez. Um arquivo de uma linha resolve, e ele nao e critico:
+        se sumir ou vier corrompido, abre em portugues, como sempre foi. #>
+    try {
+        [System.IO.File]::WriteAllText((Join-Path $script:PastaScript "IDIOMA.txt"), $Novo,
+            (New-Object System.Text.UTF8Encoding($false)))
+    } catch { }
+    # O que e montado na hora tem que ser redesenhado, senao metade da tela
+    # fica na lingua anterior ate o proximo evento.
+    try { Fill-Fila "idioma" } catch { }
+    try { Update-Diagnostico } catch { }
+}
+
+
+function Get-FatorDisco($v) {
+    <#  16.95 - O FATOR DE DISCO NUM LUGAR SO.
+
+        O motor usa 3,15x quando o video vai SAIR do container (extraido,
+        convertido pelo dovi_tool e remontado, os tres no disco ao mesmo
+        tempo) e 1,6x quando ele nao sai. A janela tinha essa regra escrita
+        duas vezes, e uma delas era so "tem seta na coluna = 3,15".
+
+        O P5 quebrou esse atalho: a coluna dele e "P5 -> MP4", TEM seta, e
+        mesmo assim ele nao passa pelo dovi_tool - e uma passada so de
+        ffmpeg. Cobrar 3,15x dele era recusar arquivo por espaco que o motor
+        nem ia usar. #>
+    if ($v.P5 -eq $true) { return 1.6 }
+    if ("$($v.ColDV)" -notmatch "→") { return 1.6 }
+    return 3.15
+}
+
+function Get-NomeCorEL($v) {
+    <#  16.94 - A ESCALA DAS TRES CORES MORA AQUI, E SO AQUI.
+
+        Achado do Diego (09/09): "vc ta se perdendo em todos lugares como
+        sempre em padronizar ne?". Estava certo. A regra verde/laranja/
+        vermelho vivia escrita DENTRO da Pintar-RotuloDV, entao a sigla do
+        diagnostico obedecia a escala e a coluna DOLBY VISION da fila nao -
+        ela pintava tudo com a mesma regra antiga ("tem seta = okdim"). O
+        mesmo veredicto medido saia de duas cores diferentes em duas partes
+        da tela, que e exatamente o defeito que a 16.84 fechou no TEXTO e
+        eu deixei aberto na COR.
+
+          verde     MEL              - EL sem imagem, descarte sem perda
+          laranja   Simple FEL       - EL com imagem, nao levanta o brilho
+          vermelho  Complex FEL      - EL com imagem E levanta o brilho
+          ambar     EL nao medida    - duvida, que nao e ressalva
+          cinza     medindo / sem EL - ainda nao ha veredicto, ou nao se aplica
+
+        Quem precisa de cor chama esta funcao. Ninguem mais decide sozinho. #>
+    switch ("$($v.ELtipo)") {
+        "MEL"        { return "verde" }
+        "FEL"        { if ($v.ELexpande -eq $true) { return "vermelho" } else { return "laranja" } }
+        "MISTO"      { if ($v.ELexpande -eq $true) { return "vermelho" } else { return "laranja" } }
+        "NAO_MEDIDO" { return "ambar" }
+        "MEDINDO"    { return "cinza" }
+    }
+    return "cinza"
+}
+
+function Get-CorEL($v) {
+    switch (Get-NomeCorEL $v) {
+        "verde"    { return $Cores.ok }
+        "laranja"  { return $Cores.lar }
+        "vermelho" { return $Cores.err }
+        "ambar"    { return $Cores.warn }
+    }
+    return $Cores.dim
+}
+
+function Get-ChipEL($v) {
+    # O chip e a mesma escala, so que em fundo/borda.
+    switch (Get-NomeCorEL $v) {
+        "verde"    { return @{ Fundo = "#0B1A08"; Borda = "#1F5A16" } }
+        "laranja"  { return @{ Fundo = "#231206"; Borda = "#7A4212" } }
+        "vermelho" { return @{ Fundo = "#230B0B"; Borda = "#7A1E1D" } }
+        "ambar"    { return Get-ChipAmbar }
+    }
+    return Get-ChipVazio
+}
+
+function Pintar-RotuloDV($v) {
+    $txt = Traduzir-Frase "$($v.DiagDVrot)"
+    $UI.diagDV.Inlines.Clear()
+    $m = [regex]::Match($txt, '^(.*?)(\[EL: [^\]]+\])(.*)$')
+    if (-not $m.Success) {
+        $UI.diagDV.Inlines.Add((New-Object System.Windows.Documents.Run $txt))
+        return
+    }
+    # A cor sai do MEDIDO, nunca do texto: ler a palavra de volta da frase
+    # seria a mesma informacao em dois lugares, que e o que a 16.84 fechou.
+    $cor = Get-CorEL $v
+    $r1 = New-Object System.Windows.Documents.Run $m.Groups[1].Value
+    $r2 = New-Object System.Windows.Documents.Run $m.Groups[2].Value
+    $r2.Foreground = Pincel $cor
+    $r3 = New-Object System.Windows.Documents.Run $m.Groups[3].Value
+    $UI.diagDV.Inlines.Add($r1); $UI.diagDV.Inlines.Add($r2); $UI.diagDV.Inlines.Add($r3)
 }
 
 function Update-Diagnostico {
@@ -3920,10 +5294,25 @@ function Update-Diagnostico {
     # nada daquilo vai acontecer. Era o caso do The Last of Us "Já Convertido"
     # mostrando conversao em verde e perda em amarelo ao mesmo tempo.
     $naoProcessa = [bool]$v.Ignorar
-    $UI.lblDiagTitulo.Text = "DIAGNÓSTICO - $($v.Nome)"
-    $UI.diagDV.Text  = $v.DiagDVrot
-    $UI.diagAu.Text  = $v.DiagAurot
-    $UI.diagLg.Text  = $v.DiagLgrot
+    $UI.lblDiagTitulo.Text = Traduzir-Frase ("DIAGNÓSTICO - {0}" -f $v.Nome)
+    <#  16.87 - A SIGLA DA EL PINTADA DENTRO DA PROPRIA LINHA (pedido do
+        Diego, que circulou o "[EL: MEL]" no print).
+
+        A linha do rotulo e uma frase so, azul inteira. Mas dentro dela ha um
+        pedaco que carrega o veredicto - e veredicto neste programa tem cor.
+        Um TextBlock nao aceita cor no meio do Text; aceita Inlines. Entao a
+        frase e quebrada em tres pedacos (antes, a sigla, depois) e so o do
+        meio muda de cor, na MESMA escala do resto:
+
+          verde    MEL
+          laranja  FEL sem expansao
+          vermelho FEL com expansao
+          ambar    EL nao medida  (duvida, nao ressalva)
+
+        Se nao houver "[EL: ...]" na frase, nada muda - a linha sai como antes. #>
+    Pintar-RotuloDV $v
+    $UI.diagAu.Text  = Traduzir-Frase $v.DiagAurot
+    $UI.diagLg.Text  = Traduzir-Frase $v.DiagLgrot
     if ($naoProcessa) {
         # 15.1f: as tres linhas dizem a MESMA coisa, no mesmo padrao de selo das
         # outras: nada vai acontecer, e por que. Antes eu mostrava o diagnostico
@@ -3932,13 +5321,14 @@ function Update-Diagnostico {
         # informacao que importa aqui e o MOTIVO, e ele tem que estar escrito,
         # na mesma posicao e no mesmo formato das demais linhas.
         $frase = "→ [NÃO SERÁ FEITO] $($v.MotivoIgnorar)"
+        $frase = Traduzir-Frase $frase
         $UI.diagDVr.Text = $frase
         $UI.diagAur.Text = $frase
         $UI.diagLgr.Text = $frase
         foreach ($c in @("diagDVr","diagAur","diagLgr")) { $UI.$c.Foreground = Pincel $Cores.err }
         return
     }
-    $UI.diagDVr.Text = $v.DiagDVres
+    $UI.diagDVr.Text = Traduzir-Frase $v.DiagDVres
     # m3c25: no diagnostico tem espaco pra explicar, entao aqui vai a frase
     # inteira - na coluna fica so o dado. Cor ambar: nao e erro do motor
     # (reaproveitar e a regra certa), e uma perda que vale ele saber.
@@ -3947,14 +5337,14 @@ function Update-Diagnostico {
     $escAu = Get-DiagAudioComEscolha $v
     $escLg = Get-DiagLegendaComEscolha $v
     if ($null -ne $escAu) {
-        $UI.diagAur.Text = [string]$escAu[0]
+        $UI.diagAur.Text = Traduzir-Frase ([string]$escAu[0])
     } elseif (Test-JocInferior $v) {
         $detJoc = (Get-AudioDetalhe $v.JocBytes $v.JocCanais $v.DurSeg).Trim()
         $UI.diagAur.Text = "→ [REAPROVEITADO] E-AC-3[ATMOS] $detJoc  ·  DeeZy Faria $(Get-CanaisTexto ([int]$v.PrincipalCanais)) 1152k"
     } else {
-        $UI.diagAur.Text = $v.DiagAures
+        $UI.diagAur.Text = Traduzir-Frase $v.DiagAures
     }
-    if ($null -ne $escLg) { $UI.diagLgr.Text = [string]$escLg[0] } else { $UI.diagLgr.Text = $v.DiagLgres }
+    if ($null -ne $escLg) { $UI.diagLgr.Text = Traduzir-Frase ([string]$escLg[0]) } else { $UI.diagLgr.Text = Traduzir-Frase $v.DiagLgres }
     # 15.1d: a cor vem do campo gravado junto com a frase, la onde a decisao
     # foi tomada - nao e mais DEDUZIDA lendo o texto de volta. Deduzir era
     # fragil: quando a busca nao casava, a linha ficava com a cor padrao do
@@ -3969,6 +5359,9 @@ function Update-Diagnostico {
             "verde"    { return $Cores.ok }
             "vermelho" { return $Cores.err }
             "ambar"    { return $Cores.warn }
+            # 16.86: o laranja ja existia na paleta (barra de disco) e agora
+            # tem uso no diagnostico: o degrau entre "atencao" e "nao faca".
+            "laranja"  { return $Cores.lar }
             default    { return $Cores.dim }
         }
     }
@@ -4026,7 +5419,7 @@ function Update-Disco {
         # Mesmo fator do motor: sem conversao de Dolby Vision o video nao sai
         # do container (1,6x); com conversao ele e extraido, convertido e
         # remontado, os tres no disco ao mesmo tempo (3,15x).
-        $fator = if ("$($v.ColDV)" -match "→") { 3.15 } else { 1.6 }
+        $fator = Get-FatorDisco $v
         $exigido = $b * $fator
         if ($exigido -gt $picoEpisodio) { $picoEpisodio = $exigido }
     }
@@ -4046,8 +5439,72 @@ function Update-Disco {
     # 16.60: quando quem manda e a exigencia de UM arquivo (e nao a soma do
     # lote), a tela diz isso - senao o numero parece grande sem explicacao.
     $porQue = if ($picoEpisodio -ge $precisoLote) { "  (pico de um arquivo)" } else { "  (pico do lote)" }
-    $UI.txtDisco.Text = ("Espaço Necessário Estimado : ~{0}{4}`nEspaço Livre em {1,-11}: {2}`nEspaço Livre Apos Converter: ~{3}" -f `
-        (Format-GB $preciso), $raizDrive.TrimEnd('\'), (Format-GB $livre), (Format-GB $sobra), $porQue)
+    <#  16.86 - A TERCEIRA LINHA MENTIA QUANDO NAO CABIA (achado do Diego).
+
+        Ate aqui a terceira linha era sempre "Espaço Livre Após Converter",
+        inclusive quando o resultado era NEGATIVO - e sobra negativa nao
+        existe. A tela dizia "Espaço Insuficiente" na barra e, uma linha
+        acima, prometia "-47,52 GB livres depois". Nao ha depois: a conversao
+        nao comeca.
+
+        Sobra negativa nao e sobra, e FALTA. E falta se diz pelo nome, com o
+        numero que resolve: quanto liberar para a fila caber. #>
+    $terceira = if ($sobra -lt 0) {
+        "Falta Liberar              : {0}" -f (Format-GB ([math]::Abs($sobra)))
+    } else {
+        "Espaço Livre Após Converter: ~{0}" -f (Format-GB $sobra)
+    }
+    <#  16.91: o Iniciar precisa saber o que ESTA tela concluiu. Antes ele
+        nao sabia, e por isso deixava comecar uma fila que nao cabia - o
+        motor recusava arquivo por arquivo, 23 segundos depois, com a
+        resposta que ja estava escrita aqui. #>
+    $script:DiscoFalta = $(if ($sobra -lt 0) { [double][math]::Abs($sobra) } else { 0.0 })
+    $script:DiscoPreciso = [double]$preciso
+    $script:DiscoLivre   = [double]$livre
+
+    <#  16.93 - QUANTOS CABEM, E QUAL E O PRIMEIRO QUE NAO CABE.
+
+        A 16.91 passou a perguntar antes de comecar sem espaco, e a pergunta
+        dizia "o motor vai converter o que couber e pular o que nao couber".
+        Verdade, mas o Diego leu e nao soube o que ia acontecer com A FILA
+        DELE: comecou, viu um filme de 82 GB entrar em conversao e parou no
+        meio, achando que aquilo nunca terminaria.
+
+        Ele estava certo em desconfiar e o programa estava certo em comecar -
+        o Ryan CABIA sozinho (258 GB de pico contra 276 livres); quem nao
+        cabia era o Troy, depois dele. Ou seja: a informacao existia e nao
+        estava na tela.
+
+        Agora a conta e feita aqui, na ordem da fila, do jeito que o motor
+        decide: cada arquivo exige 3,15x o proprio tamanho DURANTE a
+        conversao, e deixa a saida ocupando o disco quando termina. O
+        resultado vai inteiro para a pergunta do Iniciar. #>
+    $script:DiscoCabem = 0
+    $script:DiscoNaoCabem = 0
+    $script:DiscoPrimeiroFora = ""
+    $script:DiscoFaltaNoPrimeiroFora = 0.0
+    $sobrando = [double]$livre
+    foreach ($v in $ativos) {
+        $precisaEste = [double]$v.Bytes * (Get-FatorDisco $v)
+        if ($sobrando -ge $precisaEste) {
+            $script:DiscoCabem++
+            # O que fica no disco depois nao e o pico: e a saida gerada.
+            $sobrando = $sobrando - (Get-TamanhoEstimadoVideo $v)
+        } else {
+            $script:DiscoNaoCabem++
+            if ($script:DiscoPrimeiroFora -eq "") {
+                $script:DiscoPrimeiroFora = "$($v.Nome)"
+                $script:DiscoFaltaNoPrimeiroFora = $precisaEste - $sobrando
+            }
+        }
+    }
+    <#  17.01: o painel de disco tambem e frase montada, linha por linha, e
+        ficava inteiro em portugues numa tela em ingles. Cada linha passa
+        pelas regras de padrao - o rotulo traduz, o numero fica onde esta. #>
+    $UI.txtDisco.Text = (
+        (Traduzir-Frase ("Espaço Necessário Estimado : ~{0}{1}" -f (Format-GB $preciso), $porQue)) + "`n" +
+        (Traduzir-Frase ("Espaço Livre em {0,-11}: {1}" -f $raizDrive.TrimEnd('\'), (Format-GB $livre))) + "`n" +
+        (Traduzir-Frase $terceira))
     Set-BarraDisco $pct
 }
 
@@ -4378,10 +5835,14 @@ function Set-Regua([int]$EtapaAtual, [double]$PctEtapa = 0.0) {
 function Set-BarraDisco([double]$PctUso) {
     $cor = if ($PctUso -le 70) { $Cores.ok } elseif ($PctUso -le 85) { $Cores.warn }
            elseif ($PctUso -le 100) { $Cores.lar } else { $Cores.err }
-    $msg = if ($PctUso -le 70) { "$($Sim.Ok) Espaço em Disco Suficiente para Converter Todos os Vídeos da Fila." }
+    $msg = Traduzir-Frase $(
+           if ($PctUso -le 70) { "$($Sim.Ok) Espaço em Disco Suficiente para Converter Todos os Vídeos da Fila." }
            elseif ($PctUso -le 85) { "$($Sim.Skip) Espaço Suficiente, Mas o Disco Vai Ficar Apertado Durante a Conversão." }
            elseif ($PctUso -le 100) { "$($Sim.Warn) No Limite: Sobra Menos de 10% do Disco no Pico da Conversão." }
-           else { "$($Sim.Err) Espaço Insuficiente - Vídeos Podem Ser Ignorados por Falta de Espaço." }
+           else { "$($Sim.Err) Espaço Insuficiente - Vídeos Podem Ser Ignorados por Falta de Espaço." })
+    # 16.86: a barra e o texto acima falam do MESMO fato; quem diz quanto
+    # falta e a linha "Falta Liberar", nao esta - repetir o numero aqui seria
+    # a mesma informacao em dois lugares (a queixa mais antiga do Diego).
     $larguraMax = [math]::Max(80, $UI.barraDisco.Parent.ActualWidth)
     $UI.barraDisco.Width = $larguraMax * ([math]::Min(100,$PctUso) / 100.0)
     $pincel = [System.Windows.Media.BrushConverter]::new().ConvertFromString($cor)
@@ -4398,7 +5859,7 @@ function Update-TemposPausa {
         $d.HoraEtapa, (Format-MinSeg $wallEtapa), $Sim.Pausa, (Format-MinSeg $d.SegPausado))
     $UI.lblTemposFila.Text = ("Começou: {0}   Decorrido: {1}" -f
         $d.HoraFila, (Format-MinSeg $wallFila))
-    $Janela.Title = "$NOME_APP  ·  PAUSADO - $([int]$d.PctEtapa)% - Sem Consumir CPU/Disco"
+    $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("PAUSADO - {0}% - Sem Consumir CPU/Disco" -f [int]$d.PctEtapa))
 }
 
 # ---- Maquina de estados -----------------------------------------------------
@@ -4526,12 +5987,12 @@ function Set-Estado([string]$Novo) {
                     $script:SegEtapasDoVideoAtual = @()
                     Fill-Fila "inicial"; $UI.btnIniciar.Focus() | Out-Null
                     $n = @($script:Videos | Where-Object { -not $_.Ignorar }).Count
-                    $Janela.Title = "$NOME_APP  ·  Pronto para Converter - $n Vídeo(s) na Fila" }
+                    $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Pronto para Converter - {0} Vídeo(s) na Fila" -f $n)) }
         "rodando" { Fill-Fila "rodando"
                     $UI.btnPausar.Focus() | Out-Null }
         "pausado" { Fill-Fila "pausado"
                     $UI.btnPausar.Focus() | Out-Null
-                    $Janela.Title = "$NOME_APP  ·  PAUSADO - $([int]$Motor.PctEtapa)% - Sem Consumir CPU/Disco" }
+                    $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("PAUSADO - {0}% - Sem Consumir CPU/Disco" -f [int]$Motor.PctEtapa)) }
         "fim"     { $script:LinhasFila.Clear(); $UI.btnNovaConversao.Focus() | Out-Null }
     }
     # m3c8: sem isso, o dropdown da coluna ACAO so refletia o novo Estado na
@@ -4555,6 +6016,9 @@ $Motor = @{ EtapaIdx = 0; PctEtapa = 0.0; SegEtapa = 0; SegVideo = 0; RestVideo 
             # Decorrido 06m30s" as 14h16 nao fecha conta nenhuma na cabeca de
             # quem le. Entao: Decorrido = parede, e a pausa aparece do lado.
             T0Fila = $null; T0Video = $null; T0Etapa = $null; T0Diag = $null
+            # 17.00: "ha um arquivo em andamento agora". Relogio ligado nao
+            # quer dizer arquivo rodando - ver Fechar-MedidaDoVideo.
+            MedidaAberta = $false
             PctUltimo = -1; PctUltimoEm = $null; LivreEm = $null
             VidaEm = $null; VidaCpuMs = 0.0; VidaPct = 0; VidaNomes = ""; VidaEmVida = $null
             # 16.49: a prova de vida agora tem DONO. VidaChave guarda de qual
@@ -5133,7 +6597,7 @@ function Update-Progresso {
                        elseif ($script:UltimoRotuloEtapa) { "Etapa " + $script:UltimoRotuloEtapa }
                        else { "Etapa {0}/{1}" -f ($iT + 1), $nEt }
                    }
-    $Janela.Title = "$NOME_APP  ·  Convertendo$rotuloFila - $tituloEtapa - $pct%"
+    $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Convertendo$rotuloFila - $tituloEtapa - $pct%"))
 }
 
 $TimerPausa.add_Tick({
@@ -5267,6 +6731,10 @@ $TimerFila.add_Tick({
                 # que ate a 16.8 nunca fechava. Depois de fechar, o relogio que
                 # comeca e o do DIAGNOSTICO do novo arquivo, nao o de etapa.
                 Fechar-EtapaNoLog
+                # 16.99: aqui termina o video ANTERIOR - e este e o momento em
+                # que o tempo real dele existe. Tem que vir ANTES de VideoIdx
+                # mudar, senao a medida seria gravada no nome errado.
+                Fechar-MedidaDoVideo -Concluido $true
                 $Motor.T0Diag = Get-Date
                 $Motor.VideoNome = $m.Nome; $Motor.VideoIdx = $m.Idx; $Motor.VideoTotal = $m.Total
                 $Motor.HoraVideo = (Get-Date).ToString("HH'h'mm")
@@ -5290,6 +6758,9 @@ $TimerFila.add_Tick({
                 # linha, e a anterior vira "Convertido".
                 Fill-Fila $Estado.Atual
                 $Motor.T0Video = Get-Date
+                # 17.00: a partir daqui existe um arquivo em andamento, e o
+                # relogio dele vale como medida quando ele terminar.
+                $Motor.MedidaAberta = $true
                 $Motor.SegVideo = 0
                 # Comeca pela estimativa do lote em vez de zero: com zero, a
                 # linha da FILA dizia "Termina às ~<agora>" enquanto o video
@@ -5350,10 +6821,15 @@ $TimerFila.add_Tick({
             "vazio" { $UI.txtDisco.Text = $m.Motivo }
             "leitura_ini" { Escrever-Log ("Lendo {0} arquivo(s)..." -f $m.Total) "LEITURA" }
             "leitura_pct" {
-                $Janela.Title = "$NOME_APP  ·  Lendo {0}/{1} - {2}" -f ($m.Idx + 1), $m.Total, $m.Nome
+                $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Lendo {0}/{1} - {2}" -f ($m.Idx + 1), $m.Total, $m.Nome))
             }
             "video" {
                 $d = $m.Dados
+                <#  16.84: a montagem do texto do Dolby Vision saiu do runspace
+                    e veio para ca, onde Format-DolbyVision existe. O runspace
+                    manda os DADOS (perfil, codec, camadas, tipo de EL); quem
+                    escreve e um lugar so. #>
+                if ([int]$d.DVperfil -gt 0) { Update-TextosDV $d }
                 $d.TamanhoTxt = Format-GB $d.Bytes
                 # Nasce marcado quem tem o que converter de verdade.
                 # "Ignorar" cobre so Ja-Existe-na-Saida/Erro-na-Leitura agora
@@ -5367,13 +6843,256 @@ $TimerFila.add_Tick({
                 Update-CabecalhoFila
                 Update-Disco
             }
+            "el" {
+                <#  16.77: chega UM arquivo medido. Reescreve so o que a
+                    medicao decide - rotulo, resposta, cor e coluna - e
+                    redesenha. O resto da linha ja estava certo desde a fase A. #>
+                $i = [int]$m.Idx
+                if ($i -ge 0 -and $i -lt $script:Videos.Count) {
+                    $v = $script:Videos[$i]
+                    $v.ELtipo = "$($m.Tipo)"; $v.ELselo = "$($m.Selo)"; $v.ELmotivo = "$($m.Motivo)"
+                    $v.ELmaxcll = [double]$m.MaxCLL; $v.ELmaxfall = [double]$m.MaxFALL
+                    $v.ELdm = "$($m.Dm)"; $v.ELpontos = "$($m.Pontos)"
+                    $v.ELexpande = $m.Expande
+                    $v.ELcenas = [int]$m.Cenas; $v.ELcenasAcima = [int]$m.CenasAcima
+                    $v.ELpicoCena = [double]$m.PicoCena
+                    $v.L5bordas = "$($m.L5)"; $v.L5formato = "$($m.L5Formato)"
+                    $v.ELregua = "$($m.Regua)"
+                    $v.ELctnMaxCLL = [int]$m.CtnMaxCLL
+                    $v.ELctnMaxFALL = [int]$m.CtnMaxFALL
+                    $v.L5area = "$($m.L5Area)"
+                    # 16.84: rotulo, coluna e nome de faixa saem todos daqui.
+                    Update-TextosDV $v
+                    $alvoDV = Format-DolbyVision -Perfil 8 -Level "$($v.DVlevel)" -Alvo
+                    <#  16.79 - A LINHA DO DV VIROU DADO, NAO PARAGRAFO.
+
+                        A 16.78 despejava tres oracoes de explicacao na linha
+                        do diagnostico ("a EL carrega imagem e o L1 descreve
+                        BL+EL... o DoVi_Scripts trata esse caso"). Aula no
+                        lugar errado: a linha do diagnostico e onde o usuario
+                        olha para DECIDIR, e nome de ferramenta de terceiro e
+                        licao de tone mapping nao ajudam a decidir nada ali.
+                        As duas coisas continuam existindo - no manual, que e
+                        onde se aprende, e no log, que e onde se audita.
+
+                        O que fica na tela e o que MUDA A DECISAO, no mesmo
+                        formato do resto do programa (sigla + numero medido):
+
+                          MEL  ->  EL sem imagem · descarte sem perda
+                          FEL  ->  EL com imagem · L1 153 / master 1000 nits
+
+                        No FEL o par L1/master e a informacao inteira: L1 bem
+                        abaixo do master = a EL nao expande brilho. E o numero
+                        que separa o FEL comum do FEL que incomoda, e esta ali,
+                        medido, em vez de descrito. #>
+                    $selo = "[SERÁ CONVERTIDO]"
+                    $alvo = $alvoDV.Longo
+                    $nota = ""
+                    $v.DiagDVcor = "verde"
+                    <#  16.81 - O NUMERO TINHA QUE DIZER O QUE ELE SIGNIFICA.
+
+                        "L1 153 / master 1.000 nits" era dado cru: quem le nao
+                        sabe se 153 contra 1.000 e bom ou ruim. E era a
+                        pergunta inteira - o Diego perguntou, com razao,
+                        "quando da certo descartar a EL e quando nao?".
+
+                        A resposta esta nesses dois numeros, e agora a frase a
+                        diz. O L1 e o pico de brilho que a TV vai receber como
+                        instrucao; o master e o pico que o filme foi feito para
+                        ter. L1 abaixo do master = a EL nao esta levantando
+                        brilho nenhum, entao descarta-la nao pede a TV nada que
+                        o arquivo nao entregue. L1 no ou acima do master = ela
+                        esta, e ai a TV vai tone mapear para um brilho que
+                        deixou de existir. Esse e o caso que doi.
+
+                        Continua RESSALVA nos dois casos, porque o residual de
+                        imagem da EL se perde de qualquer jeito - mas a frase
+                        agora separa "ressalva de rotina" de "olhe este". #>
+                    if ($m.Tipo -eq "MEL") {
+                        # 16.84: a sigla na RESPOSTA, nao so no rotulo. Na foto
+                        # do Diego a linha do Troy dizia "EL vazia - descarte
+                        # sem perda" e nao trazia "MEL" em lugar nenhum.
+                        $nota = " — MEL: EL vazia, descarte sem perda"
+                    } elseif ($m.Selo -eq "RESSALVA" -or $m.Selo -eq "EXPANDE") {
+                        <#  16.88 - EU QUEBREI ISTO NA 16.87 (achado do Diego,
+                            no print do Saving Private Ryan).
+
+                            Na 14.43 criei no motor um selo NOVO, "EXPANDE",
+                            para o Complex FEL - e aqui continuei testando so
+                            "RESSALVA". O Ryan passou a cair no ramo final,
+                            que nao mexe em nada: linha VERDE, "[SERÁ
+                            CONVERTIDO]" e nenhuma palavra sobre a EL. O pior
+                            resultado possivel - o unico arquivo perigoso dos
+                            tres saiu pintado como o mais seguro.
+
+                            A sigla [EL: FEL] no rotulo ficou vermelha porque
+                            ela le $v.ELtipo, que chegou certo. Duas partes da
+                            mesma linha discordando: o sintoma exato de dado
+                            que chega e ramo que nao trata.
+
+                            Licao para a bateria: eu testei o TEXTO das duas
+                            frases e nao testei o CAMINHO ate elas. Teste de
+                            texto nao pega ramo nao percorrido. #>
+                        <#  16.86 - TRES NIVEIS, TRES CORES (pedido do Diego).
+
+                            Ate a 16.85 todo FEL saia da mesma cor. Mas FEL
+                            nao e um estado so, e o proprio Diego apontou:
+                            "o GOT e FEL tanto quanto o Ryan, mas o do Ryan e
+                            mais forte". Esta certo, e o numero prova - GOT
+                            pede 153 de 1.000 nits; Ryan pede 1.608 de 1.000.
+                            Pintar os dois igual e apagar a unica diferenca
+                            que importa.
+
+                            A escala agora acompanha a decisao:
+
+                              verde    MEL              pode converter
+                              laranja  FEL sem expansao pode, perde residual
+                              vermelho FEL com expansao pense antes
+
+                            Vermelho aqui NAO quer dizer "bloqueado" - o
+                            arquivo converte se o usuario mandar. Quer dizer
+                            "este e o caso que estraga a imagem", que e o
+                            unico lugar do programa onde essa cor cabe fora
+                            de erro. O ambar fica para o que nao foi medido:
+                            duvida nao e o mesmo que ressalva conhecida. #>
+                        $selo = "[SERÁ CONVERTIDO COM RESSALVA]"
+                        $v.DiagDVcor = "laranja"
+                        $nota = " — FEL: EL com imagem, descartada"
+                        if ($m.Tipo -eq "MISTO") { $nota = " — MEL e FEL na mesma amostra" }
+                        <#  16.87 - QUEM DECIDE E O MOTOR, NAO A TELA.
+
+                            Ate a 16.86 a janela refazia a conta aqui com o
+                            master que ELA tinha lido, enquanto o motor fazia
+                            a mesma conta com o dele. Duas contas para um
+                            fato so - e o console e a janela ja tinham saido
+                            com frases diferentes sobre o mesmo Ryan.
+                            Agora o motor manda Expande junto com a medida e
+                            a tela so escolhe cor e palavra. #>
+                        $l1 = [double]$m.MaxCLL; $mst = [double]$v.DVmaster
+                        if ($null -ne $m.Expande -and $l1 -gt 0 -and $mst -gt 0) {
+                            if ($m.Expande -eq $true) {
+                                $selo = "[CONVERSÃO NÃO RECOMENDADA]"
+                                $v.DiagDVcor = "vermelho"
+                                $nota = " — FEL: a camada extra levanta o brilho"
+                                $nota += (" · o arquivo pede {0:N0} nits e o master é {1:N0}" -f $l1, $mst)
+                            } else {
+                                $nota = " — FEL: a camada extra tem imagem, descartada"
+                                $nota += (" · o arquivo pede {0:N0} nits, dentro dos {1:N0} do master" -f $l1, $mst)
+                            }
+                            <#  16.85 - QUANTAS VEZES, NAO SO SE.
+
+                                A frase acima diz SE o pico passa do master. O
+                                censo do L1 (dovi_tool export --levels, 2.3.3)
+                                diz QUANTAS das cenas lidas passam - e isso
+                                muda a decisao: um pico isolado numa cena e
+                                outra coisa de metade do filme acima da regua.
+                                So entra na tela quando ha o que contar; caso
+                                contrario nao ha o que dizer e a linha nao
+                                cresce a toa. #>
+                            <#  16.87 - "em 1/3 cenas" SAIU DA TELA.
+
+                                O Diego leu e perguntou se o filme tinha tres
+                                cenas. Nao tem: eram tres cenas da AMOSTRA, de
+                                tres trechos de dois segundos. Numero que
+                                precisa de um paragrafo para nao enganar nao
+                                cabe na linha da decisao - e, pior, eu ja sei
+                                que essa amostra e pequena demais para virar
+                                estatistica (3 a 4 cenas por filme).
+                                Ele continua no log, escrito por extenso, ate
+                                a amostra ser grande o bastante para a conta
+                                significar alguma coisa. #>
+                        } elseif ($l1 -gt 0) {
+                            <#  16.96 - SEM REGUA, A LINHA DIZ O QUE SOBRA.
+
+                                Ate aqui a frase parava em "pico do master não
+                                declarado" e o usuario ficava com um numero
+                                solto e nenhuma referencia. Os numeros do
+                                CONTAINER estavam lidos, no mesmo ffprobe, e
+                                nao apareciam em lugar nenhum.
+
+                                Eles entram - e entram DITOS COMO SAO. O
+                                MaxCLL do container e medido por histograma e
+                                o L1 e MaxRGB: sao grandezas diferentes, e
+                                compara-las e o erro que a licao 15 proibiu
+                                aqui. Por isso a frase nao os coloca lado a
+                                lado como se fossem a mesma coisa - ela diz
+                                "outra régua", e o FAQ explica por que.
+
+                                O que eles dao: uma nocao de quao claro o
+                                filme e, que serve para comparar este arquivo
+                                com outro e decidir na mao. Nao respondem se a
+                                EL levantava brilho, e a linha nao finge que
+                                respondem. #>
+                            $nota += (" · L1 pede {0:N0} nits — o master não é declarado, então não há régua" -f $l1)
+                            if ([int]$v.ELctnMaxCLL -gt 0) {
+                                $nota += (" · o container declara MaxCLL {0:N0} por outra régua (histograma)" -f [double]$v.ELctnMaxCLL)
+                            }
+                        }
+                    } elseif ($m.Tipo -eq "NAO_MEDIDO") {
+                        $v.DiagDVcor = "ambar"
+                        $nota = " — EL não medida"
+                    }
+                    <#  16.85 - L5: SO FALA QUANDO HA PROBLEMA.
+
+                        O L5 diz quanto do quadro e borda. Quando ele bate com
+                        a imagem nao ha nada a decidir, e a informacao vive no
+                        log. Quando NAO bate - proporcao que nao existe em
+                        cinema nenhum - o RPU tem crop errado, que e o defeito
+                        que o DDVT chama de "bad cropped RPU". Ai vale a tela,
+                        porque muda o que o usuario faz.
+
+                        O LaFirma NAO cria esse defeito: "convert --discard"
+                        nao toca nos blocos L5. Quando ele aparece, ja veio
+                        assim no arquivo de origem - e o aviso diz isso. #>
+                    if ("$($v.L5formato)" -match "fora dos formatos comuns") {
+                        $nota += (" · borda do RPU (L5) dá {0}, que não é formato de cinema - já vem assim da origem" -f "$($v.L5area)")
+                        if ($v.DiagDVcor -eq "verde") { $v.DiagDVcor = "ambar" }
+                    }
+                    $v.DiagDVres = "→ $selo $alvo$nota"
+                    Fill-Fila "el"
+                    if ($UI.lstFila.SelectedIndex -eq $i) { Update-Diagnostico }
+                }
+            }
+            "el_fim" {
+                $script:MedindoEL = $false
+                # quem sobrou em MEDINDO aqui e arquivo que a fase B nao
+                # conseguiu ler - Fechar-MedicaoPendente resolve no Stop-Motor
+                # logo abaixo, no mesmo caminho de todos os outros.
+                if ([int]$m.Total -gt 0) {
+                    Escrever-Log ("Camada de melhoria medida em {0} de {1} arquivo(s) - {2:N2}s no total" -f $m.Medidos, $m.Total, $m.Seg) "LEITURA"
+                }
+                Stop-Motor
+                if ($script:ReleituraPendente) {
+                    $script:ReleituraPendente = $false
+                    Start-Leitura
+                }
+            }
             "leitura_fim" {
                 $script:Lendo = $false
                 $UI.btnReler.IsEnabled = $true
-                $UI.lblReler.Text = "Atualizar"
+                $UI.lblReler.Text = Traduzir "Atualizar"
                 $ativos = @(Get-Marcados).Count
                 Escrever-Log ("Leitura concluida: {0} lido(s), {1} erro(s), {2:N2}s" -f $m.Ok, $m.Erros, $m.Seg) "LEITURA"
                 Escrever-Log ("SELECAO: {0} de {1} marcado(s) automaticamente (tem trabalho)" -f $ativos, $script:Videos.Count) "ACAO"
+                <#  16.83 - EU QUEBREI O "JA EXISTE NA SAIDA" NA 16.82.
+
+                    Ate a 16.79 quem marcava era a LEITURA, dentro do runspace.
+                    Na 16.82 tirei de la (a funcao nao existe naquele mundo) e
+                    escrevi, no comentario, que "quem decide e Update-JaExiste,
+                    que ja roda depois de toda leitura via Update-Selecao".
+                    NAO RODAVA: Update-JaExiste so era chamado quando o usuario
+                    TROCAVA a pasta de saida. Depois de uma leitura, ninguem
+                    chamava.
+
+                    Efeito, no teste do Diego (05/09 01:30): o GOT ja estava
+                    convertido em 01_Arquivos_Finalizados e a janela deixou
+                    clicar Iniciar; quem barrou foi o motor, la na frente
+                    ("[AVISO] Ja Existe na Pasta de Saida. Pulando."). A tela
+                    prometeu um trabalho que nao ia acontecer.
+
+                    Licao para mim: escrever no comentario que algo "ja roda"
+                    nao faz rodar. A bateria agora exige esta chamada. #>
+                Update-JaExiste
                 Fill-Fila "inicial"
                 if ($script:Videos.Count -gt 0 -and $UI.lstFila.SelectedIndex -lt 0) { $UI.lstFila.SelectedIndex = 0 }
                 Update-Diagnostico
@@ -5382,11 +7101,18 @@ $TimerFila.add_Tick({
                 # a cada arquivo lido (e Update-Disco estima o tamanho de todos
                 # os videos marcados, nao e barato).
                 Update-Selecao
-                if (Test-PastasIguais) { $Janela.Title = "$NOME_APP  ·  Origem e Saída São a Mesma Pasta" }
-                Stop-Motor
-                if ($script:ReleituraPendente) {
-                    $script:ReleituraPendente = $false
-                    Start-Leitura
+                if (Test-PastasIguais) { $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Origem e Saída São a Mesma Pasta") }
+                <#  16.77: o runspace NAO morre aqui quando ainda ha camada de
+                    melhoria a medir - a fase B roda dentro dele. Quem encerra
+                    nesse caso e o "el_fim". Matar o runspace aqui deixaria
+                    todo arquivo travado em "medindo" para sempre. #>
+                $script:MedindoEL = ([int]$m.MedirEL -gt 0)
+                if (-not $script:MedindoEL) {
+                    Stop-Motor
+                    if ($script:ReleituraPendente) {
+                        $script:ReleituraPendente = $false
+                        Start-Leitura
+                    }
                 }
             }
             "fim"   {
@@ -5398,6 +7124,10 @@ $TimerFila.add_Tick({
                 # 16.9: a ultima etapa do ultimo video fecha AQUI - e o unico
                 # ponto em que da pra saber que ela acabou.
                 Fechar-EtapaNoLog
+                # 16.99: e o ULTIMO arquivo da fila tambem so termina aqui.
+                # Fila interrompida nao vira calibragem: tempo de conversao
+                # cortada no meio nao mede coisa nenhuma.
+                Fechar-MedidaDoVideo -Concluido ($m.Como -ne "interrompida")
                 $TimerFilaRelogio.Stop()
                 $script:Resultados = @($m.Resultados)
                 Show-Resumo $m.Como
@@ -5501,14 +7231,24 @@ function Get-SelosResultado($R) {
         O selo contradizia a tabela que ele mesmo encabeça.
         Agora cada um responde por si, e o "mantidas" também é dito - porque
         manter 33 legendas é uma informação, não a ausência de uma. #>
+    <#  16.87 - DESCARTAR E UMA ACAO, NAO UMA AUSENCIA (pedido do Diego).
+
+        Estes quatro selos saiam em CINZA, ao lado de tres selos verdes. No
+        Troy o cinza dizia "Áudios e Legendas Extras - DESCARTADOS" logo
+        depois de o programa ter, de fato, escolhido entre 33 faixas e
+        descartado as que nao serviam - trabalho feito, e feito certo.
+
+        Cinza neste programa quer dizer "nada aconteceu aqui". Aconteceu:
+        o descarte e metade do motivo de o arquivo final ser menor e tocar
+        em TV. Agora os quatro sao verdes, como os outros tres. #>
     if ($R.DescarteAudio -and $R.DescarteLegenda) {
-        $selos += ,@("Áudios e Legendas Extras - DESCARTADOS", "cinza")
+        $selos += ,@("Áudios e Legendas Extras - DESCARTADOS", "ok")
     } elseif ($R.DescarteAudio) {
-        $selos += ,@("Áudios Extras - DESCARTADOS  ·  Legendas - TODAS MANTIDAS", "cinza")
+        $selos += ,@("Áudios Extras - DESCARTADOS  ·  Legendas - TODAS MANTIDAS", "ok")
     } elseif ($R.DescarteLegenda) {
-        $selos += ,@("Legendas Extras - DESCARTADAS  ·  Áudios - TODOS MANTIDOS", "cinza")
+        $selos += ,@("Legendas Extras - DESCARTADAS  ·  Áudios - TODOS MANTIDOS", "ok")
     } else {
-        $selos += ,@("Áudios e Legendas - TODOS MANTIDOS (Modo Seguro)", "cinza")
+        $selos += ,@("Áudios e Legendas - TODOS MANTIDOS (Modo Seguro)", "ok")
     }
     # A virgula NAO e enfeite: sem ela, um unico selo volta desmontado em duas
     # strings soltas e o cartao sairia com "ok" escrito como se fosse um selo.
@@ -6051,13 +7791,13 @@ function Show-Resumo([string]$Como) {
         $UI.icoResumo.Text = $Sim.Ok
         $UI.icoResumo.Foreground = $bc.ConvertFromString($Cores.ok)
         $UI.lblResumoTitulo.Text = "Conversão Concluída"
-        $Janela.Title = "$NOME_APP  ·  Conversão Concluída às $agora"
+        $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Conversão Concluída às {0}" -f $agora))
         $UI.lblResumoTempos.Text = "Começou às $($Motor.HoraFila) - Terminou às $agora - Tempo Total $tempoTxt"
     } else {
         $UI.icoResumo.Text = $Sim.Err
         $UI.icoResumo.Foreground = $bc.ConvertFromString($Cores.err)
         $UI.lblResumoTitulo.Text = "Conversão Interrompida"
-        $Janela.Title = "$NOME_APP  ·  Conversão Interrompida às $agora"
+        $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Conversão Interrompida às {0}" -f $agora))
         $UI.lblResumoTempos.Text = "Começou às $($Motor.HoraFila) - Interrompida às $agora - Tempo Total $tempoTxt"
     }
 
@@ -6123,7 +7863,7 @@ function Show-Resumo([string]$Como) {
 }
 
 # ---- Janelas auxiliares (Log / Ferramentas) --------------------------------
-function Show-JanelaTexto([string]$Titulo, [string]$Conteudo) {
+function Show-JanelaTexto([string]$Titulo, [string]$Conteudo, [bool]$DoTopo = $false) {
     $w = New-Object System.Windows.Window
     $w.Title = $Titulo; $w.Width = 780; $w.Height = 460
     $w.WindowStartupLocation = "CenterOwner"; $w.Owner = $Janela
@@ -6136,7 +7876,12 @@ function Show-JanelaTexto([string]$Titulo, [string]$Conteudo) {
     $tb.VerticalScrollBarVisibility = "Auto"; $tb.Padding = "12"
     $tb.TextWrapping = "Wrap"          # sem isto a linha some pela direita
     $w.Content = $tb
-    $w.add_ContentRendered({ $tb.ScrollToEnd() })   # log longo abre no fim
+    <#  16.88: o log abre no FIM (a linha mais nova e a que interessa); um
+        texto para LER abre no comeco. Antes havia so um comportamento, e o
+        FAQ abriria pelos creditos. #>
+    if ($DoTopo) { $w.add_ContentRendered({ $tb.ScrollToHome() }) }
+    else         { $w.add_ContentRendered({ $tb.ScrollToEnd() }) }
+    if ($DoTopo) { $w.Width = 900; $w.Height = 620 }
     $w.ShowDialog() | Out-Null
 }
 
@@ -6422,6 +8167,17 @@ $UI.txtPastasCompacto.Text = "$($Sim.Pasta) ...\00_Arquivos_Base  →  ...\01_Ar
 # A tela nasce vazia: quem escreve aqui e a leitura real.
 $UI.lblDiagTitulo.Text = "DIAGNÓSTICO:"
 foreach ($campo in @("diagDV","diagAu","diagLg","diagDVr","diagAur","diagLgr")) { $UI.$campo.Text = "" }
+
+<#  16.93: abre no idioma que o usuario escolheu da ultima vez. Roda depois
+    da janela montada, senao a varredura nao acha os rotulos. Qualquer falha
+    aqui deixa o programa em portugues - que e o certo por omissao. #>
+try {
+    $arqPref = Join-Path $script:PastaScript "IDIOMA.txt"
+    if (Test-Path -LiteralPath $arqPref) {
+        $pref = ([System.IO.File]::ReadAllText($arqPref)).Trim().ToUpperInvariant()
+        if ($pref -eq "EN") { Set-Idioma "EN" }
+    }
+} catch { }
 $UI.txtDisco.Text = "Lendo a pasta..."
 
 # ---- Eventos ----------------------------------------------------------------
@@ -6470,6 +8226,9 @@ function Build-EscolhasManuais {
         # nao tocou legenda, motor decide" ou "usuario excluiu as duas de
         # proposito" - ver o if mais abaixo.
         $legTocada = @($v.Faixas | Where-Object { $_.Tipo -eq "subtitles" -and $null -ne $_.VerboUsuario -and -not (Test-VerboBloqueado $_) })
+        # 16.81: true quando o usuario tirou do OCR uma PGS que o automatico
+        # converteria - e a unica forma de dizer NAO ao motor (ver abaixo).
+        $pgsRecusada = $false
         foreach ($f in @($v.Faixas)) {
             if ($f.Tipo -eq "video") { continue }
             $vb = Get-VerboEfetivo $v $f
@@ -6482,6 +8241,22 @@ function Build-EscolhasManuais {
             } elseif ($f.Tipo -eq "subtitles") {
                 if ($vb -eq "MANTER")     { $leg += [int]$f.Id }
                 elseif ($vb -eq "CONVERTER") { $e["LegendaPgs"] = [int]$f.Id }
+                <#  16.81 - A TELA DIZIA "CONVERSAO DESLIGADA" E O MOTOR
+                    CONVERTIA (Troy, 05/09).
+
+                    Marcar MANTER numa PGS so acrescentava o id em $leg. A
+                    chave LegendaPgs nao era enviada - e chave AUSENTE, para
+                    o motor, quer dizer "voce decide", nao "nao converta".
+                    Ele decidia, achava a PGS pt-BR sozinho e fazia o OCR,
+                    enquanto a tela garantia ao usuario que nao faria.
+
+                    Exatamente a licao da 16.31 (a ausencia de uma chave nunca
+                    e uma ordem) repetida no ramo vizinho. Agora MANTER numa
+                    PGS que o automatico converteria manda LegendaPgs = -1,
+                    que o motor 14.40 le como "nao converta nenhuma". #>
+                if ($vb -eq "MANTER" -and "$($f.VerboAuto)" -eq "CONVERTER") {
+                    $pgsRecusada = $true
+                }
             }
         }
         if ($aud.Count -gt 0) { $e["AudioManter"] = $aud }
@@ -6498,6 +8273,9 @@ function Build-EscolhasManuais {
         # mesmo assim, porque a chave simplesmente nao chegava. Agora manda
         # a chave sempre que alguma faixa de LEGENDA foi tocada, vazia ou nao.
         if ($leg.Count -gt 0 -or $legTocada.Count -gt 0) { $e["LegendaManter"] = $leg }
+        # A ordem so vale se ninguem escolheu OUTRA PGS para o OCR: escolher
+        # uma e recusar outra e trocar de faixa, nao desligar a conversao.
+        if ($pgsRecusada -and -not $e.ContainsKey("LegendaPgs")) { $e["LegendaPgs"] = -1 }
         if ($e.Count -eq 0) { continue }
         $tabela[$v.Caminho] = $e
 
@@ -6516,13 +8294,72 @@ function Build-EscolhasManuais {
     $script:EscolhasAtuais = $tabela
 }
 
+$script:DiscoFalta = 0.0
+$script:DiscoPreciso = 0.0
+$script:DiscoLivre = 0.0
+$script:DiscoCabem = 0
+$script:DiscoNaoCabem = 0
+$script:DiscoPrimeiroFora = ""
+$script:DiscoFaltaNoPrimeiroFora = 0.0
+
 function Test-PodeIniciar {
-    # 16.11: O BLOQUEIO SAIU. Ele existia porque as escolhas por faixa nao
-    # chegavam ao motor - a tela aceitava uma escolha que ia ser ignorada e
-    # voce so descobria 20 minutos depois, olhando o arquivo pronto. Agora
-    # elas chegam (porta do motor 13.3, provada pela Sonda_Manual).
-    # A funcao continua existindo como ponto de checagem: se um dia aparecer
-    # uma escolha que o motor nao saiba executar, e aqui que ela e barrada.
+    <#  16.91 - COMECAR SABENDO QUE NAO CABE (achado do Diego, 08/09).
+
+        A tela dizia "Espaço Insuficiente" em vermelho e o Iniciar comecava
+        assim mesmo. O motor entao recusava arquivo por arquivo, 23 segundos
+        depois, com a MESMA conta que ja estava na tela. Trabalho nenhum era
+        perdido - mas a pergunta ja tinha resposta antes de comecar, e o
+        programa fingiu que nao tinha.
+
+        Agora ele pergunta. NAO bloqueia: a estimativa e estimativa (3,15x o
+        tamanho do arquivo, o pior caso), o disco pode encher ou esvaziar no
+        meio, e ha quem queira comecar assim mesmo para converter o que
+        couber. Quem decide e o usuario - mas informado, e com o NAO
+        pre-selecionado, que e a regra desta janela para pergunta perigosa
+        (a mesma do Cancelar, desde a 16.12).
+
+        HISTORIA DESTA FUNCAO: ate a 16.11 ela barrava o inicio quando havia
+        escolha manual, porque as escolhas por faixa nao chegavam ao motor -
+        a tela aceitava uma escolha que seria ignorada e voce so descobria 20
+        minutos depois, olhando o arquivo pronto. Isso foi resolvido na porta
+        do motor 13.3 e o bloqueio saiu; a funcao ficou como ponto de
+        checagem, vazia, esperando o proximo motivo. Este e o motivo. #>
+    if ($script:DiscoFalta -gt 0) {
+        <#  16.93: a pergunta passou a dizer o que vai acontecer com ESTA
+            fila, arquivo por arquivo - nao mais a regra geral. "Vai converter
+            o que couber" e verdade e nao ajuda ninguem a decidir; "1 de 2
+            cabem, o Troy fica de fora por 65 GB" ajuda. #>
+        $linhaFila = ""
+        if ($script:DiscoNaoCabem -gt 0) {
+            $linhaFila = ("Na ordem da fila, {0} de {1} arquivo(s) cabem.`n" -f `
+                          $script:DiscoCabem, ($script:DiscoCabem + $script:DiscoNaoCabem))
+            if ($script:DiscoPrimeiroFora -ne "") {
+                $nomeCurto = "$($script:DiscoPrimeiroFora)"
+                if ($nomeCurto.Length -gt 60) { $nomeCurto = $nomeCurto.Substring(0, 57) + "..." }
+                $linhaFila += ("O primeiro que fica de fora é:`n  {0}`n  (faltariam {1} na vez dele)`n" -f `
+                               $nomeCurto, (Format-GB $script:DiscoFaltaNoPrimeiroFora))
+            }
+            $linhaFila += "`n"
+        }
+        $txt = ("A fila selecionada não cabe no disco.`n`n" +
+                "Necessário estimado : ~{0}`n" +
+                "Livre agora         : {1}`n" +
+                "Falta liberar       : {2}`n`n" +
+                "{3}" +
+                "A conta é a do pior caso: cada arquivo precisa de 3,15x o próprio tamanho enquanto converte (vídeo extraído, convertido e remontado ao mesmo tempo).`n`n" +
+                "Nada sai pela metade: o motor recusa o arquivo inteiro quando não cabe, e passa para o próximo.`n`n" +
+                "Começar mesmo assim?") -f `
+                (Format-GB $script:DiscoPreciso), (Format-GB $script:DiscoLivre), (Format-GB $script:DiscoFalta), $linhaFila
+        $r = [System.Windows.MessageBox]::Show($txt, "LaFirma - falta espaço em disco",
+                [System.Windows.MessageBoxButton]::YesNo,
+                [System.Windows.MessageBoxImage]::Warning,
+                [System.Windows.MessageBoxResult]::No)
+        if ($r -ne [System.Windows.MessageBoxResult]::Yes) {
+            Escrever-Log ("INICIO cancelado pelo usuario: faltam {0} em disco" -f (Format-GB $script:DiscoFalta)) "ACAO"
+            return $false
+        }
+        Escrever-Log ("INICIO mesmo faltando {0} em disco - confirmado pelo usuario" -f (Format-GB $script:DiscoFalta)) "AVISO"
+    }
     return $true
 }
 
@@ -6569,6 +8406,9 @@ function Invoke-IniciarInterno {
     Escrever-Log ("LOTE: {0} video(s), estimativa total {1:N0}s, {2} com escolha manual" -f $Motor.VideoTotal, $somaEst, $nManual) "PROVA"
     $agoraDt = Get-Date
     $Motor.T0Fila = $agoraDt; $Motor.T0Video = $agoraDt
+    # 17.00: o Iniciar liga o relogio, mas nao ha arquivo em andamento ainda
+    # - quem abre a medida e o anuncio "ARQUIVO n/N" do motor.
+    $Motor.MedidaAberta = $false
     # 16.9: o relogio da ETAPA nao comeca aqui. Entre o Iniciar e a primeira
     # [1/7] o que roda e o DIAGNOSTICO do arquivo - comecar a etapa aqui era o
     # que fazia sair "ETAPA 1/7 fechada" ANTES da 1/7 existir, com o tempo do
@@ -6642,7 +8482,7 @@ function Invoke-Cancelar {
     $script:Controle.Pausar = $false
     $UI.btnPausar.IsEnabled = $false
     $UI.btnCancelar.IsEnabled = $false
-    $Janela.Title = "$NOME_APP  ·  Cancelando - Aguardando o Motor Encerrar..."
+    $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Cancelando - Aguardando o Motor Encerrar...")
 }
 $UI.btnPausar.add_Click({ Invoke-TogglePausa })
 $UI.btnCancelar.add_Click({
@@ -6980,6 +8820,61 @@ $UI.btnLog.add_Click({
     $cab = "Log desta sessao. Arquivo salvo em:`n$($script:LogArquivo)`n" + ("-" * 90) + "`n"
     Show-JanelaTexto "LaFirma - Log da Sessao" ($cab + ($script:LogLinhas -join "`n"))
 })
+<#  16.88 - O BOTAO "ENTENDA".
+
+    O programa mede MEL x FEL, separa Simple de Complex, decide audio,
+    escolhe legenda e recusa Perfil 5 - e cada uma dessas decisoes aparecia
+    como uma linha curta na tela. Linha curta e o formato certo para DECIDIR
+    e o formato errado para APRENDER: quem quer entender por que o Saving
+    Private Ryan saiu vermelho nao cabe numa oracao.
+
+    O texto vive em FAQ_PT.txt, ao lado do programa, e NAO dentro do .ps1.
+    Assim da para corrigir uma frase sem tocar em codigo, o mesmo arquivo
+    serve de base para o README e para o post da comunidade, e a versao EN
+    entra depois como FAQ_EN.txt sem mexer em nada aqui.
+
+    Se o arquivo faltar, a janela diz onde ele deveria estar - nao finge que
+    o botao nao existe nem some com ele. #>
+$UI.btnIdioma.add_Click({
+    Escrever-Log "CLIQUE: Idioma" "ACAO"
+    Set-Idioma $(if ($script:Lang -eq "PT") { "EN" } else { "PT" })
+})
+$UI.btnEntenda.add_Click({
+    Escrever-Log "CLIQUE: Entenda" "ACAO"
+    <#  16.94 - O TEXTO SEGUE A LINGUA (achado do Diego, 09/09):
+        "se muda pra ingles no meio, o learn q muda mas o texto q abre nao".
+        Estava certo - o rotulo do botao passava pela traducao e o conteudo
+        nao, entao "Learn" abria um texto inteiro em portugues. Agora o
+        arquivo e escolhido na hora do clique, pela lingua ATUAL, e nao no
+        carregamento: trocar a bandeira no meio da sessao ja vale no proximo
+        clique, sem reiniciar. Se o FAQ_EN.txt faltar, abre o PT dizendo em
+        ingles que so a versao portuguesa esta instalada - nunca uma janela
+        vazia. #>
+    $ehEN   = ($script:Lang -eq "EN")
+    $titulo = if ($ehEN) { "LaFirma - Understand the Conversion" } else { "LaFirma - Entenda a Conversão" }
+    $arq    = Join-Path $script:PastaScript $(if ($ehEN) { "FAQ_EN.txt" } else { "FAQ_PT.txt" })
+    $arqPT  = Join-Path $script:PastaScript "FAQ_PT.txt"
+    if (Test-Path -LiteralPath $arq) {
+        $txt = [System.IO.File]::ReadAllText($arq, [System.Text.Encoding]::UTF8)
+        Show-JanelaTexto $titulo $txt $true
+    } elseif ($ehEN -and (Test-Path -LiteralPath $arqPT)) {
+        $txt = [System.IO.File]::ReadAllText($arqPT, [System.Text.Encoding]::UTF8)
+        Escrever-Log "Entenda: FAQ_EN.txt ausente - abrindo a versao PT" "AVISO"
+        Show-JanelaTexto $titulo `
+            ("[ The English version (FAQ_EN.txt) was not found in this folder." + "`n" +
+             "  Showing the Portuguese text below. ]" + "`n`n" + $txt) $true
+    } else {
+        $falta = if ($ehEN) { "FAQ_EN.txt" } else { "FAQ_PT.txt" }
+        $msg = if ($ehEN) {
+            "The explanatory text was not found.`n`nIt should be at:`n$arq`n`n" +
+            "If you assembled the folder by hand, copy $falta along with the .ps1 files."
+        } else {
+            "O texto explicativo não foi encontrado.`n`nEle deveria estar em:`n$arq`n`n" +
+            "Se você montou a pasta na mão, copie o $falta junto com os .ps1."
+        }
+        Show-JanelaTexto $titulo $msg $true
+    }
+})
 $UI.btnFerramentas.add_Click({
     Escrever-Log "CLIQUE: Ferramentas" "ACAO"
     $sb = New-Object System.Text.StringBuilder
@@ -7052,6 +8947,11 @@ $Janela.add_ContentRendered({
         $mLinha = Select-String -LiteralPath $script:CaminhoMotor -Pattern '^\$SCRIPT_VERSION\s*=\s*"([^"]+)"' -ErrorAction Stop | Select-Object -First 1
         if ($mLinha) { $verMotor = " v" + $mLinha.Matches[0].Groups[1].Value }
     } catch { $verMotor = "" }
+    <#  16.99: a calibragem e lida DEPOIS que o log existe, para que a linha
+        que diz qual valor esta valendo apareca na sessao. Antes disso ela
+        seria escrita no vazio, e o numero que manda na estimativa inteira
+        ficaria sem rastro. #>
+    Carregar-Calibragem
     Escrever-Log ("Interface renderizada. Iniciar chama o motor{0} DE VERDADE - a conversao escreve na pasta de saida." -f $verMotor)
 })
 # 16.12: fechar a janela no meio de uma conversao e cancelar por outro nome -

@@ -20,6 +20,441 @@
 
 
 ================================================================================
+ INSTALADOR 1.8  -  09/09/2026     *** O PROGRAMA PASSOU A MEDIR, NAO SUPOR ***
+================================================================================
+ Componentes: MOTOR 14.47  |  JANELA 17.01  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.8  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+ Ferramenta trocada: dovi_tool 2.3.2 -> 2.3.3
+
+ Sobe para 1.8, e nao 1.7.4, porque muda COMPORTAMENTO: o programa deixou de
+ tratar todo Profile 7 igual.
+
+
+0f. A TELA EM INGLES PAROU DE SER METADE EM CADA LINGUA  (17.01)
+ --------------------------------------------------------------------------
+   Achado do Diego olhando a tela com a bandeira em EN: "que lingua e essa?".
+   A frase que ele apontou ("VIDEOS IN QUEUE") estava certa - o que estava
+   errado era a tela ser metade em cada lingua.
+
+   O que ainda saia em portugues, e o motivo de cada um:
+
+     Atualizar / Parar   O CODIGO reescreve este rotulo em dois pontos. A
+                         varredura da arvore visual traduz UMA vez, quando a
+                         bandeira troca; qualquer escrita depois disso desfaz
+                         a traducao em silencio. Por isso ele ficava em
+                         portugues do lado de "Open Source" traduzido - o que
+                         parecia sorteio e nao era.
+     Modo: Automatico    O valor guardado no video nao tem acento, e a tabela
+                         tinha "Modo: Automático". Nunca casava.
+     Titulo da janela    Havia um SEGUNDO titulo montado ("...Vídeo(s) na
+                         Fila") que passou batido quando o primeiro foi
+                         coberto. Agora NENHUM titulo escreve portugues
+                         direto, e a bateria reprova se algum voltar a
+                         escrever - validado por sabotagem.
+     Painel de disco     Quatro linhas montadas com numero dentro.
+     Ja Convertido       Ramo proprio da coluna SITUACAO, fora da traducao.
+     DIAGNOSTICO - x     Montado com o nome do arquivo.
+
+   LICAO NOVA: rotulo que o codigo reescreve nao pode depender da varredura
+   da arvore - ele tem que traduzir na hora em que e escrito.
+
+   E uma armadilha das regras de padrao, que ja mordeu: elas rodam EM ORDEM.
+   A regra generica "...Convertido -> ...Converted" casava primeiro com "Já
+   Convertido" e devolvia o hibrido "Já Converted". Regra mais especifica vem
+   antes, e ha teste so para isso.
+
+
+ 0e. A ESTIMATIVA DE TEMPO SE CALIBRA SOZINHA  (16.99)
+ --------------------------------------------------------------------------
+   Item de fila desde 03/09, e o de maior efeito visivel para quem usa: a
+   estimativa do primeiro segundo errava feio e a barra dava saltos.
+
+     Troy         previsto 1697s   real 1091s   +56%
+     Se7en        previsto  910s   real  655s   +39%
+     Spider-Man   previsto 1200s   real 1121s    +7%
+
+   Ja estava medido que TROCAR A CONSTANTE NAO RESOLVE: usar a media melhora
+   Troy e Se7en e faz o Spider-Man SUBESTIMAR 20%. O problema nunca foi o
+   valor - e que um numero fixo tem que servir para maquinas, discos e filmes
+   diferentes.
+
+   Entao ele deixou de ser fixo. A cada arquivo convertido o programa grava
+   uma linha em CALIBRAGEM.txt com quanto aquele arquivo custou por GB e por
+   peso, e a proxima estimativa usa o p75 das ultimas cinco rodadas. Calibra
+   na maquina de quem esta usando, com o disco de quem esta usando.
+
+   POR QUE p75 E NAO A MEDIANA - as quatro opcoes foram rodadas contra os
+   tres filmes reais:
+
+     fixo 0,0153   erro medio 33,8%   pior 55,5%   subestima 0 de 3
+     mediana       erro medio 11,6%   pior 22,9%   subestima 1 (-23%)
+     p75           erro medio 18,3%   pior 28,6%   subestima 1 (-11%)
+     maximo        erro medio 25,0%   pior 45,3%   subestima 0 de 3
+
+   A mediana e a mais exata na media E a que erra pior onde doi: prometeria
+   ao Spider-Man 23% menos tempo do que ele leva. Prometer tempo que nao se
+   cumpre e mensagem que mente. O p75 corta o erro medio quase pela metade em
+   relacao ao fixo e reduz a subestimacao para 11%.
+
+   O QUE ISTO NAO RESOLVE, e esta escrito para nao virar promessa: os tres
+   filmes sao da MESMA maquina e mesmo assim se espalham de 0,0098 a 0,0143.
+   Boa parte do erro nao e da maquina - e do MODELO DE PESOS, que descreve
+   filmes diferentes com a mesma forma. A calibragem mata o erro sistematico;
+   a variacao entre arquivos so sai revisando os pesos. Quando o espalhamento
+   passa de 30%, o log AVISA isso em vez de deixar parecer resolvido.
+
+   Historico sujo nao entra: rodada cancelada no meio, ou qualquer conta fora
+   dos limites de sanidade (0,004 a 0,060), e recusada com o motivo no log.
+   Arquivo ausente ou ilegivel volta ao valor de partida - ninguem fica sem
+   estimativa por falta de historico.
+
+
+ 0d. "AUDIO PRINCIPAL" SEGUNDO QUEM  (16.98)
+ --------------------------------------------------------------------------
+   O rotulo dizia "AUDIO PRINCIPAL" e quem lia entendia "a faixa que vai
+   tocar no meu player". Nao e isso que ele quer dizer.
+
+   A escolha do programa IGNORA de proposito a marca de padrao do arquivo:
+   em remux Dual Audio essa marca costuma apontar a dublagem que o grupo de
+   release preferiu, e o programa quer o TrueHD/Atmos esteja ele marcado ou
+   nao. A regra esta certa e continua - o que estava errado era o NOME, e o
+   silencio sobre a divergencia.
+
+   Agora o rotulo diz "AUDIO PRINCIPAL (o que o programa converte)" e, quando
+   a faixa escolhida NAO e a que o arquivo marca como padrao, a linha diz
+   qual e a outra e por que ela nao foi seguida. So nesse caso a frase cresce
+   - e e exatamente o caso em que o usuario se surpreenderia.
+
+
+ 0c. UMA AMOSTRA SO, E DO TAMANHO DO FILME  (14.47 / 16.97)
+ --------------------------------------------------------------------------
+   Duas coisas, e a primeira e a pior.
+
+   A JANELA E O MOTOR PEDIAM AMOSTRAS DIFERENTES. A janela chamava a medicao
+   com 3 pontos e o motor usava o padrao de 5. Mesmo arquivo, mesma pergunta,
+   duas amostras - e portanto a possibilidade de duas respostas para o mesmo
+   fato. O defeito que este projeto mais persegue, escondido num parametro.
+
+   E 3 PONTOS ERA POUCO PARA O CENSO. Para dizer MEL x FEL, 3 bastam e sempre
+   bastaram: o el_type nao muda ao longo do filme. Mas para contar quantas
+   cenas pedem mais brilho que o master, 3 pontos liam 3 a 4 cenas de um
+   filme inteiro - tanto que a propria tela ja tinha tirado esse numero por
+   nao significar nada.
+
+   Agora a amostra acompanha a duracao, e os dois lados chamam a MESMA
+   funcao: 5 pontos ate uma hora, 7 ate duas, 9 ate tres, 11 acima disso.
+   Custo medido: cada ponto sai por volta de 6 a 7 segundos, entao um filme
+   de 2h30 sai de ~20s para ~60s de LEITURA - em segundo plano, com a fila
+   utilizavel. Nao muda o tempo de conversao.
+
+
+ 0b. AS DUAS REGUAS, E QUAL DELAS FALOU  (14.46 / 16.96)
+ --------------------------------------------------------------------------
+   Item de fila desde 04/09, e a tentacao era obvia: usar o MaxCLL do
+   container como regua de reserva quando o arquivo nao declara o pico do
+   mastering display. NAO FOI ISSO QUE ENTROU, e de proposito.
+
+   O L1 do RPU e MaxRGB. O MaxCLL do container e medido por HISTOGRAMA. Sao
+   grandezas diferentes, e compara-las e exatamente o erro que a licao 15
+   proibiu neste projeto. O container nao virou regua de reserva.
+
+   O que faltava nao era uma segunda regua: era DIZER qual falou. Quando ha
+   pico do master, a frase e a de sempre. Quando nao ha, ela deixou de
+   terminar em "pico do master nao declarado" - agora diz que NAO HA REGUA, e
+   traz os numeros do container marcados como outra medida, que serve para
+   comparar este arquivo com outro e decidir na mao.
+
+   O veredicto (Expande) continua saindo so do master. A bateria ganhou
+   testes que reprovam se alguem "melhorar" isso comparando as duas.
+
+
+ 0a. O PROFILE 5 GANHOU O CAMINHO QUE A TELA JA PROMETIA  (14.45 / 16.95)
+ --------------------------------------------------------------------------
+   Desde a 1.8-em-preparo a janela dizia, com razao, que o Profile 5 nao vira
+   8.1 sem recodificar e que "o caminho dele e o remux para MP4". Esse
+   caminho nao existia: o arquivo era identificado e ficava parado. Promessa
+   na tela sem execucao atras e a mesma familia de defeito que este projeto
+   persegue, so que invertida - em vez de prometer demais sobre a conversao,
+   a tela apontava uma porta fechada.
+
+   AGORA ELE EXECUTA. O P5 sai por um ramo proprio, ANTES das 5 etapas: nao
+   ha dovi_tool a rodar, nao ha camada de melhoria a medir, nao ha remontagem
+   em .mkv. E uma passada de ffmpeg.
+
+     Video       COPIADO, quadro por quadro, com a tag dvh1. Sem recodificar.
+     Audio       copiado quando cabe no MP4 (E-AC-3, AC-3, AAC, MP3, ALAC,
+                 FLAC, Opus); TrueHD e DTS viram E-AC-3 640k, porque nao tem
+                 lugar no container.
+     Legenda     de texto vira mov_text. PGS e descartada COM AVISO: legenda
+                 de imagem nao existe em MP4, e nao ha OCR neste caminho.
+
+   Por que MP4: o Profile 5 usa espaco de cor proprio e nao tem camada HDR10
+   de reserva, entao nao ha o que converter no perfil. O que falta a ele e
+   container - e em MP4 com dvh1 ele toca no Apple TV, no Infuse e nos
+   players que hoje ignoram o .mkv.
+
+   A saida e conferida pela DURACAO, nao pelo tamanho. Duas tentativas de
+   conferir pelo tamanho falharam no primeiro teste real: um trecho curto
+   pesa pouco legitimamente, e um remux que descarta a faixa DTS sai muito
+   menor que a origem sem nada ter dado errado. A duracao nao mente - um
+   remux cortado no meio deixa um arquivo que existe, abre, e mente sobre
+   estar inteiro. Nao batendo, o .mp4 e apagado.
+
+   Junto: a trava previa de espaco parou de cobrar 3,15x de um P5. Ele nao
+   passa pelo dovi_tool, entao exigir espaco para arquivos soltos de video
+   era recusar arquivo por espaco que o motor nem ia usar.
+
+
+ 0. O QUE A RODADA DE 09/09 CORRIGIU  (MOTOR 14.44 / JANELA 16.94)
+ --------------------------------------------------------------------------
+   Quatro achados do Diego usando a build anterior, e os quatro sao a mesma
+   queixa: a mesma informacao saindo de jeitos diferentes em cantos
+   diferentes da tela.
+
+   O ARQUIVO QUE NAO CABE NEM COMECA
+     A fila terminava um filme e ANUNCIAVA o proximo - "ARQUIVO 2/2",
+     diagnostico rodando, tela em "Convertendo - Etapa 1/5" - para so vinte
+     segundos depois descobrir que faltavam 72 GB e pular. A recusa sempre
+     esteve certa; errada estava a ORDEM. A conferencia de espaco subiu para
+     antes do anuncio: quem nao cabe nao abre bloco, nao cria pasta
+     temporaria e nao aparece como "em conversao" um segundo sequer. A trava
+     antiga continua onde estava, como segunda linha de defesa.
+
+   UMA ESCALA DE COR SO
+     A sigla [EL: FEL] do diagnostico saia VERMELHA num Complex FEL e a
+     coluna DOLBY VISION da MESMA linha saia AMBAR. A regra verde/laranja/
+     vermelho estava escrita dentro de uma funcao e copiada pela metade na
+     outra. Agora ela mora num lugar so, e a sigla, o texto da coluna e o
+     chip leem todos dele.
+
+   O TEXTO DO ENTENDA SEGUE A LINGUA
+     O botao virava "Learn" e o texto que abria continuava em portugues.
+     Entrou o FAQ_EN.txt, e o arquivo passou a ser escolhido no clique, pela
+     lingua atual - trocar a bandeira no meio da sessao ja vale.
+
+   A TRADUCAO DEIXOU DE PARAR NO ROTULO
+     "Fila (3)", "VIDEOS NA FILA (2 de 3 Selecionados)", "Convertendo -
+     Etapa 3/5" e o diagnostico inteiro ficavam em portugues numa tela em
+     ingles. Nao era esquecimento: a traducao varria a arvore visual e so
+     alcanca rotulo fixo; essas frases sao montadas com numero dentro. Agora
+     o IDIOMA_EN.txt aceita REGRAS de padrao (linha comecando com ~), e uma
+     frase nova precisa de uma linha nova no .txt, nao de codigo.
+
+   O FAQ GANHOU FONTES, E OS CREDITOS FICARAM LEGIVEIS
+     Nova secao 14 com o que sustenta cada afirmacao do texto: o repositorio,
+     o dovi_tool, o suporte profissional da Dolby, as planilhas da comunidade
+     (brilho medido por titulo, e players com suporte a MEL/FEL) e o
+     DoViBaker. Os creditos deixaram de ser tabela de duas colunas coladas.
+     Duas correcoes tecnicas entraram junto, vindas da leitura do manual da
+     Dolby e da documentacao do dovi_tool:
+       - o modo 2 do dovi_tool, que este programa usa, REMOVE do RPU o
+         mapeamento de luma/croma do Profile 7 FEL. O que sai e um 8.1
+         legitimo. O que nenhum modo faz e RECALCULAR o L1 - e daqui vem
+         toda a ressalva do Complex FEL;
+       - o L5 sao as bordas (esquerda, direita, topo, base), e a area ativa
+         e a resolucao menos elas. E a definicao do manual da Dolby, e a
+         conferencia que o programa faz espelha uma validacao que a propria
+         Dolby trata como erro de metadado.
+
+
+ 1. MEL, SIMPLE FEL E COMPLEX FEL - o programa mede antes de converter
+ --------------------------------------------------------------------------
+   Ate a 1.7.3, converter um Profile 7 era sempre a mesma coisa na tela.
+   Agora o programa le a camada de melhoria ANTES, pelo campo el_type do
+   RPU, e separa tres casos:
+
+     MEL          verde      a camada nao tem imagem, descarte sem perda
+     SIMPLE FEL   laranja    tem imagem, mas so refino
+     COMPLEX FEL  vermelho   levanta o brilho - conversao nao recomendada
+
+   O que separa Simple de Complex e um numero: o L1 do arquivo contra o pico
+   do mastering display. Sem esse pico declarado, o programa diz que nao
+   sabe, em vez de escolher um lado.
+
+   Medido na maquina do Diego: Troy 2004 e MEL (303 de 1.000 nits), GOT
+   S08E01 e Simple FEL (153 de 1.000) e Saving Private Ryan e Complex FEL
+   (1.608 de 1.000). O Ryan foi encontrado por medicao, sem lista nenhuma.
+
+   A medicao roda em SEGUNDO PLANO, depois da leitura da pasta - a leitura
+   continua instantanea, como antes.
+
+ 2. dovi_tool 2.3.2 -> 2.3.3
+ --------------------------------------------------------------------------
+   Trocado depois de bancada propria: 5 arquivos, 3 perfis, 2 versoes de CM,
+   ZERO divergencia em DM version, cenas, L1 MaxCLL, L1 MaxFALL e bytes do
+   RPU. A 2.3.3 traz o "export --levels", que o programa passou a usar para
+   ler o L1 de cada cena e a area ativa (L5) na mesma passada.
+
+   Achado da bancada: num HEVC valido cortado no meio, as DUAS versoes saem
+   com codigo 0 e deixam um RPU parcial dizendo "Done.". O dovi_tool nao
+   protege contra arquivo truncado - quem desconfia do tamanho da saida e o
+   LaFirma.
+
+ 3. AREA ATIVA (L5) - a borda declarada no RPU
+ --------------------------------------------------------------------------
+   Lida e conferida contra a resolucao real, com o nome do formato (Scope
+   2,39:1, Flat 1,85:1, 16:9, 4:3). No log sempre; na tela so quando a borda
+   nao resulta em formato de cinema nenhum - RPU com corte errado, que ja
+   veio assim da origem. O LaFirma nao cria esse defeito: "convert
+   --discard" nao toca nos blocos L5.
+
+ 4. BOTAO "ENTENDA"
+ --------------------------------------------------------------------------
+   Novo, na barra de cima, ao lado de Log e Ferramentas. Abre o texto
+   inteiro sobre a conversao - 13 secoes, do que e BL/EL/RPU ate por que os
+   binarios nao vao no GitHub, passando pelo que cada aparelho faz com a
+   camada de melhoria e pelos creditos. Vive em FAQ_PT.txt, fora do .ps1.
+
+ 5. IDIOMA: PORTUGUES E INGLES
+ --------------------------------------------------------------------------
+   Botao de bandeira na barra de cima, ao lado do Entenda. Um clique troca
+   os rotulos fixos da tela: barra, abas, cabecalhos das tabelas, titulos
+   dos paineis. As frases montadas na hora (diagnostico, selos, situacao)
+   ainda saem em portugues - entram na proxima camada.
+
+   A traducao NAO esta dentro do programa: e uma tabela em IDIOMA_EN.txt,
+   uma linha por texto, portugues e ingles separados por TAB. Corrigir uma
+   traducao e editar uma linha num arquivo de texto - nao exige mexer em
+   codigo, nem saber PowerShell, nem reinstalar nada.
+
+   Se o arquivo sumir, o botao avisa e o programa continua em portugues,
+   inteiro. A traducao e uma camada por cima, nunca a fonte.
+
+ 6. PROFILE 5: A TELA PAROU DE PROMETER O QUE O MOTOR NEGA
+ --------------------------------------------------------------------------
+   Ate aqui o P5 caia no mesmo ramo do Profile 7: a coluna dizia "5.0 ->
+   8.1" e a linha prometia "[SERA CONVERTIDO] Profile 8.1". O motor, no
+   mesmo programa, ja dizia ha semanas que chegar a 8.1 a partir do P5
+   RECODIFICA o video - e recodificar e o que este programa se recusa a
+   fazer. A tela prometia o que o motor ia negar: a mesma familia do defeito
+   da legenda que dizia "Conversao Desligada" e fazia OCR assim mesmo.
+
+   Agora o P5 tem ramo proprio, sai em ambar, nao entra na fila de conversao
+   e a resposta diz o caminho que existe de verdade: remux para MP4, sem
+   recodificar. A EXECUCAO desse remux ainda nao esta pronta - o comando ja
+   foi validado em bancada (video com tag dvh1, audio E-AC-3, legenda em
+   tx3g), falta integra-lo as etapas com progresso e verificacao.
+
+ 7. CONSERTOS DE COMPORTAMENTO
+ --------------------------------------------------------------------------
+   - "Manter" na legenda agora desliga o OCR de verdade. A tela dizia
+     "Conversao Desligada" e o motor fazia OCR assim mesmo, porque a escolha
+     nao era enviada e ausencia de chave significa "o motor decide".
+   - O nome da faixa de audio passou a ser o CODEC, nao o track_name: um
+     TrueHD Atmos 7.1 aparecia como "Surround".
+   - Saida truncada nao conta como pronta (corte em 60% do tamanho da
+     origem; conversao real fica em torno de 94%).
+   - Medicao interrompida nunca fica verde nem pendurada: vira "EL nao
+     medida", em ambar.
+   - Espaco em disco: sobra negativa nao e sobra. Quando nao cabe, a linha
+     diz "Falta Liberar: X GB" - e o Iniciar PERGUNTA antes de comecar, com
+     os tres numeros e o NAO pre-selecionado.
+   - Descartar audios e legendas extras virou selo VERDE no cartao final:
+     descartar e acao, nao ausencia.
+   - Uma coisa, um texto: o perfil Dolby Vision tem uma unica fonte de
+     verdade, no vocabulario oficial (dvhe.07.06, BL+EL+RPU [FEL]).
+
+ 8. BATERIA DE TESTES: 99 -> 313
+ --------------------------------------------------------------------------
+   Alem dos testes do item 1, entraram tres familias que mudam a natureza da
+   bateria:
+   - ESTRUTURAL: reprova funcao da janela chamada dentro de runspace, e
+     exige que todo selo produzido pelo motor tenha ramo proprio na janela.
+   - EXECUTANDO: carrega a funcao de verdade e roda contra arquivos
+     temporarios. A conversao PQ->nits e validada contra 8 medicoes reais.
+   - A BATERIA OLHA PARA SI: reprova se ela mesma tiver erro de execucao, e
+     proibe comentario de bloco que fecha cedo. Os dois nasceram de defeitos
+     dela que passavam despercebidos.
+
+ O QUE ESTA VERSAO AINDA NAO FAZ, E ESTA ESCRITO NO PROGRAMA
+ --------------------------------------------------------------------------
+   Nao mede o brilho real da camada base (a separacao Simple x Complex e
+   comparacao com o pico do master, um indicio, nao prova). Nao regenera o
+   L1. Nao guarda a EL descartada. Nao converte Profile 5. A analise e por
+   amostragem de trechos, nao pelo filme inteiro.
+
+
+================================================================================
+ MOTOR 14.37  |  JANELA 16.76  -  04/09/2026   *** A 2.0 COMECA: MEL x FEL ***
+================================================================================
+ Componentes tocados: MOTOR 14.36 -> 14.37  |  JANELA 16.75 -> 16.76
+                      TESTAR_LAFIRMA 1.3 -> 1.4
+ Instalador: sem mudanca (1.7.3) - nada aqui muda o que vai empacotado.
+
+ POR QUE ESTA VERSAO EXISTE
+
+   A ferramenta foi divulgada e apareceu uma critica tecnica, publica e
+   correta: num Dolby Vision Profile 7 com FEL, a imagem final e BL + EL.
+   Descartar a EL (que e o que a conversao para 8.1 faz, e continua fazendo)
+   deixa no arquivo um L1 que descreve a imagem COMPOSTA - ou seja, a TV
+   recebe a instrucao de tone mapear para um pico de brilho que nao existe
+   mais. Em parte dos titulos isso aparece como imagem escura demais ou
+   highlight lavado.
+
+   Ate a 14.36 o motor tratava todo Profile 7 igual e nao dizia uma palavra
+   sobre isso. Nao era mentira escrita na tela: era omissao. Que da no mesmo
+   quando o usuario conclui, do silencio, que o resultado e sempre sem perda.
+
+ O QUE MUDOU NA PRATICA
+
+   O diagnostico passa a dizer, por arquivo, QUE TIPO de camada de melhoria
+   o video tem, e a colocar um selo honesto:
+
+     MEL   ->  [CONVERSAO LIMPA]           a EL nao carrega imagem
+     FEL   ->  [CONVERSAO COM RESSALVA]    a EL carrega imagem; para FEL
+                                           critico, o DoVi_Scripts trata
+                                           esse caso e e citado pelo nome
+     misto ->  [CONVERSAO COM RESSALVA]    tratado como FEL, o lado seguro
+     sem
+     leitura-> [NAO MEDIDO]                terceiro estado, e aparece com
+                                           esse nome - nunca vira "limpo
+                                           por falta de prova"
+
+   Na janela: a coluna DOLBY VISION mostra "7.6 FEL -> 8.1", a linha de
+   diagnostico traz o selo, e o chip da coluna deixa de ser verde quando ha
+   ressalva. Verde e afirmacao; num FEL a afirmacao seria falsa.
+
+ COMO ELE SABE (medicao, nao suposicao)
+
+   Get-TipoCamadaDV corta alguns trechos curtos do video com "-c copy" - nao
+   recodifica nada e custa segundos -, extrai o RPU de cada trecho com o
+   dovi_tool e le o "dovi_tool info --summary". Quem classifica MEL ou FEL e
+   o proprio dovi_tool, pelo campo el_type do RPU. Nao ha heuristica nossa
+   no meio do caminho.
+
+   A amostra e assumida na tela: o diagnostico diz em quantos trechos leu.
+   Ler o filme inteiro custaria uma passada completa e nao muda a decisao.
+
+ O QUE ESTA VERSAO NAO FAZ
+
+   Nao mede o brilho real da base layer, entao NAO prova que um FEL tem
+   brightness expansion - por isso FEL sai como ressalva, nunca como defeito.
+   Medir a base layer e regenerar o L1 e a fase 2 da 2.0.
+
+   Nada aqui muda a conversao: o mesmo arquivo que saia antes sai agora. O
+   que mudou e o que o programa CONTA sobre ele.
+
+ UMA ARMADILHA QUE QUASE PASSOU
+
+   O motor chama a ferramenta de $doviTool; a janela sempre chamou de
+   $dovi_tool. Como nenhuma FUNCAO do motor precisava dela ate agora, isso
+   nunca importou. Funcao carregada pela AST enxerga so as variaveis da
+   janela - sem a ponte, TODO arquivo sairia como "nao medido", sem um unico
+   erro na tela. A bateria 1.4 tem um teste so para isso.
+
+ BATERIA 1.3 -> 1.4
+
+   Entraram 15 asseroes do item 1 (incluindo "nao medir nunca vira limpa" e
+   "o L1 do DV nao se compara com o MaxCLL do HDR10+ - sao reguas
+   diferentes"), validadas por 5 sabotagens com 5 reprovacoes.
+   Corrigidos dois defeitos DELA: um teste cobrava o Enter/Esc nas caixas de
+   pasta, comportamento revertido na 16.64b - reprovava o codigo certo; e a
+   ausencia das ferramentas de desenvolvimento (Auditor_OCR, Limpar_Testes)
+   virava [FALHA] em vez de [pulado], que e o que elas sao.
+
+
+================================================================================
  INSTALADOR 1.7.3  -  03/09/2026      *** .NET 8.0.30 VIRA O PADRAO ***
 ================================================================================
  Componentes: MOTOR 14.36  |  JANELA 16.75  |  CORRETOR 2.27  |  REOCR 1.29

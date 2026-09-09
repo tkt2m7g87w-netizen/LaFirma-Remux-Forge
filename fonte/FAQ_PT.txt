@@ -1,0 +1,519 @@
+﻿==============================================================================
+ LaFirma Remux Forge - ENTENDA A CONVERSÃO
+ O que o programa faz, o que ele não faz, e o que você ganha ou perde
+==============================================================================
+
+ Este texto existe porque conversão de Dolby Vision é cheia de detalhe que
+ muda o resultado e quase nunca é explicado. Aqui esta o que sabemos, com a
+ separação que importa: o que o programa MEDIU no seu arquivo, o que está na
+ documentação das ferramentas, e o que é relato da comunidade que nós não
+ testamos. Onde não sabemos, está escrito que não sabemos.
+
+
+------------------------------------------------------------------------------
+ 1. O PROBLEMA QUE O PROGRAMA RESOLVE
+------------------------------------------------------------------------------
+
+ Um UHD Blu-ray com Dolby Vision costuma vir no Perfil 7. Esse perfil tem
+ DUAS faixas de vídeo dentro do mesmo arquivo, e a maioria dos aparelhos
+ digitais não sabe o que fazer com a segunda. O resultado é a imagem sair
+ sem Dolby Vision, ou com cor errada, ou o arquivo simplesmente não tocar.
+
+ O Perfil 8.1 resolve: uma faixa só, com os metadados dinâmicos por dentro,
+ e compatível com quem só entende HDR10. É o formato que Plex, Jellyfin,
+ Emby, Apple TV, Shield e as TVs modernas tocam sem reclamar.
+
+ A conversão NÃO recodifica o vídeo. A imagem que sai é a mesma que entrou,
+ quadro por quadro. O que muda é a embalagem.
+
+
+------------------------------------------------------------------------------
+ 2. AS PECAS: BL, EL E RPU
+------------------------------------------------------------------------------
+
+ BL (Base Layer)
+   O vídeo HDR10 normal, 10 bits. É a imagem que você vê. Ela nunca é tocada
+   pela conversão.
+
+ EL (Enhancement Layer)
+   Uma segunda faixa de vídeo, que existe SÓ no Perfil 7. É ela que some na
+   conversão - e todo o resto deste texto é sobre o que tem dentro dela.
+
+ RPU
+   Os metadados dinâmicos. São instruções de brilho, cena a cena, que o
+   arquivo manda para a TV: "aqui o pico e 400 nits, aqui e 1.200". O RPU
+   NÃO some na conversão - ele vai inteiro para o Perfil 8.1.
+
+ Guarde isto, porque é a chave de tudo que vem depois: a conversão joga fora
+ a EL e mantém o RPU.
+
+ E aqui vale a precisão, porque o detalhe muda o que se pode afirmar. O
+ dovi_tool não copia o RPU cru: no modo 2, que é o que este programa usa, ele
+ REMOVE do RPU o mapeamento de luma e croma que só existe no Profile 7 com
+ FEL - a parte das instruções que não faz sentido nenhum sem a segunda
+ camada. O que sai é um RPU de Profile 8.1 legítimo, e não um Profile 7
+ remendado.
+
+ O que o dovi_tool NÃO faz - e nenhum modo dele faz - é recalcular o L1, o
+ número de brilho por cena. Esse continua sendo o que a análise original
+ mediu, e a análise original olhou a imagem com a EL somada. É daí que vem
+ tudo o que este texto discute a seguir.
+
+
+------------------------------------------------------------------------------
+ 3. MEL, SIMPLE FEL E COMPLEX FEL - o que o programa mede
+------------------------------------------------------------------------------
+
+ Nem toda EL carrega a mesma coisa. São três casos, e o programa mede qual é
+ o do seu arquivo antes de converter. Ele não chuta: lê o campo el_type
+ dentro do RPU com o dovi_tool, que é a mesma fonte que qualquer ferramenta
+ séria usa.
+
+ MEL - Minimal Enhancement Layer          [na tela: VERDE]
+   A EL não carrega imagem nenhuma. Ela existe só para o player de disco
+   acionar o segundo decodificador. Descartar uma EL vazia não muda um pixel
+   do vídeo. Conversão limpa, sem ressalva.
+
+ SIMPLE FEL - camada completa, sem expansao de brilho   [na tela: LARANJA]
+   A EL carrega imagem, mas é refino: residual de compressão, grão, degradê
+   mais fino. O brilho que o RPU pede cabe no que a camada base entrega
+   sozinha. Você perde detalhe fino, do tipo que só aparece em quadro
+   parado, olhando de perto, em poucas cenas. Em movimento, não se vê.
+
+ COMPLEX FEL - camada completa, COM expansao de brilho  [na tela: VERMELHO]
+   Aqui a EL não está refinando: ela está LEVANTANDO o brilho. O RPU declara
+   um pico que a camada base sozinha não alcança. Quando a EL some, a TV
+   continua recebendo a instrução antiga - e tenta mapear para um brilho que
+   não existe mais no arquivo. É o único caso que incomoda de verdade.
+
+ O QUE SEPARA SIMPLE DE COMPLEX
+
+   Um número, e só um. O programa compara o L1 (o pico de brilho que o RPU
+   pede) com o pico do mastering display (o monitor em que o filme foi
+   colorizado, declarado dentro do próprio arquivo).
+
+   L1 abaixo do master  ->  a camada extra não estava levantando brilho
+   L1 igual ou acima    ->  estava, e o que ela levantava vai embora
+
+ EXEMPLOS MEDIDOS AQUI, NÃO INVENTADOS
+
+   Troy (2004) Director's Cut  ->  MEL            303 nits de 1.000
+   Game of Thrones S08E01      ->  SIMPLE FEL     153 nits de 1.000
+   Saving Private Ryan (1998)  ->  COMPLEX FEL  1.608 nits de 1.000
+
+ O Saving Private Ryan pede 60% mais brilho do que o master declara. Foi
+ encontrado por medição, sem consultar lista nenhuma.
+
+
+------------------------------------------------------------------------------
+ 4. O VERMELHO NÃO QUER DIZER QUE A CONVERSÃO ESTRAGA
+------------------------------------------------------------------------------
+
+ Esta é a parte que quase nunca é dita, e sem ela o aviso vermelho assusta
+ mais do que deveria.
+
+ A MAIORIA DOS APARELHOS JÁ DESCARTA A CAMADA EXTRA
+
+   NVIDIA Shield, Apple TV com Infuse, Zidoo, Dune HD, Fire TV, as TVs LG e
+   Sony tocando o arquivo direto: todos leem só a camada base e o RPU, e
+   ignoram a segunda faixa. É exatamente o que a conversão faz - só que em
+   definitivo.
+
+   Se você assiste nesses aparelhos, o Perfil 7 já aparece hoje do jeito que
+   o convertido vai aparecer. Você não perde nada ao converter, nem num
+   Complex FEL. Ganha compatibilidade e um arquivo menor.
+
+ QUEM PERDE ALGUMA COISA
+
+   Quem tem um aparelho com decodificador duplo, que junta as duas camadas
+   por hardware. Segundo a comunidade, é o caso dos players de disco OPPO
+   UDP-203/205, Panasonic UB820/UB9000, Sony X700 e X800M2, dos clones OPPO
+   (M9201/M9203/M9205) e do Ugoos AM6B Plus rodando CoreELEC.
+
+   Não testamos nenhum deles - esta lista é relato, não medição nossa.
+
+ O QUE O VERMELHO QUER DIZER, ENTÃO
+
+   "Este arquivo tem uma camada que alguns aparelhos aproveitam, e converter
+   abre mão dela para sempre." Se você não tem um desses aparelhos e não
+   pretende ter, converta sem medo.
+
+ A RECOMENDAÇÃO HONESTA
+
+   Quando der vermelho, guarde o arquivo original se tiver espaço. Não pela
+   imagem de hoje, mas porque a conversão é de mão única e você não sabe que
+   aparelho vai ter daqui a três anos.
+
+
+------------------------------------------------------------------------------
+ 5. COMO A MEDIÇÃO É FEITA, E ATÉ ONDE ELA VALE
+------------------------------------------------------------------------------
+
+ O QUE O PROGRAMA FAZ
+
+   Ele corta alguns trechos curtos do filme, de dois segundos cada, copiando
+   os dados sem recodificar nada, e lê o RPU de cada um. Não encosta no seu
+   arquivo.
+
+   Quantos trechos depende da duração: cinco até uma hora, sete até duas,
+   nove até três, onze acima disso. Um filme longo tem mais cenas para
+   representar, e a amostra acompanha.
+
+ O QUE A LEITURA DÁ COM CERTEZA
+
+   Se é MEL ou FEL. Esse campo é o mesmo do início ao fim do filme, então
+   ler um trecho já basta para saber.
+
+ O QUE A LEITURA DÁ POR AMOSTRA
+
+   Os números de brilho. Os trechos lidos não são o filme inteiro, e um pico
+   que acontece só numa cena de fora pode passar despercebido. Quando os
+   trechos discordam entre si, o programa assume o lado seguro e trata o
+   arquivo como FEL.
+
+ O LIMITE, DITO SEM RODEIO
+
+   O programa não mede o brilho real da camada base. A separação entre
+   Simple e Complex é uma comparação com o pico do mastering display: um bom
+   indício, não uma prova.
+
+   Medir brilho de vídeo é perfeitamente possível — um programa de coloração
+   como o DaVinci Resolve mostra isso quadro a quadro nos scopes, e quem
+   trabalha com HDR faz todo dia. O que não existe, até onde procuramos, é
+   uma medição automática, de linha de comando, que rode no arquivo inteiro
+   e devolva um número que um programa possa usar para decidir sozinho.
+
+   Então: medir a camada base dá para fazer na mão, com olho treinado e
+   ferramenta profissional. Automatizar isso é outro trabalho, e é o que
+   falta aqui. Se um dia o LaFirma fizer, será porque escrevemos o medidor —
+   e este texto vai dizer quando isso acontecer.
+
+ QUANDO NÃO HÁ RÉGUA
+
+   Se o arquivo não declara o pico do mastering display, não há com o que
+   comparar. Nesse caso o programa diz que não sabe, em vez de inventar um
+   número.
+
+   Você vai ver, aí, o programa mostrar o MaxCLL do container e dizer que ele
+   é "outra régua". Isso não é rodeio. O L1 do RPU é MaxRGB - o maior dos três
+   canais de cor, pixel a pixel. O MaxCLL do container é medido por
+   histograma. São duas contas diferentes sobre a mesma imagem, e o número de
+   uma não responde a pergunta da outra: comparar os dois daria um veredicto
+   com cara de medida e sem valor de medida.
+
+   Então ele aparece pelo que serve: dar uma noção de quão claro o filme é, e
+   permitir comparar este arquivo com outro. Para decidir se a camada extra
+   levantava o brilho, só o pico do master serve - e quando ele não está lá, a
+   resposta honesta é que não dá para saber.
+
+
+------------------------------------------------------------------------------
+ 6. ÁUDIO
+------------------------------------------------------------------------------
+
+ TrueHD, DTS-HD MA e DTS:X são formatos de disco. Muita TV e muito servidor
+ não tocam, ou tocam sem os canais todos, ou forçam o servidor a recodificar
+ na hora - que é pior que converter uma vez só, porque acontece toda vez.
+
+ O programa converte para E-AC-3 (Dolby Digital Plus), e o caminho depende
+ do que entra. Não é a mesma coisa para todo mundo:
+
+   TrueHD (com ou sem Atmos)  ->  E-AC-3 Atmos, 1152 kbps, pelo DeeZy
+      O Atmos vive dentro do TrueHD, e o DeeZy sabe levar os objetos de
+      áudio para o E-AC-3 (o formato chamado JOC). O que era Atmos continua
+      Atmos: a mesma cena sonora, num formato que todo mundo toca.
+
+   DTS, DTS-HD MA e DTS:X     ->  E-AC-3 comum, 640 kbps, pelo ffmpeg
+      Aqui NÃO há Atmos na saída, e não é limitação de configuração: DTS e
+      Atmos são tecnologias de empresas diferentes. Os objetos de áudio do
+      DTS:X não viram objetos Dolby - não existe conversor que faça isso. O
+      que sai é a mistura em canais (5.1 ou 7.1), sem áudio por objetos.
+
+   E-AC-3, AC-3 e AAC         ->  não converte
+      Já tocam em qualquer aparelho. Mexer seria perder qualidade à toa.
+
+   Outros codecs              ->  mantidos como estão
+
+ Resumindo o que você ganha e o que perde: vindo de TrueHD Atmos, você mantém
+ o Atmos. Vindo de DTS:X, você perde os objetos - fica um 7.1 em canais. Nos
+ dois casos é conversão com perda, como toda passagem de áudio sem perda para
+ áudio comprimido.
+
+ O áudio original não é apagado do seu arquivo de origem. O que sai é uma
+ cópia nova.
+
+------------------------------------------------------------------------------
+ 7. LEGENDAS
+------------------------------------------------------------------------------
+
+ A legenda PGS de Blu-ray é IMAGEM, não texto. Muita TV não renderiza, e
+ quando renderiza não deixa mudar tamanho nem cor.
+
+ O programa faz OCR das legendas em português e gera um .SRT de texto, com
+ correção por dicionário. No fim ele dá uma nota de qualidade - EXCELENTE,
+ BOA, RAZOÁVEL ou RUIM - conferida no arquivo gerado, não estimada. A
+ legenda PGS original continua dentro do arquivo final: o .SRT é uma faixa
+ a mais, não uma troca.
+
+ A precisão do OCR depende da fonte usada no release. Não existe OCR de
+ legenda com 100% de acerto, e o programa prefere dizer a nota do que
+ fingir que saiu perfeito.
+
+
+------------------------------------------------------------------------------
+ 8. PERFIL 5 - o caminho dele é o container, não o perfil
+------------------------------------------------------------------------------
+
+ O Perfil 5 vem de streaming e usa um espaço de cor próprio (IPTPQc2), sem
+ camada HDR10 de reserva. Remuxar um P5 para P8 não funciona: a imagem sai
+ roxa ou esverdeada. Fazer direito exigiria RECODIFICAR o vídeo inteiro, e
+ isso é justamente o que este programa se recusa a fazer.
+
+ Mas o P5 não fica parado. O que ele precisa não é de conversão de perfil: é
+ de um container que os aparelhos leiam. Em MP4, com a marca dvh1, o Perfil 5
+ toca no Apple TV, no Infuse e nos players que hoje ignoram o .mkv.
+
+ Então o programa remuxa o P5 para MP4, e o vídeo sai COPIADO - quadro por
+ quadro, sem recodificar nada. O que muda é a embalagem, exatamente como no
+ Perfil 7.
+
+ O que muda de faixa nesse caminho:
+
+   Áudio que cabe no MP4      copiado como está (E-AC-3, AC-3, AAC)
+   TrueHD e DTS               viram E-AC-3 640k - não têm lugar no MP4
+   Legenda de texto           vira mov_text, o formato de legenda do MP4
+   Legenda PGS                descartada - imagem não existe em MP4, e não
+                              há OCR neste caminho
+
+ O programa avisa cada uma dessas coisas na tela antes de fazer, e confere a
+ duração do arquivo gerado contra a do original: um remux interrompido no
+ meio deixa um arquivo que abre e mente sobre estar inteiro. Se não bater, o
+ .mp4 é apagado.
+
+
+------------------------------------------------------------------------------
+ 9. BORDAS (L5)
+------------------------------------------------------------------------------
+
+ O RPU também guarda a área ativa da imagem - quantas linhas do quadro são
+ borda preta. O programa lê isso e confere contra a resolução real, e sabe
+ dizer o formato: Scope 2,39:1, Flat 1,85:1, 16:9, 4:3.
+
+ Os quatro números do L5 são a área de LETTERBOX - esquerda, direita, topo,
+ base, nessa ordem - e não a área da imagem. A área ativa é a resolução menos
+ essas bordas. Isso está definido assim no manual oficial das ferramentas
+ profissionais da Dolby, e é como o programa lê.
+
+ Isso só vira aviso quando a borda declarada não resulta em formato de
+ cinema nenhum, que é sinal de RPU com corte errado. A conferência não é
+ invenção nossa: a própria Dolby valida a proporção declarada no L5 contra a
+ proporção do quadro e trata a divergência como ERRO de metadado. Quando
+ acontece, já veio assim do arquivo de origem: a conversão não toca nos
+ blocos de borda.
+
+
+------------------------------------------------------------------------------
+ 10. O QUE O PROGRAMA NÃO FAZ
+------------------------------------------------------------------------------
+
+ - Não recodifica vídeo. Nunca.
+ - Não mede o brilho real da camada base (ver seção 5).
+ - Não regenera o L1 do RPU para o brilho da camada base. Seria a correção de
+   verdade para o Complex FEL, e exige o medidor que ainda não existe.
+   Nenhum modo do dovi_tool faz isso - não é limitação deste programa, é o
+   estado da ferramenta.
+ - Não guarda a EL descartada. Está na fila: um modo que extrai a EL para um
+   arquivo separado, permitindo remontar o Perfil 7 depois.
+ - Não lê o filme inteiro na análise.
+ - Não converte Perfil 5 para 8.1 (o caminho dele é o MP4 - ver seção 8).
+ - Não apaga nem altera o seu arquivo original.
+
+
+------------------------------------------------------------------------------
+ 11. DE ONDE VEIO O QUE SABEMOS
+------------------------------------------------------------------------------
+
+ Este programa não descobriu nada sozinho. O que ele sabe sobre Dolby Vision
+ foi aprendido usando, lendo e ouvindo o trabalho de outras pessoas.
+
+ dovi_tool, de quietvoid
+
+   É a ferramenta que faz a conversão de perfil, aqui e em praticamente todo
+   lugar. Ler o RPU, saber se a camada é MEL ou FEL, exportar o L1 e o L5 —
+   tudo isso é ele. O LaFirma não reimplementa nada disso: ele organiza o
+   trabalho em volta e mostra o resultado de um jeito que dê para decidir.
+
+ DDVT, de DonaldFaQ
+
+   Foi com o DDVT que este projeto aprendeu o assunto. Antes do LaFirma, era
+   com ele que se convertia — e foi usando o DDVT que se entendeu o que é
+   RPU, o que é camada de melhoria, o que muda entre um perfil e outro e por
+   que Perfil 7 dá trabalho. A ideia de automatizar essa conversão nasceu
+   dali. Sem esse aprendizado, nada aqui teria sido escrito.
+
+ dovi_convert, de cryptochrome
+
+   O autor perguntou publicamente como o LaFirma tratava a camada de
+   melhoria: se apenas descartava, ou se checava antes se havia expansão de
+   brilho acima da camada base. A pergunta estava certa, e a resposta na
+   época era desconfortável — o programa descartava sem checar.
+
+   Foi essa cobrança que fez o LaFirma passar a medir antes de converter, e
+   é dela que vem o vocabulário que este texto usa: MEL, Simple FEL e Complex
+   FEL. Crítica técnica, direta e correta, do tipo que melhora o software dos
+   outros. Fica o agradecimento.
+
+ A comunidade
+
+   A planilha mantida por Reset9999, que cataloga título por título quem é
+   MEL e quem é FEL, e as discussões em fórum sobre o que cada aparelho faz
+   com a camada de melhoria. Muito do que está na seção 4 veio de relato de
+   quem tem o aparelho na mão.
+
+------------------------------------------------------------------------------
+ 12. POR QUE AS FERRAMENTAS NÃO VÊM NO GITHUB
+------------------------------------------------------------------------------
+
+ O repositório do GitHub traz o código-fonte: os scripts, o instalador, os
+ manuais. A pasta tools\ com os binários (ffmpeg, dovi_tool, mkvmerge,
+ DeeZy, Tesseract, PgsToSrt e companhia) fica em espelhos externos.
+
+ Dois motivos:
+
+ - Tamanho. São centenas de megabytes de binários de terceiros, que o
+   GitHub não foi feito para hospedar e que mudam de versão sozinhos.
+ - Autoria. São programas de outras pessoas, cada um com sua licença. Nós
+   não republicamos o trabalho dos outros como se fosse nosso: o repositório
+   diz de onde cada um vem e como obtê-lo, e o pacote pronto existe para
+   quem só quer usar sem montar nada.
+
+ Quem quiser montar a pasta na mão encontra a lista completa, com os links
+ oficiais de cada ferramenta, no guia de instalação.
+
+
+------------------------------------------------------------------------------
+ 13. CRÉDITOS
+------------------------------------------------------------------------------
+
+ Este programa é uma casca em volta do trabalho de outras pessoas. Cada uma
+ delas resolveu um problema difícil e deixou o resultado disponível para
+ quem quisesse usar. Sem isso, nada aqui existiria.
+
+ ffmpeg / ffprobe
+   Processamento, extração e análise de mídia. É ele que corta os trechos da
+   amostra sem recodificar, lê a duração e o FPS, e converte o áudio DTS.
+
+ MKVToolNix (mkvmerge)
+   O padrão para arquivos Matroska. Monta o arquivo final, faixa por faixa,
+   preservando capítulos, marcas e nomes.
+
+ dovi_tool (quietvoid)
+   Leitura e conversão dos metadados Dolby Vision. É ele que identifica o
+   perfil, diz se a camada é MEL ou FEL, exporta o L1 e o L5, e faz a
+   conversão de Profile 7 para 8.1.
+
+ DDVT (DonaldFaQ)
+   Trabalho com RPU e correção de corte. Foi a ferramenta que ensinou este
+   projeto a existir: antes do LaFirma, era com ela que se convertia, e foi
+   usando ela que se entendeu o assunto.
+
+ DeeZy
+   Conversão para E-AC-3 com o Atmos preservado. É o que permite sair de um
+   TrueHD Atmos e continuar com Atmos do outro lado.
+
+ seconv / BinaryOCR
+   OCR das legendas PGS, o caminho principal.
+
+ PgsToSrt / Tesseract
+   OCR de reserva, para quando o caminho principal não dá conta.
+
+ E dois agradecimentos que não são de código:
+
+ cryptochrome, autor do dovi_convert
+   Pela pergunta pública sobre camada de melhoria que fez este programa parar
+   de descartar e começar a medir.
+
+ Reset9999 e a comunidade
+   Pela planilha de MEL x FEL por título. Trabalho manual e paciente, que
+   serve de segunda opinião para todo mundo.
+
+
+------------------------------------------------------------------------------
+ 14. ONDE CONFERIR E APRENDER MAIS
+------------------------------------------------------------------------------
+
+ Nada neste texto pede que você acredite na nossa palavra. Abaixo estão as
+ fontes que sustentam o que está escrito aqui, na ordem em que elas importam.
+ A lista é curta de propósito: só entrou o que responde alguma pergunta que
+ este texto levanta.
+
+ O PROGRAMA
+
+ LaFirma Remux Forge
+   https://github.com/tkt2m7g87w-netizen/LaFirma-Remux-Forge
+   Código-fonte, instalador, manuais e o registro de mudanças. Dúvida sobre o
+   que o programa faz se resolve lendo o que ele faz. É também onde relatar
+   um problema ou pedir alguma coisa.
+
+ A FERRAMENTA QUE FAZ A CONVERSÃO
+
+ dovi_tool, de quietvoid
+   https://github.com/quietvoid/dovi_tool
+   A documentação dos modos de conversão está aí. O modo 2, que este programa
+   usa, é descrito como "converte o RPU para Profile 8.1, removendo o
+   mapeamento do Profile 7 FEL". Nenhum modo recalcula o L1 - é o que
+   sustenta a seção 10.
+
+ O QUE A DOLBY PUBLICA
+
+ Dolby Professional Support
+   https://professionalsupport.dolby.com/s/?language=en_US
+   Portal de suporte profissional. Vale pelo manual das Professional Tools e
+   pelos artigos de QC de master, que descrevem o que a própria Dolby valida
+   num metadado: faixa do L1, versão do CM, coerência do L5 com o quadro.
+   É a régua que a seção 9 usa.
+
+ Dolby Vision Post Production Forum
+   https://professionalsupport.dolby.com/s/dolby-vision-post-production-forum?language=en_US
+   Fórum de quem masteriza. Discussão de fluxo, trims e análise, do lado de
+   quem cria o arquivo - não do lado de quem converte.
+
+ Dolby Learning
+   https://learning.dolby.com/
+   Material de formação da Dolby, para quem quer entender o sistema inteiro
+   em vez de só a conversão.
+
+ A SEGUNDA OPINIÃO DA COMUNIDADE
+
+ Planilha de brilho medido por título (madVR)
+   https://docs.google.com/spreadsheets/d/15i0a84uiBtWiHZ5CXZZ7wygLFXwYOd84/
+   Medições de brilho real, quadro a quadro, feitas na imagem decodificada de
+   filme por filme - CLL, FALL, picos e a distribuição por faixa de nits.
+   É o tipo de medida que a seção 5 diz que existe e que o LaFirma ainda não
+   automatiza. Se você quer uma segunda opinião sobre um título específico,
+   é aqui.
+
+ Planilha de players e suporte a MEL/FEL
+   https://docs.google.com/spreadsheets/d/1Uyuw_1dADsRw7u1LGW6qTSZDLLNXWVK82gmHX7L6M3I/
+   Catálogo de aparelhos com coluna própria para Dolby Vision MEL/FEL. É a
+   fonte para a pergunta prática da seção 4: "o meu aparelho aproveita a
+   camada extra ou não?".
+
+ Comparações FEL x camada base
+   https://drive.google.com/drive/folders/1FS42T95TOSpoy4xtwUBIQmziCe_R_IKe
+   Pasta mantida pela comunidade com comparações lado a lado entre o que a
+   camada de melhoria acrescenta e o que a camada base entrega sozinha. É a
+   resposta em imagem para a pergunta da seção 3: "e na prática, quanto
+   muda?".
+
+ PARA QUEM QUER IR FUNDO
+
+ DoViBaker, de erazortt
+   https://github.com/erazortt/DoViBaker
+   Junta camada base, camada de melhoria e RPU e entrega a imagem final em
+   PQ12. É a prova de que dá para ver, e não só supor, o que a camada extra
+   acrescenta num título específico. Traz também um analisador de RPU.
+
+==============================================================================
+ Dúvida que este texto não respondeu é falha deste texto, não sua.
+==============================================================================

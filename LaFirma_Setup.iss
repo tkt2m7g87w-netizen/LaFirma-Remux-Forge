@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ;  LaFirma Remux Forge - Black Edition
 ;  Script de instalacao (Inno Setup 6)
 ;
@@ -73,9 +73,9 @@
 ; sintaxe de PowerShell - o Inno le como texto solto e aborta com
 ; "Text is not inside a section" (aconteceu em 26/08, linha 42).
 ; ============================================================================
-#define Versao      "1.7.3"
-#define VersaoGui   "16.75"
-#define VersaoMotor "14.36"
+#define Versao      "1.8"
+#define VersaoGui   "17.01"
+#define VersaoMotor "14.47"
 #define VersaoCorretor "2.27"
 #define VersaoReocr "1.29"
 #define Publicador  "Diego"
@@ -272,12 +272,26 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; e - 1.4 - as pastas/arquivos de trabalho que o proprio programa gera. Se voce
 ; testou dentro de fonte\ alguma vez, esse lixo iria junto pro instalador.
 ;
+; 1.8: DOIS NOMES NOVOS NA LISTA DE BLOQUEIO (09/09).
+;   LEIA-ME.txt        - e a nota de ENTREGA que vem junto de cada build de
+;                        teste ("copie por cima em C:\LaFirma"). Ela nao faz
+;                        sentido nenhuma para quem instala pelo .exe, e nao
+;                        estava bloqueada: o exclude antigo era "LEIA_ME.txt",
+;                        com UNDERSCORE, e o arquivo tem HIFEN. Um caractere
+;                        de diferenca e ela ia instalada.
+;   Testar_LaFirma.*   - a bateria de regressao e ferramenta de DESENVOLVIMENTO,
+;                        da mesma familia do Auditor_OCR e do Limpar_Testes,
+;                        que ja estavam bloqueados. Ela nao serve para quem so
+;                        quer converter um filme, e sozinha ja tem 145 KB.
+;                        SE VOCE QUISER que ela va no instalador, e so tirar
+;                        os dois nomes desta lista - nada mais depende disso.
+;
 ; O .vbs sai daqui de proposito: ele tem uma entrada propria logo abaixo,
 ; vinda de lancador\. Deixar as duas ativas fazia o mesmo arquivo ser copiado
 ; duas vezes, e se as copias divergissem, quem ganhava era a ultima - confusao
 ; garantida no dia em que o lancador mudar.
 Source: "fonte\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-    Excludes: "COPIE_O_PROGRAMA_AQUI.txt,_testes\*,{#Lancador},README.md,LEIA_ME.txt,Limpar_Testes.ps1,Limpar_Testes.bat,Auditor_OCR.ps1,Auditor_OCR.bat,Reocr_Legenda.bat,deezy_work\*,*.mkv,*.mp4,*.m2ts,*.hevc,*.srt,*.sup,00_Arquivos_Base\*,01_Arquivos_Finalizados\*,_temp_conversao\*,_ddvt_temp_*\*,_logs\*,_corretor\*,_reocr\*,_auditoria_ocr\*,_retratos\*,LaFirma_motor_log_*.txt,log_conversao_*.txt,relatorio_*.txt,tools\DeeZy\apps\ffmpeg\*,tools\PgsToSrt\x86\*"
+    Excludes: "COPIE_O_PROGRAMA_AQUI.txt,_testes\*,{#Lancador},README.md,LEIA_ME.txt,LEIA-ME.txt,Testar_LaFirma.ps1,Testar_LaFirma.bat,Limpar_Testes.ps1,Limpar_Testes.bat,Auditor_OCR.ps1,Auditor_OCR.bat,Reocr_Legenda.bat,deezy_work\*,*.mkv,*.mp4,*.m2ts,*.hevc,*.srt,*.sup,00_Arquivos_Base\*,01_Arquivos_Finalizados\*,_temp_conversao\*,_ddvt_temp_*\*,_logs\*,_corretor\*,_reocr\*,_auditoria_ocr\*,_retratos\*,LaFirma_motor_log_*.txt,log_conversao_*.txt,relatorio_*.txt,tools\DeeZy\apps\ffmpeg\*,tools\PgsToSrt\x86\*"
 
 ;
 ; ---- 1.7: O MANUAL TAMBEM E ENTREGA (03/09) -------------------------------

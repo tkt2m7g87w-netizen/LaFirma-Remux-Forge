@@ -1,0 +1,213 @@
+﻿# LaFirma Remux Forge - tabela de traducao PT -> EN
+# Uma linha por texto. Separador: TAB (nao espaco).
+# Linha vazia ou comecando com # e ignorada.
+# Editar aqui NAO exige mexer em codigo nem reinstalar nada.
+
+# ---- Barra de botoes ----
+Iniciar F1	Start F1
+Pausar F2	Pause F2
+Retomar F2	Resume F2
+Cancelar ESC	Cancel ESC
+Parar	Stop
+Abrir Origem	Open Source
+Abrir Saída	Open Output
+Atualizar	Refresh
+Entenda	Learn
+Log	Log
+Ferramentas	Tools
+
+# ---- Pastas ----
+PASTAS:	FOLDERS:
+Pasta de Origem :	Source Folder  :
+Pasta de Saída  :	Output Folder  :
+Procurar	Browse
+
+# ---- Abas e listas ----
+Fila	Queue
+Faixas do Vídeo	Video Tracks
+Marcar Todos	Select All
+Desmarcar Todos	Clear All
+Selecione um vídeo na aba Fila.	Select a video on the Queue tab.
+Modo: Automático	Mode: Automatic
+Modo: Manual	Mode: Manual
+Lendo a pasta...	Reading the folder...
+
+# ---- Cabecalhos da fila ----
+VÍDEOS NA FILA	VIDEOS IN QUEUE
+TAMANHO	SIZE
+DOLBY VISION	DOLBY VISION
+ÁUDIO	AUDIO
+LEGENDA PT-BR	PT-BR SUBTITLE
+SITUAÇÃO	STATUS
+
+# ---- Cabecalhos das faixas ----
+ID	ID
+TIPO	TYPE
+CODEC	CODEC
+IDIOMA	LANGUAGE
+NOME DA FAIXA	TRACK NAME
+MARCAS	FLAGS
+PADRÃO	DEFAULT
+AÇÃO	ACTION
+
+# ---- Paineis ----
+DIAGNÓSTICO:	DIAGNOSIS:
+ESPAÇO EM DISCO:	DISK SPACE:
+FERRAMENTAS DISPONIVEIS:	AVAILABLE TOOLS:
+RESUMO DA CONVERSÃO:	CONVERSION SUMMARY:
+DETALHAMENTO POR PROCESSO:	BREAKDOWN BY PROCESS:
+VÍDEO	VIDEO
+Este vídeo não pôde ser lido.	This video could not be read.
+
+# ---- Fim ----
+Conversão Concluída	Conversion Finished
+Conversão Interrompida	Conversion Interrupted
+Nova Conversão	New Conversion
+Encerrar Programa	Quit
+
+# ============================================================================
+#  REGRAS DE PADRAO (16.94)
+# ============================================================================
+#  Uma linha que comeca com ~ nao e um rotulo: e uma REGRA.
+#    ~<expressao regular><TAB><substituicao>
+#  Use $1, $2... para os pedacos capturados (numero, nome de arquivo, %) -
+#  eles NAO se traduzem, so mudam de lugar dentro da frase inglesa.
+#  As regras rodam EM ORDEM, uma depois da outra, sobre a frase ja montada.
+#  Por isso: regra mais especifica ANTES da mais geral.
+#  Servem para o texto que a tela monta na hora ("Fila (3)", "Convertendo ·
+#  Etapa 3/5", as frases do diagnostico) - esse texto nunca passou pela
+#  varredura da arvore, que so alcanca rotulo fixo.
+
+# ---- Abas e cabecalhos com contagem ----
+~^Fila \((\d+)\)$	Queue ($1)
+~^Faixas do Vídeo \((\d+)\)$	Video Tracks ($1)
+~^VÍDEOS NA FILA \((\d+)\)$	VIDEOS IN QUEUE ($1)
+~^VÍDEOS NA FILA \((\d+) de (\d+) Selecionados\)$	VIDEOS IN QUEUE ($1 of $2 Selected)
+
+# As regras rodam EM ORDEM. Estas quatro vem ANTES do bloco geral
+# da coluna SITUACAO porque a regra generica "...Convertido -> ...Converted"
+# casaria primeiro com "Já Convertido" e devolveria "Já Converted".
+# Regra mais especifica primeiro, sempre.
+# ---- Coluna SITUACAO, ramo "nao vai ser processado" ----
+~^(.*)Já Convertido$	$1Already Converted
+~^(.*)Não Foi Possível Ler$	$1Could Not Be Read
+~^(.*)Já Existe na Saída$	$1Already in the Output Folder
+~^(.*)Erro na Leitura$	$1Read Error
+
+# ---- Coluna SITUACAO ----
+~Etapa (\d+)/(\d+)	Step $1/$2
+~Convertendo · 	Converting · 
+~Pausado · 	Paused · 
+~^(.*)Nada a Converter$	$1Nothing to Convert
+~^(.*)Proximo a Converter$	$1Next to Convert
+~^(.*)Convertido$	$1Converted
+~^Na Fila$	Queued
+~  ·  Manual	  ·  Manual
+
+# ---- Rotulos que o CODIGO reescreve (a varredura da arvore nao segura) ----
+Parar	Stop
+Lendo a Pasta...	Reading the Folder...
+Origem e Saída São a Mesma Pasta	Source and Output Are the Same Folder
+Cancelando - Aguardando o Motor Encerrar...	Cancelling - Waiting for the Engine to Stop
+Marque o vídeo p/ editar	Tick the video to edit
+
+# ---- Painel de ESPACO EM DISCO (montado linha a linha) ----
+~ESPAÇO EM DISCO:	DISK SPACE:
+~^Espaço Necessário Estimado : 	Estimated Space Needed     : 
+~^Espaço Livre em (\S+)\s*: 	Free Space on $1           : 
+~^Falta Liberar\s*: 	Must Free Up               : 
+~^Espaço Livre Após Converter: 	Free Space After Converting: 
+~Espaço em Disco Suficiente para Converter Todos os Vídeos da Fila\.	Enough Disk Space to Convert Every Video in the Queue.
+~Espaço Suficiente, Mas o Disco Vai Ficar Apertado Durante a Conversão\.	Enough Space, But the Disk Will Be Tight During the Conversion.
+~No Limite: Sobra Menos de 10% do Disco no Pico da Conversão\.	At the Limit: Less Than 10% of the Disk Left at the Conversion Peak.
+~Espaço Insuficiente - Vídeos Podem Ser Ignorados por Falta de Espaço\.	Not Enough Space - Videos May Be Skipped for Lack of Space.
+~ \(pico de um arquivo\)	 (peak of one file)
+~ \(pico do lote\)	 (peak of the batch)
+
+# ---- Modo do video (o valor guardado nao tem acento) ----
+~^Modo: Automatico$	Mode: Automatic
+~^Modo: Manual$	Mode: Manual
+
+# ---- Titulo do diagnostico com o nome do arquivo ----
+~^DIAGNÓSTICO - 	DIAGNOSIS - 
+
+# ---- Coluna DOLBY VISION enquanto mede ----
+~ ⋯ → 	 ⋯ → 
+~^P(\d)\.(\d+) medindo	P$1.$2 measuring
+~medindo	measuring
+
+# ---- Titulos de janela que faltavam ----
+~^PAUSADO - (\d+)% - Sem Consumir CPU/Disco$	PAUSED - $1% - Not Using CPU/Disk
+~^Pronto para Converter - (\d+) Vídeo\(s\) na Fila$	Ready to Convert - $1 Video(s) in Queue
+~^Lendo (\d+)/(\d+) - (.*)$	Reading $1/$2 - $3
+~^Conversão Concluída às (.*)$	Conversion Finished at $1
+~^Conversão Interrompida às (.*)$	Conversion Interrupted at $1
+
+# ---- Titulo da janela ----
+~^Pronto para Converter - (\d+) Vídeo\(s\) Selecionado\(s\)$	Ready to Convert - $1 Video(s) Selected
+~^Convertendo	Converting
+
+# ---- Selos do diagnostico (sempre entre colchetes, no inicio da resposta) ----
+~\[SERÁ CONVERTIDO\]	[WILL BE CONVERTED]
+~\[SERÁ CONVERTIDA\]	[WILL BE CONVERTED]
+~\[CONVERSÃO NÃO RECOMENDADA\]	[CONVERSION NOT RECOMMENDED]
+~\[SERÁ REMUXADO\]	[WILL BE REMUXED]
+~\[NÃO SERÁ CONVERTIDO\]	[WILL NOT BE CONVERTED]
+~\[NÃO SERÁ FEITO\]	[WILL NOT BE DONE]
+~\[NÃO NECESSÁRIO\]	[NOT NEEDED]
+~\[CONVERSÃO NÃO NECESSÁRIA\]	[CONVERSION NOT NEEDED]
+~\[REAPROVEITADO\]	[REUSED]
+~\[REAPROVEITADA\]	[REUSED]
+~\[MANTIDO\]	[KEPT]
+~\[DETECTADO\]	[DETECTED]
+~\[SEM ÁUDIO\]	[NO AUDIO]
+~\[SEM LEGENDA PT-BR\]	[NO PT-BR SUBTITLE]
+~\[EL: NÃO MEDIDA\]	[EL: NOT MEASURED]
+
+# ---- Linha do Dolby Vision ----
+~^Dolby VISION: 	Dolby VISION: 
+~Já Está em Profile 8\.1	Already in Profile 8.1
+~medindo a camada de melhoria \(MEL x FEL\)	measuring the enhancement layer (MEL x FEL)
+~EL não medida	EL not measured
+~— MEL: EL vazia, descarte sem perda	— MEL: empty EL, discarded with no loss
+~— FEL: a camada extra tem imagem, descartada	— FEL: the extra layer has picture, discarded
+~— FEL: a camada extra levanta o brilho	— FEL: the extra layer raises brightness
+~o arquivo pede ([\d.,]+) nits, dentro dos ([\d.,]+) do master	the file asks for $1 nits, within the master's $2
+~o arquivo pede ([\d.,]+) nits e o master é ([\d.,]+)	the file asks for $1 nits and the master is $2
+~Profile 5 não vira 8\.1 sem recodificar o vídeo — o caminho dele é o MP4, com o vídeo copiado	Profile 5 cannot become 8.1 without re-encoding the video — its path is MP4, with the video copied
+~Profile 5 não vira 8\.1 sem recodificar o vídeo — o caminho dele é o remux para MP4	Profile 5 cannot become 8.1 without re-encoding the video — its path is a remux to MP4
+
+~L1 pede ([\d.,]+) nits — o master não é declarado, então não há régua	L1 asks for $1 nits — the master is not declared, so there is no ruler
+~o container declara MaxCLL ([\d.,]+) por outra régua \(histograma\)	the container declares MaxCLL $1 by a different ruler (histogram)
+~L1 pede ([\d.,]+) nits	L1 asks for $1 nits
+~borda do RPU \(L5\) dá ([^,]+), que não é formato de cinema - já vem assim da origem	RPU border (L5) gives $1, which is no cinema format - it came that way from the source
+
+# ---- Linha do audio ----
+~^ÁUDIO PRINCIPAL \(o que o programa converte\): 	MAIN AUDIO (the one the program converts): 
+~o arquivo marca outra faixa como padrão \(([^)]+)\) — a escolha aqui é pelo codec, não pela marca	the file flags a different track as default ($1) — the choice here is by codec, not by the flag
+~^ÁUDIO PRINCIPAL: NENHUM$	MAIN AUDIO: NONE
+~^ÁUDIO PRINCIPAL: 	MAIN AUDIO: 
+~O Arquivo Não Tem Faixa de Áudio	The File Has No Audio Track
+~Faixa Já Compatível	Track Already Compatible
+~Modo Seguro, Faixa Preservada	Safe Mode, Track Preserved
+~DeeZy Faria 	DeeZy Would Do 
+~ canais	 channels
+
+# ---- Linha da legenda ----
+~^LEGENDA PT-BR: NÃO ENCONTRADA$	PT-BR SUBTITLE: NOT FOUND
+~^LEGENDA PT-BR 	PT-BR SUBTITLE 
+~^LEGENDA PT-BR: 	PT-BR SUBTITLE: 
+~ na Faixa 	 on Track 
+~Legenda Padrão do Arquivo Final	Default Subtitle of the Final File
+~Legenda em Português no formato \.SRT \(por OCR\)	Portuguese subtitle in .SRT format (by OCR)
+~O Arquivo Final Não Terá Legenda em Português	The Final File Will Have No Portuguese Subtitle
+~Existe Só Legenda de Portugal \(pt-PT\)	Only European Portuguese (pt-PT) Subtitles Exist
+
+# ---- Colunas de audio e legenda da fila ----
+~ Mantido$	 Kept
+~ Excluído$	 Excluded
+~^Sem Dolby Vision$	No Dolby Vision
+~^Sem Áudio$	No Audio
+~^Sem Legenda$	No Subtitle
+~^Não Lido$	Not Read
+~^Já Convertido$	Already Converted

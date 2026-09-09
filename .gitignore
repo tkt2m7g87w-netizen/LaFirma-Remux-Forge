@@ -1,0 +1,67 @@
+# ============================================================================
+#  LaFirma Remux Forge - o que NAO sobe para o GitHub
+# ----------------------------------------------------------------------------
+#  Este arquivo existe por um motivo medido: a pasta fonte\tools\ tem
+#  1,16 GB de binarios de OUTRAS PESSOAS. Sem esta lista, um "arrastar a
+#  pasta inteira" sobe tudo - e sete arquivos dela passam de 50 MB, que e
+#  onde o GitHub comeca a reclamar (seconv.exe sozinho tem 75 MB).
+#
+#  Sem tools\, o repositorio inteiro fica em ~5 MB.
+#
+#  E nao e so tamanho: sao programas de terceiros, cada um com sua licenca.
+#  O projeto nao republica o trabalho dos outros - diz de onde cada um vem.
+# ============================================================================
+
+# ---- Binarios de terceiros (o motivo principal) ----
+#  Bloqueia o CONTEUDO de tools\, mas deixa passar os .txt que explicam de
+#  onde baixar cada ferramenta - eles sao nossos, tem 2 KB, e sao justamente
+#  o que faz a pasta vazia no GitHub ter serventia para quem for montar.
+fonte/tools/*
+!fonte/tools/*.txt
+tools/*
+!tools/*.txt
+
+# ---- O runtime do .NET que o instalador embute (56 MB, e da Microsoft) ----
+redist/*.exe
+
+# ---- O que o Inno Setup produz ----
+Saida/*.exe
+Saida/*.iss.bak
+Output/
+
+# ---- O que o proprio programa cria enquanto roda ----
+_logs/
+_corretor/
+_reocr/
+_auditoria_ocr/
+_retratos/
+_temp_conversao/
+_ddvt_temp_*/
+_ddvt_au_*/
+deezy_work/
+00_Arquivos_Base/
+01_Arquivos_Finalizados/
+LaFirma_motor_log_*.txt
+log_conversao_*.txt
+relatorio_*.txt
+IDIOMA.txt
+CALIBRAGEM.txt
+VERSAO.txt
+
+# ---- Midia: nunca, em hipotese nenhuma ----
+*.mkv
+*.mp4
+*.m2ts
+*.hevc
+*.srt
+*.sup
+*.ass
+
+# ---- Notas de entrega de build (nao sao do programa) ----
+LEIA-ME.txt
+!redist/LEIA-ME.txt
+
+# ---- Sujeira de sistema ----
+Thumbs.db
+desktop.ini
+.DS_Store

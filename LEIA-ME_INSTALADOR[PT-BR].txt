@@ -1,4 +1,4 @@
-================================================================================
+﻿================================================================================
            GUIA DE COMPILAÇÃO E INSTALAÇÃO COM INNO SETUP (.ISS)
                       LaFirma Remux Forge - Black Edition
 ================================================================================
@@ -12,6 +12,12 @@ Se você é o usuário final, apenas execute o arquivo 'LaFirma_Setup.exe'.
 Por questões de direitos autorais e limites de tamanho de repositório, os
 arquivos binários pesados e ferramentas de terceiros contidos na pasta 'tools\'
 NÃO PODEM SER ENVIADOS AO GITHUB.
+
+A REGRA ESTÁ AUTOMATIZADA DESDE 09/09/2026: existe um .gitignore na raiz do
+projeto que bloqueia fonte\tools\, o .exe do runtime em redist\, o instalador
+compilado em Saida\ e tudo que o programa cria enquanto roda. Ele existe porque
+"lembrar de não arrastar a pasta tools" é o tipo de regra que falha uma vez e
+sobe 1,16 GB de binário de terceiro para um repositório público.
 
 O repositório contém apenas os scripts fontes (.ps1, .bat, .vbs), arquivos de
 configuração, dicionários e este script do Inno Setup (.iss).
@@ -51,6 +57,13 @@ diretamente na estrutura da pasta 'tools\':
    - Link: https://github.com/quietvoid/dovi_tool/releases
    - Ação: Baixe o arquivo 'dovi_tool-x.x.x-x86_64-pc-windows-msvc.zip', extraia e
      coloque o 'dovi_tool.exe' na raiz de 'tools\'.
+   - VERSÃO MÍNIMA: 2.3.3. A partir da 1.8 o programa usa o comando
+     'export --levels level1,level5', que só existe da 2.3.3 em diante. Com a
+     2.3.2 nada quebra - a detecção MEL x FEL continua funcionando, porque usa
+     outro comando -, mas o censo do L1 por cena e a leitura da área ativa (L5)
+     simplesmente não aparecem.
+     A troca foi validada em bancada própria: 5 arquivos, 3 perfis, 2 versões de
+     CM, zero divergência na leitura entre 2.3.2 e 2.3.3.
 
 3. MKVToolNix (mkvmerge.exe, mkvextract.exe):
    - Fonte: Download oficial do MKVToolNix.
@@ -94,66 +107,104 @@ diretamente na estrutura da pasta 'tools\':
 --------------------------------------------------------------------------------
 4. ÁRVORE DE PASTAS OBRIGATÓRIA (ESTRUTURA PRÉ-COMPILAÇÃO)
 --------------------------------------------------------------------------------
-Antes de clicar em "Compile" no Inno Setup, a sua pasta raiz do projeto
-DEVE conter exatamente a estrutura e os arquivos abaixo:
+CORRIGIDA EM 09/09/2026. A versão anterior deste guia mostrava os .ps1 na RAIZ
+do projeto - eles ficam dentro de 'fonte\', e é de lá que o .iss os empacota
+(Source: "fonte\*", recursivo). Quem montasse a pasta seguindo a árvore antiga
+compilaria um instalador vazio de programa.
+
+Antes de clicar em "Compile" no Inno Setup, a sua pasta raiz do projeto DEVE
+conter exatamente a estrutura abaixo:
 
 <PASTA_RAIZ_DO_PROJETO>\
 |-- LaFirma_Setup.iss                <- O script de compilação do Inno Setup
-|-- Abrir_LaFirma_JANELA.vbs         <- Atalho direto sem console
-|-- Abrir_LaFirma_JANELA.bat         <- Atalho com console visível (diagnóstico)
-|-- LaFirma_JANELA.ps1               <- Interface gráfica WPF
-|-- Converter_AUTO_DIRETO.ps1       <- Motor do programa
-|-- Converter_AUTO_DIRETO.bat       <- Executável direto em modo console
-|-- Corretor_Legenda.ps1            <- Script de pós-processamento de legendas
-|-- Reocr_Legenda.ps1               <- Script de Re-OCR com Tesseract
-|-- LaFirma_PTBR_1.3M.dic.gz        <- Dicionário PT-BR principal
-|-- Auditor_OCR.dic.gz              <- Dicionário de apoio do motor
-|-- HOW_TO_USE_EN.txt               <- Manual em Inglês
-|-- COMO_USAR_PT.txt                <- Manual em Português
-|-- Changelog.txt                   <- Histórico de alterações
+|-- Compilar.bat                     <- Atalho para compilar sem abrir a IDE
+|-- README.md                        <- A página do GitHub
+|-- .gitignore                       <- O que NÃO sobe para o GitHub (ver 1)
+|-- LEIA-ME_INSTALADOR[PT-BR].txt    <- Este guia
+|-- README_INSTALLER[ENGLISH].txt    <- Este guia, em inglês
+|
+|-- fonte\                           <- TUDO QUE VIRA O PROGRAMA INSTALADO
+|     |-- LaFirma_JANELA.ps1         <- Interface gráfica WPF
+|     |-- Abrir_LaFirma_JANELA.bat   <- Atalho com console visível (diagnóstico)
+|     |-- Converter_AUTO_DIRETO.ps1  <- Motor do programa
+|     |-- Converter_AUTO_DIRETO.bat  <- Executável direto em modo console
+|     |-- Corretor_Legenda.ps1       <- Pós-processamento de legendas
+|     |-- Reocr_Legenda.ps1          <- Re-OCR com Tesseract
+|     |-- Reocr_Legenda.bat          <- (ferramenta de dev, NÃO vai no instalador)
+|     |-- Auditor_OCR.ps1 / .bat     <- (ferramenta de dev, NÃO vai no instalador)
+|     |-- Auditor_OCR.dic.gz         <- Dicionário de apoio do auditor
+|     |-- Limpar_Testes.ps1 / .bat   <- (ferramenta de dev, NÃO vai no instalador)
+|     |-- LaFirma_PTBR_1.3M.dic.gz   <- Dicionário PT-BR principal
+|     |-- COMO_USAR_PT.txt           <- Manual do usuário, português
+|     |-- HOW_TO_USE_EN.txt          <- Manual do usuário, inglês
+|     |-- FAQ_PT.txt                 <- Texto do botão ENTENDA, português
+|     |-- FAQ_EN.txt                 <- Texto do botão LEARN, inglês
+|     |-- IDIOMA_EN.txt              <- Tabela e regras de tradução PT -> EN
+|     |-- Changelog.txt              <- Histórico de alterações, português
+|     |-- CHANGELOG_EN.txt           <- Histórico de alterações, inglês
+|     |
+|     |-- tools\                     <- PASTA TOOLS (MONTADA VIA PASSO 3)
+|           |-- ffmpeg.exe
+|           |-- ffprobe.exe
+|           |-- dovi_tool.exe        <- VERSÃO MÍNIMA 2.3.3
+|           |-- mkvmerge.exe
+|           |-- mkvextract.exe
+|           |-- MediaInfo.exe
+|           |-- nvcuda.dll / nvcuvid.dll / LIBCURL.DLL
+|           |
+|           |-- SubtitleEdit\        <- Motor de OCR preferencial
+|           |     |-- seconv.exe
+|           |     |-- Latin.db
+|           |     |-- libSkiaSharp.dll / libHarfBuzzSharp.dll
+|           |
+|           |-- PgsToSrt\            <- OCR secundário (.NET 8 x64)
+|           |     |-- PgsToSrt.exe
+|           |     |-- x64\
+|           |     |-- tessdata\
+|           |           |-- por.traineddata
+|           |
+|           |-- Tesseract\           <- Re-OCR de linhas curtas
+|           |     |-- tesseract.exe
+|           |     |-- tessdata\
+|           |           |-- por.traineddata
+|           |           |-- osd.traineddata
+|           |
+|           |-- DeeZy\               <- Conversor TrueHD/Atmos -> E-AC-3
+|                 |-- deezy.exe
+|                 |-- apps\          <- dee\ e truehdd\
 |
 |-- icone\
-|     |-- icone.ico                 <- Ícone do programa
+|     |-- LaFirmaRemuxForge.ico      <- Ícone do programa
 |
-|-- redist\                         <- (Opcional) Guarde o Runtime aqui
+|-- lancador\
+|     |-- Abrir_LaFirma_JANELA.vbs   <- Atalho direto, sem console
+|
+|-- redist\                          <- (Opcional) Runtime .NET
 |     |-- windowsdesktop-runtime-8.0.30-win-x64.exe
 |     |-- LEIA-ME.txt
+|     |-- README.txt
 |
-|-- tools\                          <- PASTA TOOLS (MONTADA VIA PASSO 3)
-|     |-- ffmpeg.exe
-|     |-- ffprobe.exe
-|     |-- dovi_tool.exe
-|     |-- mkvmerge.exe
-|     |-- mkvextract.exe
-|     |-- MediaInfo.exe
-|     |-- nvcuda.dll / nvcuvid.dll / LIBCURL.DLL
-|     |
-|     |-- SubtitleEdit\             <- Motor de OCR Preferencial
-|     |     |-- seconv.exe
-|     |     |-- Latin.db
-|     |     |-- libSkiaSharp.dll
-|     |
-|     |-- PgsToSrt\                 <- OCR Secundário (.NET 8 x64)
-|     |     |-- PgsToSrt.exe
-|     |     |-- x64\
-|     |     |-- tessdata\
-|     |           |-- por.traineddata
-|     |
-|     |-- Tesseract\                <- RE-OCR de linhas curtas
-|     |     |-- tesseract.exe
-|     |     |-- tessdata\
-|     |           |-- por.traineddata
-|     |           |-- osd.traineddata
-|     |
-|     |-- DeeZy\                    <- Conversor TrueHD/Atmos -> E-AC-3
-|           |-- deezy.exe
-|           |-- apps\               <- Ferramentas internas
+|-- _testes\                         <- Bateria de regressão (NÃO vai no
+|     |-- Testar_LaFirma.ps1            instalador; é ferramenta de dev)
+|     |-- Testar_LaFirma.bat
 |
-|-- 00_Arquivos_Base\               <- Pasta onde o usuário colocará as mídias
-|-- 01_Arquivos_Finalizados\        <- Pasta de saída das mídias prontas
+|-- Saida\                           <- O instalador compilado sai aqui
+
+
+ATENÇÃO A DOIS DETALHES QUE JÁ CUSTARAM CARO:
+
+  1) As pastas 00_Arquivos_Base\ e 01_Arquivos_Finalizados\ NÃO ficam aqui.
+     Elas são criadas pelo INSTALADOR na máquina do usuário. Se existirem
+     dentro de fonte\, o .iss as exclui - mas um .mkv esquecido lá dentro
+     viraria um instalador de 80 GB, e por isso a exclusão existe.
+
+  2) A pasta fonte\tools\ tem cerca de 1,16 GB e são programas de OUTRAS
+     PESSOAS. Ela NUNCA vai para o GitHub - o .gitignore na raiz cuida disso.
+     Sem ela, o repositório inteiro fica em torno de 5 MB.
 
 
 --------------------------------------------------------------------------------
+
 5. PASSO A PASSO PARA GERAR O INSTALADOR (.ISS)
 --------------------------------------------------------------------------------
 1. Certifique-se de ter baixado e posicionado todas as ferramentas da Seção 3 

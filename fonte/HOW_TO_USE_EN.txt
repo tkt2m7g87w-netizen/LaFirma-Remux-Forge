@@ -46,6 +46,61 @@ DIAGNOSIS and then 5 WORK STEPS, each with its own progress bar:
      - If the video is ALREADY Profile 8.x (no Enhancement Layer), this step
        is SKIPPED automatically and the video is reused ("[NOT NEEDED]
        Already Profile 8.1"). Profiles 5 and 7 are converted normally.
+     - The diagnosis now tells you WHICH KIND of enhancement layer a Profile
+       7 file has, because that changes what the conversion means. It reads
+       this from the file itself, over a few short stretches of video:
+
+         MEL   ->  [WILL BE CONVERTED], in green. The enhancement layer
+                   carries no picture; discarding it does not change the
+                   video.
+
+         SIMPLE FEL -> [WILL BE CONVERTED, WITH A CAVEAT], in orange. The
+                   layer does carry picture, but it is refinement: the fine
+                   residual between the 10-bit base and the higher precision
+                   of the master. Dropping it costs gradient and shadow
+                   detail that only shows on a paused frame, looked at
+                   closely. While watching, you do not see it.
+
+         COMPLEX FEL -> [CONVERSION NOT RECOMMENDED], in red. Here the extra
+                   layer is not refining, it is RAISING the brightness - and
+                   the L1 left in the file describes that higher peak. The
+                   TV is then told to tone map to a brightness that is no
+                   longer there.
+
+                   THE PROBLEM WAS NEVER THE PIXEL, IT WAS THE INSTRUCTION.
+                   L1 is the nits message handed to the TV; what ruins the
+                   picture is that message being wrong, not the layer being
+                   gone.
+
+                   Red does NOT block anything: if you start it, it
+                   converts. And it is worth knowing that most digital
+                   players (Shield, Apple TV, Zidoo, TVs) discard that layer
+                   anyway - on those, the file already plays today the way
+                   the converted one will. The LEARN button, on the top bar,
+                   explains this at length - and its final section gives
+                   the addresses where you can check every claim for
+                   yourself. It opens in whichever language the flag next
+                   to the button is set to.
+
+                   What separates Simple from Complex is a number: the
+                   file's L1 against the mastering display peak. If the file
+                   does not declare that peak, the program says it does not
+                   know, instead of picking a side.
+
+         [NOT MEASURED] -> the layer could not be read on this file. That
+                   does not mean it is clean; it means it was not measured.
+
+     - Profile 5 is a different case, and it has its own path. Getting to
+       Profile 8.1 from it would require RE-ENCODING the video - it is not
+       a remux, and there is loss. What P5 needs is not a profile
+       conversion: it is a container devices will read. So the program
+       remuxes it to MP4, with the video COPIED and the dvh1 tag - that is
+       how a P5 plays on Apple TV, on Infuse and on the players that ignore
+       .mkv. On that path: audio is copied when it fits in MP4 (E-AC-3,
+       AC-3, AAC) and becomes E-AC-3 640k when it does not (TrueHD, DTS);
+       text subtitles become mov_text; PGS subtitles are discarded, because
+       image subtitles have no representation in MP4 - and there is no OCR
+       on this path. The program announces each of these before doing it.
   3. Converts the MAIN audio track to E-AC-3, following this rule:
      - Dolby TrueHD/MLP  -> E-AC-3 Atmos (via DeeZy), if DeeZy is available.
      - DTS / DTS-HD / DTS:X -> standard E-AC-3 (via ffmpeg).
@@ -308,6 +363,12 @@ Everything must be inside the SAME main folder:
     |-- Changelog.txt                  <- what changed in each version
     |
     |-- icone\                         <- the program icon
+    |-- CALIBRAGEM.txt                 <- created automatically, one line per
+    |                                     converted file: this is how the time
+    |                                     estimate learns this machine's pace.
+    |                                     Deleting it breaks nothing - the
+    |                                     program falls back to the factory
+    |                                     number and starts learning again.
     |-- _logs\                         <- created automatically, per-session logs
     |-- _corretor\                     <- only appear when a subtitle comes out
     |-- _reocr\                           with defects (see below)

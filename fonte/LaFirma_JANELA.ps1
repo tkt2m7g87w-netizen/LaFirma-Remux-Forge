@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.01
+#  LaFirma - JANELA 17.02
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,8 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    17.02  09/09/2026  A ESCOLHA DE IDIOMA CHEGA AO DISCO, E O PAINEL DE
+#                       DISCO VOLTA JUNTO COM A LINGUA.
 #    17.01  09/09/2026  A TELA EM INGLES PAROU DE SER METADE EM CADA.
 #           Print do Diego com a bandeira em EN: ele olhou "VIDEOS IN
 #           QUEUE" e perguntou "que lingua e essa?". A frase esta certa -
@@ -578,7 +580,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.01"
+$SCRIPT_VERSION = "17.02"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -2383,8 +2385,48 @@ function Test-TemReocr {
     da barra sem que o resto do motor de progresso precise mudar.
     $Gb = 0 devolve 0: sem tamanho nao ha conversao possivel, e devolver
     zero e melhor que dividir por zero. #>
+function Get-PastaDados {
+    <#  17.02 - ONDE O PROGRAMA GUARDA O QUE E DELE.
+
+        O idioma escolhido e a calibragem do tempo eram gravados na pasta
+        do proprio programa. Funciona quando o LaFirma mora em C:\LaFirma,
+        e falha calada quando ele mora em Program Files - o Windows nega a
+        escrita e o catch engolia o erro. Era esse o defeito de "escolhi
+        ingles, fechei e voltou em portugues": a escolha nunca chegou ao
+        disco.
+
+        Agora: tenta a pasta do programa (que continua sendo o lugar certo
+        para quem instala em C:\LaFirma, e mantem o que ja esta gravado);
+        se ela nao aceita escrita, cai para %LOCALAPPDATA%\LaFirma, que e
+        do usuario e sempre aceita. O teste e uma escrita de verdade, nao
+        um palpite pelo caminho. #>
+    if ($script:PastaDados) { return $script:PastaDados }
+    $cand = $script:PastaScript
+    try {
+        $sonda = Join-Path $cand ".lafirma_escrita.tmp"
+        [System.IO.File]::WriteAllText($sonda, "x")
+        [System.IO.File]::Delete($sonda)
+    } catch {
+        $cand = Join-Path $env:LOCALAPPDATA "LaFirma"
+        try { if (-not (Test-Path -LiteralPath $cand)) { New-Item -ItemType Directory -Path $cand -Force | Out-Null } }
+        catch { $cand = $script:PastaScript }
+    }
+    $script:PastaDados = $cand
+    return $cand
+}
+
+function Get-CaminhoIdioma {
+    <#  17.02: le dos DOIS lugares. Quem ja tinha o IDIOMA.txt na pasta do
+        programa nao perde a escolha ao atualizar. #>
+    $naDados = Join-Path (Get-PastaDados) "IDIOMA.txt"
+    if (Test-Path -LiteralPath $naDados) { return $naDados }
+    $noScript = Join-Path $script:PastaScript "IDIOMA.txt"
+    if (Test-Path -LiteralPath $noScript) { return $noScript }
+    return $naDados
+}
+
 function Get-CaminhoCalibragem {
-    return (Join-Path $script:PastaScript $script:CalibArquivo)
+    return (Join-Path (Get-PastaDados) $script:CalibArquivo)
 }
 
 function Get-Percentil([double[]]$Valores, [double]$P) {
@@ -5184,13 +5226,23 @@ function Set-Idioma([string]$Novo) {
         proxima vez. Um arquivo de uma linha resolve, e ele nao e critico:
         se sumir ou vier corrompido, abre em portugues, como sempre foi. #>
     try {
-        [System.IO.File]::WriteAllText((Join-Path $script:PastaScript "IDIOMA.txt"), $Novo,
+        [System.IO.File]::WriteAllText((Join-Path (Get-PastaDados) "IDIOMA.txt"), $Novo,
             (New-Object System.Text.UTF8Encoding($false)))
-    } catch { }
+    } catch {
+        # 17.02: falhar em silencio foi o defeito. Se nao deu para gravar,
+        # o log diz - senao o programa "esquece" a escolha sem explicar.
+        Escrever-Log ("IDIOMA: nao foi possivel guardar a escolha - {0}" -f $_.Exception.Message) "AVISO"
+    }
     # O que e montado na hora tem que ser redesenhado, senao metade da tela
     # fica na lingua anterior ate o proximo evento.
     try { Fill-Fila "idioma" } catch { }
     try { Update-Diagnostico } catch { }
+    <#  17.02: o painel de disco TAMBEM e montado na hora, e nao estava
+        nesta lista. Resultado: trocava para ingles, voltava para portugues
+        e as tres linhas do disco continuavam em ingles ate a proxima
+        leitura da pasta - a tela com duas linguas ao mesmo tempo que o
+        Diego viu e descreveu como "fica horrivel quando volta". #>
+    try { Update-Disco } catch { }
 }
 
 
@@ -8172,7 +8224,7 @@ foreach ($campo in @("diagDV","diagAu","diagLg","diagDVr","diagAur","diagLgr")) 
     da janela montada, senao a varredura nao acha os rotulos. Qualquer falha
     aqui deixa o programa em portugues - que e o certo por omissao. #>
 try {
-    $arqPref = Join-Path $script:PastaScript "IDIOMA.txt"
+    $arqPref = Get-CaminhoIdioma
     if (Test-Path -LiteralPath $arqPref) {
         $pref = ([System.IO.File]::ReadAllText($arqPref)).Trim().ToUpperInvariant()
         if ($pref -eq "EN") { Set-Idioma "EN" }

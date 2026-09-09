@@ -4,7 +4,7 @@
 #  ffmpeg + dovi_tool + mkvmerge (+ OCR de legenda PT-BR opcional via PgsToSrt)
 # ============================================================================
 #
-#  VERSAO: 14.47 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
+#  VERSAO: 14.48 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
 #  ----------------------------------------------------------------------
 #  REGRA DE VERSIONAMENTO (definida com o usuario):
 #    - Atualizacao GRANDE (muda comportamento/logica): sobe o numero maior
@@ -22,6 +22,8 @@
 #   v14.40 (LegendaPgs = -1 desliga o OCR: 'MANTER' na tela agora e uma
 #           ordem para o motor, nao silencio - 05/09/2026)
 #   v14.47 (uma amostra so, e do tamanho do filme - 09/09/2026)
+#   v14.48 (sem regua, a amostra grande nao paga o que custa; e o tempo
+#           da medicao passou a ser MEDIDO e registrado - 09/09/2026)
 #
 #        A janela chamava Get-TipoCamadaDV com -Pontos 3 e o motor usava o
 #        padrao 5. Mesmo arquivo, mesma pergunta, DUAS amostras - e portanto
@@ -930,7 +932,7 @@
 #         de video via ffmpeg, conversao Dolby Vision para Profile 8.1 via
 #         dovi_tool, remux final via mkvmerge, log via Start-Transcript.
 # ============================================================================
-$SCRIPT_VERSION  = "14.47"
+$SCRIPT_VERSION  = "14.48"
 $SCRIPT_CODINOME = "LaFirma"
 #
 #  PASTA TEMPORARIA: SEMPRE NO MESMO DISCO DO ARQUIVO DE ORIGEM
@@ -3428,6 +3430,7 @@ function Get-TipoCamadaDV {
         L5Formato      = ""
         L5AreaAtiva    = ""
         Expande        = $null   # $true / $false / $null (sem regua para dizer)
+        SegundosMedindo = 0.0    # 14.48: quanto ESTA medicao custou, medido
     })
 
     $dv = Get-InfoDolbyVision -MkvPath $MkvPath
@@ -3501,6 +3504,27 @@ function Get-TipoCamadaDV {
             $res.CtnMaxFALL = [int]$brilhoCtx.MaxFALL
         }
     } catch { }
+    <#  14.48 - SEM REGUA, A AMOSTRA GRANDE NAO PAGA O QUE CUSTA.
+
+        A 14.47 subiu a amostra de 3 para ate 11 pontos, e o Diego sentiu:
+        a medicao ficou demorada. A amostra grande existe por UM motivo -
+        o censo do L1, que conta quantas cenas pedem mais brilho do que o
+        master entrega. E esse censo so pode ser feito quando o arquivo
+        DECLARA o pico do mastering display: sem essa regua o programa nao
+        conta nada, e esta escrito assim no proprio codigo abaixo.
+
+        Ou seja: quando nao ha regua, os pontos a mais leem cenas que
+        ninguem vai contar. Pagam tempo e nao respondem nada. O que sobra
+        de pergunta e MEL x FEL, e para essa tres pontos bastam - o el_type
+        nao muda ao longo do filme.
+
+        Entao: com regua, a amostra cheia. Sem regua, tres pontos. Nenhuma
+        resposta e perdida; o que cai e leitura que ja nao virava numero. #>
+    if ($res.ReguaUsada -ne "master" -and $Pontos -gt 3) {
+        $Pontos = 3
+        $res.PontosPedidos = $Pontos
+    }
+
     # A resolucao real e a REGUA do L5: o RPU diz quantas linhas sao borda,
     # e so a resolucao diz que imagem sobra. Quem chamou pode passar; se nao
     # passou, custa um ffprobe que nao abre o video.
@@ -3515,6 +3539,7 @@ function Get-TipoCamadaDV {
     }
     $tipos      = New-Object System.Collections.ArrayList
     $ultimoErro = ""
+    $relogioMedida = [System.Diagnostics.Stopwatch]::StartNew()
     $inicio     = $DuracaoSeg * 0.05
     $fim        = $DuracaoSeg * 0.92
     $passo      = 0.0
@@ -3756,6 +3781,12 @@ function Get-TipoCamadaDV {
     } else {
         $res.Selo = "NAO MEDIDO"
     }
+
+    <#  14.48: quanto esta medicao custou, medido - nao estimado. Vai para o
+        log junto com quantos pontos foram pedidos e quantos foram lidos,
+        que e o unico jeito de decidir o tamanho da amostra com dado em vez
+        de sensacao. #>
+    try { $res.SegundosMedindo = [math]::Round($relogioMedida.Elapsed.TotalSeconds, 1) } catch { }
 
     $script:CacheTipoEL = $res
     return $res

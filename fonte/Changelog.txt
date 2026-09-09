@@ -22,14 +22,56 @@
 ================================================================================
  INSTALADOR 1.8  -  09/09/2026     *** O PROGRAMA PASSOU A MEDIR, NAO SUPOR ***
 ================================================================================
- Componentes: MOTOR 14.47  |  JANELA 17.01  |  CORRETOR 2.27  |  REOCR 1.29
+ Componentes: MOTOR 14.48  |  JANELA 17.02  |  CORRETOR 2.27  |  REOCR 1.29
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
-              TESTAR_LAFIRMA 3.8  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+              TESTAR_LAFIRMA 3.11  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
  Ferramenta trocada: dovi_tool 2.3.2 -> 2.3.3
 
  Sobe para 1.8, e nao 1.7.4, porque muda COMPORTAMENTO: o programa deixou de
  tratar todo Profile 7 igual.
 
+
+0g. A ESCOLHA DE IDIOMA CHEGA AO DISCO  (17.02 / 14.48)
+ --------------------------------------------------------------------------
+   Tres defeitos que o Diego relatou depois de usar a 1.8 instalada.
+
+   1) "ABRI EM INGLES, FECHEI, ABRIU EM PORTUGUES."
+      A 16.93 gravava a escolha num IDIOMA.txt na PASTA DO PROGRAMA. Isso
+      funciona quando o LaFirma mora em C:\LaFirma e falha CALADA quando ele
+      mora em Program Files - o Windows nega a escrita e o catch engolia o
+      erro. A escolha nunca chegava ao disco, e o programa "esquecia" sem
+      dizer nada.
+      Agora o programa testa a pasta com uma escrita de verdade, nao com um
+      palpite pelo caminho. Se ela aceita, continua gravando la (quem ja tem
+      o arquivo nao perde nada). Se nao aceita, cai para
+      %LOCALAPPDATA%\LaFirma, que e do usuario e sempre aceita. A leitura
+      olha os dois lugares. E se ainda assim falhar, agora o log DIZ - falhar
+      em silencio foi o defeito, nao o efeito colateral dele.
+      A calibragem do tempo (16.99) gravava no mesmo lugar e tinha o mesmo
+      problema; foi junto.
+
+   2) "QUANDO VOLTA PARA PORTUGUES FICA TODO ERRADO."
+      Trocar de idioma redesenha o que e montado na hora: a fila e o
+      diagnostico. O PAINEL DE DISCO tambem e montado na hora e nao estava
+      nessa lista - entao ele ficava na lingua anterior ate a proxima leitura
+      da pasta. Duas linguas na mesma tela, que e exatamente o que a 17.01
+      tinha acabado de resolver em todo o resto. Agora ele volta junto.
+
+   3) "ESTA DEMORANDO MUITO PARA MEDIR."
+      Verdade, e a 14.47 e a causa: a amostra subiu de 3 para ate 11 pontos.
+      Ela subiu por um motivo - o CENSO DO L1, que conta quantas cenas pedem
+      mais brilho do que o mastering display entrega. Mas esse censo so pode
+      ser feito quando o arquivo DECLARA o pico do master. Sem essa regua o
+      programa nao conta nada: os pontos a mais liam cenas que ninguem ia
+      contar, pagando tempo por resposta nenhuma.
+      Agora: COM regua, a amostra cheia. SEM regua, tres pontos - que e o
+      que MEL x FEL precisa, porque o el_type nao muda ao longo do filme.
+      Nenhuma resposta e perdida; o que cai e leitura que ja nao virava
+      numero.
+      E o tempo de cada medicao passou a ser MEDIDO e registrado, junto com
+      quantos pontos foram pedidos e quantos foram lidos. Sem esse numero,
+      decidir o tamanho da amostra e decidir por sensacao - e foi assim que
+      a 14.47 ficou lenta sem ninguem perceber.
 
 0f. A TELA EM INGLES PAROU DE SER METADE EM CADA LINGUA  (17.01)
  --------------------------------------------------------------------------

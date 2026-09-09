@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.9"
+$Versao = "3.11"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -137,12 +137,13 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      Set-Idioma - 16.92).
 # 3.1: janela 131 -> 135 (Get-NomeCorEL, Get-CorEL, Get-ChipEL - a escala de
 #      cor num lugar so - e Traduzir-Frase, para o texto montado - 16.94).
+# 3.10: janela 141 -> 143 (Get-PastaDados, Get-CaminhoIdioma - 17.02)
 # 3.6: janela 136 -> 141 (Get-CaminhoCalibragem, Get-Percentil,
 #      Registrar-Calibragem, Carregar-Calibragem e Fechar-MedidaDoVideo - a
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
 # 3.2: janela 135 -> 136 (Get-FatorDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 141
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 143
                "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
@@ -1897,13 +1898,18 @@ Checar "Janela: fila interrompida tambem FECHA o estado (nao fica aberto)" `
     Elas nao tocam na janela, entao podem ser isoladas e rodadas aqui. #>
 $fnsCal = ([System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)).FindAll(
     { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
-      $args[0].Name -in @("Get-CaminhoCalibragem","Get-Percentil","Registrar-Calibragem","Carregar-Calibragem") }, $true)
-if ($fnsCal.Count -eq 4) {
+      <#  17.02: Get-CaminhoCalibragem passou a chamar Get-PastaDados, que
+          decide se a pasta do programa aceita escrita. Sem isolar as duas
+          juntas, a funcao chamava um nome que nao existia neste escopo -
+          erro que os Checar nao viam e a secao 21 pegou. #>
+      $args[0].Name -in @("Get-PastaDados","Get-CaminhoCalibragem","Get-Percentil","Registrar-Calibragem","Carregar-Calibragem") }, $true)
+if ($fnsCal.Count -eq 5) {
     $tmpCal = Join-Path ([System.IO.Path]::GetTempPath()) ("lafirma_cal_" + [guid]::NewGuid().ToString("N").Substring(0,8))
     [void][System.IO.Directory]::CreateDirectory($tmpCal)
     try {
         $guardaPastaCal = $script:PastaScript
         $script:PastaScript = $tmpCal
+        $script:PastaDados  = $null   # 17.02: sem cache, a sonda decide de novo
         $script:SegPorGbPorPesoPadrao = 0.0153
         $script:SegPorGbPorPeso = 0.0153
         $script:CalibMin = 0.004; $script:CalibMax = 0.060
@@ -2232,11 +2238,15 @@ $r3 = & $simular 10GB @([PSCustomObject]@{ Nome = "Ryan"; Bytes = 81.99GB; Saida
 Checar "EXECUTANDO: sem espaco nenhum, nenhum cabe e o primeiro de fora e o unico" `
     (($r3.Cabem -eq 0) -and ($r3.Primeiro -eq "Ryan") -and ($r3.Falta -gt 0))
 
+<#  17.02: a escolha deixou de ser gravada na pasta do script e passou a ir
+    para a pasta de dados (Get-PastaDados). O teste segue o caminho novo -
+    e continua exigindo o antigo na LEITURA, que e o que preserva a escolha
+    de quem ja tinha o arquivo.  #>
 Checar "Janela: a escolha de idioma fica guardada entre uma sessao e outra" `
-    (($jan -match 'Join-Path \$script:PastaScript "IDIOMA\.txt"') -and
+    (($jan -match 'WriteAllText\(\(Join-Path \(Get-PastaDados\) "IDIOMA\.txt"\)') -and
      ($jan -match '(?s)Test-Path -LiteralPath \$arqPref.{0,300}Set-Idioma "EN"'))
 Checar "Janela: preferencia ilegivel ou ausente abre em portugues, sem erro" `
-    ([bool]($jan -match '(?s)\$arqPref = Join-Path.{0,400}\} catch \{ \}'))
+    ([bool]($jan -match '(?s)\$arqPref = Get-CaminhoIdioma.{0,400}\} catch \{ \}'))
 
 Titulo "26. O ARQUIVO QUE NAO CABE NEM COMECA (14.44)"
 <#  Achado do Diego (08/09, ultimas fotos): "terminou o ryan mas começou o
@@ -2399,6 +2409,52 @@ foreach ($par in @(@("FAQ_PT.txt","ONDE CONFERIR E APRENDER MAIS"), @("FAQ_EN.tx
     Checar ("{0}: descreve o L5 como borda, na ordem esq/dir/topo/base" -f $par[0]) `
         ([bool]($tx -match '(?i)(esquerda, direita, topo,\s*\r?\n?\s*base|left, right, top, bottom)'))
 }
+
+Titulo "31. OS TRES DEFEITOS QUE O DIEGO ACHOU USANDO A 1.8 (17.02 / 14.48)"
+<#  Ele instalou, usou e trouxe tres coisas: a escolha de idioma nao ficava
+    guardada, o painel de disco voltava errado ao trocar de lingua, e a
+    medicao ficou demorada. As tres tem conserto medido, e as tres tem
+    teste aqui - senao voltam.  #>
+
+# --- 1) A escolha de idioma tem que CHEGAR ao disco
+Checar "Janela: existe uma funcao unica que decide ONDE gravar (Get-PastaDados)" `
+    ([bool]($jan -match 'function Get-PastaDados'))
+Checar "Janela: a pasta e testada com uma ESCRITA de verdade, nao pelo caminho" `
+    ([bool]($jan -match '(?s)function Get-PastaDados.{0,1400}WriteAllText\(\$sonda'))
+Checar "Janela: sem permissao, cai para %LOCALAPPDATA%" `
+    ([bool]($jan -match '(?s)function Get-PastaDados.{0,1600}LOCALAPPDATA'))
+Checar "Janela: o IDIOMA.txt e GRAVADO na pasta de dados, nao na do script" `
+    ([bool]($jan -match 'WriteAllText\(\(Join-Path \(Get-PastaDados\) "IDIOMA\.txt"\)'))
+Checar "Janela: falhar ao gravar o idioma NAO e mais silencio - vai para o log" `
+    ([bool]($jan -match '(?s)WriteAllText\(\(Join-Path \(Get-PastaDados\) "IDIOMA\.txt"\).{0,400}Escrever-Log'))
+Checar "Janela: a leitura olha os DOIS lugares (quem ja tinha nao perde)" `
+    ([bool]($jan -match '(?s)function Get-CaminhoIdioma.{0,600}\$script:PastaScript "IDIOMA\.txt"'))
+Checar "Janela: o arranque usa Get-CaminhoIdioma, nao o caminho fixo" `
+    ([bool]($jan -match '\$arqPref = Get-CaminhoIdioma'))
+Checar "Janela: a calibragem grava no MESMO lugar (tinha o mesmo defeito)" `
+    ([bool]($jan -match 'Join-Path \(Get-PastaDados\) \$script:CalibArquivo'))
+
+# --- 2) O painel de disco volta junto com a lingua
+Checar "Janela: trocar de idioma REDESENHA o painel de disco" `
+    ([bool]($jan -match '(?s)function Set-Idioma.{0,3000}Update-Disco'))
+Checar "Janela: e continua redesenhando a fila e o diagnostico" `
+    ([bool]($jan -match '(?s)function Set-Idioma.{0,3000}Fill-Fila "idioma".{0,900}Update-Diagnostico'))
+
+# --- 3) A medicao so paga a amostra grande quando ela responde alguma coisa
+Checar "Motor: sem regua do master, a amostra cai para tres pontos" `
+    ([bool]($mot -match '(?s)\$res\.ReguaUsada -ne "master" -and \$Pontos -gt 3.{0,120}\$Pontos = 3'))
+Checar "Motor: e o corte tambem corrige PontosPedidos (o log nao pode mentir)" `
+    ([bool]($mot -match '(?s)\$Pontos = 3\s*\r?\n\s*\$res\.PontosPedidos = \$Pontos'))
+Checar "Motor: COM regua, a amostra cheia continua valendo" `
+    ([bool]($mot -match 'if \(\$Pontos -le 0\) \{ \$Pontos = Get-PontosDaAmostra'))
+Checar "Motor: o tempo da medicao e MEDIDO, nao estimado" `
+    ([bool]($mot -match 'SegundosMedindo') -and [bool]($mot -match '\$relogioMedida = \[System\.Diagnostics\.Stopwatch\]::StartNew\(\)'))
+Checar "Motor: o relogio comeca ANTES do laco dos pontos" `
+    ([bool]($mot -match '(?s)\$relogioMedida = \[System\.Diagnostics\.Stopwatch\]::StartNew\(\).{0,3000}for \(\$i = 0; \$i -lt \$Pontos'))
+Checar "Motor: e o tempo e guardado no resultado, para ir ao log" `
+    ([bool]($mot -match '\$res\.SegundosMedindo = \[math\]::Round\(\$relogioMedida'))
+Checar "Motor: medir NUNCA derruba a conversao (o relogio tambem esta protegido)" `
+    ([bool]($mot -match 'try \{ \$res\.SegundosMedindo'))
 
 Titulo "21. A PROPRIA BATERIA NAO PODE TER ERRO DE EXECUCAO (2.4)"
 <#  Este teste olha para dentro: $Error junta todo erro nao-terminante que

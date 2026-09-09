@@ -19,14 +19,51 @@
 ==============================================================================
  INSTALLER 1.8  -  09/09/2026    *** IT MEASURES, IT NO LONGER ASSUMES ***
 ==============================================================================
- Components: ENGINE 14.47 | WINDOW 17.01 | SUBTITLE FIXER 2.27 | REOCR 1.29
+ Components: ENGINE 14.48 | WINDOW 17.02 | SUBTITLE FIXER 2.27 | REOCR 1.29
              AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
-             TESTAR_LAFIRMA 3.8 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+             TESTAR_LAFIRMA 3.11 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
  Tool changed: dovi_tool 2.3.2 -> 2.3.3
 
  It goes to 1.8 and not 1.7.4 because BEHAVIOUR changed: the program stopped
  treating every Profile 7 the same way.
 
+
+ 0. THE LANGUAGE CHOICE ACTUALLY REACHES THE DISK  (17.02 / 14.48)
+ --------------------------------------------------------------------------
+   Three defects reported after using 1.8 as installed.
+
+   1) "I OPENED IT IN ENGLISH, CLOSED IT, IT CAME BACK IN PORTUGUESE."
+      16.93 saved the choice to IDIOMA.txt in the PROGRAM'S OWN FOLDER. That
+      works when LaFirma lives in C:\LaFirma and fails SILENTLY when it lives
+      in Program Files - Windows refuses the write and the catch swallowed
+      the error. The choice never reached the disk.
+      The program now tests the folder with a real write, not a guess based
+      on the path. If it is writable, it keeps saving there. If not, it falls
+      back to %LOCALAPPDATA%\LaFirma, which belongs to the user and always
+      accepts. Reading looks in both places, and a failure is now written to
+      the log - failing in silence was the defect.
+      The timing calibration (16.99) wrote to the same place and had the same
+      problem; it was fixed with it.
+
+   2) "COMING BACK TO PORTUGUESE LOOKS WRONG."
+      Switching language redraws what is built at runtime: the queue and the
+      diagnosis. The DISK PANEL is built at runtime too and was not on that
+      list, so it stayed in the previous language until the next folder read.
+      Two languages on one screen - exactly what 17.01 had just fixed
+      everywhere else. It now comes back with the rest.
+
+   3) "MEASURING IS TAKING TOO LONG."
+      True, and 14.47 is the cause: the sample went from 3 to up to 11
+      points. It grew for one reason - the L1 census, which counts how many
+      scenes ask for more brightness than the mastering display delivers.
+      That census can only be done when the file DECLARES the master peak.
+      Without that ruler nothing is counted, so the extra points were reading
+      scenes nobody would count.
+      Now: WITH a ruler, the full sample. WITHOUT one, three points - which
+      is all MEL vs FEL needs, since el_type does not change across a film.
+      No answer is lost; what goes is reading that was not becoming a number.
+      And the time each measurement costs is now MEASURED and logged,
+      alongside how many points were asked for and how many were read.
 
  1. MEL, SIMPLE FEL AND COMPLEX FEL - measured before converting
  --------------------------------------------------------------------------

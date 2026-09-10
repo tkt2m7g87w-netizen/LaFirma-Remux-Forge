@@ -78,6 +78,10 @@ _testes/*.log
 .gitignore.txt
 gitignore.txt
 
+# ---- Material de bancada e notas internas (nao sao do programa) ----
+_bancada/
+ACHADO_*.md
+
 # ---- Rascunho e backup de editor ----
 *.bak
 *.tmp

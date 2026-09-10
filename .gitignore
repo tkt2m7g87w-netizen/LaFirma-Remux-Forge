@@ -61,6 +61,29 @@ VERSAO.txt
 LEIA-ME.txt
 !redist/LEIA-ME.txt
 
+# ---- Entregas e anexos do chat (nunca sao fonte do projeto) ----
+#  O app do Claude salva os anexos baixados numa subpasta "Claude outputs"
+#  dentro da primeira pasta conectada. Se ela cair aqui dentro, todo .zip
+#  que voce baixar aparece na lista de commit.
+Claude outputs/
+*.zip
+*.7z
+*.rar
+
+# ---- Resultado de teste (o log da bateria, nao a bateria) ----
+LaFirma_teste_*.txt
+_testes/*.log
+
+# ---- Sobra de renomear o proprio .gitignore no Windows ----
+.gitignore.txt
+gitignore.txt
+
+# ---- Rascunho e backup de editor ----
+*.bak
+*.tmp
+*.orig
+~$*
+
 # ---- Sujeira de sistema ----
 Thumbs.db
 desktop.ini

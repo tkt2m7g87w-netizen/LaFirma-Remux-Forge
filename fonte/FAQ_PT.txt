@@ -114,21 +114,34 @@
 
  A MAIORIA DOS APARELHOS JÁ DESCARTA A CAMADA EXTRA
 
-   NVIDIA Shield, Apple TV com Infuse, Zidoo, Dune HD, Fire TV, as TVs LG e
-   Sony tocando o arquivo direto: todos leem só a camada base e o RPU, e
-   ignoram a segunda faixa. É exatamente o que a conversão faz - só que em
-   definitivo.
+   NVIDIA Shield, Apple TV, Fire TV Stick e Fire TV Cube, Zidoo, Dune HD,
+   Windows, as TVs LG CX e mais novas e as TVs Sony: leem só a camada base
+   e o RPU, e ignoram a segunda faixa. É exatamente o que a conversão faz -
+   só que em definitivo.
 
    Se você assiste nesses aparelhos, o Perfil 7 já aparece hoje do jeito que
    o convertido vai aparecer. Você não perde nada ao converter, nem num
    Complex FEL. Ganha compatibilidade e um arquivo menor.
 
- QUEM PERDE ALGUMA COISA
+ QUEM PERDE ALGUMA COISA, EM ARQUIVO MKV
 
-   Quem tem um aparelho com decodificador duplo, que junta as duas camadas
-   por hardware. Segundo a comunidade, é o caso dos players de disco OPPO
-   UDP-203/205, Panasonic UB820/UB9000, Sony X700 e X800M2, dos clones OPPO
-   (M9201/M9203/M9205) e do Ugoos AM6B Plus rodando CoreELEC.
+   O LaFirma trabalha com MKV, e isso encurta a lista. Dentro de um MKV,
+   poucos aparelhos decodificam a camada extra:
+
+     . Ugoos AM6B Plus e os demais SoCs com CoreELEC
+     . Chromecast com Google TV
+     . PC com MPV, JRiver ou outro player que use libplacebo
+
+ E FORA DO MKV
+
+   A lista é maior, e é de onde vem a fama do Perfil 7. Os players de disco
+   OPPO UDP-203/205, os clones OPPO (M9201/M9203/M9205), Sony X700 e X800M2,
+   Panasonic UB820/UB9000 e as TVs LG C7, C8 e C9 também juntam as duas
+   camadas - mas só a partir de M2TS, TS ou MP4. Nenhum deles lê a camada
+   extra de dentro de um MKV.
+
+   Ou seja: se o seu arquivo é MKV e o seu aparelho é um desses, você já
+   está assistindo sem a camada extra hoje.
 
    Não testamos nenhum deles - esta lista é relato, não medição nossa.
 

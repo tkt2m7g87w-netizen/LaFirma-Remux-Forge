@@ -118,21 +118,34 @@
 
  MOST DEVICES ALREADY DISCARD THE EXTRA LAYER
 
-   NVIDIA Shield, Apple TV with Infuse, Zidoo, Dune HD, Fire TV, LG and Sony
-   TVs playing the file directly: they all read only the base layer and the
-   RPU, and ignore the second track. That is exactly what the conversion
-   does - only permanently.
+   NVIDIA Shield, Apple TV, Fire TV Stick and Fire TV Cube, Zidoo, Dune HD,
+   Windows, LG CX and newer TVs and Sony TVs: they read only the base layer
+   and the RPU, and ignore the second track. That is exactly what the
+   conversion does - only permanently.
 
    If you watch on those devices, Profile 7 already looks today the way the
    converted file will look. You lose nothing by converting, not even on a
    Complex FEL. You gain compatibility and a smaller file.
 
- WHO DOES LOSE SOMETHING
+ WHO DOES LOSE SOMETHING, IN AN MKV FILE
 
-   Anyone with a dual-decoder device that combines both layers in hardware.
-   According to the community, that means the OPPO UDP-203/205, Panasonic
-   UB820/UB9000, Sony X700 and X800M2 disc players, the OPPO clones
-   (M9201/M9203/M9205) and the Ugoos AM6B Plus running CoreELEC.
+   LaFirma works with MKV, and that shortens the list. Inside an MKV, few
+   devices decode the extra layer:
+
+     . Ugoos AM6B Plus and the other SoCs running CoreELEC
+     . Chromecast with Google TV
+     . A PC with MPV, JRiver or another player using libplacebo
+
+ AND OUTSIDE MKV
+
+   The list is longer, and it is where Profile 7's reputation comes from.
+   The OPPO UDP-203/205 disc players, the OPPO clones (M9201/M9203/M9205),
+   Sony X700 and X800M2, Panasonic UB820/UB9000 and the LG C7, C8 and C9 TVs
+   also combine both layers - but only from M2TS, TS or MP4. None of them
+   reads the extra layer from inside an MKV.
+
+   Which means: if your file is an MKV and your device is one of those, you
+   are already watching without the extra layer today.
 
    We tested none of them - this list is report, not our own measurement.
 

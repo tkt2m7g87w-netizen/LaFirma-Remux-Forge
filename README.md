@@ -1,7 +1,7 @@
 # LaFirma Remux Forge (Black Edition)
 
 <p align="center">
-  <b>🌐 English</b> &nbsp;·&nbsp; <a href="./README.pt-BR.md">🇧🇷 Ler em Português</a>
+  <b>&#127482;&#127480; English</b> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="./README.pt-BR.md">&#127463;&#127479; Português</a>
 </p>
 
 > **Automated MKV Remuxing & Transcoding Engine**
@@ -9,16 +9,16 @@
 
 ---
 
-## 📥 Downloads
+## Downloads
 
-> **⚠️ GitHub is the most up-to-date source.** The mirrors below still work, but they carry an earlier version of the program.
+> **GitHub is the most up-to-date source.** The mirrors below still work, but they carry an earlier version of the program.
 
 | | Where | Status |
 |---|---|---|
-| **Source code, guides, changelog** | Right here in this repo | ✅ always newest |
-| **Ready-made installer** | [Releases](../../releases) | ✅ current |
-| Installer — mirror | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | ⚠️ outdated |
-| Full folder — mirror | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | ⚠️ outdated |
+| **Source code, guides, changelog** | Right here in this repo | always newest |
+| **Ready-made installer** | [Releases](../../releases) | current |
+| Installer — mirror | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | **outdated** |
+| Full folder — mirror | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | **outdated** |
 
 **Installer compilation guide:** [README_INSTALLER[ENGLISH].txt](./README_INSTALLER%5BENGLISH%5D.txt)
 
@@ -39,25 +39,27 @@ It is an orchestration bridge: we built the GUI, the decision logic and the Powe
 
 ---
 
-## 💡 Dolby Vision: the program MEASURES before converting
+## Dolby Vision: the program MEASURES before converting
 
 This is the difference that defines the project. Converting a Profile 7 is **not always the same thing**, and the program stopped pretending otherwise.
 
 Before touching the file, it reads the `el_type` field inside the RPU (with `dovi_tool`) and separates **three** cases:
 
-| | Colour on screen | What it means |
-|---|---|---|
-| **MEL** — Minimal Enhancement Layer | 🟢 green | The extra layer **carries no picture**. Discarding it changes no pixel. |
-| **Simple FEL** | 🟠 orange | The layer carries picture, but it is **refinement** — residual, grain, gradients. You lose fine detail, visible only on a paused frame. |
-| **Complex FEL** | 🔴 red | The layer **raises brightness**. Without it the RPU asks the TV for a peak the video no longer delivers. This is the only case that matters. |
+| On screen | What it means |
+|---|---|
+| $\textcolor{green}{\textsf{MEL}}$ — Minimal Enhancement Layer | The extra layer **carries no picture**. Discarding it changes no pixel. |
+| $\textcolor{orange}{\textsf{Simple FEL}}$ | The layer carries picture, but it is **refinement** — residual, grain, gradients. You lose fine detail, visible only on a paused frame. |
+| $\textcolor{red}{\textsf{Complex FEL}}$ | The layer **raises brightness**. Without it the RPU asks the TV for a peak the video no longer delivers. This is the only case that matters. |
 
-### What separates 🟠 Simple from 🔴 Complex
+### What separates $\textcolor{orange}{\textsf{Simple}}$ from $\textcolor{red}{\textsf{Complex}}$
 
 **One number.** The RPU's **L1** — the peak the file *asks for* — against the **mastering display peak** — the monitor the film was graded on, declared inside the file itself.
 
-> **L1 below the master** → 🟠 **Simple FEL.** The base layer already delivers what the RPU asks for.
-> **L1 at or above the master** → 🔴 **Complex FEL.** The RPU asks for brightness the base layer alone does not have.
-> **No master peak declared** → ⚪ the program says **it does not know**, instead of picking a side.
+> **L1 below the master** → $\textcolor{orange}{\textsf{Simple FEL}}$. The base layer already delivers what the RPU asks for.
+>
+> **L1 at or above the master** → $\textcolor{red}{\textsf{Complex FEL}}$. The RPU asks for brightness the base layer alone does not have.
+>
+> **No master peak declared** → the program says **it does not know**, instead of picking a side.
 
 Measured on a real machine, with no list consulted:
 
@@ -67,7 +69,7 @@ Game of Thrones S08E01      ->  SIMPLE FEL       153 nits of 1,000
 Saving Private Ryan (1998)  ->  COMPLEX FEL    1,608 nits of 1,000
 ```
 
-> ⚠️ **Red does not mean the conversion ruins the file.** Shield, Apple TV, Zidoo, Dune and TVs **already discard** the extra layer today — on those devices Profile 7 already plays the way the converted file will. Who actually loses something is whoever owns a dual-layer decoder (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2).
+> **Red does not mean the conversion ruins the file.** Shield, Apple TV, Zidoo, Dune and TVs **already discard** the extra layer today — on those devices Profile 7 already plays the way the converted file will. Who actually loses something is whoever owns a dual-layer decoder (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2).
 
 **The limits, said plainly:**
 
@@ -77,7 +79,7 @@ Saving Private Ryan (1998)  ->  COMPLEX FEL    1,608 nits of 1,000
 
 ---
 
-## 💡 Profile 5 → MP4
+## Profile 5 → MP4
 
 Profile 5 (native to Web-DL / streaming) uses the **IPTPQc2** colour space without a standard HDR10 fallback layer. Forcing a remux-only conversion to P8 causes severe colour distortion (purple/green tint), and doing it properly would require **full video re-encoding** — which this program refuses to do.
 
@@ -87,9 +89,9 @@ On that path: audio is copied when it fits in MP4 (E-AC-3, AC-3, AAC) and conver
 
 ---
 
-## 💡 Other problems solved
+## Other problems solved
 
-### 🔊 Audio
+### Audio
 
 Smart TVs and soundbars refuse the lossless codecs a Blu-ray carries. The program converts only what needs converting:
 
@@ -99,7 +101,7 @@ Smart TVs and soundbars refuse the lossless codecs a Blu-ray carries. The progra
   **No Atmos in the output.** DTS and Atmos come from different companies, and DTS:X objects do not become Dolby objects. Nothing on earth converts one into the other.
 * **E-AC-3**, **AC-3** and **AAC** are already compatible and are left untouched.
 
-### 💬 PGS subtitles → SRT
+### PGS subtitles → SRT
 
 **Brazilian Portuguese only.** This is not a general-purpose OCR: the dictionary, the correction rules and the quality grading were all built around PT-BR.
 
@@ -107,23 +109,23 @@ Image-based PGS becomes clean `.SRT` text, spellchecked against a 1.3 million wo
 
 The original PGS track **stays in the final file**. The `.SRT` is one extra track, not a replacement.
 
-### 💾 Batch and disk space
+### Batch and disk space
 
 Queue a single file or a whole season. Before starting, the program **simulates the entire queue in the order the engine will process it** and tells you three things: how many files fit, which is the first one that does not, and how much would be missing by its turn.
 
 A file that does not fit **never even starts** — no temporary folder, no 20 minutes of work thrown away.
 
-### 🎛️ Auto or manual
+### Auto or manual
 
 Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**.
 
-### 🌍 Two languages
+### Two languages
 
 Portuguese and English, switched by a flag next to the Learn button. The choice is remembered between sessions.
 
 ---
 
-## 📖 Understand the conversion
+## Understand the conversion
 
 The program has a **Learn** button with 14 sections explaining what the conversion does — and what it does **not** do. The text lives in [`fonte/FAQ_EN.txt`](./fonte/FAQ_EN.txt) and can be read here without installing anything.
 
@@ -146,7 +148,7 @@ The program has a **Learn** button with 14 sections explaining what the conversi
 
 ---
 
-## 🛠️ Installation & requirements
+## Installation & requirements
 
 * **Installer:** installs natively with standard Windows integration and Start Menu / Desktop shortcuts.
 * **Dependencies (optional):** self-contained toolset. **.NET Desktop Runtime 8.0** is only required for the fallback OCR engine (`PgsToSrt`) and can be downloaded automatically during installation if missing.
@@ -155,7 +157,7 @@ The program has a **Learn** button with 14 sections explaining what the conversi
 
 ---
 
-## 🖼️ Screenshots
+## Screenshots
 
 **1. Initial analysis** — queue reading, disk-space calculation and per-file diagnosis.
 
@@ -179,7 +181,7 @@ The program has a **Learn** button with 14 sections explaining what the conversi
 
 ---
 
-## 🙏 Credits & acknowledgments
+## Credits & acknowledgments
 
 This program is a shell around other people's work. Each of them solved a hard problem and left the result available to anyone who wanted it. Without that, nothing here would exist.
 

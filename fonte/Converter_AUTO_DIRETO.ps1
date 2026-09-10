@@ -4,7 +4,7 @@
 #  ffmpeg + dovi_tool + mkvmerge (+ OCR de legenda PT-BR opcional via PgsToSrt)
 # ============================================================================
 #
-#  VERSAO: 14.48 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
+#  VERSAO: 14.49 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
 #  ----------------------------------------------------------------------
 #  REGRA DE VERSIONAMENTO (definida com o usuario):
 #    - Atualizacao GRANDE (muda comportamento/logica): sobe o numero maior
@@ -22,6 +22,8 @@
 #   v14.40 (LegendaPgs = -1 desliga o OCR: 'MANTER' na tela agora e uma
 #           ordem para o motor, nao silencio - 05/09/2026)
 #   v14.47 (uma amostra so, e do tamanho do filme - 09/09/2026)
+#   v14.49 ("Profile 7.6" nao existe: o 06 do dvhe.07.06 e o NIVEL, nao
+#           parte do nome do perfil - 09/09/2026)
 #   v14.48 (sem regua, a amostra grande nao paga o que custa; e o tempo
 #           da medicao passou a ser MEDIDO e registrado - 09/09/2026)
 #
@@ -932,7 +934,7 @@
 #         de video via ffmpeg, conversao Dolby Vision para Profile 8.1 via
 #         dovi_tool, remux final via mkvmerge, log via Start-Transcript.
 # ============================================================================
-$SCRIPT_VERSION  = "14.48"
+$SCRIPT_VERSION  = "14.49"
 $SCRIPT_CODINOME = "LaFirma"
 #
 #  PASTA TEMPORARIA: SEMPRE NO MESMO DISCO DO ARQUIVO DE ORIGEM
@@ -3153,8 +3155,8 @@ function Get-InfoDolbyVision {
     # ffprobe, e monta os nomes tecnicos padronizados:
     #   - Codec:   "dvhe.07.06" (dvhe.0<perfil>.0<level>)
     #   - Camadas: "BL+EL+RPU" (conforme flags bl/el/rpu do arquivo)
-    #   - Nome:    "Profile 7.6" (perfil.level) ou "Profile 8.1" (perfil 8
-    #              usa o bl_signal_compatibility_id, convencao da comunidade)
+    #   - Nome:    "Profile 7" (so o perfil) ou "Profile 8.1" (o 8 usa o
+    #              bl_signal_compatibility_id - o ponto ali nao e nivel)
     # Usado apenas no diagnostico informativo - a conversao (dovi_tool)
     # lida com qualquer perfil de origem automaticamente.
     param([string]$MkvPath)
@@ -3186,9 +3188,19 @@ function Get-InfoDolbyVision {
 
         $codec = "dvhe.{0:D2}.{1:D2}" -f $perfil, $level
 
-        # Perfil 8 usa a convencao "8.<compat_id>" (ex: 8.1); os demais usam
-        # "<perfil>.<level>" (ex: 7.6, 5.6).
-        $nome = if ($perfil -eq 8) { "Profile 8.$compat" } else { "Profile $perfil.$level" }
+        <#  14.49 - O NIVEL NAO E NOME DE PERFIL (achado do Diego, 09/09).
+
+            Ate aqui montava "Profile 7.6" juntando perfil e level. Na string
+            dvhe.07.06 o 07 e o PERFIL e o 06 e o NIVEL, e a Dolby nomeia os
+            perfis so pelo primeiro numero: Profile 5, Profile 7, Profile 8.
+            "Profile 7.6" nao existe em lugar nenhum da especificacao.
+
+            O unico ponto legitimo e o do Profile 8.1: ali o 1 nao e nivel, e
+            o bl_signal_compatibility_id - Profile 8 compativel com HDR10.
+
+            O nivel continua no campo Level e dentro do codec, que a tela
+            mostra ao lado. Nada se perde; o que sai e o nome inventado. #>
+        $nome = if ($perfil -eq 8) { "Profile 8.$compat" } else { "Profile $perfil" }
 
         $script:CacheInfoDV = [PSCustomObject]@{
             Perfil  = $perfil

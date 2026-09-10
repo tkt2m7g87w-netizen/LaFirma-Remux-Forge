@@ -211,3 +211,33 @@ Marque o vídeo p/ editar	Tick the video to edit
 ~^Sem Legenda$	No Subtitle
 ~^Não Lido$	Not Read
 ~^Já Convertido$	Already Converted
+
+# ---- 17.03: a aba Faixas (grupos, padrao, extras, rodape) ----
+VÍDEO	VIDEO
+ÁUDIO	AUDIO
+LEGENDAS	SUBTITLES
+EXTRAS	EXTRAS
+PADRÃO	DEFAULT
+Capítulos	Chapters
+Anexos	Attachments
+Mantidos	Kept
+sem capítulos	no chapters
+nenhum anexo	no attachments
+~^(\d+) capítulos$	$1 chapters
+~^(\d+) anexo\(s\)$	$1 attachment(s)
+~^Tamanho Estimado da Saída : 	Estimated Output Size : 
+~   ·   Original : 	   ·   Original : 
+~\[ESCOLHA MANUAL\]	[MANUAL CHOICE]
+~\[SEM RECODIFICAR\]	[NO RE-ENCODE]
+~\[GERA FAIXA NOVA\]	[CREATES A NEW TRACK]
+~PGS em \.SRT \(via OCR\)	PGS to .SRT (by OCR)
+
+# ---- 17.03: os nomes das etapas, que vem do motor ----
+Preparando o motor...	Starting the engine...
+Extraindo Vídeo Puro do MKV (ffmpeg, Sem Recodificar)	Extracting the raw video from the MKV (ffmpeg, no re-encode)
+Convertendo Dolby Vision para Profile 8.1 (dovi_tool)	Converting Dolby Vision to Profile 8.1 (dovi_tool)
+Conversão de Áudio para E-AC-3	Converting audio to E-AC-3
+Conversão de Legenda PGS para .SRT	Converting PGS subtitle to .SRT
+Remontando MKV Final (mkvmerge)	Rebuilding the final MKV (mkvmerge)
+Diagnóstico do arquivo	File diagnosis
+Limpeza dos temporários	Cleaning up temporary files

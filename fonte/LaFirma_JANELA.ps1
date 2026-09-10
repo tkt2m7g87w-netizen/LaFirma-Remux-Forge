@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.02
+#  LaFirma - JANELA 17.03
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,8 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    17.03  09/09/2026  "PERFIL 7.6" NAO EXISTE - O NIVEL NAO E NOME DE
+#                       PERFIL. E O QUE A TELA ESCREVE PASSOU A TRADUZIR.
 #    17.02  09/09/2026  A ESCOLHA DE IDIOMA CHEGA AO DISCO, E O PAINEL DE
 #                       DISCO VOLTA JUNTO COM A LINGUA.
 #    17.01  09/09/2026  A TELA EM INGLES PAROU DE SER METADE EM CADA.
@@ -580,7 +582,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.02"
+$SCRIPT_VERSION = "17.03"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -3126,6 +3128,22 @@ $Xaml = @"
                       <Setter Property="Foreground" Value="$($Cores.err)"/>
                       <Setter Property="Background" Value="#1A1A20"/>
                     </DataTrigger>
+                    <!-- 17.03: os mesmos tres verbos na tela em ingles. O
+                         DataTrigger casa com o TEXTO exibido, entao sem estes
+                         a coluna ACAO perdia a cor ao trocar de lingua. -->
+                    <DataTrigger Binding="{Binding}" Value="KEEP">
+                      <Setter Property="Foreground" Value="$($Cores.foco)"/>
+                      <Setter Property="Background" Value="#1A1A20"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding}" Value="CONVERT">
+                      <Setter Property="Foreground" Value="$($Cores.ok)"/>
+                      <Setter Property="Background" Value="#1A1A20"/>
+                      <Setter Property="FontWeight" Value="SemiBold"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding}" Value="DROP">
+                      <Setter Property="Foreground" Value="$($Cores.err)"/>
+                      <Setter Property="Background" Value="#1A1A20"/>
+                    </DataTrigger>
                   </Style.Triggers>
                 </Style>
               </TextBlock.Style>
@@ -4503,11 +4521,25 @@ function Format-DolbyVision {
         "MEDINDO"    { $sigla = "medindo" }
         "NAO_MEDIDO" { $sigla = "EL não medida" }
     }
-    $curto = "P{0}.{1}" -f $Perfil, $Level
+    <#  17.03 - "PERFIL 7.6" NAO EXISTE (achado do Diego, 09/09).
+
+        A tela escrevia "P7.6" e "Profile 7.6". Na string dvhe.07.06 o 07 e
+        o PERFIL e o 06 e o NIVEL - duas coisas separadas, e a Dolby nomeia
+        os perfis so pelo primeiro numero: Profile 5, Profile 7, Profile 8.
+        O unico "ponto" legitimo e o do Profile 8.1, e ali o 1 nao e nivel:
+        e o bl_signal_compatibility_id (Profile 8 compativel com HDR10).
+
+        Fonte: Dolby Vision Profiles and Levels, tabela de bitstream profile
+        strings - "[Dolby_Vision_Profile_String].[Dolby_Vision_Level_ID]".
+
+        O nivel nao se perde: ele continua visivel no codec, que aparece ao
+        lado (dvhe.07.06). O que sai e a invencao de um nome de perfil que a
+        Dolby nunca definiu. #>
+    $curto = "P{0}" -f $Perfil
     if ($sigla -ne "") { $curto = "$curto $sigla" }
     $faixa = "Dolby Vision, Version 1.0, $cod, $cam"
     if ($sigla -ne "") { $faixa = "$faixa [$sigla]" }
-    $longo = "Profile {0}.{1} [{2}] [{3}]" -f $Perfil, $Level, $cod, $cam
+    $longo = "Profile {0} [{1}] [{2}]" -f $Perfil, $cod, $cam
     if ($sigla -ne "") { $longo = "$longo [EL: $sigla]" }
     return [PSCustomObject]@{ Codec = $cod; Curto = $curto; Faixa = $faixa; Longo = $longo }
 }
@@ -4648,6 +4680,41 @@ function New-LinhaFaixa {
 # proposito ("decisao intencional, nao erro"). Testado na maquina real, o
 # Diego pediu vermelho mesmo - fica friccao visual maior no que sai do
 # arquivo, que e o resultado mais dificil de reverter depois de convertido.
+<#  17.03 - O VERBO DA COLUNA ACAO ERA DADO E TEXTO AO MESMO TEMPO.
+
+    Achado do Diego (09/09, print): a tela inteira em ingles e a coluna ACAO
+    continuava MANTER / CONVERTER / EXCLUIR.
+
+    Nao era esquecimento. A palavra era usada para DUAS coisas: e o texto que
+    aparece, e e a CHAVE que o XAML usa para escolher a cor
+    (DataTrigger Value="MANTER"). Traduzir a palavra apagava as tres cores da
+    coluna - por isso a varredura de traducao nunca encostou nela.
+
+    O conserto e a mesma separacao que ja fizemos no Dolby Vision: uma coisa,
+    um texto. O VALOR continua em portugues, invisivel, e a coluna passa a
+    exibir um texto proprio, que traduz. Os DataTriggers ganharam os tres
+    verbos em ingles ao lado dos tres em portugues, para que a cor funcione
+    nas duas linguas.
+#>
+$script:VerbosEN = @{ "MANTER" = "KEEP"; "CONVERTER" = "CONVERT"; "EXCLUIR" = "DROP" }
+
+function Get-VerboExibido([string]$Verbo) {
+    if ($script:Lang -ne "EN") { return $Verbo }
+    if ($script:VerbosEN.ContainsKey($Verbo)) { return $script:VerbosEN[$Verbo] }
+    return $Verbo
+}
+
+function Get-VerboCanonico([string]$Texto) {
+    # O caminho de volta: o que o usuario escolheu no dropdown vira sempre o
+    # valor em portugues antes de tocar em qualquer decisao. Sem isto, uma
+    # escolha feita com a tela em ingles gravaria "KEEP" em VerboUsuario e
+    # nenhuma comparacao do programa reconheceria esse valor.
+    foreach ($k in $script:VerbosEN.Keys) {
+        if ($script:VerbosEN[$k] -eq $Texto) { return $k }
+    }
+    return $Texto
+}
+
 function Cor-Verbo([string]$Verbo) {
     switch ($Verbo) {
         "CONVERTER" { $Cores.ok }
@@ -4672,11 +4739,18 @@ function Cor-Verbo([string]$Verbo) {
 # pode oferecer uma opcao que o motor nunca executaria.
 function Test-VerboBloqueado($f) { return ($f.Tipo -eq "video") }
 function Get-OpcoesVerbo($f) {
-    if ($f.Papel -eq "audio-principal") { return @("MANTER", "CONVERTER") }
-    return @("MANTER", "CONVERTER", "EXCLUIR")
+    # 17.03: o dropdown mostra na lingua da tela; quem le de volta e
+    # Get-VerboCanonico, no TrocaVerbo.
+    $ops = if ($f.Papel -eq "audio-principal") { @("MANTER", "CONVERTER") }
+           else { @("MANTER", "CONVERTER", "EXCLUIR") }
+    return @($ops | ForEach-Object { Get-VerboExibido $_ })
 }
 
 function Add-CabecalhoGrupo([string]$Texto, [string]$Extra) {
+    # 17.03: VIDEO / AUDIO / LEGENDAS / EXTRAS sao montados aqui, nao no XAML -
+    # a varredura de traducao nao alcanca linha de ListView.
+    $Texto = Traduzir-Frase $Texto
+    $Extra = Traduzir-Frase $Extra
     [void]$script:LinhasFaixas.Add((New-LinhaFaixa "" $Texto "" "" $Extra "" "" `
         $Cores.marca $Cores.dim2 $Cores.dim2 $Cores.dim2 $Cores.dim2 "SemiBold"))
 }
@@ -4892,6 +4966,10 @@ function Fill-Faixas {
             $vb  = if ($usaManual) { "$($f.VerboUsuario)" } else { "$($f.VerboAuto)" }
             $det = if ($usaManual) { "[ESCOLHA MANUAL]" } else { "$($f.DetalheAuto)" }
             $corVerbo = if ($usaManual) { $Cores.marca } else { (Cor-Verbo $vb) }
+            # 17.03: a COR e a logica seguem o valor em portugues; o que vai
+            # para a tela e o texto exibido, na lingua atual.
+            $vbTela  = Get-VerboExibido $vb
+            $det     = Traduzir-Frase $det
             $idxF = if ($idxPorId.ContainsKey([int]$f.Id)) { $idxPorId[[int]$f.Id] } else { -1 }
             # m3c8: so editavel em "inicial". Sem isso o dropdown continuava
             # aceitando clique depois do F1 - Fill-Faixas so roda de novo por
@@ -4905,9 +4983,9 @@ function Fill-Faixas {
             # nenhum) continuava deixando trocar Automatico/Manual e mexer
             # nas faixas - inutil, ja que nada daquilo ia ser aplicado.
             $editavel = ($manual -and -not $bloq -and $Estado.Atual -eq "inicial" -and [bool]$v.Marcado)
-            $opcoes = if ($editavel) { Get-OpcoesVerbo $f } else { @($vb) }
+            $opcoes = if ($editavel) { Get-OpcoesVerbo $f } else { @($vbTela) }
             $ehPadrao = ($f.Tipo -eq "video") -or ([int]$f.Id -eq $idPadraoAudio) -or ([int]$f.Id -eq $idPadraoLeg)
-            $padraoTxt = if ($ehPadrao) { "PADRÃO" } else { "" }
+            $padraoTxt = if ($ehPadrao) { Traduzir-Frase "PADRÃO" } else { "" }
 
             <#  16.84 - A COLUNA "NOME DA FAIXA" DO VIDEO VINHA VAZIA.
 
@@ -4933,7 +5011,7 @@ function Fill-Faixas {
             [void]$script:LinhasFaixas.Add((New-LinhaFaixa `
                 $f.Id "" $f.Codec $idiomaTxt $nomeFx $tam $f.Marcas `
                 $Cores.dim2 $Cores.txt $corIdioma $Cores.okdim $Cores.dim "SemiBold" `
-                $vb $det $corVerbo $(if ($vb -eq "CONVERTER") { "SemiBold" } else { "Normal" }) `
+                $vbTela $det $corVerbo $(if ($vb -eq "CONVERTER") { "SemiBold" } else { "Normal" }) `
                 $idxF $opcoes $editavel $editavel $padraoTxt))
         }
         if ($ocultas -gt 0) {
@@ -4947,13 +5025,13 @@ function Fill-Faixas {
     Add-CabecalhoGrupo "EXTRAS" ""
     $temCap = ($v.Capitulos -gt 0)
     [void]$script:LinhasFaixas.Add((New-LinhaFaixa `
-        "" "" "Capítulos" "" $(if ($temCap) { "$($v.Capitulos) capítulos" } else { "sem capítulos" }) "" `
-        $(if ($temCap) { "Mantidos" } else { "" }) `
+        "" "" (Traduzir-Frase "Capítulos") "" (Traduzir-Frase $(if ($temCap) { "$($v.Capitulos) capítulos" } else { "sem capítulos" })) "" `
+        $(if ($temCap) { Traduzir-Frase "Mantidos" } else { "" }) `
         $Cores.dim2 $(if ($temCap) { $Cores.txt } else { $Cores.dim2 }) $Cores.dim $Cores.okdim $Cores.dim "SemiBold" `
         $(if ($temCap) { "MANTER" } else { "" }) "" (Cor-Verbo "MANTER") "Normal"))
-    $txtAnexos = if ($v.Anexos -gt 0) { "$($v.Anexos) anexo(s)" } else { "nenhum anexo" }
+    $txtAnexos = Traduzir-Frase $(if ($v.Anexos -gt 0) { "$($v.Anexos) anexo(s)" } else { "nenhum anexo" })
     [void]$script:LinhasFaixas.Add((New-LinhaFaixa `
-        "" "" "Anexos" "" $txtAnexos "" "" `
+        "" "" (Traduzir-Frase "Anexos") "" $txtAnexos "" "" `
         $Cores.dim2 $Cores.txt $Cores.dim $Cores.dim2 $Cores.dim "SemiBold"))
 
     Update-BotaoModo
@@ -4962,7 +5040,7 @@ function Fill-Faixas {
     $estimado = Get-TamanhoEstimadoVideo $v
     $delta = $estimado - [double]$v.Bytes
     $sinalDelta = if ($delta -gt 0) { "+" } else { "" }
-    $UI.txtRodapeTamanho.Text = ("Tamanho Estimado da Saída : ~{0}   ·   Original : {1}   ·   Δ : {2}{3}" -f `
+    $UI.txtRodapeTamanho.Text = Traduzir-Frase ("Tamanho Estimado da Saída : ~{0}   ·   Original : {1}   ·   Δ : {2}{3}" -f `
         (Format-GB $estimado), (Format-GB $v.Bytes), $sinalDelta, (Format-GB $delta))
 
     # m3c14: a estimativa tambem vai pro log - da pra conferir a conta depois,
@@ -5243,6 +5321,54 @@ function Set-Idioma([string]$Novo) {
         leitura da pasta - a tela com duas linguas ao mesmo tempo que o
         Diego viu e descreveu como "fica horrivel quando volta". #>
     try { Update-Disco } catch { }
+    try { Fill-Faixas } catch { }
+
+    <#  17.03 - A TROCA AO VIVO ALCANCA QUASE TUDO. QUASE.
+
+        Ideia do Diego (09/09): "no momento que a pessoa clica para mudar a
+        linguagem, o programa avisa que muda na proxima reiniciada e ja
+        pergunta se quer fazer na hora".
+
+        Ele esta certo, e o motivo e concreto: alguns textos do WPF sao
+        escritos uma vez, na construcao da janela - cabecalho de coluna que
+        ja foi medido, largura calculada com a palavra antiga, tooltip que o
+        template guardou. A varredura reescreve o que consegue alcancar; o
+        resto so nasce certo abrindo de novo.
+
+        A TRAVA QUE IMPORTA: com uma fila rodando, reiniciar joga fora a
+        conversao em curso. Entao a pergunta so aparece com o programa
+        parado. Rodando, ele troca o que da e diz que o resto fica para a
+        proxima abertura - sem oferecer nada que possa custar uma hora de
+        trabalho. #>
+    if ($Estado.Atual -in @("rodando","pausado")) {
+        Escrever-Log "IDIOMA: fila em andamento - reinicio nao oferecido" "ACAO"
+        return
+    }
+    $msg = if ($Novo -eq "EN") {
+        "The language was switched now, and most of the screen is already in English." + "`n`n" +
+        "A few labels are written once, when the window is built, and only come out right after restarting." + "`n`n" +
+        "Restart the program now?"
+    } else {
+        "O idioma foi trocado agora, e quase toda a tela já está em português." + "`n`n" +
+        "Alguns rótulos são escritos uma vez só, quando a janela é montada, e só saem certos depois de reabrir." + "`n`n" +
+        "Reiniciar o programa agora?"
+    }
+    $titulo = if ($Novo -eq "EN") { "LaFirma - restart to finish" } else { "LaFirma - reiniciar para completar" }
+    $r = [System.Windows.MessageBox]::Show($msg, $titulo, "YesNo", "Question", "No")
+    if ($r -eq "Yes") {
+        Escrever-Log "IDIOMA: reinicio pedido pelo usuario" "ACAO"
+        try {
+            $exe = (Get-Process -Id $PID).Path
+            if (-not $exe) { $exe = "powershell.exe" }
+            Start-Process -FilePath $exe `
+                -ArgumentList @("-NoProfile","-ExecutionPolicy","Bypass","-STA","-File","`"$($script:CaminhoScript)`"")
+            $Janela.Close()
+        } catch {
+            Escrever-Log ("IDIOMA: nao consegui reabrir o programa - {0}" -f $_.Exception.Message) "AVISO"
+        }
+    } else {
+        Escrever-Log "IDIOMA: usuario preferiu continuar sem reiniciar" "ACAO"
+    }
 }
 
 
@@ -6000,10 +6126,14 @@ function Set-Estado([string]$Novo) {
         # 16.37: guarda de indice + a fase (diagnostico/limpeza) tem nome
         # proprio, senao pausar durante a limpeza mostraria o nome da ultima
         # etapa como se ela ainda estivesse rodando.
-        $UI.lblEtapaNome.Text = if ($Motor.Fase) { "$($Sim.Pausa) " + $Motor.Fase }
+        <#  17.03: o NOME DA ETAPA vinha do motor, que fala so portugues, e
+            era escrito na tela sem passar pela traducao - a tela em ingles
+            mostrava "Extraindo Video Puro do MKV". Achado do Diego no print
+            de 09/09. Agora as quatro escritas do rotulo traduzem. #>
+        $UI.lblEtapaNome.Text = if ($Motor.Fase) { "$($Sim.Pausa) " + (Traduzir-Frase $Motor.Fase) }
                                 else {
                                     $iP = [math]::Max(0, [math]::Min($Cfg.Etapas.Count - 1, $Motor.EtapaIdx))
-                                    "$($Sim.Pausa) " + $Cfg.Etapas[$iP]
+                                    "$($Sim.Pausa) " + (Traduzir-Frase $Cfg.Etapas[$iP])
                                 }
         # 16.45: o ambar da pausa vale para o PREENCHIMENTO tambem - o que
         # congelou foi o avanco, nao o leito. E com guarda de indice: ate a
@@ -6292,13 +6422,13 @@ function Update-Progresso {
     $nEt = $Cfg.Etapas.Count
     if (-not $d.VideoNome) {
         $UI.lblEtapaNum.Text = "-/$nEt"
-        $UI.lblEtapaNome.Text = "$($Sim.Atual) Preparando o motor..."
+        $UI.lblEtapaNome.Text = "$($Sim.Atual) " + (Traduzir-Frase "Preparando o motor...")
     } elseif ($d.Fase) {
         # 16.37: diagnostico e limpeza nao tem numero - e essa a informacao.
         # Antes elas ocupavam a caixa "1/7" e "7/7" e o usuario contava sete
         # etapas onde havia cinco de trabalho.
         $UI.lblEtapaNum.Text = "·"
-        $UI.lblEtapaNome.Text = "$($Sim.Atual) $($d.Fase)"
+        $UI.lblEtapaNome.Text = "$($Sim.Atual) " + (Traduzir-Frase "$($d.Fase)")
     } else {
         $iEt = [math]::Max(0, [math]::Min($nEt - 1, $d.EtapaIdx))
         # 16.45: o numero e a POSICAO NO PLANO deste arquivo, nao o indice no
@@ -6319,8 +6449,8 @@ function Update-Progresso {
             $script:UltimoRotuloEtapa = "1/$totPlano"
         }
         $UI.lblEtapaNum.Text = $script:UltimoRotuloEtapa
-        $nomeEtapa = "$($Sim.Atual) $($Cfg.Etapas[$iEt])"
-        if ($d.Nota) { $nomeEtapa += "   ·   $($d.Nota)" }
+        $nomeEtapa = "$($Sim.Atual) " + (Traduzir-Frase $Cfg.Etapas[$iEt])
+        if ($d.Nota) { $nomeEtapa += "   ·   " + (Traduzir-Frase "$($d.Nota)") }
         $UI.lblEtapaNome.Text = $nomeEtapa
     }
     # Decorrido de PAREDE, pra fechar com o "Começou". Sem o "(pausado XX)" que
@@ -7928,11 +8058,80 @@ function Show-JanelaTexto([string]$Titulo, [string]$Conteudo, [bool]$DoTopo = $f
     $tb.VerticalScrollBarVisibility = "Auto"; $tb.Padding = "12"
     $tb.TextWrapping = "Wrap"          # sem isto a linha some pela direita
     $w.Content = $tb
+
+    <#  17.03 - OS ENDERECOS DO "ENTENDA" ERAM TEXTO MORTO (achado do Diego).
+
+        A seção 14 do FAQ existe para a pessoa CONFERIR o que o programa
+        afirma - manuais da Dolby, o repositorio do dovi_tool, as planilhas
+        da comunidade. Num TextBox comum o endereco e texto cru: nao tem cor,
+        nao tem sublinhado, e clicar nele nao faz nada. Quem quisesse abrir
+        tinha que selecionar com o mouse e copiar na mao.
+
+        Para o texto de LEITURA (o Entenda, $DoTopo) a janela passa a montar
+        um FlowDocument, onde cada endereco vira um Hyperlink de verdade:
+        azul, sublinhado, e abre no navegador. O LOG continua no TextBox -
+        la o que se quer e selecionar e copiar blocos inteiros, e um
+        FlowDocument atrapalharia isso.
+
+        Se qualquer coisa falhar na montagem, fica o TextBox de antes: um
+        texto sem link e pior que um texto com link, mas e infinitamente
+        melhor que uma janela vazia. #>
+    if ($DoTopo) {
+        try {
+            $doc = New-Object System.Windows.Documents.FlowDocument
+            $doc.FontFamily  = New-Object System.Windows.Media.FontFamily("Consolas")
+            $doc.FontSize    = 14
+            $doc.PagePadding = New-Object System.Windows.Thickness(14)
+            $doc.Foreground  = [System.Windows.Media.BrushConverter]::new().ConvertFromString($Cores.txt)
+            $doc.Background  = [System.Windows.Media.BrushConverter]::new().ConvertFromString($Cores.fundo)
+            $azul = [System.Windows.Media.BrushConverter]::new().ConvertFromString("#4DA3FF")
+            $reLink = [regex]'(https?://[^\s<>"\)\]]+)'
+            foreach ($linha in ($Conteudo -split "`r?`n")) {
+                $par = New-Object System.Windows.Documents.Paragraph
+                $par.Margin = New-Object System.Windows.Thickness(0)
+                $pos = 0
+                foreach ($m in $reLink.Matches($linha)) {
+                    if ($m.Index -gt $pos) {
+                        $par.Inlines.Add((New-Object System.Windows.Documents.Run $linha.Substring($pos, $m.Index - $pos)))
+                    }
+                    $url = $m.Value
+                    $lnk = New-Object System.Windows.Documents.Hyperlink((New-Object System.Windows.Documents.Run $url))
+                    $lnk.Foreground = $azul
+                    $lnk.TextDecorations = [System.Windows.TextDecorations]::Underline
+                    $lnk.ToolTip = $url
+                    $lnk.Tag = $url
+                    $lnk.add_Click({
+                        param($s, $e)
+                        try { Start-Process "$($s.Tag)" } catch {
+                            Escrever-Log ("LINK: nao consegui abrir {0} - {1}" -f $s.Tag, $_.Exception.Message) "AVISO"
+                        }
+                    })
+                    $par.Inlines.Add($lnk)
+                    $pos = $m.Index + $m.Length
+                }
+                if ($pos -lt $linha.Length) {
+                    $par.Inlines.Add((New-Object System.Windows.Documents.Run $linha.Substring($pos)))
+                }
+                $doc.Blocks.Add($par)
+            }
+            $visor = New-Object System.Windows.Controls.FlowDocumentScrollViewer
+            $visor.Document = $doc
+            $visor.VerticalScrollBarVisibility = "Auto"
+            $visor.Background = $doc.Background
+            $visor.BorderThickness = 0
+            $visor.IsSelectionEnabled = $true
+            $w.Content = $visor
+        } catch {
+            # fica o TextBox
+            Escrever-Log ("TEXTO: FlowDocument falhou, usando o texto simples - {0}" -f $_.Exception.Message) "AVISO"
+        }
+    }
     <#  16.88: o log abre no FIM (a linha mais nova e a que interessa); um
         texto para LER abre no comeco. Antes havia so um comportamento, e o
         FAQ abriria pelos creditos. #>
-    if ($DoTopo) { $w.add_ContentRendered({ $tb.ScrollToHome() }) }
-    else         { $w.add_ContentRendered({ $tb.ScrollToEnd() }) }
+    # 17.03: o FlowDocument ja nasce no topo; o ScrollToHome era do TextBox.
+    if (-not $DoTopo) { $w.add_ContentRendered({ $tb.ScrollToEnd() }) }
+    elseif ($w.Content -is [System.Windows.Controls.TextBox]) { $w.add_ContentRendered({ $tb.ScrollToHome() }) }
     if ($DoTopo) { $w.Width = 900; $w.Height = 620 }
     $w.ShowDialog() | Out-Null
 }
@@ -8834,7 +9033,9 @@ $script:TrocaVerbo = [System.Windows.Controls.SelectionChangedEventHandler]{
     $idxF = [int]$cb.Tag
     if ($idxF -lt 0) { return }   # linhas sinteticas (cabecalho, "...mais N", Anexos): sem faixa real
     if (@($evento.AddedItems).Count -eq 0) { return }
-    $novo = "$($evento.AddedItems[0])"
+    # 17.03: o dropdown pode estar em ingles; tudo daqui para baixo decide
+    # com o valor canonico, em portugues.
+    $novo = Get-VerboCanonico "$($evento.AddedItems[0])"
     $idxV = $UI.lstFila.SelectedIndex
     if ($idxV -lt 0 -or $idxV -ge $script:Videos.Count) { return }
     $v = $script:Videos[$idxV]

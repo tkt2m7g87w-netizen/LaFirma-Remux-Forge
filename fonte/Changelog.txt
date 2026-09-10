@@ -5,11 +5,10 @@
 
  NOTA SOBRE ESTE ARQUIVO
  --------------------------------------------------------------------------
- Ate a versao 1.3 do instalador, este arquivo continha - por engano - o
- changelog do DDVT (Donalds Dolby Vision Toolset), que e um projeto de
- terceiros, nao o do LaFirma. Quem instalava lia o historico do programa
- errado. Corrigido na 1.4: agora o historico do LaFirma vem primeiro, e o
- do DDVT ficou preservado no fim, na secao de creditos - nada foi perdido.
+ Historico do LaFirma Remux Forge, da versao 1.4 do instalador em diante.
+ O CHANGELOG_EN.txt, ao lado, e a edicao em ingles: cobre a versao atual
+ por inteiro e resume as anteriores. A arqueologia de decisoes antigas fica
+ aqui, neste arquivo.
 
  CONVENCAO DE VERSAO (definida com o usuario)
  --------------------------------------------------------------------------
@@ -22,18 +21,83 @@
 ================================================================================
  INSTALADOR 1.8  -  09/09/2026     *** O PROGRAMA PASSOU A MEDIR, NAO SUPOR ***
 ================================================================================
- Componentes: MOTOR 14.48  |  JANELA 17.02  |  CORRETOR 2.27  |  REOCR 1.29
+ Componentes: MOTOR 14.49  |  JANELA 17.03  |  CORRETOR 2.27  |  REOCR 1.29
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
-              TESTAR_LAFIRMA 3.11  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+              TESTAR_LAFIRMA 3.12  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
  Ferramenta trocada: dovi_tool 2.3.2 -> 2.3.3
 
  Sobe para 1.8, e nao 1.7.4, porque muda COMPORTAMENTO: o programa deixou de
  tratar todo Profile 7 igual.
 
 
+0h. O QUE A TELA ESCREVE, EM QUALQUER LINGUA  (17.03 / 14.49)
+ --------------------------------------------------------------------------
+   Tres achados em uso real da 1.8 ja instalada.
+
+   1) "PERFIL 7.6" NAO EXISTE.
+      A tela escrevia "P7.6 FEL" na coluna e "Profile 7.6 [dvhe.07.06]" no
+      diagnostico. Na string dvhe.07.06 o 07 e o PERFIL e o 06 e o NIVEL -
+      duas coisas separadas. A Dolby nomeia os perfis so pelo primeiro
+      numero: Profile 5, Profile 7, Profile 8. "Profile 7.6" nao esta em
+      lugar nenhum da especificacao; foi invencao nossa, juntando dois
+      campos que nao se juntam.
+      O unico ponto legitimo e o do Profile 8.1: ali o 1 nao e nivel, e o
+      bl_signal_compatibility_id (Profile 8 compativel com HDR10) - e esse
+      continua como estava.
+      O nivel nao se perde: ele segue visivel dentro do codec, que a tela
+      mostra ao lado. O que saiu foi o nome inventado.
+      Fonte: Dolby Vision Profiles and Levels, tabela de bitstream profile
+      strings - "[Dolby_Vision_Profile_String].[Dolby_Vision_Level_ID]".
+
+   2) A COLUNA ACAO CONTINUAVA EM PORTUGUES NA TELA EM INGLES.
+      MANTER / CONVERTER / EXCLUIR nao traduziam, e nao era esquecimento: a
+      palavra era usada para DUAS coisas ao mesmo tempo. Ela e o texto que
+      aparece, e e a CHAVE que o XAML usa para escolher a cor
+      (DataTrigger Value="MANTER"). Traduzir a palavra apagaria as tres
+      cores da coluna - por isso a varredura de traducao nunca encostou
+      nela.
+      O conserto e a mesma separacao que ja tinha resolvido o Dolby Vision
+      (uma coisa, um texto): o VALOR continua em portugues, invisivel, e a
+      coluna passa a exibir um texto proprio, que traduz. Os DataTriggers
+      ganharam KEEP / CONVERT / DROP ao lado dos tres em portugues, para a
+      cor funcionar nas duas linguas, e o clique no dropdown passa por
+      Get-VerboCanonico antes de virar decisao - sem isso, uma escolha feita
+      com a tela em ingles gravaria "KEEP" e nenhuma comparacao do programa
+      reconheceria esse valor.
+      Junto foram a aba Faixas inteira: os grupos (VIDEO / AUDIO / LEGENDAS
+      / EXTRAS), o rotulo PADRAO, Capitulos, Anexos, o detalhe do verbo e o
+      rodape do tamanho estimado.
+
+   3) OS NOMES DAS ETAPAS VINHAM DO MOTOR E NUNCA TRADUZIAM.
+      "Extraindo Video Puro do MKV (ffmpeg, Sem Recodificar)" e as outras
+      quatro sao escritas pelo motor, que fala so portugues por decisao de
+      projeto. A janela recebia a frase pronta e mostrava. Agora as quatro
+      escritas do rotulo passam pela traducao - a etapa em curso, a etapa
+      pausada, a fase sem numero (diagnostico/limpeza) e o "Preparando o
+      motor".
+
+   E DUAS COISAS QUE NASCERAM DESTA RODADA:
+
+   TROCAR DE IDIOMA PERGUNTA SE QUER REINICIAR. A troca ao
+   vivo alcanca quase tudo, mas alguns textos do WPF sao escritos uma vez,
+   na construcao da janela, e so nascem certos abrindo de novo. Entao o
+   programa avisa e oferece reiniciar na hora - com uma trava: se houver
+   fila rodando, a pergunta NAO aparece, porque reiniciar jogaria fora a
+   conversao em curso. Rodando, ele troca o que da e diz que o resto fica
+   para a proxima abertura.
+
+   OS ENDERECOS DO "ENTENDA" VIRARAM LINK DE VERDADE. A secao 14 do FAQ
+   existe para a pessoa CONFERIR o que o programa afirma - manuais da
+   Dolby, o repositorio do dovi_tool, as planilhas da comunidade. Num
+   TextBox comum o endereco e texto morto: sem cor, sem sublinhado, e
+   clicar nao faz nada. O texto de leitura passou a ser montado como
+   FlowDocument, com cada endereco virando Hyperlink azul e sublinhado que
+   abre no navegador. O LOG continua no TextBox - la o que se quer e
+   selecionar e copiar blocos inteiros.
+
 0g. A ESCOLHA DE IDIOMA CHEGA AO DISCO  (17.02 / 14.48)
  --------------------------------------------------------------------------
-   Tres defeitos que o Diego relatou depois de usar a 1.8 instalada.
+   Tres defeitos relatados em uso da 1.8 instalada.
 
    1) "ABRI EM INGLES, FECHEI, ABRIU EM PORTUGUES."
       A 16.93 gravava a escolha num IDIOMA.txt na PASTA DO PROGRAMA. Isso
@@ -75,9 +139,8 @@
 
 0f. A TELA EM INGLES PAROU DE SER METADE EM CADA LINGUA  (17.01)
  --------------------------------------------------------------------------
-   Achado do Diego olhando a tela com a bandeira em EN: "que lingua e essa?".
-   A frase que ele apontou ("VIDEOS IN QUEUE") estava certa - o que estava
-   errado era a tela ser metade em cada lingua.
+   Achado com a bandeira em EN: a frase apontada ("VIDEOS IN QUEUE") estava
+   certa - o errado era a tela ser metade em cada lingua.
 
    O que ainda saia em portugues, e o motivo de cada um:
 
@@ -250,7 +313,7 @@
 
  0. O QUE A RODADA DE 09/09 CORRIGIU  (MOTOR 14.44 / JANELA 16.94)
  --------------------------------------------------------------------------
-   Quatro achados do Diego usando a build anterior, e os quatro sao a mesma
+   Quatro achados em uso da build anterior, e os quatro sao a mesma
    queixa: a mesma informacao saindo de jeitos diferentes em cantos
    diferentes da tela.
 
@@ -314,7 +377,7 @@
    do mastering display. Sem esse pico declarado, o programa diz que nao
    sabe, em vez de escolher um lado.
 
-   Medido na maquina do Diego: Troy 2004 e MEL (303 de 1.000 nits), GOT
+   Medido na maquina de teste: Troy 2004 e MEL (303 de 1.000 nits), GOT
    S08E01 e Simple FEL (153 de 1.000) e Saving Private Ryan e Complex FEL
    (1.608 de 1.000). O Ryan foi encontrado por medicao, sem lista nenhuma.
 
@@ -503,8 +566,6 @@
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
               TESTAR_LAFIRMA 1.3  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
 
- Diego: "vai muda ja vou usar a .30 por padrao".
-
  O runtime de referencia do projeto passa de 8.0.29 para 8.0.30. Mesma
  familia, entao o PgsToSrt aceita igual - a 1.7.2 ja tinha estabelecido por
  que: net8.0 aceita qualquer 8.0.x e recusa 6.0, 9.0 e 10.0.
@@ -529,7 +590,7 @@
    bateria reprova se o titulo do .bat ficar para tras (regra da 1.7).
 
    As mencoes a 8.0.29 que SOBRARAM sao historico proposital: a lista de
-   versoes instaladas na maquina do Diego em 03/09, e o registro de onde a
+   versoes instaladas na maquina de teste em 03/09, e o registro de onde a
    versao antiga tinha saido. Historico nao se reescreve.
 
  DE QUEBRA
@@ -553,16 +614,13 @@
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
               TESTAR_LAFIRMA 1.3  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
 
- ERRO MEU, DE INSTRUCAO
+ INSTRUCAO DE ATUALIZACAO ERRADA
 
-   Diego: "oh como vc e burro vc fez eu excluir o runtime".
-
-   O passo a passo que eu dei junto com os zips dizia: "apague tudo dentro de
+   O passo a passo entregue junto com os zips dizia: "apague tudo dentro de
    LaFirma_Setup MENOS a pasta fonte, e cole o zip por cima". A pasta redist\
    - com o windowsdesktop-runtime-8.0.29-win-x64.exe, 58 MB - estava nesse
-   "tudo". E o zip que eu mando NAO carrega esses 58 MB, coisa que eu nunca
-   disse a ele. Resultado: o runtime sumiu da maquina dele seguindo a minha
-   instrucao.
+   "tudo", e o zip de atualizacao nao carrega esses 58 MB. Resultado: o
+   runtime saiu da maquina seguindo a instrucao.
 
    O ESTRAGO REAL E PEQUENO, e vale registrar por escrito: o .iss trata o
    runtime como opcional na compilacao -
@@ -588,19 +646,15 @@
           "TESSERACT STANDALONE: nao vai no instalador, e de proposito"
           "winget install -e --id UB-Mannheim.TesseractOCR"
 
-      Era o MESMO texto velho que eu tinha acabado de tirar dos dois manuais
-      e do chip da janela na 1.7 - e que ficou aqui, contradizendo o #error
-      que existe 130 linhas abaixo, no proprio arquivo, abortando a
-      compilacao se tools\Tesseract\ faltar. Corrigi os tres lugares onde
-      alguem le e esqueci o quarto.
+      Era o MESMO texto velho retirado dos dois manuais e do chip da janela
+      na 1.7 - e que ficou aqui, contradizendo o #error que existe 130 linhas
+      abaixo, no proprio arquivo, abortando a compilacao se tools\Tesseract\
+      faltar. Tres lugares onde alguem le foram corrigidos; o quarto ficou.
 
  QUAL VERSAO DO .NET FUNCIONA (a pergunta que custou uma noite de testes)
 
-   Diego: "no dia q eu fiz esse teste eu instalei todas versoes dessa merda e
-   so um deles deu certo [...] como diabos vamos saber disso sem fazer toda
-   build, perde tempo desinstalando, instalando e tal?"
-
-   Nao precisa de build nenhuma. As versoes instaladas sao PASTAS:
+   Descobrir qual runtime serve nao precisa de build nenhuma nem de
+   desinstalar e reinstalar versao por versao. As versoes instaladas sao PASTAS:
 
        dir "C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App"
 
@@ -634,20 +688,14 @@
 
  O QUE ACONTECEU
 
-   Diego, depois de eu entregar a 1.6.9 dizendo que estava tudo auditado,
-   LEU o COMO_USAR e colou de volta o trecho da arvore de pastas:
+   A 1.6.9 saiu anunciada como auditada. O COMO_USAR ainda dizia
+   "apps\ (ffmpeg, dee e truehdd internos do DeeZy)" - um dia depois de o
+   ffmpeg ter saido de la. Os manuais tinham sido "atualizados" com um
+   replace do numero da versao, sem releitura do conteudo.
 
-     "adivinha oq tem de errado?"
-
-   Estava escrito "apps\ (ffmpeg, dee e truehdd internos do DeeZy)" - um dia
-   depois de eu tirar o ffmpeg de la. Eu tinha "atualizado" os manuais com um
-   replace do numero da versao e nao reli uma linha do conteudo.
-
-     "fico pensando oq diabos vc faz nas suas auditorias q vc nao le nada"
-
-   Ele esta certo. Minha auditoria era hash, encoding, contagem de funcao e
-   numero de versao - tudo o que da para provar com script. O TEXTO, que e
-   o que o usuario le, eu nunca tinha lido.
+   A auditoria ate aqui era hash, encoding, contagem de funcao e numero de
+   versao - tudo o que da para provar com script. O TEXTO, que e o que o
+   usuario le, nunca entrava.
 
  O QUE A LEITURA COMPLETA ACHOU
 
@@ -693,8 +741,7 @@
 
  POR QUE 1.7 E NAO 1.6.10
 
-   Diego: "chama essa merda de 1.7 tu fez uma porra de auditoria realmente
-   de verdade". Ele esta certo sobre o que mudou de patamar: da 1.6.7 ate
+   Mudou de patamar: da 1.6.7 ate
    aqui sairam 297 MB de peso morto do instalador, os dois manuais foram
    reescritos contra o codigo, e a bateria deixou de conferir so mecanica
    (hash, encoding, contagem de funcao) para conferir CONTEUDO - manual x
@@ -718,14 +765,9 @@
 
  O QUE ACONTECEU
 
-   Diego, sobre os 40 MB que sobraram da 1.6.8:
-
-     "e ae o ffmpeg a +? quando se vai resolve isso po vai eh algo ate
-      relevante se nao acha? ou vc tem medo de fuder tudo?"
-
-   Na 1.6.8 eu deixei esses 40 MB alegando a minha propria regra: mudanca no
-   motor nao vai para build sem uma conversao real antes. A regra continua
-   valendo - ela so nao se aplica AQUI, e eu devia ter visto isso na hora.
+   Os 40 MB que sobraram da 1.6.8 ficaram por aplicacao da regra do projeto:
+   mudanca no motor nao vai para build sem uma conversao real antes. A regra
+   continua valendo - ela so nao se aplica a este caso.
 
  POR QUE NAO SE APLICA
 
@@ -775,17 +817,12 @@
 
  O QUE ACONTECEU
 
-   Diego, depois de eu ter auditado a pasta do instalador TRES vezes:
-
-     "esse tempo todo q eu falo de lixo desnecessario quantas vezes vc ja
-      auditou isso e vc agora a pouco quis tirar kbytes por peso q quebraria
-      algo importante pra mim q era abrir a janela, e vc nao ve 251 megas"
-
-   Ele esta certo, e o contraste e o ponto: na 1.6.4 eu tirei o
-   Abrir_LaFirma_JANELA.bat (167 BYTES) alegando peso, quebrando o jeito dele
-   de abrir o programa nos testes - e na mesma auditoria passei os olhos por
-   uma pasta de 290 MB sem abrir. Eu estava contando bytes onde da para ler
-   nome de arquivo e ignorando megabytes onde tem que entrar na pasta.
+   A pasta do instalador tinha sido auditada tres vezes, e o contraste e o
+   ponto: na 1.6.4 saiu o Abrir_LaFirma_JANELA.bat (167 BYTES) alegando peso,
+   quebrando o caminho usado para abrir o programa nos testes - e na mesma
+   auditoria uma pasta de 290 MB passou sem ser aberta. Auditoria que conta
+   bytes onde da para ler nome de arquivo e ignora megabytes onde e preciso
+   entrar na pasta.
 
  O QUE ERA
 
@@ -813,7 +850,7 @@
 
    De quebra: o ffmpeg.exe que FICA e byte a byte o mesmo tools\ffmpeg.exe
    (MD5 70195e0342959d38e4ddb410456c9de2 nos dois, 40.808.448 bytes). Esses
-   40 MB duplicados eu NAO tirei: o motor passa os dois caminhos de proposito,
+   40 MB duplicados FICAM: o motor passa os dois caminhos de proposito,
    para sobreviver a uma mudanca de auto-discovery do DeeZy. Peso justificado.
 
  O QUE MUDOU
@@ -831,8 +868,8 @@
  TESTE NOVO
 
    Tres testes novos (183 no total). Dois guardam os padroes. O terceiro e
-   o que eu devia ter escrito na 1.6.4: ele NAO usa lista de nomes digitada
-   por mim - LE os .ps1, extrai todo caminho de tools\ que o codigo chama
+   o que devia ter sido escrito na 1.6.4: NAO usa lista de nomes digitada a
+   mao - LE os .ps1, extrai todo caminho de tools\ que o codigo chama
    de verdade, e roda a regra de Exclude do Inno em cima de cada um. Foi a
    lista digitada a mao que quase tirou o Auditor_OCR.dic.gz e que tirou o
    Abrir_LaFirma_JANELA.bat de verdade. Agora quem confere e o codigo.
@@ -857,11 +894,10 @@
  --------------------------------------------------------------------------
  [1.6.7] VERSAO PARADA DENTRO DE ARQUIVO E MENTIRA, MESMO EM .bat DE UMA LINHA
  --------------------------------------------------------------------------
- Diego olhou a DATA DE MODIFICACAO da pasta fonte\ e viu seis arquivos parados
- em 20/08 e 01/09 enquanto os outros onze estavam em 02/09. Ele estava certo
- de desconfiar: eu nao tinha tocado neles porque "nao vao para o instalador",
- e nao vale como desculpa - eles continuam na pasta dele e ele continua
- abrindo. Abrindo, achei quatro numeros errados:
+ A DATA DE MODIFICACAO da pasta fonte\ mostrava seis arquivos parados em
+ 20/08 e 01/09 enquanto os outros onze estavam em 02/09. Tinham ficado de
+ fora por "nao irem para o instalador" - o que nao vale: continuam na pasta
+ e continuam sendo abertos. Abertos, quatro numeros errados:
 
    Abrir_LaFirma_JANELA.bat   title dizia GUI 16.33   (a janela e 16.74)
    Auditor_OCR.bat            title dizia 1.1.9       (o .ps1 e 1.1.10)
@@ -874,12 +910,11 @@
  nunca teve.
 
  E O Abrir_LaFirma_JANELA.bat VOLTOU PARA O INSTALADOR.
- Eu o tinha tirado na 1.6.4 com o argumento de que era "um segundo caminho
- para a mesma coisa que o .vbs, so que com console piscando". Estava errado:
- o console piscando E O MOTIVO DE ELE EXISTIR. Diego usa esse .bat para
- testar - abre pela pasta de instalacao e a tela preta mostra o erro que o
- .vbs engole. Ferramenta usada toda semana nao sai do pacote por causa de 167
- bytes; o que eu queria tirar era lixo de teste, e esse nunca foi.
+ Saiu na 1.6.4 sob o argumento de ser "um segundo caminho para a mesma coisa
+ que o .vbs, so que com console piscando". Errado: o console piscando E O
+ MOTIVO DE ELE EXISTIR. Esse .bat e o caminho de teste - abre pela pasta de
+ instalacao e a tela preta mostra o erro que o .vbs engole. Ferramenta usada
+ toda semana nao sai do pacote por causa de 167 bytes.
  O .vbs continua sendo o caminho do usuario final (atalho do menu e da area
  de trabalho). Os dois manuais voltaram a explicar a diferenca entre os dois
  planos B: o .bat da JANELA mostra o erro da janela; o Converter_AUTO_DIRETO
@@ -911,16 +946,15 @@
 
  O teste da bateria nao usa numero inventado: cria um arquivo de 160 MB, roda
  a funcao de verdade e confere que vieram tres amostras e que a devolvida e a
- maior. Rodando aqui, a PRIMEIRA amostra deu 605 MB/s e as outras duas 7.242 e
- 6.929 - o efeito e real e reproduzivel, nao era azar do Diego.
+ maior. Na bancada, a PRIMEIRA amostra deu 605 MB/s e as outras duas 7.242 e
+ 6.929 - o efeito e real e reproduzivel, nao foi azar de uma medicao.
 
  [1.6.4] A FAXINA: O INSTALADOR PAROU DE LEVAR FERRAMENTA DE DESENVOLVIMENTO,
          E AS PASTAS DE INVESTIGACAO DA LEGENDA SOMEM SOZINHAS.
  --------------------------------------------------------------------------
- Diego, 02/09: "quero tirar a lixeira, limpeza de arquivos e tal, limpeza de
- teste nao faz sentido eu ter esses lixos no arquivo final, o usuario final
- nao vai ficar fazendo teste, ele so vai abrir o programa e usar (...) temos q
- enxugar esse monte de .bat e .ps1 do instalador final".
+ Decisao de 02/09: ferramenta de teste e de limpeza nao tem por que ir no
+ pacote final - o usuario final abre o programa e usa. O instalador foi
+ enxugado dos .bat e .ps1 que so servem ao desenvolvimento.
 
  SAIRAM DO INSTALADOR (cada um conferido contra quem o chama):
    Limpar_Testes.ps1 + .bat   ferramenta de desenvolvimento; nada no programa
@@ -930,7 +964,7 @@
                               tools\DeeZy\ quando roda na arvore de fontes.
                               Sujeira de execucao, e ia junto no instalador.
 
- O Auditor_OCR.dic.gz FICA - e por pouco eu o tirei junto (02/09). O nome
+ O Auditor_OCR.dic.gz FICA - e por pouco saia junto (02/09). O nome
  engana: parece "o dicionario do Auditor", e o Auditor esta saindo. Mas quem
  le esse arquivo tambem e o MOTOR, na correcao de acento da legenda que sai do
  seconv/BinaryOCR (Repara-AcentoBinaryOcr). Sem ele a funcao devolve vazio,
@@ -950,9 +984,9 @@
 
  [MOTOR 14.34] _corretor E _reocr SO FICAM QUANDO HA O QUE INVESTIGAR
  --------------------------------------------------------------------------
- Diego: "A PASTA CORRETOR REOCR (...) TEM Q SUMIR NO FINAL, HOJE ELA FICA PQ
- NOS PRECISAMOS DO LOG PARA ARRUMAR (...) QUANDO A LEGENDA FOR CRITICA, ELA SO
- PODE FICAR ALI CRIADA".
+ Regra definida: as pastas _corretor e _reocr tem de sumir no fim da
+ conversao. Elas so existem para investigar legenda - so ficam quando a
+ legenda saiu critica.
 
  E o que passa a acontecer, no fim de cada arquivo:
    . legenda EXCELENTE ou BOA -> apaga o .srt corrigido, os relatorios e os
@@ -1005,11 +1039,10 @@
  [JANELA 16.71 e 16.72] O LOG PASSOU A GRAVAR O TEMPO RESTANTE - E NA MESMA
                 HORA MOSTROU UM ERRO CONSTANTE DE +71 SEGUNDOS.
  --------------------------------------------------------------------------
- Depois de tres entregas em que eu pedi print da tela para saber se a conta
- estava boa, Diego: "ja falei q nao vou olhar merda nenhuma de RODAPE, E A
- MERDA DO SEU LOG Q TEM Q SABER SE TA FUNCIONANDO". Ele esta certo, e a falha
- e minha: o log registrava o % de cada ferramenta, o tempo de cada etapa e a
- estimativa do lote - e NAO registrava o unico numero reclamado.
+ Conferir a conta por print da tela nao e conferencia: quem tem de saber se
+ esta funcionando e o LOG. E o log registrava o % de cada ferramenta, o tempo
+ de cada etapa e a estimativa do lote - e NAO registrava justamente o numero
+ reclamado.
 
  16.71 - o log grava a linha RODAPE a cada 30s e em toda troca de etapa ou
  fase, com tudo que entrou na conta:
@@ -1043,11 +1076,11 @@
  [JANELA 16.70] O FIM DA CONVERSAO MENTIA - "TERMINANDO AGORA" COM O MKVMERGE
                 AINDA MONTANDO.
  --------------------------------------------------------------------------
- Print do Diego, Jumanji 01/09 as 21h24: etapa 5/5 em 70%, mkvmerge rodando,
+ Jumanji, 01/09 as 21h24: etapa 5/5 em 70%, mkvmerge rodando,
  e o rodape da fila dizia "Terminando Agora". Faltavam 1m18s. Um minuto
  depois, na conferencia, a linha dizia so "Finalizando" - sem numero nenhum.
 
- Duas causas, as duas introduzidas por mim nas 16.68/16.69:
+ Duas causas, as duas introduzidas nas 16.68/16.69:
 
    1. A 16.68 so sabia fazer PREVISTO - DECORRIDO. Naquela noite a maquina
       estava mais lenta e o audio levou 31m36s contra 25m50s previstos.
@@ -1065,7 +1098,7 @@
    + conferencia e limpeza
    + estimativa dos videos seguintes da fila
 
- "Pelo ritmo dela" e o que segura o caso do print: com a etapa em 70% e 1m15s
+ "Pelo ritmo dela" e o que segura esse caso: com a etapa em 70% e 1m15s
  de relogio, o previsto DELA vira 1m47s, sobram 42s + 38s de conferencia =
  1m20s contra 1m18s reais. Nenhuma etapa "termina agora" enquanto esta em 70%.
 
@@ -1075,7 +1108,7 @@
      congelar. Errar para menos e o "Terminando Agora" com trabalho pela
      frente; errar para mais so custa uma espera menor que a anunciada.
    . A fase de conferencia ganhou relogio proprio. Ate aqui ela herdava o da
-     etapa 5 e o print mostrava "02m 23s" numa conferencia que tinha comecado
+     etapa 5 e a tela mostrava "02m 23s" numa conferencia que tinha comecado
      havia 20 segundos.
    . "Terminando Agora" so abaixo de 15s (era 60).
    . A linha do rodape nao depende mais de a fila estar abaixo de 100%: fila
@@ -1099,8 +1132,8 @@
      17h02 (17m06s)             "Tempo Restante:  9 min"   faltavam 15m34s
      17h08 (22m42s)             "Tempo Restante:  8 min"   faltavam 10m00s
 
- Entre o primeiro e o segundo print passaram 14 minutos de relogio e o
- "restante" caiu 8. Diego: "passou varios minutos e diminuiu so alguns".
+ Entre a primeira e a segunda leitura passaram 14 minutos de relogio e o
+ "restante" caiu 8.
 
  O QUE MUDOU
    1. O tempo restante e PREVISTO - DECORRIDO (descontada a pausa), com o
@@ -1150,7 +1183,7 @@
     nao quer dizer codigo que roda.)
  3. O teste da estimativa parou de usar stub: carrega as seis funcoes reais
     e confere o Troia contra os 23m05s do relogio. Era o stub que escondia
-    a colisao de nome - eu tinha escrito o mascaramento do proprio defeito.
+    a colisao de nome: o teste mascarava o proprio defeito.
  As tres foram conferidas reintroduzindo o defeito de proposito: reprovam.
  149 testes no total.
 
@@ -1169,7 +1202,7 @@
  vira lixo aos olhos da regra. Quem cuida do 'INF TOL' e a regra 3B, que e
  cirurgica.
  NENHUMA REGRA MUDOU. A medicao ficou escrita ao lado das duas regras para
- que ninguem - eu inclusive - 'conserte' isso de novo sem refazer a conta.
+ que ninguem 'conserte' isso de novo sem refazer a conta.
 
  --------------------------------------------------------------------------
  ESTADO DO MODELO DE TEMPO - encerrado
@@ -1195,14 +1228,14 @@
  --------------------------------------------------------------------------
  [JANELA 16.66] DUAS FUNCOES COM O MESMO NOME - E A 16.65 SAIU QUEBRADA
  --------------------------------------------------------------------------
- O Diego converteu o Troia na 1.5.8 e a tela disse 4 MINUTOS para uma
- conversao que levou 23m05s. Erro de -82%, o pior de toda a historia deste
- modelo - pior do que antes de eu comecar a mexer nele.
+ O Troia convertido na 1.5.8: a tela disse 4 MINUTOS para uma conversao que
+ levou 23m05s. Erro de -82%, o pior de toda a historia deste modelo - pior
+ do que antes de o modelo comecar a ser revisado.
 
  A CAUSA: a funcao que responde 'o que vai rodar neste video' nasceu na
  16.64 chamada Get-PlanoDoVideo, e JA EXISTIA outra com esse nome - a que
  devolve os indices das etapas do plano. Em PowerShell a ULTIMA definicao
- vence, calada. A minha foi substituida: a chamada caia na outra, que
+ vence, calada. A nova foi substituida: a chamada caia na outra, que
  ignora o parametro e devolve um ARRAY, e perguntar .Dovi a um array da
  $null - ou seja, false. As tres perguntas viravam 'nao vai rodar', e
  sobrava so a remontagem na conta.
@@ -1215,7 +1248,7 @@
  POR QUE A BATERIA NAO PEGOU - e o que doi: o teste da estimativa carregava
  as funcoes de verdade, MENOS a que resolve o plano, que ele trocava por um
  stub. O stub tinha o nome certo e o parametro certo, entao no teste tudo
- passava. Eu tinha escrito o mascaramento do proprio defeito.
+ passava - o teste mascarava o proprio defeito que devia pegar.
 
  DUAS CORRECOES, e a segunda importa mais que a primeira:
  1. A funcao virou Get-TrabalhoDoVideo - nome unico.
@@ -1250,7 +1283,7 @@
  num arquivo de 87 GB. Numa faixa de legenda isso e a contagem de eventos:
  SRT grava um por fala, PGS grava dois (um para desenhar, um para apagar).
 
- Conferido nos arquivos do proprio Diego, contra os blocos que sairam no
+ Conferido em arquivos reais, contra os blocos que sairam no
  .srt do Reocr:
      Troia   indice 2757 / 2 = 1378,5   ->  1378 blocos   (+0,04%)
      Se7en   indice 3144 / 2 = 1572     ->  1572 blocos   (exato)
@@ -1276,7 +1309,7 @@
                                   pior  71,2%  pior 24,3%  pior  8,8%
 
  TRAVA DE SANIDADE: fora da faixa de 20 a 20.000 blocos o numero nao e o
- que eu penso que e (container esquisito, faixa de imagem que nao e legenda,
+ que deveria ser (container esquisito, faixa de imagem que nao e legenda,
  formato que conta de outro jeito) e a conta volta para a duracao. Melhor
  cair no plano B do que entregar uma estimativa absurda.
 
@@ -1301,7 +1334,7 @@
 
  Esta versao saiu de DOZE conversoes reais na 1.5.6 (8 episodios de Fallout
  S02, Lara Croft, Troia, Homem-Aranha e Game of Thrones S08E01 - este ultimo
- lido de um HD mecanico) mais dois pedidos de tela do Diego.
+ lido de um HD mecanico) mais dois pedidos de tela.
 
  --------------------------------------------------------------------------
  [JANELA 16.64] CLICAR NA CAIXA DE PASTA ABRE O SELETOR
@@ -1309,7 +1342,7 @@
  A caixa inteira virou botao: CLICAR NELA ABRE O SELETOR, igual ao botao
  'Procurar' ao lado (que era o 'Trocar'). Nao e preciso mirar no botao.
  A primeira tentativa foi deixar a caixa editavel para poder colar caminho;
- o Diego pediu o contrario depois de ver funcionando, e com razao: o dialogo
+ foi revertida depois de ver funcionando, e com razao: o dialogo
  novo TEM barra de endereco e campo 'Pasta:', entao colar caminho ja
  acontece la dentro, com autocompletar e validacao do proprio Windows.
  Duas formas de fazer a mesma coisa, sendo que uma delas nao valida nada, e
@@ -1399,8 +1432,8 @@
  --------------------------------------------------------------------------
  [JANELA 16.64] MAXIMIZAR A JANELA ABRIA O SELETOR DE PASTA SOZINHO
  --------------------------------------------------------------------------
- Achado pelo Diego no log de 28/08 15h28: nove Maximized/Normal seguidos e
- nenhuma pasta trocada - o dialogo abria a cada maximizada e ele cancelava.
+ Achado no log de 28/08 15h28: nove Maximized/Normal seguidos e nenhuma
+ pasta trocada - o dialogo abria a cada maximizada e era cancelado.
 
  A CAUSA: a acao estava ligada ao soltar do botao, sozinho. Soltar o botao
  NAO quer dizer que ele foi apertado ali. Ao maximizar, o botao e apertado
@@ -1420,9 +1453,9 @@
  --------------------------------------------------------------------------
  [JANELA 16.64] DOIS CONSERTOS ACHADOS NO PRIMEIRO LOG DA PROPRIA 16.64
  --------------------------------------------------------------------------
- O Diego rodou a 16.64 no Devil Wears Prada (10,74 GB, ja em Profile 8.1, ja
- em E-AC-3, ja com legenda .SRT - ou seja, so a remontagem roda) e o log
- mostrou duas coisas erradas minhas:
+ A 16.64 rodada no Devil Wears Prada (10,74 GB, ja em Profile 8.1, ja em
+ E-AC-3, ja com legenda .SRT - ou seja, so a remontagem roda) e o log mostrou
+ duas coisas erradas:
  1. O DIAGNOSTICO estava contado DENTRO do if do Dolby Vision, entao sumia
     da estimativa em todo arquivo que ja chega em 8.1. O ffprobe roda
     SEMPRE. Nas 12 conversoes isso muda 0,1% (so o Lara Croft nao tinha DV),
@@ -1434,8 +1467,8 @@
     com PGS estragaria a conta inteira. Agora imprime o codec que achou.
 
  O MESMO LOG PROVOU O QUE FUNCIONA: a medicao de disco leu 1.226 MB/s no
- NVMe do Diego e prendeu o fator em 1,00x, como projetado (disco mais rapido
- que a referencia nao encolhe tempo de CPU); e a linha MEDIDA gravou GB,
+ NVMe da maquina de teste e prendeu o fator em 1,00x, como projetado (disco
+ mais rapido que a referencia nao encolhe tempo de CPU); e a linha MEDIDA gravou GB,
  duracao e tamanho da faixa de legenda como planejado.
 
  --------------------------------------------------------------------------
@@ -1489,8 +1522,8 @@
               AUDITOR_OCR 1.1.9  |  LIMPAR_TESTES 1.9
               TESTAR_LAFIRMA 1.2  |  AUDITAR_SRT 1.3   (pasta _testes\)
 
- Esta versao nao saiu de conversao nenhuma: saiu de AUDITORIA. O Diego pediu
- para arrumar a estimativa de tempo e, de quebra, procurar defeito no projeto.
+ Esta versao nao saiu de conversao nenhuma: saiu de AUDITORIA - arrumar a
+ estimativa de tempo e, de quebra, procurar defeito no projeto.
  Sao seis achados, e nenhum deles tinha aparecido em uso.
 
  --------------------------------------------------------------------------
@@ -1672,7 +1705,7 @@
 
  [TESTAR_LAFIRMA 1.1]  _testes\Testar_LaFirma.bat
    74 testes: sintaxe pelo parser oficial, contagem E nome das funcoes,
-   sintaxe de PS7 que o 5.1 do Diego quebraria, encoding arquivo por arquivo
+   sintaxe de PS7 que o PowerShell 5.1 quebraria, encoding arquivo por arquivo
    (BOM/CRLF/ASCII), versao do cabecalho contra a variavel, o contrato do
    .srt contra 4 amostras, .bat para todo .ps1, e um teste para CADA defeito
    ja corrigido. Validada por sabotagem: 5 defeitos plantados, 5 pegos.
@@ -1835,10 +1868,9 @@
  ------------------------------------------------------------------------
  AUDITORIA DO INSTALADOR - .ISS, .BAT E OS DOIS SCRIPTS DE LEGENDA (20/08)
  ------------------------------------------------------------------------
- Diego pediu auditoria completa antes do Setup 1.4: ".iss tudo tudo tudo
- muito detalhado e revisado". Revisao linha a linha de LaFirma_Setup.iss,
- Compilar.bat, Corretor_Legenda.ps1 e Reocr_Legenda.ps1 contra a fonte\
- real que ele tinha na maquina. Quatro problemas encontrados e corrigidos:
+ Auditoria completa antes do Setup 1.4: revisao linha a linha de
+ LaFirma_Setup.iss, Compilar.bat, Corretor_Legenda.ps1 e Reocr_Legenda.ps1
+ contra a fonte\ real da maquina. Quatro problemas encontrados e corrigidos:
 
  1) COMPILAR.BAT CHECAVA UM ARQUIVO QUE NUNCA EXISTIU
     A trava de "pasta fonte\ vazia" testava "fonte\LaFirma_MOTOR.ps1" - esse
@@ -1890,8 +1922,8 @@
  ------------------------------------------------------------------------
  JANELA 16.49 + MOTOR 14.22 - O DIAGNOSTICO QUE PARECIA RODAR DUAS VEZES
  ------------------------------------------------------------------------
- Relato do Diego sobre o log de 19/08 22h56: "apareceu q leu o diagnostico
- duas vezes e por duas vezes comecou o processo de extrair o mkv".
+ Relato sobre o log de 19/08 22h56: o diagnostico aparecia lido duas vezes e
+ a extracao do mkv comecava duas vezes.
  Nao rodou duas vezes. Eram DOIS defeitos de escrita, um em cada arquivo.
 
  1) A PALAVRA "DIAGNOSTICO" NOMEAVA DUAS COISAS DIFERENTES  (motor 14.22)
@@ -1927,8 +1959,7 @@
  ------------------------------------------------------------------------
  JANELA 16.49 - A LINHA DA FILA: O "~" SAIU E A LETRA CRESCEU
  ------------------------------------------------------------------------
- Diego: "ja q eh uma previsao deixe algo escrito no sentido e nao esse ~
- amador. Deixe tudo na vdd de uma forma mais no sentido escrito e legal."
+ Sendo uma previsao, ela passa a ser escrita por extenso: o "~" saiu.
 
      antes  Termina as ~11h48 (faltam 1h 13min)
      agora  Deve Terminar por Volta das 11h48   -   Tempo Restante 1h 13min
@@ -1979,12 +2010,10 @@
  proposito - e assim desde sempre, nao e novo. O arquivo FINAL monta na
  pasta de saida configurada (o SSD), e os temporarios do HD saem sozinhos
  no [LIMPEZA] (confirmado no log: "18,12 GB Liberados"). Ler do HD e
- valido; nao substitui gravar e converter num HD do inicio ao fim, que o
- Diego decidiu nao testar por nao ser o uso real dele.
+ valido; nao substitui gravar e converter num HD do inicio ao fim, caso que
+ nao foi testado por nao ser o uso real do projeto.
 
- A LINHA DO RODAPE GANHOU OS ":" QUE FALTAVAM. Diego: "falta um : ne?
- Comecou: 00h52 ... feio demais do jeito que esta, duvido em algum lugar
- da industria um programa mostrar desse jeito." Ele tem razao:
+ A LINHA DO RODAPE GANHOU OS ":" QUE FALTAVAM:
 
      antes  Começou 00h52   Decorrido 05m 09s
      agora  Começou: 00h52   Decorrido: 05m 09s
@@ -2009,9 +2038,9 @@
  Quatro falas boas perdidas para consertar quatro linhas ruins. O conserto
  saiu pior que o defeito. A 1.12 NAO DEVE SER USADA.
 
- Defeito meu, e de um tipo que eu ja devia conhecer: testei a DETECCAO da
- regra nova em 7.695 blocos e nao testei o que acontece DEPOIS que ela
- marca. Cobri metade do caminho e chamei de medido.
+ Defeito de um tipo ja conhecido no projeto: a DETECCAO da regra nova foi
+ testada em 7.695 blocos e o que acontece DEPOIS que ela marca, nao. Meio
+ caminho coberto e chamado de medido.
 
  TRAVA (1.13): bloco de 2+ linhas so aceita leitura com o MESMO numero de
  linhas. Barrar aqui nao perde nada - o bloco fica como estava.
@@ -2031,7 +2060,7 @@
  ------------------------------------------------------------------------
  JANELA 16.48 - A ETAPA FANTASMA E O TITULO QUE CONTAVA POR FORA
  ------------------------------------------------------------------------
- Duas coisas no mesmo print (19/08 17h49).
+ Duas coisas na mesma tela (19/08 17h49).
 
  1) O TITULO DA JANELA DIZIA "Etapa 3/5" E O RODAPE "ETAPA 2/4".
     Dois numeros para a mesma etapa, a um palmo um do outro. A 16.45
@@ -2039,7 +2068,7 @@
     ainda usando EtapaIdx+1 sobre as 5 do catalogo. Agora o titulo
     pergunta ao mesmo lugar que o rodape.
 
- 2) "O DIAGNOSTICO RODA ./4 E DEPOIS COMECA A 2/4, TA CERTO?"
+ 2) O DIAGNOSTICO RODAVA COMO ./4 E A CONTAGEM COMECAVA EM 2/4.
     O 1/4 existia - e durava ZERO segundo. O peso da etapa 1 era
     (Video + Ffprobe + Limpeza); quando o video ja e Profile 8.1 ele nao
     sai do container, Video = 0, e sobrava o 5 do Ffprobe. So que o
@@ -2192,7 +2221,7 @@
 
  A CAIXA VEM DA POSICAO, NAO DO QUE O OCR LEU
  "la mesmo" abre a fala e vira "Ia"; "onde tr" esta no meio e vira "ir".
- Na primeira versao eu decidia pela letra original e saia "onde Ir" - um
+ Na primeira versao a decisao vinha da letra original e saia "onde Ir" - um
  erro novo no lugar do velho.
 
  MEDIDO: 7.695 blocos, 28 corrigidos, ZERO estrago. Controles intactos
@@ -2212,9 +2241,9 @@
  A lista saiu com 407 itens onde deviam ser 472. Cada item acentuado
  agora vai entre parenteses.
 
- CORRIGINDO UMA CONCLUSAO MINHA ANTERIOR
- Eu tinha reportado 4 blocos "totalmente podres" que teriam passado pelo
- Reocr no Troia. Estava errado: misturei arquivos intermediarios
+ CORRIGINDO UMA CONCLUSAO ANTERIOR
+ Tinham sido reportados 4 blocos "totalmente podres" que teriam passado pelo
+ Reocr no Troia. Errado: a primeira varredura misturou arquivos intermediarios
  (_CORRIGIDO) com finais (_REOCR) na primeira varredura. Nos arquivos
  FINAIS aqueles blocos ja estao corrigidos - o de 00:57:05 e "Nao!".
  O Reocr ja fazia o trabalho dele.
@@ -2255,7 +2284,7 @@
  foi essa linha que denunciou o defeito, e ela mesma estava errada. Agora
  nomeia a fase.
 
- PEGO NA SIMULACAO, ANTES DE EMPACOTAR (defeito que eu mesmo criei na 16.45)
+ PEGO NA SIMULACAO, ANTES DE EMPACOTAR (defeito introduzido na 16.45)
  O motor ANUNCIA as cinco etapas sempre, inclusive as que so imprimem "nao
  necessario" e fecham em 00m00s - esta no log do Lara Croft:
      > [1/5] ... fechada 00m 00s   > [2/5] ... fechada 00m 00s
@@ -2407,7 +2436,7 @@
      + 36,32s  [MOTOR] primeiro arquivo
    34 segundos sem UMA linha de log no meio.
 
- Causa: minha propria mudanca da 14.18. A limpeza de temporarios orfaos
+ Causa: a propria mudanca da 14.18. A limpeza de temporarios orfaos
  passou a receber tambem a RAIZ do disco na mesma lista das pastas de
  trabalho - e a varredura roda com -Recurse. Ou seja: para achar sobras de
  conversao, o motor passou a ler o C: inteiro antes de tocar no primeiro
@@ -2425,7 +2454,7 @@
  ------------------------------------------------------------------------
  JANELA 16.45 - A LINGUAGEM VISUAL DO RODAPE
  ------------------------------------------------------------------------
- Quatro pedidos do Diego, todos sobre a mesma coisa: a tela estava dizendo
+ Quatro pedidos, todos sobre a mesma coisa: a tela estava dizendo
  varias coisas com o mesmo desenho.
 
  1) O ROXO DEIXOU DE SER ESTADO
@@ -2444,9 +2473,9 @@
               enquanto o texto dizia "5/5": tela se contradizendo.
       16.43 - voltou o bloco num cinza proprio, so pra fechar a conta - e
               virou um retangulo que existe pra dizer que nao vai acontecer.
-    O Diego apontou o erro: "se a etapa nao e feita nao e necessaria naquele
-    momento, nao tem o porque ela aparecer ali". Certo - e o que faltava era
-    corrigir a CAUSA, nao escolher qual sintoma doia menos. O errado nunca
+    O erro apontado: etapa que nao e feita naquele momento nao tem por que
+    aparecer ali. O que faltava era corrigir a CAUSA, nao escolher qual
+    sintoma doia menos. O errado nunca
     foi a regua: era o DENOMINADOR. Chamar de "5/5" um arquivo que so tem 3
     etapas de trabalho e que estava errado desde sempre.
     Agora existe UM PLANO por arquivo - so as etapas com peso > 0. O Se7en
@@ -2484,7 +2513,7 @@
     duplicar tambem o proximo conserto). Valem sempre, inclusive com a fila
     rodando - eles nao mexem em nada, so abrem o Explorer.
 
- PEGO ANTES DE SAIR (nao chegou a rodar na maquina do Diego)
+ PEGO ANTES DE SAIR (nao chegou a rodar na maquina de teste)
     A funcao do plano devolvia  return ,$plano  e todo chamador recebia com
     @(...). A virgula existe pra impedir desmonte de colecao vazia - mas
     @( ,@(0,3,4) ) NAO desmonta: fica um array de UM elemento, com o array
@@ -2504,8 +2533,8 @@
    "LaFirma_PTBR_1.3M.dic.gz" nao aparecia em NENHUM .ps1 do projeto - e o
    instalador 1.4 tem uma trava de compilacao exigindo esse arquivo, com o
    comentario dizendo que "e o que o Corretor 2.9+ e o Reocr 1.2+ usam".
-   Funcionou ate hoje por acidente: o Auditor_OCR.dic.gz da maquina do
-   Diego tinha sido trocado a mao pelo arquivo grande (3.145 KB no lugar de
+   Funcionou ate hoje por acidente: o Auditor_OCR.dic.gz da maquina de teste
+   tinha sido trocado a mao pelo arquivo grande (3.145 KB no lugar de
    195 KB) - por isso os relatorios dizem 1.296.508 palavras.
    No dia em que o setup instalasse os DOIS arquivos com os nomes certos,
    os scripts voltariam a ler o de 50 mil e a familia de falso positivo que
@@ -2613,7 +2642,7 @@
      media   = trabalho / feitos
      noBloco = trabalho - (media * feitos)
  So que (trabalho/feitos)*feitos E o proprio trabalho. noBloco dava SEMPRE
- ZERO. O preenchimento nunca existiu - eu escrevi uma conta que se anula.
+ ZERO. O preenchimento nunca existiu - a conta se anula sozinha.
 
  Corrigido em duas frentes, e a segunda e a que resolve de verdade:
    1. o tempo de cada bloco agora e MARCADO na troca, e o avanco dentro do
@@ -2932,7 +2961,7 @@
  1.2.0   detector pegava 4 dos 12 blocos; dicionario carregado em dobro.
  1.3.0   TROCAVA LIXO POR LIXO PIOR e escrevia "8 aproveitaveis" - nao
          existia trava de aceite. Era o pior defeito do projeto: estava
-         dentro da ferramenta que eu mandei o usuario rodar.
+         dentro da ferramenta indicada ao usuario para rodar.
          E o ffmpeg sobrepunha a legenda na CENA - o Tesseract lia o filme.
  1.5.0   Nao existe escala unica que sirva: escala virou TENTATIVA, igual
          ao PSM e ao instante. Sao 60 combinacoes por bloco (3 instantes x
@@ -3116,8 +3145,8 @@
  nao e distribuido junto - a referencia e so de origem/inspiracao.
    https://github.com/DonaldFaQ/DDVT
 
- O changelog abaixo e do DDVT, preservado exatamente como estava neste
- arquivo antes da versao 1.4. Ele nao descreve o LaFirma.
+ Abaixo, a ultima entrada do changelog do DDVT, para registro de qual
+ versao serviu de referencia. Ela nao descreve o LaFirma.
 
 --------------------------------------------------------------------------------
 
@@ -3126,398 +3155,6 @@
 *UPDATED dovi_tool to v2.3.2.
 *UPDATED mkvtoolnix to v98.0.0.0.
 
--v0.73 "Understanding is overrated"
-*UPDATED hdr10plus_tool  to v1.7.2.
-*UPDATED mkvtoolnix to v97.0.0.0.
-*Reworked Plotting HDR10 / HDR10+ / DV
-*Minor Bugfixes.
+ Versoes anteriores do DDVT: ver o repositorio do autor.
 
--v0.72.1 "Blessed is the mind too small for doubt"
-*UPDATED dovi_tool to v2.3.1.
-*UPDATED mkvtoolnix to v95.0.0.0.
-*Minor Bugfixes.
-
--v0.72 "Hope for the best, but prepare for the worst"
-*Major Bugfixes.
-*UPDATED mkvtoolnix to v94.0.0.0.
-
--v0.71.1 "The Emperor protects"
-*UPDATED hdr10plus_tool to v1.7.1.
-*UPDATED - All scripts support Drag & Drop now. (Start without Input).
-*UPDATED - Demuxer script (creates now logfiles).
-*UPDATED - Fileinfo script supports now Dual Layer files.
-*UPDATED - MediaInfo supports now Blu-ray ISO files (needed Admin rights! Set Powershell policy to remoteSigned).
-*Major Bugfixes.
-
--v0.71 "Back to the roots"
-*FIXED - Problems with =/() symbols in tool dirname.
-*REWORKED - Demuxer script (more options and better stability with Dual Layer files).
-*COMEBACK - Support for mkvextract/mp4box for demuxing (slower speed but lesser PPS errors).
-(No switch in options, you can force faster FFMPEG demuxing in the scripts itselfs).
-*Major Bugfixes.
-(3rd Party Apps from v0.70 works fine!).
-
--v0.70
-*COMPLETE OVERHAUL.
-*ADDED Theme support.
-*REWORKED all scripts.
-*Major Bugfixes.
-*UPDATED mkvtoolnix to v93.0.0.0.
-
--v0.65.5
-*ADDED INJECTOR - No more Bordercheck if input file is only HDR10+ SEI.
-*ADDED FILEINFO Script works now with HDR10+ json files.
-*FIXED REMOVER Checkloop if file contains no HDR10+/DV.
-*FIXED REMOVER No more DIR MENU if you start without input.
-*UPDATED AviSynth Plus Installer to 3.7.5 (requires new 3rd Party Tool folder).
-*UPDATED LAVFilters Installer to 0.80 (requires new 3rd Party Tool folder).
-*Minor Bugfixes.
-
--v0.65.4
-*ADDED L2, L8 Plotting with FileInfo script.
-*ADDED Mass Converting with -Remover- (Folder Support).
-*UPDATED dovi_tool to v2.3.0.
-*UPDATED mkvtoolnix to v92.0.0.0.
-*Minor Bugfixes.
-(Do not forget to Download the new 3rd Party Apps).
-(If you using Shell Extensions, please reinstall via Options script).
-
--v0.65.3
-*FIXED Errors with P8 Hybrid script if no temp folder set in options.
-*FIXED If you right click on a video file and navigate to DDVT/P8 Hybrid script, file will be automated set as HDR Input file.
-*FIXED Some little bugs in options script. It's recommended to reinstall shell extensions if needed.
-*Minor Bugfixes.
-
--v0.65.2
-*FIXED Errors with FFMPEG and bitstream demuxing/pipelining (clipping and wrong colors on some movies)
-*Minor Bugfixes.
-
--v0.65.1
-*ADDED INJECTOR Custom JSON Support (if activated) for RPU (*.bin) files.
-
--v0.65
-*ADDED Logfile for HYBRID script.
-*ADDED Set Frame 0 Scenecut Fix in RPU (Turn ON/OFF via Options).
-*FIXED Errors in HYBRID script.
-*FIXED Errors in DEMUXER script.
-*FIXED Display Bug with RPU files in FILEINFO script.
-*NEW ICON SET - Reinstall the Shell Extensions!
-*Minor Bugfixes.
-
--v0.64.5
-*ADDED -Injector- Support for Custom JSON files without injecting DV / HDR10+. Not supported for DV Profile 7. Skip DV and HDR10+ Input for processing JSON files directly.
-*FIXED -Options- Errors with Shell Extensions and W11.
-*FIXED -Options- Wrong TAB entry in DDVT_Options.ini [Line JSON_PROCESS] (if you have the TAB bug, please delete the complete line in ini file and save options again).
-*FIXED -MediaInfo- Removed HDR Metadata Tab for non HDR files.
-*UPDATED mkvtoolnix to v89.0.0.0.
-*Minor Bugfixes.
-
--v0.64.4
-*XML Support (Injector / Demuxer)
-*REWORKED MANY Scripts
-*ADDED Function to plot HDR Metadata in -FileInfo- script (fork from reset_9999)
-*ADDED Mass Converting with -MKVtoMP4- (Folder Support)
-*UPDATED Python to v3.13
-*Minor Bugfixes.
-
--v0.64.3d
-*ADDED Function in -MKVtoMP4- script for creating "fake" Profile 5 files.
-
--v0.64.3c
-*FIXED Errors in demuxing combinations in DEMUXER script.
-*FIXED Some errors in MediaInfo with DL files.
-*FIXED L6 Error (L6 SWITCH) in Injector script.
-*FIXED If changing FPS with Injector and EL is input, FPS from EL changed, too.
-*ADDED Option in Injector script for writing RPU L6 Data as HDR bitstream data.
-*Minor Bugfixes.
-
--v0.64.3b
-*REWORKED -P8 Hybrid Script-. Works now faster.
-*Minor Bugfixes.
-
--v0.64.3a
-*FIXED Problems with files that contains "()" in filename.
-
--v0.64.3
-*ADDED m2ts Dual Layer Suppert for Demuxer Script.
-*FIXED -Demuxer- Frames display bug.
-*Minor Bugfixes.
-
--v0.64.2
-*Major Bugfixes.
-*FIXED -MediaInfo- bugs with AV1/VP1
-
--v0.64.1
-*Minor Bugfixes.
-*ADDED Custom JSON file directly Support (Injector) (also bin files).
-*ADDED RPU Extracting via -Demuxer- Script. (bin files)
-*FIXED Wrong L9 detection with MediaInfo.
-
--v0.64
-*Minor Bugfixes.
-*ADDED -MEDIAINFO- script (also quick video check for DV levels, included MEL/FEL analyse).
-*ADDED -SYNCCHECK- (check frames and cropping borders between video and rpu).
-*UPDATED dovi_tool to v2.1.3.
-*UPDATED hdr10plus_tool to v1.6.1.
-*UPDATED mkvtoolnix to v88.0.0.0.
-*UPDATED FFMPEG to 7.1
-
--v0.63.2
-*ADDED Shot List Support in Generator. (Generator script not official)
-*UPDATED Dolby Vision Pro Tools.
-*UPDATED dovi_tool to v2.1.1.
-*UPDATED mkvtoolnix to v83.0.0.0.
-
--v0.63.1
-*FIXED Border check fails if temp folder includes spaces (THX @ sirbod).
-*FIXED Better HDR detection.
-
--v0.63
-*UPDATED Complete overhaul of the -DEMUXER- script.
-*UPDATED Complete overhaul of the -REMOVER- script.
-*UPDATED No more Target subfolders.
-*FIXED minor bugfixes.
-
--v0.62
-*UPDATED Complete overhaul of the INJECTOR script.
-*ADDED Feature for settings custom mkvtoolnix path in Options.
-*UPDATED mkvtoolnix to v82.0.0.0.
-*FIXED minor bugfixes.
-
--v0.61.5
-*FIXED missing HDR Info String in mkvtomp4 script with DV P5 files.
-*UPDATED mkvtoolnix to v81.0.0.0.
-
--v0.61.4
-*FIXED wrong error message during RPU.bin creating in DEMUXER Script.
-*FIXED Sourcecode REMOVER Script.
-
--v0.61.3
-*UPDATED dovi_tool to v2.1.0.
-*Minor Bugfixes.
-*REMOVED Crop Check function in DEMUXER script.
-*ADDED Crop Check function in FILEINFO script.
-*ADDED SCENECUTS option in FILEINFO script without extracting ALL frames.
-
--v0.61.2
-*Minor Bugfixes
-*FIXED FFPROBE Bug with UAC On.
-
--v0.61.1
-*Minor Bugfixes
-*ADDED Video Bitrate Plotter in FILEINFO Script.
-*ADDED MediaInfo File Writer in FILEINFO Script.
-
--v0.61
-*Minor Bugfixes.
-*Some changes in scripts layout.
-*RENAMED Script Frameinfo.cmd to Fileinfo.cmd.
- Support for plotting DV / HDR10+ metadata graphs to png picture file.
- If u use shell extensions start Options.cmd and reset Shell Extensions!
-*UPDATED mkvtoolnix to v79.0.0.0.
-
--v0.60
-*Minor Bugfixes.
-*UPDATED mkvtoolnix to v78.0.0.0.
-
--v0.59
-*Hybrid Scripts supports now HDR10+ files without DV for secondary input.
- If the secondary stream contains DV and HDR10+ metadata, you can choose
- which metadata will be used for RPU.
-*Live ticker for Output file HDR infos.
-
--v0.58
-*Removes mkclean from all scripts because damage on some tracks inside mkv container.
-
--v0.57 
-*DEMUXER creates a directory in source file dir if a custom dir is set - Fixed.
-*HYBRID Any bugfixes and overhauled layout. Live ticker if HDR and OUTPUT Borders matches.
-
--v0.56
-*NEW - Hybrid Script - If DV file contents DV and HDR10+ and the HDR file is only HDR
-                       you can choice to mux HDR10+ metadata into target file. DV RPU
-                       will always mux in HDR stream, HDR10+ is optional.
-*Small Bugfixes.
-
--v0.55
-*NEW Checking and repairing MKV Container during muxing.
-*UPDATED mkvtoolnix to v 77.0.0.0.
-*Major Bugfixes.
-*Reworked Shell Extensions (Hybrid P8 Script now in Shell Background).
-
--v0.54
-*NEW New Script included (DDVT_Hybrid) for fast creating DV Profile 8.1 Hybrid Releases.
-*INJECTOR-Function to change correctly the video framerate. Also included in HYBRID Script.
-*UPDATED mkvtoolnix to v76.0.0.0.
-
--v0.53
-*UPDATED FFMPEG to N-110509-g722ff74055-20230506
-*UPDATED MP4Box to 2.2-rev0-gab012bbfb
-*UPDATED mkvtoolnix to v75.0.0.0.
-
--v0.52
-*UPDATED dovi_tool to v2.0.3.
-*UPDATED hdr10plus_tool to v1.6.
-
--v0.51
-*UPDATED dovi_tool to v2.0.1.
-*UPDATED hdr10plus_tool to v1.5.2.
-*UPDATED mkvtoolnix to v73.0.0.0.
-*Bugfix in Injector script for HDR10+ injecting (thx "von Suppé" for finding and "GodzilaAvenger" for fixing).
-
--v0.50
-*Works now correct with all symbols in filenames.
-*UPDATED mkvtoolnix to v71.1.1.0.
-
--v0.49
-*INJECTOR-Support for HDR10+ JSON Data delaying.
-*UPDATED hdr10plus_tool to v1.4.0.
-*UPDATED dovi_tool to v1.5.7.
-
--v0.48c
-*INJECTOR-Support for DV Profile 5 Video Streams.
-*UPDATED hdr10plus_tool to v1.3.2.
-*UPDATED dovi_tool to v1.5.6.
-
--v0.48b
-*UPDATED mkvtoolnix to v70.0.0.0.
-*Fixed bugs with spaced names.
-*Fixed FRAMEINFO function.
-
--v0.48a
-*UPDATED FRAMEINFO Function. If you set Frames to ALL, all frames of
- a RPU will be exported. Also a file with all scenecuts will be created.
- Automatically formated in readable format.
-*Minor Bugfixes.
-
--v0.48
-*UPDATED mkvtoolnix to v 69.0.0.0.
-*Add function to set TEMP and OUTPUT folder.
-*Multi instances support (only for different releases!)
-
--v0.47a
-*UPDATED hdr10plus_tool to v1.3.1.
-*DEMUXER Added feature to disable validation of HDR10+ extraction.
-
--v0.47
-*INJECTOR supports custom.json files (copy edited custom.json to video source dir).
- custom json scripts processed first!
-*INJECTOR New function "Match L6 Metadata".
- L6 Metadata will be edited for matching HDR stream Metadata.
-*INJECTOR creates now a small Logfile by muxing.
-*FRAMEINFO shows more informations about the RPU.
-*UPDATED dovi_tool to v1.5.5.
-
--v0.46
-*Shows RPU/EL Layer Information in INJECTOR (Profile, CM Version, Frames)
-*UPDATED dovi_tool to v1.5.4.
-
--v0.45
-*Added DoVi Profile 8.4 HLG Conversion in DEMUXER.
-*Fixed bad Frame choice in FRAMEINFO.
-*UPDATED mkvtoolnix to v68.0.0.0.
-
--v0.44
-*Fixed wrong Min Luminance Bug in DEMUXER by HDR10+ to DV Conversion.
-*UPDATED dovi_tool to v1.5.3.
-
--v0.43
-*INJECTOR supports EL.hevc file for creating DV Profile 7 Single Layer Files.
- Copy EL.hevc to source video file directory.
- If exist EL.hevc and RPU.bin the tool automatically uses EL.hevc.
-*Fixed wrong FPS Bug in REMOVER.
-*Minor Bugfixes.
-
--v0.42
-*UPDATED dovi_tool to v1.5.1.
-*UPDATED hdr10plus_tool to v1.2.2.
-*Fixed bad Bottom entry after analysing in RPU Output in INJECTOR.
-
--v0.41b
-*Complete reworked Injector. If input file is in mp4/mkv container crop borders will automatically set.
-*Fixed wrong FPS Bug with Injector / Check Release.
-*Fixed Minor Bugs.
-
--v0.41a
-*Cropping values from RPU.bin will shown in INJECTOR.
-*New Function in DEMUXER called CHECK RPU CROPPING VALUES.
- You can fix wrong cropped RPUs directcly.
- Works only with Profile 8 MKVs/MP4s and RAW Streams.
-
--v0.41
-*Add MKVtoMP4 Script.
-*UPDATED mkvtoolnix to v67.0.0.0.
-** Scripts renamed, use DDVT_Options Script for creating new Shell Extensions.
-
--v0.40e
-*Fixed container FPS error in INJECTOR.
-
--v0.40d
-*UPDATED MediaInfo to v22.02.
-*UPDATED mkvtoolnix to v66.0.0.0.
-*UPDATED dovi_tool to v1.4.7.
-*Fixed Minor Bugs.
-
--v0.40c
-*RAW Stream Support for all Scripts.
-*Turn off Autodetect Borders Feature for RAW Streams.
-*DV and HDR10+ Metadata can now replaced in Stream.
-
--v0.40b
-*Fixed major Bug by demuxing Profile7 files.
-
--v0.40a
-*Fixed number bug in Demuxer.
-*Fixed Frameinfo RPU bug.
-
--v0.40
-*Support for HEVC RAW streams in DDVT Demuxer.
-*Support for HEVC RAW streams in DDVT Remover.
-*Fixed DV remove Bug in DDVT Remover.
-*New Context Menus (create them with DDVT Options).
-
--v0.39
-*Fixed HDR10+ converting without HDR metadata strings.
-
--v0.38
-*UPDATED MP4Box.exe.
-*Added MP4 Mux Support in Injector (only if Input file is MP4 und only for Profile8).
-*Added DDVT REMOVER.cmd (Remove HDR10+ and/or DoVi Metadata from MP4/MKV Container).
-*Minor Bugfixes.
-
--v0.37c
-*Fixed wrong ID by video track if muxing with INJECTOR.
-*UPDATED FFMPEG to v5.0.
-
--v0.37b
-*Minor Bugfixes.
-*UPDATED mkvtoolnix to v65.0.0.0.
-
--v0.37a - FIXED
-*Fixed troubleshooting with profile switch in Profile 7 options.
-
--v0.37a
-*Added AutoDetect Borders in AA Editor (works only with containers).
-*Added Profile 8 to Profile 7 Conversion.
-
--v0.37
-*UPDATED dovi_tool to v1.4.6.
-*Added DDVT_FRAMEINFO.cmd.
-
--v0.36
-*HDR10+ Demuxing / Injecting Support.
-
--v0.35a
-*Minor Bugfixes.
-*Changed colors of any strings.
-
--v0.35
-*Added Active Area Editor in Injector.
-*UPDATED hdr10plus_tool to v1.2.2.
-
--v0.33a
-*Fixed bad strings if opened without file.
-
--v0.33
-*Multiple Instances Support.
-*Injector RAW File Support.
+================================================================================

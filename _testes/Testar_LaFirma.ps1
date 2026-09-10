@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.11"
+$Versao = "3.12"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -137,13 +137,14 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      Set-Idioma - 16.92).
 # 3.1: janela 131 -> 135 (Get-NomeCorEL, Get-CorEL, Get-ChipEL - a escala de
 #      cor num lugar so - e Traduzir-Frase, para o texto montado - 16.94).
+# 3.12: janela 143 -> 145 (Get-VerboExibido e Get-VerboCanonico - 17.03)
 # 3.10: janela 141 -> 143 (Get-PastaDados, Get-CaminhoIdioma - 17.02)
 # 3.6: janela 136 -> 141 (Get-CaminhoCalibragem, Get-Percentil,
 #      Registrar-Calibragem, Carregar-Calibragem e Fechar-MedidaDoVideo - a
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
 # 3.2: janela 135 -> 136 (Get-FatorDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 143
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 145
                "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
@@ -1005,8 +1006,11 @@ if ($fnFmt.Count -eq 1) {
         (($got.Faixa -ne $tro.Faixa) -and ($got.Curto -ne $tro.Curto))
     Checar "EXECUTANDO: a forma da aba Faixas e a string oficial do MediaInfo" `
         ($got.Faixa -eq "Dolby Vision, Version 1.0, dvhe.07.06, BL+EL+RPU [FEL]")
+    # 17.03: era "P7.6 FEL". O 06 do dvhe.07.06 e o NIVEL, nao parte do nome
+    # do perfil - a Dolby nomeia Profile 5, 7 e 8. O ponto do 8.1 e outro
+    # numero (o compat id) e continua valendo.
     Checar "EXECUTANDO: a coluna da fila fica curta e completa" `
-        (($got.Curto -eq "P7.6 FEL") -and ($alv.Curto -eq "P8.1"))
+        (($got.Curto -eq "P7 FEL") -and ($alv.Curto -eq "P8.1"))
     Checar "EXECUTANDO: o alvo 8.1 nunca sai 'seco'" `
         (($alv.Longo -match "dvhe\.08\.06") -and ($alv.Longo -match "BL\+RPU"))
     Checar "EXECUTANDO: sem medida, nenhuma sigla e inventada" `
@@ -2455,6 +2459,161 @@ Checar "Motor: e o tempo e guardado no resultado, para ir ao log" `
     ([bool]($mot -match '\$res\.SegundosMedindo = \[math\]::Round\(\$relogioMedida'))
 Checar "Motor: medir NUNCA derruba a conversao (o relogio tambem esta protegido)" `
     ([bool]($mot -match 'try \{ \$res\.SegundosMedindo'))
+
+Titulo "32. O QUE A TELA ESCREVE, EM QUALQUER LINGUA (17.03 / 14.49)"
+<#  Tres achados do Diego usando a 1.8 instalada:
+    (a) "Perfil 7.6" - esse nome nao existe; o 06 do dvhe.07.06 e o NIVEL;
+    (b) a coluna ACAO continuava MANTER/CONVERTER/EXCLUIR na tela em ingles;
+    (c) os nomes das etapas vinham do motor e nunca passavam pela traducao.  #>
+
+# --- (a) o nivel nao e nome de perfil
+Checar "Motor: o nome do perfil NAO cola o nivel (nada de 'Profile 7.6')" `
+    ([bool]($mot -match '\$nome = if \(\$perfil -eq 8\) \{ "Profile 8\.\$compat" \} else \{ "Profile \$perfil" \}'))
+Checar "Motor: o Profile 8.1 continua com o ponto (ali o 1 e o compat id)" `
+    ([bool]($mot -match '"Profile 8\.\$compat"'))
+Checar "Motor: o nivel nao se perde - continua no campo Level" `
+    ([bool]($mot -match 'Level   = \$level'))
+Checar "Janela: a forma CURTA nao escreve o nivel" `
+    ([bool]($jan -match '\$curto = "P\{0\}" -f \$Perfil'))
+Checar "Janela: a forma LONGA nao escreve o nivel" `
+    ([bool]($jan -match '\$longo = "Profile \{0\} \[\{1\}\] \[\{2\}\]" -f \$Perfil, \$cod, \$cam'))
+Checar "Janela: o codec continua carregando o nivel (dvhe.07.06)" `
+    ([bool]($jan -match 'dvhe\.\{0:D2\}\.\{1:D2\}" -f \$Perfil, \(\[int\]\$Level\)'))
+
+if ($jan -match '(?s)(function Format-DolbyVision.*?\n\})') {
+    $fnFmt = $Matches[1]
+    try {
+        $Cores = @{ dim2 = "#888888" }
+        . ([scriptblock]::Create($fnFmt))
+        $r7 = Format-DolbyVision -Perfil 7 -Level "6" -Codec "dvhe.07.06" -Camadas "BL+EL+RPU" -ELtipo "FEL"
+        Checar "EXECUTANDO: Profile 7 FEL -> curto 'P7 FEL' (nao 'P7.6 FEL')" ($r7.Curto -eq "P7 FEL")
+        # Sem -like aqui: em PowerShell os colchetes de "[dvhe...]" sao
+        # curinga e o teste passaria/falharia por motivo errado.
+        Checar "EXECUTANDO: e o longo diz 'Profile 7 [dvhe.07.06]'" `
+            ($r7.Longo.StartsWith("Profile 7 [dvhe.07.06]"))
+        Checar "EXECUTANDO: nenhuma das quatro formas contem '7.6'" `
+            (-not (($r7.Codec + $r7.Curto + $r7.Faixa + $r7.Longo) -match '\bP?7\.6\b'))
+        $r8 = Format-DolbyVision -Perfil 8 -Level "6" -Alvo
+        Checar "EXECUTANDO: o alvo continua sendo 'P8.1' (o ponto ali e legitimo)" ($r8.Curto -eq "P8.1")
+    } catch {
+        Checar "EXECUTANDO: Format-DolbyVision pode ser isolada e executada" $false
+    }
+} else {
+    Checar "EXECUTANDO: Format-DolbyVision pode ser isolada e executada" $false
+}
+
+# --- (b) o verbo da coluna ACAO
+Checar "Janela: existe a tabela de verbos em ingles" `
+    ([bool]($jan -match '\$script:VerbosEN = @\{'))
+Checar "Janela: existe o caminho de ida (Get-VerboExibido)" `
+    ([bool]($jan -match 'function Get-VerboExibido'))
+Checar "Janela: e o de VOLTA (Get-VerboCanonico) - senao a escolha grava em ingles" `
+    ([bool]($jan -match 'function Get-VerboCanonico'))
+Checar "Janela: o dropdown mostra na lingua da tela" `
+    ([bool]($jan -match '(?s)function Get-OpcoesVerbo.{0,400}Get-VerboExibido'))
+Checar "Janela: quem le o clique converte para o valor canonico" `
+    ([bool]($jan -match '\$novo = Get-VerboCanonico'))
+Checar "Janela: a COR continua saindo do valor em portugues, nao do texto" `
+    ([bool]($jan -match '\$corVerbo = if \(\$usaManual\) \{ \$Cores\.marca \} else \{ \(Cor-Verbo \$vb\) \}'))
+Checar "Janela: os tres verbos EN tem DataTrigger proprio (senao a cor some)" `
+    (([bool]($jan -match 'Value="KEEP"')) -and ([bool]($jan -match 'Value="CONVERT"')) -and ([bool]($jan -match 'Value="DROP"')))
+Checar "Janela: os tres verbos PT continuam com DataTrigger" `
+    (([bool]($jan -match 'Value="MANTER"')) -and ([bool]($jan -match 'Value="CONVERTER"')) -and ([bool]($jan -match 'Value="EXCLUIR"')))
+
+if ($jan -match '(?s)(\$script:VerbosEN = @\{[^\r\n]*\})') {
+    $tabVb = $Matches[1]
+    . ([scriptblock]::Create($tabVb))
+    if ($jan -match '(?s)(function Get-VerboExibido.*?\n\})') { . ([scriptblock]::Create($Matches[1])) }
+    if ($jan -match '(?s)(function Get-VerboCanonico.*?\n\})') { . ([scriptblock]::Create($Matches[1])) }
+    $script:Lang = "PT"
+    Checar "EXECUTANDO PT: MANTER continua MANTER" ((Get-VerboExibido "MANTER") -eq "MANTER")
+    $script:Lang = "EN"
+    Checar "EXECUTANDO EN: MANTER -> KEEP"       ((Get-VerboExibido "MANTER") -eq "KEEP")
+    Checar "EXECUTANDO EN: CONVERTER -> CONVERT" ((Get-VerboExibido "CONVERTER") -eq "CONVERT")
+    Checar "EXECUTANDO EN: EXCLUIR -> DROP"      ((Get-VerboExibido "EXCLUIR") -eq "DROP")
+    Checar "EXECUTANDO: KEEP volta a ser MANTER"      ((Get-VerboCanonico "KEEP") -eq "MANTER")
+    Checar "EXECUTANDO: CONVERT volta a ser CONVERTER" ((Get-VerboCanonico "CONVERT") -eq "CONVERTER")
+    Checar "EXECUTANDO: DROP volta a ser EXCLUIR"      ((Get-VerboCanonico "DROP") -eq "EXCLUIR")
+    Checar "EXECUTANDO: o que ja esta em portugues passa intacto pela volta" `
+        ((Get-VerboCanonico "MANTER") -eq "MANTER")
+    $idaVolta = @("MANTER","CONVERTER","EXCLUIR") | ForEach-Object {
+        (Get-VerboCanonico (Get-VerboExibido $_)) -eq $_ }
+    Checar "EXECUTANDO: ida e volta fecham nos tres verbos" `
+        (@($idaVolta) -notcontains $false)
+    $script:Lang = "PT"
+} else {
+    Checar "EXECUTANDO: a tabela de verbos pode ser isolada" $false
+}
+
+# --- (c) os nomes das etapas e o resto da aba Faixas
+Checar "Janela: o nome da etapa passa pela traducao (vem do motor, em PT)" `
+    ([bool]($jan -match '\$nomeEtapa = "\$\(\$Sim\.Atual\) " \+ \(Traduzir-Frase \$Cfg\.Etapas\[\$iEt\]\)'))
+Checar "Janela: a etapa PAUSADA tambem traduz" `
+    ([bool]($jan -match 'Traduzir-Frase \$Cfg\.Etapas\[\$iP\]'))
+Checar "Janela: a fase sem numero (diagnostico/limpeza) traduz" `
+    ([bool]($jan -match 'Traduzir-Frase "\$\(\$d\.Fase\)"'))
+Checar "Janela: 'Preparando o motor' traduz" `
+    ([bool]($jan -match 'Traduzir-Frase "Preparando o motor\.\.\."'))
+Checar "Janela: os cabecalhos de grupo da aba Faixas traduzem" `
+    ([bool]($jan -match '(?s)function Add-CabecalhoGrupo.{0,300}\$Texto = Traduzir-Frase \$Texto'))
+Checar "Janela: o rotulo PADRAO traduz" `
+    ([bool]($jan -match 'Traduzir-Frase "PADRÃO"'))
+Checar "Janela: Capitulos e Anexos traduzem" `
+    (([bool]($jan -match 'Traduzir-Frase "Capítulos"')) -and ([bool]($jan -match 'Traduzir-Frase "Anexos"')))
+Checar "Janela: o rodape do tamanho estimado traduz" `
+    ([bool]($jan -match '\$UI\.txtRodapeTamanho\.Text = Traduzir-Frase'))
+Checar "Janela: o detalhe do verbo traduz" `
+    ([bool]($jan -match '\$det     = Traduzir-Frase \$det'))
+
+$idi = ""
+if (Test-Path -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt")) {
+    $idi = Get-Content -Raw -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt")
+}
+foreach ($frase in @("VÍDEO","ÁUDIO","LEGENDAS","PADRÃO","Capítulos","Anexos",
+                     "Extraindo Vídeo Puro do MKV (ffmpeg, Sem Recodificar)",
+                     "Remontando MKV Final (mkvmerge)","Preparando o motor...")) {
+    Checar ("Idioma: '{0}' tem traducao" -f $frase) ([bool]($idi -match [regex]::Escape($frase)))
+}
+
+# --- o aviso de reinicio ao trocar de idioma
+Checar "Janela: trocar de idioma oferece reiniciar para completar" `
+    ([bool]($jan -match '(?s)function Set-Idioma.{0,6000}Reiniciar o programa agora\?'))
+Checar "Janela: com a fila RODANDO o reinicio nao e oferecido" `
+    ([bool]($jan -match '(?s)Set-Idioma.{0,6000}\$Estado\.Atual -in @\("rodando","pausado"\).{0,200}return'))
+Checar "Janela: a pergunta vem com NAO pre-selecionado (regra da 16.12)" `
+    ([bool]($jan -match '(?s)Reiniciar o programa agora\?.{0,900}"YesNo", "Question", "No"'))
+Checar "Janela: a pergunta existe nas duas linguas" `
+    ([bool]($jan -match 'Restart the program now\?'))
+Checar "Janela: falhar ao reabrir NAO derruba o programa" `
+    ([bool]($jan -match 'IDIOMA: nao consegui reabrir o programa'))
+
+# --- os links do Entenda
+Checar "Janela: o texto de LEITURA monta FlowDocument (link de verdade)" `
+    ([bool]($jan -match 'New-Object System\.Windows\.Documents\.FlowDocument'))
+Checar "Janela: os enderecos viram Hyperlink" `
+    ([bool]($jan -match 'New-Object System\.Windows\.Documents\.Hyperlink'))
+Checar "Janela: azul e sublinhado" `
+    (([bool]($jan -match '\$lnk\.Foreground = \$azul')) -and ([bool]($jan -match 'TextDecorations\]::Underline')))
+Checar "Janela: clicar abre no navegador" `
+    ([bool]($jan -match '(?s)\$lnk\.add_Click.{0,300}Start-Process "\$\(\$s\.Tag\)"'))
+Checar "Janela: o LOG continua no TextBox (la o que se quer e copiar)" `
+    ([bool]($jan -match 'if \(\$DoTopo\) \{\s*\r?\n\s*try \{'))
+Checar "Janela: falhar a montagem cai no texto simples, nunca em janela vazia" `
+    ([bool]($jan -match 'FlowDocument falhou, usando o texto simples'))
+
+if ($jan -match "(\`$reLink = \[regex\][^\r\n]+)") {
+    . ([scriptblock]::Create($Matches[1]))
+    Checar "EXECUTANDO: acha o endereco no meio da linha" `
+        ((@($reLink.Matches("  Repositorio: https://github.com/x/y (o nosso)")).Count) -eq 1)
+    Checar "EXECUTANDO: e nao engole o parentese que vem depois" `
+        ($reLink.Matches("ver (https://a.com/b) aqui")[0].Value -eq "https://a.com/b")
+    Checar "EXECUTANDO: linha sem endereco nao vira link" `
+        ((@($reLink.Matches("texto qualquer sem endereco")).Count) -eq 0)
+    Checar "EXECUTANDO: acha os dois enderecos de uma linha com dois" `
+        ((@($reLink.Matches("a https://um.com b https://dois.com")).Count) -eq 2)
+} else {
+    Checar "EXECUTANDO: o regex de link pode ser isolado" $false
+}
 
 Titulo "21. A PROPRIA BATERIA NAO PODE TER ERRO DE EXECUCAO (2.4)"
 <#  Este teste olha para dentro: $Error junta todo erro nao-terminante que

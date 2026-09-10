@@ -1465,9 +1465,13 @@ Titulo "23. IDIOMA PT / EN (16.92)"
 
 Checar "Janela: o botao de idioma existe no XAML" `
     (($jan -match 'x:Name="btnIdioma"') -and ($jan -match 'x:Name="lblBandeira"'))
+<#  3.13: o handler passou a guardar o alvo numa variavel, porque agora ele
+    faz duas coisas - trocar e, so depois, oferecer o reinicio. O que este
+    teste guarda continua sendo o mesmo: o botao existe, chama Set-Idioma, e
+    o alvo e o OPOSTO da lingua atual (senao ele nao alterna, so vai). #>
 Checar "Janela: o botao de idioma tem acao e alterna os dois" `
     (($jan -match '\$UI\.btnIdioma\.add_Click') -and
-     ($jan -match 'Set-Idioma \$\(if \(\$script:Lang -eq "PT"\) \{ "EN" \} else \{ "PT" \}\)'))
+     ($jan -match '(?s)\$UI\.btnIdioma\.add_Click\(\{.{0,400}\$alvo = if \(\$script:Lang -eq "PT"\) \{ "EN" \} else \{ "PT" \}.{0,400}Set-Idioma \$alvo'))
 Checar "Janela: a tabela vive FORA do .ps1 (traduzir nao e mexer em codigo)" `
     ([bool]($jan -match 'Join-Path \$script:PastaScript "IDIOMA_EN\.txt"'))
 Checar "Janela: sem a tabela, o programa NAO troca e avisa (portugues nunca depende dela)" `

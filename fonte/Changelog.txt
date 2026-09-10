@@ -21,11 +21,43 @@
 ================================================================================
  INSTALADOR 1.8.1  -  10/09/2026
 ================================================================================
- Componentes: MOTOR 14.49  |  JANELA 17.04  |  CORRETOR 2.27  |  REOCR 1.29
+ Componentes: MOTOR 14.49  |  JANELA 17.05  |  CORRETOR 2.27  |  REOCR 1.29
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
-              TESTAR_LAFIRMA 3.13  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+              TESTAR_LAFIRMA 3.14  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
 
- Correcao de um defeito introduzido na 1.8. Nada mais mudou.
+ Dois defeitos do idioma. O segundo e a causa do primeiro.
+
+ A TROCA AO VIVO NAO ALCANCAVA A TELA INTEIRA  (17.05)
+ --------------------------------------------------------------------------
+   Visto nas fotos de 10/09: trocar de idioma deixava a tela METADE em cada
+   lingua. Traduziam o titulo da janela, a fila e os cabecalhos de coluna.
+   Ficavam em portugues a barra de botoes (Iniciar, Pausar, Abrir Origem,
+   Abrir Saida), "Marcar Todos", os paineis DIAGNOSTICO e ESPACO EM DISCO e
+   a aba que nao estava selecionada.
+
+   A CAUSA: Traduzir-Arvore percorria so o VisualTreeHelper. A arvore VISUAL
+   contem apenas o que ja foi RENDERIZADO - conteudo de aba nao selecionada,
+   e tudo que mora dentro de um ControlTemplate ainda nao realizado,
+   simplesmente nao esta la. O que traduzia era o que tem outro caminho: o
+   titulo e a fila sao remontados por Fill-Fila, e as colunas ja tinham um
+   bloco proprio.
+
+   E aqui esta o que doi: reiniciar "resolvia" porque a janela nasce montada
+   de uma vez. A pergunta de reinicio da 17.03 era o REMENDO deste defeito -
+   consertamos o remendo duas vezes antes de olhar a causa.
+
+   O CONSERTO: a varredura anda tambem na arvore LOGICA
+   (LogicalTreeHelper), que enxerga o que o XAML declarou, renderizado ou
+   nao; alcanca o Content de ContentControl e os Items de ItemsControl que
+   ainda nao viraram container; e um HashSet impede visitar duas vezes o que
+   esta nas duas arvores.
+
+   E O NUMERO VAI PARA O LOG: "IDIOMA: EN - 47 rotulo(s) trocado(s) na
+   tela". Sem essa conta, a unica forma de saber se a traducao pegou era
+   olhar foto da tela - foi assim que este defeito sobreviveu a duas
+   versoes.
+
+ A PERGUNTA DE REINICIO ERA DO ARRANQUE TAMBEM  (17.04)
 
  A PERGUNTA DE REINICIO ERA DO ARRANQUE TAMBEM  (17.04)
  --------------------------------------------------------------------------
@@ -54,7 +86,9 @@
    janela ainda nao foi exibida - cinto e suspensorio, com a razao escrita
    no log.
 
-   A BATERIA (3.13): secao 33, 13 testes. Eles nao guardam o sintoma,
+   A BATERIA (3.14): secao 33, 13 testes; e a secao 34, 10 testes da
+   varredura - inclusive o que reprova se ela voltar a andar so na arvore
+   visual. Secao 33, 13 testes. Eles nao guardam o sintoma,
    guardam a separacao: o corpo do Set-Idioma e extraido e reprova se
    voltar a conter a pergunta, o Close() ou o Start-Process; o handler do
    botao tem que chamar as duas na ordem; e o bloco de arranque e extraido

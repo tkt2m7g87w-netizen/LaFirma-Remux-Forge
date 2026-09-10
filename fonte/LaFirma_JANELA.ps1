@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.04
+#  LaFirma - JANELA 17.05
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,13 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    17.05  10/09/2026  A TROCA AO VIVO PASSOU A ALCANCAR A TELA INTEIRA.
+#                        Traduzir-Arvore so andava na arvore VISUAL, que
+#                        contem apenas o ja renderizado - a barra de
+#                        botoes, os paineis e a aba nao selecionada
+#                        ficavam em portugues. Agora anda tambem na
+#                        arvore LOGICA, e o log diz quantos rotulos
+#                        trocaram.
 #    17.04  10/09/2026  A PERGUNTA DE REINICIO E DO CLIQUE, NUNCA DO
 #                        ARRANQUE. A 17.03 poe a pergunta dentro do
 #                        Set-Idioma, que o arranque tambem chama para
@@ -589,7 +596,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.04"
+$SCRIPT_VERSION = "17.05"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -5249,40 +5256,96 @@ function Traduzir([string]$Pt) {
 }
 
 function Traduzir-Arvore($Raiz, [hashtable]$Mapa) {
-    <#  Percorre a arvore visual e troca o texto dos rotulos. So mexe em
-        TextBlock, cabecalho de coluna e aba - nada de caixa de texto, que
-        guarda caminho de pasta, nem de conteudo montado na hora. #>
-    if ($null -eq $Raiz) { return }
-    $fila = New-Object System.Collections.Generic.Queue[object]
+    <#  17.05 - A ARVORE VISUAL NAO E A TELA INTEIRA.
+
+        Defeito achado em uso, 10/09, olhando as fotos: depois de trocar de
+        idioma ao vivo a tela ficava METADE em cada lingua. Traduziam o
+        titulo, a fila e os cabecalhos de coluna; NAO traduziam a barra de
+        botoes, "Marcar Todos", os paineis DIAGNOSTICO e ESPACO EM DISCO e a
+        aba que nao estava selecionada.
+
+        A CAUSA: esta funcao percorria so o VisualTreeHelper. A arvore
+        VISUAL contem apenas o que ja foi RENDERIZADO - o conteudo de uma
+        aba nao selecionada, e tudo que mora dentro de um ControlTemplate
+        ainda nao realizado, simplesmente nao esta la. O que traduzia era o
+        que tem outro caminho: o titulo e a fila sao remontados por
+        Fill-Fila, e as colunas ja tinham o bloco proprio la embaixo.
+
+        Reiniciar "resolvia" porque a janela nasce montada de uma vez - e foi
+        por isso que a pergunta de reinicio existiu. Ela era o remendo do
+        defeito que esta sendo consertado agora.
+
+        O CONSERTO: varrer TAMBEM a arvore LOGICA (LogicalTreeHelper), que
+        enxerga o que o XAML declarou, renderizado ou nao. As duas juntas,
+        sem repetir - um HashSet guarda quem ja foi visitado, senao um
+        elemento que esta nas duas arvores seria traduzido duas vezes (e na
+        segunda o texto ja estaria em ingles, o que nao quebra, mas mede
+        errado).
+
+        E a conta vai para o LOG. Sem esse numero a unica forma de saber se
+        a traducao pegou era olhar foto da tela. #>
+    if ($null -eq $Raiz) { return 0 }
+    $trocados = 0
+    $vistos   = New-Object 'System.Collections.Generic.HashSet[object]' ([System.Collections.Generic.EqualityComparer[object]]::Default)
+    $fila     = New-Object System.Collections.Generic.Queue[object]
     $fila.Enqueue($Raiz)
     while ($fila.Count -gt 0) {
         $o = $fila.Dequeue()
+        if ($null -eq $o) { continue }
+        if (-not $vistos.Add($o)) { continue }
+
         if ($o -is [System.Windows.Controls.TextBlock]) {
-            $t = "$($o.Text)"
-            if ($t -ne "" -and $Mapa.ContainsKey($t)) { $o.Text = $Mapa[$t] }
+            $x = "$($o.Text)"
+            if ($x -ne "" -and $Mapa.ContainsKey($x)) { $o.Text = $Mapa[$x]; $trocados++ }
         } elseif ($o -is [System.Windows.Controls.GridViewColumnHeader]) {
-            $t = "$($o.Content)"
-            if ($t -ne "" -and $Mapa.ContainsKey($t)) { $o.Content = $Mapa[$t] }
+            $x = "$($o.Content)"
+            if ($x -ne "" -and $Mapa.ContainsKey($x)) { $o.Content = $Mapa[$x]; $trocados++ }
         } elseif ($o -is [System.Windows.Controls.TabItem]) {
-            $t = "$($o.Header)"
-            if ($t -ne "" -and $Mapa.ContainsKey($t)) { $o.Header = $Mapa[$t] }
+            $x = "$($o.Header)"
+            if ($x -ne "" -and $Mapa.ContainsKey($x)) { $o.Header = $Mapa[$x]; $trocados++ }
         }
-        $n = [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($o)
-        for ($i = 0; $i -lt $n; $i++) {
-            $fila.Enqueue([System.Windows.Media.VisualTreeHelper]::GetChild($o, $i))
+
+        # --- filhos VISUAIS (o que ja foi desenhado)
+        if ($o -is [System.Windows.DependencyObject]) {
+            try {
+                $n = [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($o)
+                for ($i = 0; $i -lt $n; $i++) {
+                    $fila.Enqueue([System.Windows.Media.VisualTreeHelper]::GetChild($o, $i))
+                }
+            } catch { }
+            # --- filhos LOGICOS (o que o XAML declarou, desenhado ou nao)
+            try {
+                foreach ($f in [System.Windows.LogicalTreeHelper]::GetChildren($o)) {
+                    if ($f -is [System.Windows.DependencyObject]) { $fila.Enqueue($f) }
+                }
+            } catch { }
+        }
+
+        # Content de ContentControl (botao, aba) nem sempre e filho logico.
+        if ($o -is [System.Windows.Controls.ContentControl]) {
+            $c = $o.Content
+            if ($c -is [System.Windows.DependencyObject]) { $fila.Enqueue($c) }
+        }
+        # Items de ItemsControl que ainda nao viraram container.
+        if ($o -is [System.Windows.Controls.ItemsControl]) {
+            foreach ($it in @($o.Items)) {
+                if ($it -is [System.Windows.DependencyObject]) { $fila.Enqueue($it) }
+            }
         }
     }
+
     # Os cabecalhos do GridView nao aparecem na arvore visual antes de a
     # lista ser desenhada; por isso eles tambem sao trocados direto no modelo.
     try {
         foreach ($lst in @($UI.lstFila, $UI.lstFaixas)) {
             if ($null -eq $lst -or $null -eq $lst.View) { continue }
             foreach ($col in @($lst.View.Columns)) {
-                $t = "$($col.Header)"
-                if ($t -ne "" -and $Mapa.ContainsKey($t)) { $col.Header = $Mapa[$t] }
+                $x = "$($col.Header)"
+                if ($x -ne "" -and $Mapa.ContainsKey($x)) { $col.Header = $Mapa[$x]; $trocados++ }
             }
         }
     } catch { }
+    return $trocados
 }
 
 function Set-Idioma([string]$Novo) {
@@ -5299,11 +5362,13 @@ function Set-Idioma([string]$Novo) {
     }
     $mapa = if ($Novo -eq "EN") { $script:MapaEN } else { $script:MapaPT }
     $script:Lang = $Novo
-    Traduzir-Arvore $Janela $mapa
+    $trocados = Traduzir-Arvore $Janela $mapa
     $UI.lblBandeira.Text = $(if ($Novo -eq "EN") { [char]::ConvertFromUtf32(0x1F1FA) + [char]::ConvertFromUtf32(0x1F1F8) }
                              else { [char]::ConvertFromUtf32(0x1F1E7) + [char]::ConvertFromUtf32(0x1F1F7) })
     $UI.lblIdioma.Text = $(if ($Novo -eq "EN") { "English" } else { "Português" })
-    Escrever-Log ("IDIOMA: {0}" -f $Novo) "ACAO"
+    # 17.05: o numero vai para o log. Se ele vier baixo demais, a varredura
+    # nao esta alcancando a tela - e era exatamente isso que acontecia.
+    Escrever-Log ("IDIOMA: {0} - {1} rotulo(s) trocado(s) na tela" -f $Novo, $trocados) "ACAO"
     <#  16.93: a escolha fica guardada. O Diego perguntou se nao daria para
         simplesmente reiniciar o programa ao trocar - a troca ao vivo ja
         funciona e nao precisa disso, mas a preocupacao dele estava certa:

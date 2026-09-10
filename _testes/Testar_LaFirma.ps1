@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.13"
+$Versao = "3.14"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -2675,6 +2675,41 @@ Checar "Janela: Offer-ReinicioIdioma desiste se a janela ainda nao foi exibida" 
     ([bool]($jan -match '(?s)function Offer-ReinicioIdioma.{0,3000}-not \$Janela\.IsLoaded.{0,300}return'))
 Checar "Janela: e diz no log por que nao ofereceu" `
     ([bool]($jan -match 'IDIOMA: janela ainda nao exibida - reinicio nao oferecido'))
+
+
+Titulo "34. A TROCA AO VIVO ALCANCA A TELA INTEIRA (17.05)"
+<#  Defeito visto nas fotos de 10/09: trocar de idioma ao vivo deixava a
+    tela metade em cada lingua. Traduziam o titulo, a fila e as colunas;
+    ficavam em portugues a barra de botoes, "Marcar Todos", os paineis
+    DIAGNOSTICO e ESPACO EM DISCO, e a aba que nao estava selecionada.
+
+    A causa: Traduzir-Arvore andava so no VisualTreeHelper, que contem
+    apenas o que ja foi RENDERIZADO. Reiniciar "resolvia" porque a janela
+    nasce montada de uma vez - a pergunta de reinicio era o remendo deste
+    defeito.  #>
+
+Checar "Janela: a varredura anda tambem na arvore LOGICA (nao so na visual)" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,6000}\[System\.Windows\.LogicalTreeHelper\]::GetChildren'))
+Checar "Janela: e continua andando na arvore visual" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,6000}\[System\.Windows\.Media\.VisualTreeHelper\]::GetChildrenCount'))
+Checar "Janela: nao visita o mesmo elemento duas vezes (as arvores se cruzam)" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,4000}HashSet.{0,2000}-not \$vistos\.Add\(\$o\).{0,80}continue'))
+Checar "Janela: alcanca o Content de ContentControl" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,8000}\$o -is \[System\.Windows\.Controls\.ContentControl\]'))
+Checar "Janela: alcanca os Items de ItemsControl ainda sem container" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,8000}\$o -is \[System\.Windows\.Controls\.ItemsControl\]'))
+Checar "Janela: a varredura DEVOLVE quantos rotulos trocou" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,9000}return \$trocados'))
+Checar "Janela: e o Set-Idioma guarda esse numero" `
+    ([bool]($jan -match '\$trocados = Traduzir-Arvore \$Janela \$mapa'))
+Checar "Janela: que vai para o LOG (sem ele, so foto da tela diz se pegou)" `
+    ([bool]($jan -match 'rotulo\(s\) trocado\(s\) na tela'))
+Checar "Janela: os tres tipos de rotulo continuam cobertos" `
+    ((($jan -match '(?s)function Traduzir-Arvore.{0,4000}Controls\.TextBlock') -and
+      ($jan -match '(?s)function Traduzir-Arvore.{0,4000}GridViewColumnHeader') -and
+      ($jan -match '(?s)function Traduzir-Arvore.{0,4000}Controls\.TabItem')))
+Checar "Janela: as colunas do GridView continuam trocadas fora da arvore" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,9000}\$lst\.View\.Columns'))
 
 
 Titulo "21. A PROPRIA BATERIA NAO PODE TER ERRO DE EXECUCAO (2.4)"

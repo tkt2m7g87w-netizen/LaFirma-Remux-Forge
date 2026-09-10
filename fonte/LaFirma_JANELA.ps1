@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.05
+#  LaFirma - JANELA 17.07
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,16 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    17.07  10/09/2026  CONSERTO DA 17.06: a nota do audio foi escrita com
+#                        Escrever-Log DENTRO do runspace de leitura, onde
+#                        as funcoes da janela nao existem. Todo arquivo
+#                        saia como "Nao Foi Possivel Ler". Agora usa a
+#                        Avisar do proprio runspace.
+#    17.06  10/09/2026  A LINHA DO AUDIO VOLTOU AO TAMANHO DAS VIZINHAS.
+#                        A 16.98 poe um parentese no rotulo e uma frase de
+#                        justificativa depois do selo; a linha virava um
+#                        paragrafo e empurrava a coluna da direita. A nota
+#                        de qual faixa o arquivo marcava foi para o log.
 #    17.05  10/09/2026  A TROCA AO VIVO PASSOU A ALCANCAR A TELA INTEIRA.
 #                        Traduzir-Arvore so andava na arvore VISUAL, que
 #                        contem apenas o ja renderizado - a barra de
@@ -596,7 +606,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.05"
+$SCRIPT_VERSION = "17.07"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -1887,12 +1897,42 @@ $script:TrabalhoLeitura = {
                         $marcadaPadrao = @(@($json.tracks) | Where-Object {
                             $_.type -eq "audio" -and $_.properties.default_track -eq $true }) | Select-Object -First 1
                     } catch { }
-                    $notaPadrao = ""
+                    <#  17.06 - A LINHA VOLTOU AO TAMANHO DAS VIZINHAS.
+
+                        A 16.98 resolveu o sentido e estragou a forma: o
+                        rotulo ganhou um parentese explicativo e a linha
+                        ganhou uma frase inteira de justificativa depois do
+                        selo. Do lado de "Dolby VISION: Profile 7 [...]
+                        [DETECTADO]" e "LEGENDA PT-BR [PGS]: ... [DETECTADO]",
+                        a do audio virava um paragrafo - sozinha empurrava a
+                        coluna da direita e quebrava o alinhamento do bloco.
+
+                        A regra do Diego, e ela vale para o diagnostico
+                        inteiro: a ESQUERDA detecta, a DIREITA diz o que sera
+                        feito. Qual faixa o arquivo marcava como padrao nao e
+                        nenhuma das duas coisas.
+
+                        Entao a nota saiu da tela e foi para o LOG, inteira,
+                        com o porque. Nao se perde: quem quer entender a
+                        escolha abre o log; quem so quer o diagnostico nao
+                        leva um paragrafo na cara.
+
+                        A REGRA CONTINUA A MESMA: a escolha ignora de
+                        proposito a marca de padrao do arquivo, porque em
+                        remux Dual Audio ela costuma apontar a dublagem que o
+                        grupo preferiu, e o programa quer o TrueHD/Atmos. #>
                     if ($null -ne $marcadaPadrao -and $null -ne $pr -and
                         [int]$marcadaPadrao.id -ne [int]$pr.id) {
-                        $notaPadrao = (" · o arquivo marca outra faixa como padrão ({0}) — a escolha aqui é pelo codec, não pela marca" -f (Rotular-Audio $marcadaPadrao $false))
+                        # 17.07: AQUI DENTRO E O RUNSPACE - as funcoes da
+                        # janela nao existem. Quem manda mensagem daqui e a
+                        # Avisar declarada neste proprio bloco. A 17.06
+                        # tropecou nisso e derrubou a leitura inteira; o
+                        # porque completo esta no Changelog.
+                        Avisar ("AUDIO: '{0}' - escolhida a faixa {1} ({2}); o arquivo marca a faixa {3} ({4}) como padrao. A escolha e pelo codec, nao pela marca." -f `
+                            $a.Name, [int]$pr.id, (Rotular-Audio $pr $ehAtmos),
+                            [int]$marcadaPadrao.id, (Rotular-Audio $marcadaPadrao $false)) "LEITURA"
                     }
-                    $d.DiagAurot = "ÁUDIO PRINCIPAL (o que o programa converte): $rot [DETECTADO]$notaPadrao"
+                    $d.DiagAurot = "ÁUDIO PRINCIPAL: $rot [DETECTADO]"
 
                     $pronta = Get-FaixaAtmosJocExistente -MkvPath $a.FullName -FaixaExcluir $pr
                     $prontaEhJoc = [bool]$pronta

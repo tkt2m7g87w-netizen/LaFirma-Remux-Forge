@@ -21,11 +21,61 @@
 ================================================================================
  INSTALADOR 1.8.1  -  10/09/2026
 ================================================================================
- Componentes: MOTOR 14.49  |  JANELA 17.05  |  CORRETOR 2.27  |  REOCR 1.29
+ Componentes: MOTOR 14.49  |  JANELA 17.07  |  CORRETOR 2.27  |  REOCR 1.29
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
-              TESTAR_LAFIRMA 3.14  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+              TESTAR_LAFIRMA 3.16  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
 
- Dois defeitos do idioma. O segundo e a causa do primeiro.
+ Dois defeitos do idioma, e um acerto de forma no diagnostico.
+
+ O RUNSPACE E OUTRO MUNDO - DE NOVO  (17.07)
+ --------------------------------------------------------------------------
+   A 17.06 quebrou a leitura da pasta. Todo arquivo saia como "Nao Foi
+   Possivel Ler", com esta linha no log:
+
+     Erro lendo <arquivo>: O termo 'Escrever-Log' nao e reconhecido como
+     nome de cmdlet, funcao, arquivo de script ou programa operavel.
+
+   A CAUSA: a nota do audio que a 17.06 mandou para o log foi escrita com
+   Escrever-Log - que e funcao da JANELA - dentro do runspace de LEITURA.
+   Ali dentro as funcoes da janela nao existem. Quem manda mensagem de la e
+   a Avisar declarada no proprio bloco do runspace.
+
+   O QUE DOI: a secao 13 da bateria existe desde a 16.82 exatamente para
+   pegar isto - "NENHUMA funcao da janela e chamada dentro dos runspaces".
+   Ela teria reprovado. A bateria nao foi rodada antes da entrega.
+
+   ALEM DO CONSERTO, a secao 24e ganhou um teste que exige AVISAR no ponto
+   exato, e nao so a regra geral da secao 13.
+
+ A LINHA DO AUDIO VOLTOU AO TAMANHO DAS VIZINHAS  (17.06)
+ --------------------------------------------------------------------------
+   A 16.98 acertou o sentido e estragou a forma. O rotulo ganhou um
+   parentese explicativo e a linha ganhou uma frase inteira de justificativa
+   depois do selo:
+
+     ÁUDIO PRINCIPAL (o que o programa converte): TrueHD Atmos 7.1
+     [DETECTADO] · o arquivo marca outra faixa como padrão (AC-3 5.1) — a
+     escolha aqui é pelo codec, não pela marca
+
+   Do lado das vizinhas, que sao rotulo + fato + selo, essa virava um
+   paragrafo. Sozinha empurrava a coluna da direita e quebrava o alinhamento
+   do bloco inteiro.
+
+   A REGRA, dita pelo Diego e que vale para o diagnostico todo: a ESQUERDA
+   detecta, a DIREITA diz o que sera feito. Qual faixa o arquivo marcava
+   como padrao nao e nenhuma das duas coisas.
+
+     ÁUDIO PRINCIPAL: TrueHD Atmos 7.1 [DETECTADO]
+
+   74 caracteres, o mesmo comprimento das vizinhas.
+
+   A NOTA NAO SE PERDEU: foi para o log, inteira, nomeando as duas faixas e
+   dizendo o porque. Quem quer entender a escolha abre o log.
+
+   E A REGRA CONTINUA A MESMA: a escolha ignora de proposito a marca de
+   padrao do arquivo, porque em remux Dual Audio ela costuma apontar a
+   dublagem que o grupo preferiu, e o programa quer o TrueHD/Atmos. So mudou
+   onde isso e contado.
 
  A TROCA AO VIVO NAO ALCANCAVA A TELA INTEIRA  (17.05)
  --------------------------------------------------------------------------
@@ -86,7 +136,7 @@
    janela ainda nao foi exibida - cinto e suspensorio, com a razao escrita
    no log.
 
-   A BATERIA (3.14): secao 33, 13 testes; e a secao 34, 10 testes da
+   A BATERIA (3.16): secao 33, 13 testes; e a secao 34, 10 testes da
    varredura - inclusive o que reprova se ela voltar a andar so na arvore
    visual. Secao 33, 13 testes. Eles nao guardam o sintoma,
    guardam a separacao: o corpo do Set-Idioma e extraido e reprova se

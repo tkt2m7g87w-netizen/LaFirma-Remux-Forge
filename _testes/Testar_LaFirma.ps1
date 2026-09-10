@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.14"
+$Versao = "3.16"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -1733,22 +1733,44 @@ Titulo "24e. 'AUDIO PRINCIPAL' SEGUNDO QUEM (16.98)"
     A regra esta certa. Errado era o nome - e o silencio sobre a divergencia,
     que e justamente quando o usuario se surpreende. #>
 
-Checar "Janela: o rotulo diz de quem e a escolha" `
-    ([bool]($jan -match ([char]0x00C1 + 'UDIO PRINCIPAL \(o que o programa converte\)')))
-Checar "Janela: avisa quando a faixa escolhida NAO e a marcada como padrao" `
-    ([bool]($jan -match 'o arquivo marca outra faixa como padr' + [char]0x00E3 + 'o'))
-Checar "Janela: e diz por que ela nao foi seguida" `
-    ([bool]($jan -match 'a escolha aqui ' + [char]0x00E9 + ' pelo codec, n' + [char]0x00E3 + 'o pela marca'))
-Checar "Janela: o aviso so aparece quando as duas faixas DIFEREM" `
+<#  3.15 - a linha do audio encolheu (17.06). A regra que ela guarda mudou
+    de lugar, nao de conteudo: a divergencia de faixa padrao continua sendo
+    detectada e continua sendo dita - so que no LOG, nao na tela.
+    A ESQUERDA detecta, a DIREITA diz o que sera feito. #>
+Checar "Janela: o rotulo do audio e curto, igual ao das linhas vizinhas" `
+    ([bool]($jan -match ([char]0x00C1 + 'UDIO PRINCIPAL: \$rot \[DETECTADO\]')))
+Checar "Janela: o parentese explicativo saiu do rotulo (era o que inchava)" `
+    (-not ($jan -match ([char]0x00C1 + 'UDIO PRINCIPAL \(o que o programa converte\)')))
+Checar "Janela: a justificativa NAO volta para a linha da tela" `
+    (-not ($jan -match '\$d\.DiagAurot = "' + [char]0x00C1 + 'UDIO PRINCIPAL[^"]*pela marca'))
+Checar "Janela: a divergencia de faixa padrao continua DETECTADA" `
     ([bool]($jan -match '\[int\]\$marcadaPadrao\.id -ne \[int\]\$pr\.id'))
+Checar "Janela: e continua sendo dita - no log" `
+    ([bool]($jan -match '(?s)\[int\]\$marcadaPadrao\.id -ne \[int\]\$pr\.id.{0,900}Avisar'))
+<#  3.16 - o teste acima passou a exigir AVISAR, e nao Escrever-Log, por um
+    motivo medido: a 17.06 escreveu a nota do audio com Escrever-Log DENTRO
+    do runspace de leitura, onde as funcoes da janela nao existem. Cada
+    arquivo morria com "O termo 'Escrever-Log' nao e reconhecido" e a fila
+    inteira saiu como "Nao Foi Possivel Ler". A secao 13 pega isso de forma
+    geral; este aqui pega no ponto exato. #>
+Checar "Janela: a nota do audio usa a Avisar do runspace, NUNCA Escrever-Log" `
+    (-not ($jan -match '(?s)\[int\]\$marcadaPadrao\.id -ne \[int\]\$pr\.id.{0,900}Escrever-Log'))
+Checar "Janela: a linha do log diz o porque da escolha" `
+    ([bool]($jan -match 'A escolha e pelo codec, nao pela marca'))
+Checar "Janela: e nomeia as duas faixas, a escolhida e a marcada" `
+    ([bool]($jan -match "escolhida a faixa \{1\}.{0,80}o arquivo marca a faixa \{3\}"))
 Checar "Janela: nao le o arquivo de novo so para isso (usa o JSON ja lido)" `
     ([bool]($jan -match '\$marcadaPadrao = @\(@\(\$json\.tracks\)'))
-Checar "Idioma: as duas frases novas do audio tem traducao" `
+Checar "Idioma: o rotulo curto do audio tem traducao" `
     ($(  $arqI2 = Join-Path $Fonte "IDIOMA_EN.txt"
          if (-not (Test-Path -LiteralPath $arqI2)) { $false }
          else { $tI2 = Get-Content -Raw -LiteralPath $arqI2
-                ($tI2 -match 'MAIN AUDIO \(the one the program converts\)') -and
-                ($tI2 -match 'not by the flag') } ))
+                ($tI2 -match 'MAIN AUDIO: ') } ))
+Checar "Idioma: e a regra da frase antiga saiu junto (senao vira letra morta)" `
+    ($(  $arqI2 = Join-Path $Fonte "IDIOMA_EN.txt"
+         if (-not (Test-Path -LiteralPath $arqI2)) { $false }
+         else { $tI2 = Get-Content -Raw -LiteralPath $arqI2
+                -not ($tI2 -match 'the one the program converts') } ))
 
 Titulo "24f. A LEGENDA PT-BR EM PGS - CONTRA LISTAS DE FAIXA REAIS (3.5)"
 <#  A fila do projeto trazia, desde 08/08: "Find-PtBrPgsTrack tem falso

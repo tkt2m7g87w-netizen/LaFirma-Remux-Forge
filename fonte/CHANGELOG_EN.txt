@@ -19,11 +19,46 @@
 ==============================================================================
  INSTALLER 1.8.1  -  10/09/2026
 ==============================================================================
- Components: ENGINE 14.49 | WINDOW 17.05 | SUBTITLE FIXER 2.27 | REOCR 1.29
+ Components: ENGINE 14.49 | WINDOW 17.07 | SUBTITLE FIXER 2.27 | REOCR 1.29
              AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
-             TESTAR_LAFIRMA 3.14 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+             TESTAR_LAFIRMA 3.16 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
 
- Two language defects. The second one is the cause of the first.
+ Two language defects, and one shape fix in the diagnosis.
+
+ THE RUNSPACE IS ANOTHER WORLD - AGAIN  (17.07)
+ --------------------------------------------------------------------------
+   17.06 broke folder reading. Every file came out as "could not be read",
+   with this line in the log: "The term 'Escrever-Log' is not recognized".
+
+   THE CAUSE: the audio note 17.06 sent to the log was written with
+   Escrever-Log - a WINDOW function - inside the READING runspace, where
+   window functions do not exist. Messages from in there go through the
+   Avisar declared in the runspace block itself.
+
+   WHAT STINGS: battery section 13 has existed since 16.82 for exactly this
+   - "NO window function is called inside the runspaces". It would have
+   failed. The battery was not run before delivery.
+
+   Besides the fix, section 24e gained a test that demands AVISAR at the
+   exact spot, not just section 13's general rule.
+
+ THE AUDIO LINE IS BACK TO THE SIZE OF ITS NEIGHBOURS  (17.06)
+ --------------------------------------------------------------------------
+   16.98 got the meaning right and the shape wrong. The label gained an
+   explanatory parenthesis and the line gained a whole sentence of
+   justification after the seal. Next to its neighbours - label, fact, seal -
+   that one became a paragraph: on its own it pushed the right-hand column
+   out and broke the block's alignment.
+
+   THE RULE, as Diego put it, and it holds for the whole diagnosis: the LEFT
+   detects, the RIGHT says what will be done. Which track the file flagged
+   as default is neither of those.
+
+   The note did not disappear: it went to the log, in full, naming both
+   tracks and saying why. And the rule itself is unchanged - the choice
+   still ignores the file's default flag on purpose, because in Dual Audio
+   remuxes that flag usually points at the dub. Only where it is told
+   changed.
 
  LIVE SWITCHING DID NOT REACH THE WHOLE SCREEN  (17.05)
  --------------------------------------------------------------------------
@@ -83,7 +118,7 @@
    applies, now inside the new function. And it gives up quietly if the
    window has not been shown yet - belt and braces, with the reason logged.
 
-   THE BATTERY (3.14): section 33, 13 tests; plus section 34, 10 tests on
+   THE BATTERY (3.16): section 33, 13 tests; plus section 34, 10 tests on
    the sweep - including one that fails if it ever goes back to walking the
    visual tree alone. Section 33, 13 tests. They do not guard the symptom,
    they guard the separation: Set-Idioma's body is extracted and fails if it

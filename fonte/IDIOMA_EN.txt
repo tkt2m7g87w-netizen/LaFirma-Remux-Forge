@@ -183,8 +183,7 @@ Marque o vídeo p/ editar	Tick the video to edit
 ~borda do RPU \(L5\) dá ([^,]+), que não é formato de cinema - já vem assim da origem	RPU border (L5) gives $1, which is no cinema format - it came that way from the source
 
 # ---- Linha do audio ----
-~^ÁUDIO PRINCIPAL \(o que o programa converte\): 	MAIN AUDIO (the one the program converts): 
-~o arquivo marca outra faixa como padrão \(([^)]+)\) — a escolha aqui é pelo codec, não pela marca	the file flags a different track as default ($1) — the choice here is by codec, not by the flag
+~^ÁUDIO PRINCIPAL: 	MAIN AUDIO: 
 ~^ÁUDIO PRINCIPAL: NENHUM$	MAIN AUDIO: NONE
 ~^ÁUDIO PRINCIPAL: 	MAIN AUDIO: 
 ~O Arquivo Não Tem Faixa de Áudio	The File Has No Audio Track

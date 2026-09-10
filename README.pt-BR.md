@@ -9,16 +9,16 @@
 
 ---
 
-## Downloads
+## 📥 Downloads
 
-> **O GitHub é a fonte mais atual.** Os espelhos abaixo continuam no ar e funcionam, mas trazem uma versão anterior do programa.
+> **⚠️ O GitHub é a fonte mais atual.** Os espelhos abaixo continuam no ar e funcionam, mas trazem uma versão anterior do programa.
 
 | | Onde | Estado |
 |---|---|---|
-| **Código-fonte, guias, changelog** | Aqui neste repositório | sempre o mais novo |
-| **Instalador pronto** | [Releases](../../releases) | atual |
-| Instalador — espelho | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | **desatualizado** |
-| Pasta completa — espelho | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | **desatualizado** |
+| **Código-fonte, guias, changelog** | Aqui neste repositório | ✅ sempre o mais novo |
+| **Instalador pronto** | [Releases](../../releases) | ✅ atual |
+| Instalador — espelho | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | ⚠️ desatualizado |
+| Pasta completa — espelho | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | ⚠️ desatualizado |
 
 **Guia de compilação do instalador:** [LEIA-ME_INSTALADOR[PT-BR].txt](./LEIA-ME_INSTALADOR%5BPT-BR%5D.txt)
 
@@ -39,17 +39,17 @@ Ele é uma ponte de automação: nós fizemos a interface, a lógica de decisão
 
 ---
 
-## Dolby Vision: o programa MEDE antes de converter
+## 💡 Dolby Vision: o programa MEDE antes de converter
 
 É a diferença que define o projeto. Converter um Perfil 7 **não é sempre a mesma coisa**, e o programa deixou de fingir que era.
 
 Antes de tocar no arquivo, ele lê o campo `el_type` dentro do RPU (com o `dovi_tool`) e separa **três** casos:
 
-| Na tela | O que significa |
-|---|---|
-| $\textcolor{green}{\textsf{MEL}}$ — Minimal Enhancement Layer | A camada extra **não carrega imagem**. Descartar não muda um pixel. |
-| $\textcolor{orange}{\textsf{Simple FEL}}$ | A camada carrega imagem, mas é **refino** — residual, grão, degradê. Perde-se detalhe fino, visível só em quadro parado. |
-| $\textcolor{red}{\textsf{Complex FEL}}$ | A camada **levanta o brilho**. Sem ela, o RPU pede à TV um pico que o vídeo não entrega mais. É o único caso que incomoda. |
+| | Cor | O que significa |
+|---|---|---|
+| $\textcolor{green}{\textsf{MEL}}$ — Minimal Enhancement Layer | 🟢 | A camada extra **não carrega imagem**. Descartar não muda um pixel. |
+| $\textcolor{orange}{\textsf{Simple FEL}}$ | 🟠 | A camada carrega imagem, mas é **refino** — residual, grão, degradê. Perde-se detalhe fino, visível só em quadro parado. |
+| $\textcolor{red}{\textsf{Complex FEL}}$ | 🔴 | A camada **levanta o brilho**. Sem ela, o RPU pede à TV um pico que o vídeo não entrega mais. É o único caso que incomoda. |
 
 ### O que separa $\textcolor{orange}{\textsf{Simple}}$ de $\textcolor{red}{\textsf{Complex}}$
 
@@ -69,7 +69,7 @@ Game of Thrones S08E01      ->  SIMPLE FEL     153 nits de 1.000
 Saving Private Ryan (1998)  ->  COMPLEX FEL  1.608 nits de 1.000
 ```
 
-> **Vermelho não quer dizer que a conversão estraga.** Shield, Apple TV, Zidoo, Dune e as TVs **já descartam** a camada extra hoje — nesses aparelhos o Perfil 7 já toca do jeito que o convertido vai tocar. Quem perde alguma coisa é quem tem player com decodificador duplo (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2).
+> ⚠️ **Vermelho não quer dizer que a conversão estraga.** Shield, Apple TV, Zidoo, Dune e as TVs **já descartam** a camada extra hoje — nesses aparelhos o Perfil 7 já toca do jeito que o convertido vai tocar. Quem perde alguma coisa é quem tem player com decodificador duplo (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2).
 
 **Os limites, ditos sem rodeio:**
 
@@ -79,7 +79,7 @@ Saving Private Ryan (1998)  ->  COMPLEX FEL  1.608 nits de 1.000
 
 ---
 
-## Perfil 5 → MP4
+## 💡 Perfil 5 → MP4
 
 O Perfil 5 (nativo de Web-DL / streaming) usa o espaço de cores **IPTPQc2** e não possui camada de fallback HDR10. Remuxar para P8 gera cores roxas/esverdeadas, e fazer direito exigiria **recodificar o vídeo inteiro** — o que este programa se recusa a fazer.
 
@@ -89,9 +89,9 @@ Nesse caminho: o áudio é copiado quando cabe no MP4 (E-AC-3, AC-3, AAC) e vira
 
 ---
 
-## Outros problemas que o programa resolve
+## 💡 Outros problemas que o programa resolve
 
-### Áudio
+### 🔊 Áudio
 
 Smart TVs e soundbars recusam os codecs sem perda que um Blu-ray carrega. O programa converte só o que precisa ser convertido:
 
@@ -101,7 +101,7 @@ Smart TVs e soundbars recusam os codecs sem perda que um Blu-ray carrega. O prog
   **Sem Atmos na saída.** DTS e Atmos são de empresas diferentes, e os objetos do DTS:X não viram objetos Dolby. Nada no mundo converte um no outro.
 * **E-AC-3**, **AC-3** e **AAC** já são compatíveis e não são tocados.
 
-### Legenda PGS → SRT
+### 💬 Legenda PGS → SRT
 
 **Só em português do Brasil.** Não é um OCR genérico: o dicionário, as regras de correção e a nota de qualidade foram construídos em cima do PT-BR.
 
@@ -109,23 +109,23 @@ A legenda em imagem vira texto `.SRT` limpo, corrigido contra um dicionário de 
 
 A faixa PGS original **continua no arquivo final**. O `.SRT` é uma faixa a mais, não uma troca.
 
-### Lote e espaço em disco
+### 💾 Lote e espaço em disco
 
 Coloque um arquivo só ou uma temporada inteira. Antes de começar, o programa **simula a fila inteira na ordem em que o motor vai processar** e diz três coisas: quantos arquivos cabem, qual é o primeiro que não cabe, e quanto faltaria na vez dele.
 
 Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minutos de trabalho jogados fora.
 
-### Automático ou manual
+### 🎛️ Automático ou manual
 
 Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**.
 
-### Duas línguas
+### 🌍 Duas línguas
 
 Português e inglês, trocados por uma bandeira ao lado do botão Entenda. A escolha fica guardada entre as sessões.
 
 ---
 
-## Entenda a conversão
+## 📖 Entenda a conversão
 
 O programa traz um botão **Entenda** com 14 seções que explicam o que a conversão faz — e o que ela **não** faz. O texto vive em [`fonte/FAQ_PT.txt`](./fonte/FAQ_PT.txt) e pode ser lido aqui sem instalar nada.
 
@@ -148,7 +148,7 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 ---
 
-## Instalação e requisitos
+## 🛠️ Instalação e requisitos
 
 * **Instalador:** instala o programa no sistema como qualquer aplicativo nativo e cria atalhos no Menu Iniciar e na Área de Trabalho.
 * **Pré-requisito (opcional):** o programa traz suas próprias ferramentas portáteis. O **.NET Desktop Runtime 8.0** é usado apenas pelo motor de OCR reserva (`PgsToSrt`) e, se faltar, pode ser baixado automaticamente durante a instalação.
@@ -157,7 +157,7 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 ---
 
-## Telas do programa
+## 🖼️ Telas do programa
 
 **1. Análise inicial** — leitura da fila, cálculo de espaço em disco e diagnóstico de cada arquivo.
 
@@ -181,7 +181,7 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 ---
 
-## Agradecimentos e créditos
+## 🙏 Agradecimentos e créditos
 
 Este programa é uma casca em volta do trabalho de outras pessoas. Cada uma delas resolveu um problema difícil e deixou o resultado disponível para quem quisesse usar. Sem isso, nada aqui existiria.
 

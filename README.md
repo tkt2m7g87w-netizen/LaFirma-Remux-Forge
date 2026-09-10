@@ -1,6 +1,8 @@
 # LaFirma Remux Forge (Black Edition)
 
-**Read this in other languages:** [🇧🇷 Português](./README.pt-BR.md)
+<p align="center">
+  <b>🌐 English</b> &nbsp;·&nbsp; <a href="./README.pt-BR.md">🇧🇷 Ler em Português</a>
+</p>
 
 > **Automated MKV Remuxing & Transcoding Engine**
 > *Convert Dolby Vision Profile 7 (MEL/FEL) to 8.1 without video re-encoding, transcode audio to E-AC-3 with Atmos, and process PT-BR PGS OCR subtitles with a smooth PowerShell GUI.*
@@ -49,7 +51,13 @@ Before touching the file, it reads the `el_type` field inside the RPU (with `dov
 | **Simple FEL** | 🟠 orange | The layer carries picture, but it is **refinement** — residual, grain, gradients. You lose fine detail, visible only on a paused frame. |
 | **Complex FEL** | 🔴 red | The layer **raises brightness**. Without it the RPU asks the TV for a peak the video no longer delivers. This is the only case that matters. |
 
-**What separates Simple from Complex is one number:** the RPU's L1 (the peak the file asks for) against the mastering display peak (the monitor the film was graded on, declared inside the file itself). If the file does not declare that peak, **the program says it does not know** rather than picking a side.
+### What separates 🟠 Simple from 🔴 Complex
+
+**One number.** The RPU's **L1** — the peak the file *asks for* — against the **mastering display peak** — the monitor the film was graded on, declared inside the file itself.
+
+> **L1 below the master** → 🟠 **Simple FEL.** The base layer already delivers what the RPU asks for.
+> **L1 at or above the master** → 🔴 **Complex FEL.** The RPU asks for brightness the base layer alone does not have.
+> **No master peak declared** → ⚪ the program says **it does not know**, instead of picking a side.
 
 Measured on a real machine, with no list consulted:
 
@@ -81,13 +89,37 @@ On that path: audio is copied when it fits in MP4 (E-AC-3, AC-3, AAC) and conver
 
 ## 💡 Other problems solved
 
-| | |
-|---|---|
-| **Audio codecs** | TrueHD (with or without Atmos) → **E-AC-3 Atmos** 1152 kbps via DeeZy, audio objects preserved. DTS, DTS-HD MA and DTS:X → **plain E-AC-3** 640 kbps via ffmpeg — **no Atmos in the output**, because DTS and Atmos come from different companies and DTS:X objects do not become Dolby objects. |
-| **PGS subtitles → SRT** | **Brazilian Portuguese only.** Automated OCR of image-based PGS to clean `.SRT`, with dictionary spellchecking and a **quality grade checked on the generated file** — EXCELLENT, GOOD, FAIR or POOR. The original PGS track stays in the final file: the `.SRT` is one extra track, not a replacement. |
-| **Batch & disk space** | Queue multiple files or full seasons. Before starting, the app **simulates the whole queue in order** and says how many files fit, which is the first one left out, and how much would be missing on its turn. A file that does not fit **never even starts**. |
-| **Auto or manual** | Smart auto-detection rules, or manually keep, convert or drop each audio track and subtitle stream. |
-| **Two languages** | Portuguese and English, a flag next to the Learn button. The choice is remembered between sessions. |
+### 🔊 Audio
+
+Smart TVs and soundbars refuse the lossless codecs a Blu-ray carries. The program converts only what needs converting:
+
+* **TrueHD** and **TrueHD Atmos** → **E-AC-3 Atmos**, 1152 kbps, via DeeZy.
+  The audio objects survive: Atmos goes in, Atmos comes out.
+* **DTS**, **DTS-HD MA** and **DTS:X** → **plain E-AC-3**, 640 kbps, via ffmpeg.
+  **No Atmos in the output.** DTS and Atmos come from different companies, and DTS:X objects do not become Dolby objects. Nothing on earth converts one into the other.
+* **E-AC-3**, **AC-3** and **AAC** are already compatible and are left untouched.
+
+### 💬 PGS subtitles → SRT
+
+**Brazilian Portuguese only.** This is not a general-purpose OCR: the dictionary, the correction rules and the quality grading were all built around PT-BR.
+
+Image-based PGS becomes clean `.SRT` text, spellchecked against a 1.3 million word dictionary, and the program **grades the file it generated** — EXCELLENT, GOOD, FAIR or POOR — instead of assuming it worked.
+
+The original PGS track **stays in the final file**. The `.SRT` is one extra track, not a replacement.
+
+### 💾 Batch and disk space
+
+Queue a single file or a whole season. Before starting, the program **simulates the entire queue in the order the engine will process it** and tells you three things: how many files fit, which is the first one that does not, and how much would be missing by its turn.
+
+A file that does not fit **never even starts** — no temporary folder, no 20 minutes of work thrown away.
+
+### 🎛️ Auto or manual
+
+Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**.
+
+### 🌍 Two languages
+
+Portuguese and English, switched by a flag next to the Learn button. The choice is remembered between sessions.
 
 ---
 

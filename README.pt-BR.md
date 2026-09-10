@@ -1,6 +1,8 @@
 # LaFirma Remux Forge (Black Edition)
 
-**Leia em outros idiomas:** [🌐 English](./README.md)
+<p align="center">
+  <b>🇧🇷 Português</b> &nbsp;·&nbsp; <a href="./README.md">🌐 Read in English</a>
+</p>
 
 > **Remux e conversão automatizados de MKV**
 > *Converte Dolby Vision Perfil 7 (MEL/FEL) para 8.1 sem recodificar o vídeo, transforma o áudio em E-AC-3 com Atmos e converte legendas PGS em PT-BR por OCR, com uma interface fluida em PowerShell.*
@@ -49,7 +51,13 @@ Antes de tocar no arquivo, ele lê o campo `el_type` dentro do RPU (com o `dovi_
 | **Simple FEL** | 🟠 laranja | A camada carrega imagem, mas é **refino** — residual, grão, degradê. Perde-se detalhe fino, visível só em quadro parado. |
 | **Complex FEL** | 🔴 vermelho | A camada **levanta o brilho**. Sem ela, o RPU pede à TV um pico que o vídeo não entrega mais. É o único caso que incomoda. |
 
-**O que separa Simple de Complex é um número:** o L1 do RPU (o pico que o arquivo pede) contra o pico do mastering display (o monitor em que o filme foi finalizado, declarado dentro do próprio arquivo). Se o arquivo não declara esse pico, **o programa diz que não sabe** em vez de escolher um lado.
+### O que separa 🟠 Simple de 🔴 Complex
+
+**Um número.** O **L1** do RPU — o pico que o arquivo *pede* — contra o **pico do mastering display** — o monitor em que o filme foi finalizado, declarado dentro do próprio arquivo.
+
+> **L1 abaixo do master** → 🟠 **Simple FEL.** A camada base já entrega o que o RPU pede.
+> **L1 no ou acima do master** → 🔴 **Complex FEL.** O RPU pede um brilho que a camada base sozinha não tem.
+> **Sem o pico do master declarado** → ⚪ o programa diz que **não sabe**, em vez de escolher um lado.
 
 Medido em máquina real, sem consultar lista nenhuma:
 
@@ -81,13 +89,37 @@ Nesse caminho: o áudio é copiado quando cabe no MP4 (E-AC-3, AC-3, AAC) e vira
 
 ## 💡 Outros problemas que o programa resolve
 
-| | |
-|---|---|
-| **Áudio incompatível** | TrueHD (com ou sem Atmos) → **E-AC-3 Atmos** 1152 kbps via DeeZy, com os objetos de áudio preservados. DTS, DTS-HD MA e DTS:X → **E-AC-3 comum** 640 kbps via ffmpeg — **sem Atmos na saída**, porque DTS e Atmos são de empresas diferentes e os objetos do DTS:X não viram objetos Dolby. |
-| **Legenda PGS → SRT** | **Só em português do Brasil.** OCR automático das faixas PGS para `.SRT`, com correção por dicionário e uma **nota de qualidade conferida no arquivo gerado** — EXCELENTE, BOA, RAZOÁVEL ou RUIM. A faixa PGS original continua no arquivo final: o `.SRT` é uma faixa a mais, não uma troca. |
-| **Lote e espaço em disco** | Adicione uma temporada inteira e deixe o programa trabalhar. Antes de começar ele **simula a fila inteira na ordem** e diz quantos arquivos cabem, qual é o primeiro que fica de fora e quanto faltaria na vez dele. Quem não cabe **nem chega a começar**. |
-| **Automático ou manual** | Deixe o motor de decisão cuidar de tudo, ou escolha faixa por faixa o que manter, converter ou excluir. |
-| **Duas línguas** | Português e inglês, com uma bandeira ao lado do botão Entenda. A escolha fica guardada entre as sessões. |
+### 🔊 Áudio
+
+Smart TVs e soundbars recusam os codecs sem perda que um Blu-ray carrega. O programa converte só o que precisa ser convertido:
+
+* **TrueHD** e **TrueHD Atmos** → **E-AC-3 Atmos**, 1152 kbps, via DeeZy.
+  Os objetos de áudio sobrevivem: entra Atmos, sai Atmos.
+* **DTS**, **DTS-HD MA** e **DTS:X** → **E-AC-3 comum**, 640 kbps, via ffmpeg.
+  **Sem Atmos na saída.** DTS e Atmos são de empresas diferentes, e os objetos do DTS:X não viram objetos Dolby. Nada no mundo converte um no outro.
+* **E-AC-3**, **AC-3** e **AAC** já são compatíveis e não são tocados.
+
+### 💬 Legenda PGS → SRT
+
+**Só em português do Brasil.** Não é um OCR genérico: o dicionário, as regras de correção e a nota de qualidade foram construídos em cima do PT-BR.
+
+A legenda em imagem vira texto `.SRT` limpo, corrigido contra um dicionário de 1,3 milhão de palavras, e o programa **dá nota ao arquivo que ele mesmo gerou** — EXCELENTE, BOA, RAZOÁVEL ou RUIM — em vez de supor que deu certo.
+
+A faixa PGS original **continua no arquivo final**. O `.SRT` é uma faixa a mais, não uma troca.
+
+### 💾 Lote e espaço em disco
+
+Coloque um arquivo só ou uma temporada inteira. Antes de começar, o programa **simula a fila inteira na ordem em que o motor vai processar** e diz três coisas: quantos arquivos cabem, qual é o primeiro que não cabe, e quanto faltaria na vez dele.
+
+Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minutos de trabalho jogados fora.
+
+### 🎛️ Automático ou manual
+
+Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**.
+
+### 🌍 Duas línguas
+
+Português e inglês, trocados por uma bandeira ao lado do botão Entenda. A escolha fica guardada entre as sessões.
 
 ---
 

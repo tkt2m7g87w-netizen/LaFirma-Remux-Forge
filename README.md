@@ -11,21 +11,66 @@
 
 ## 📥 Downloads
 
-> **⚠️ GitHub is the most up-to-date source.** The mirrors below still work, but they carry an earlier version of the program.
+> **GitHub is the most complete and up-to-date source for this project** — code, guides, changelog in both languages and the test battery.
 
-| | Where | Status |
-|---|---|---|
-| **Source code, guides, changelog** | Right here in this repo | ✅ always newest |
-| **Ready-made installer** | [Releases](../../releases) | ✅ current |
-| Installer — mirror | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | ⚠️ outdated |
-| Full folder — mirror | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | ⚠️ outdated |
+### I just want to use the program
+
+| | Where |
+|---|---|
+| **Installer** | [Releases](../../releases/latest) |
+| Mirror | [Proton Drive](https://drive.proton.me/urls/TY10BEQW70#GOgarsvsnVPi) · [MEGA](https://mega.nz/file/zeQCTTDK#oFn_ReBQVBjq77bUVctdJLJspm9bd9A4KK0vtCLK4u8) |
+
+Download, install and run. **The tools ship inside the installer** — nothing else to download.
+
+### I want to run the scripts or build the installer
+
+Then you need the `tools` folder, which cannot live in this repo (the reason is right below):
+
+| | Where |
+|---|---|
+| **`tools` folder** | [Proton Drive](https://drive.proton.me/urls/ENVFS0JVY4#LkoRfX5WzjzI) · [MEGA](https://mega.nz/folder/yOoiBRjC#UDsfFm1dxky7nPtT1yFZfQ) |
+| **`tools` as .rar** | [Proton Drive](https://drive.proton.me/urls/8GFBM9P074#qK16EIrndB4D) · [MEGA](https://mega.nz/file/vCo2WDqC#T3IGsESlfBfPU-fiof2ECnJAkRqQ5oKl8KssomkQIxI) |
 
 **Installer compilation guide:** [README_INSTALLER[ENGLISH].txt](./README_INSTALLER%5BENGLISH%5D.txt)
 
 <details>
+<summary><b>📦 How to assemble the <code>tools</code> folder by hand</b></summary>
+
+**If you use the installer you do not need this.** This is for people who cloned the repo and want to run the `.ps1` files directly, or build their own installer.
+
+**1.** Download the `tools` folder from one of the mirrors above. If you take the `.rar`, extract it.
+
+**2.** Put the contents inside `fonte\tools\` of the cloned repo. The structure must end up like this:
+
+```
+fonte\tools\
+├── dovi_tool.exe          ├── DeeZy\
+├── ffmpeg.exe             ├── PgsToSrt\
+├── ffprobe.exe            ├── SubtitleEdit\
+├── mkvmerge.exe           └── Tesseract\
+├── mkvextract.exe
+├── MediaInfo.exe
+├── LIBCURL.DLL
+├── nvcuda.dll
+└── nvcuvid.dll
+```
+
+**3.** The `.txt` files that already ship in the repo (`COMO_USAR_TOOLS_PT.txt` and `HOW_TO_USE_TOOLS_EN.txt`) stay there — they say where each tool came from and what it is for. Do not delete them.
+
+**4.** Check without guessing: open the program. In the strip above the queue, each tool shows a tick:
+
+`✔ dovi_tool  ✔ DeeZy  ✔ seconv  ✔ PgsToSrt  ✔ Tesseract  ✔ mkvmerge`
+
+If one of them is not green, that is the one missing or in the wrong place.
+
+**Minimum version:** `dovi_tool` **2.3.3**. Earlier ones lack `export --levels`, and without it the program cannot measure MEL × FEL.
+
+</details>
+
+<details>
 <summary><b>Why the binaries are not in this repo</b></summary>
 
-The `tools\` folder holds hundreds of MB of **other people's** programs, each under its own licence. We do not republish other people's work as our own — this repo says where each one comes from, and the ready-made package exists for those who just want to use it.
+The `tools\` folder holds hundreds of MB of **other people's** programs, each under its own licence. We do not republish other people's work as our own — this repo says where each one comes from, and the mirrors exist for those who want to assemble it themselves.
 
 </details>
 

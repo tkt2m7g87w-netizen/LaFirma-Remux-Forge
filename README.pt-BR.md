@@ -11,21 +11,66 @@
 
 ## 📥 Downloads
 
-> **⚠️ O GitHub é a fonte mais atual.** Os espelhos abaixo continuam no ar e funcionam, mas trazem uma versão anterior do programa.
+> **O GitHub é a fonte mais completa e atual do projeto** — código, guias, changelog nas duas línguas e a bateria de testes.
 
-| | Onde | Estado |
-|---|---|---|
-| **Código-fonte, guias, changelog** | Aqui neste repositório | ✅ sempre o mais novo |
-| **Instalador pronto** | [Releases](../../releases) | ✅ atual |
-| Instalador — espelho | [Proton Drive](https://drive.proton.me/urls/ZATVE13HWM#em0BACyqRM5J) · [MEGA](https://mega.nz/file/abxFWYpR#3DjvTORJqK-XMqp7uvR8l30qJT67wAS6OVpxLnlTI-I) · [GoFile](https://gofile.io/d/YE2isutz) | ⚠️ desatualizado |
-| Pasta completa — espelho | [Proton Drive](https://drive.proton.me/urls/FQWT6PB5W4#VgsXd07uV4OK) · [MEGA](https://mega.nz/folder/aSpxxJII#v5CzveN0-Um9LryBnjfMMQ) | ⚠️ desatualizado |
+### Só quero usar o programa
+
+| | Onde |
+|---|---|
+| **Instalador** | [Releases](../../releases/latest) |
+| Espelho | [Proton Drive](https://drive.proton.me/urls/TY10BEQW70#GOgarsvsnVPi) · [MEGA](https://mega.nz/file/zeQCTTDK#oFn_ReBQVBjq77bUVctdJLJspm9bd9A4KK0vtCLK4u8) |
+
+Baixe, instale e use. **As ferramentas já vão dentro do instalador** — não precisa baixar mais nada.
+
+### Quero rodar os scripts ou compilar o instalador
+
+Aí sim você precisa da pasta `tools`, que não pode viver neste repositório (o porquê está logo abaixo):
+
+| | Onde |
+|---|---|
+| **Pasta `tools`** | [Proton Drive](https://drive.proton.me/urls/ENVFS0JVY4#LkoRfX5WzjzI) · [MEGA](https://mega.nz/folder/yOoiBRjC#UDsfFm1dxky7nPtT1yFZfQ) |
+| **`tools` em .rar** | [Proton Drive](https://drive.proton.me/urls/8GFBM9P074#qK16EIrndB4D) · [MEGA](https://mega.nz/file/vCo2WDqC#T3IGsESlfBfPU-fiof2ECnJAkRqQ5oKl8KssomkQIxI) |
 
 **Guia de compilação do instalador:** [LEIA-ME_INSTALADOR[PT-BR].txt](./LEIA-ME_INSTALADOR%5BPT-BR%5D.txt)
 
 <details>
+<summary><b>📦 Como montar a pasta <code>tools</code> à mão</b></summary>
+
+**Quem usa o instalador não precisa disto.** Isto é para quem clonou o repositório e quer rodar os `.ps1` direto, ou compilar o próprio instalador.
+
+**1.** Baixe a pasta `tools` de um dos espelhos acima. Se pegar o `.rar`, extraia.
+
+**2.** Coloque o conteúdo dentro de `fonte\tools\` do repositório clonado. A estrutura tem que ficar assim:
+
+```
+fonte\tools\
+├── dovi_tool.exe          ├── DeeZy\
+├── ffmpeg.exe             ├── PgsToSrt\
+├── ffprobe.exe            ├── SubtitleEdit\
+├── mkvmerge.exe           └── Tesseract\
+├── mkvextract.exe
+├── MediaInfo.exe
+├── LIBCURL.DLL
+├── nvcuda.dll
+└── nvcuvid.dll
+```
+
+**3.** Os arquivos `.txt` que já vêm no repositório (`COMO_USAR_TOOLS_PT.txt` e `HOW_TO_USE_TOOLS_EN.txt`) continuam ali — eles dizem de onde cada ferramenta veio e para que serve. Não apague.
+
+**4.** Confira sem adivinhar: abra o programa. Na faixa acima da fila, cada ferramenta aparece com um visto:
+
+`✔ dovi_tool  ✔ DeeZy  ✔ seconv  ✔ PgsToSrt  ✔ Tesseract  ✔ mkvmerge`
+
+Se algum não aparecer verde, é essa que falta ou está no lugar errado.
+
+**Versão mínima:** `dovi_tool` **2.3.3**. As anteriores não têm o `export --levels`, e sem ele o programa não mede MEL × FEL.
+
+</details>
+
+<details>
 <summary><b>Por que os binários não estão neste repositório</b></summary>
 
-A pasta `tools\` tem centenas de MB de programas de **outras pessoas**, cada um com a sua licença. Não republicamos o trabalho dos outros como se fosse nosso — este repositório diz de onde cada um vem, e o pacote pronto existe para quem só quer usar.
+A pasta `tools\` tem centenas de MB de programas de **outras pessoas**, cada um com a sua licença. Não republicamos o trabalho dos outros como se fosse nosso — este repositório diz de onde cada um vem, e os espelhos existem para quem quer montar por conta própria.
 
 </details>
 

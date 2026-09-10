@@ -69,7 +69,7 @@ Game of Thrones S08E01      ->  SIMPLE FEL     153 nits de 1.000
 Saving Private Ryan (1998)  ->  COMPLEX FEL  1.608 nits de 1.000
 ```
 
-> ⚠️ **Vermelho não quer dizer que a conversão estraga.** Shield, Apple TV, Zidoo, Dune e as TVs **já descartam** a camada extra hoje — nesses aparelhos o Perfil 7 já toca do jeito que o convertido vai tocar. Quem perde alguma coisa é quem tem player com decodificador duplo (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2).
+> ⚠️ **Vermelho não quer dizer que a conversão estraga.** Shield, Apple TV, Fire TV, Zidoo, Dune, Windows e as TVs LG CX ou mais novas **já descartam** a camada extra hoje — nesses aparelhos o Perfil 7 já toca do jeito que o convertido vai tocar. **Dentro de um MKV**, que é o que este programa faz, só decodificam a camada extra o Ugoos/CoreELEC, o Chromecast com Google TV e um PC com MPV, JRiver ou outro player com libplacebo. Os players de disco (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2) e as TVs LG C7-C9 juntam as duas camadas só a partir de M2TS, TS ou MP4.
 
 **Os limites, ditos sem rodeio:**
 

@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.03
+#  LaFirma - JANELA 17.04
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,13 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    17.04  10/09/2026  A PERGUNTA DE REINICIO E DO CLIQUE, NUNCA DO
+#                        ARRANQUE. A 17.03 poe a pergunta dentro do
+#                        Set-Idioma, que o arranque tambem chama para
+#                        aplicar o idioma guardado - entao o programa abria
+#                        perguntando, e responder Sim estourava ao fechar
+#                        uma janela ainda nao exibida. Extraida para
+#                        Offer-ReinicioIdioma, chamada so pelo botao.
 #    17.03  09/09/2026  "PERFIL 7.6" NAO EXISTE - O NIVEL NAO E NOME DE
 #                       PERFIL. E O QUE A TELA ESCREVE PASSOU A TRADUZIR.
 #    17.02  09/09/2026  A ESCOLHA DE IDIOMA CHEGA AO DISCO, E O PAINEL DE
@@ -582,7 +589,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.03"
+$SCRIPT_VERSION = "17.04"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -5323,6 +5330,37 @@ function Set-Idioma([string]$Novo) {
     try { Update-Disco } catch { }
     try { Fill-Faixas } catch { }
 
+}
+
+
+function Offer-ReinicioIdioma([string]$Novo) {
+    <#  17.04 - ESTA PERGUNTA E DO CLIQUE, NUNCA DO ARRANQUE.
+
+        Defeito achado em uso, madrugada de 10/09, e ele era meu: a pergunta
+        de reiniciar nasceu DENTRO do Set-Idioma na 17.03. So que o arranque
+        tambem chama Set-Idioma, para aplicar o idioma guardado da sessao
+        anterior. Resultado: quem tinha escolhido ingles abria o programa e
+        era recebido pela caixa "reiniciar agora?" - e dizer Sim estourava:
+
+            "Nao sera possivel definir Visibility nem chamar Show, ShowDialog
+             ou WindowInteropHelper.EnsureHandle depois que uma Janela for
+             fechada."
+
+        A janela ainda nem tinha sido exibida quando o codigo mandou fecha-la
+        e reabrir. Cinco sessoes do log de 01:26 terminam nessa linha.
+
+        E no arranque a pergunta nao faz sentido nenhum: a janela esta sendo
+        construida AGORA, no idioma certo. Nao ha nada a completar.
+
+        Por isso a pergunta saiu do Set-Idioma e mora aqui, chamada so pelo
+        clique no botao de idioma. O arranque chama Set-Idioma e mais nada.
+
+        A guarda de IsLoaded e cinto e suspensorio: se um dia alguem chamar
+        isto cedo demais de novo, nao estoura - so nao pergunta. #>
+    if (-not $Janela.IsLoaded) {
+        Escrever-Log "IDIOMA: janela ainda nao exibida - reinicio nao oferecido" "ACAO"
+        return
+    }
     <#  17.03 - A TROCA AO VIVO ALCANCA QUASE TUDO. QUASE.
 
         Ideia do Diego (09/09): "no momento que a pessoa clica para mudar a
@@ -8426,6 +8464,9 @@ try {
     $arqPref = Get-CaminhoIdioma
     if (Test-Path -LiteralPath $arqPref) {
         $pref = ([System.IO.File]::ReadAllText($arqPref)).Trim().ToUpperInvariant()
+        # 17.04: aqui so APLICA. A pergunta de reinicio e do clique no
+        # botao - no arranque nao ha nada a completar, a janela nasce
+        # ja no idioma certo.
         if ($pref -eq "EN") { Set-Idioma "EN" }
     }
 } catch { }
@@ -9090,7 +9131,12 @@ $UI.btnLog.add_Click({
     o botao nao existe nem some com ele. #>
 $UI.btnIdioma.add_Click({
     Escrever-Log "CLIQUE: Idioma" "ACAO"
-    Set-Idioma $(if ($script:Lang -eq "PT") { "EN" } else { "PT" })
+    $alvo = if ($script:Lang -eq "PT") { "EN" } else { "PT" }
+    Set-Idioma $alvo
+    # 17.04: quem pergunta se quer reiniciar e o CLIQUE, nao o Set-Idioma -
+    # senao o arranque pergunta sozinho e estoura ao fechar uma janela que
+    # ainda nao foi exibida.
+    if ($script:Lang -eq $alvo) { Offer-ReinicioIdioma $alvo }
 })
 $UI.btnEntenda.add_Click({
     Escrever-Log "CLIQUE: Entenda" "ACAO"

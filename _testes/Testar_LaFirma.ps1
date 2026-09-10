@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.12"
+$Versao = "3.13"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -137,6 +137,7 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      Set-Idioma - 16.92).
 # 3.1: janela 131 -> 135 (Get-NomeCorEL, Get-CorEL, Get-ChipEL - a escala de
 #      cor num lugar so - e Traduzir-Frase, para o texto montado - 16.94).
+# 3.13: janela 145 -> 146 (Offer-ReinicioIdioma - 17.04)
 # 3.12: janela 143 -> 145 (Get-VerboExibido e Get-VerboCanonico - 17.03)
 # 3.10: janela 141 -> 143 (Get-PastaDados, Get-CaminhoIdioma - 17.02)
 # 3.6: janela 136 -> 141 (Get-CaminhoCalibragem, Get-Percentil,
@@ -144,7 +145,7 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
 # 3.2: janela 135 -> 136 (Get-FatorDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 145
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 146
                "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
@@ -2577,9 +2578,9 @@ foreach ($frase in @("VÍDEO","ÁUDIO","LEGENDAS","PADRÃO","Capítulos","Anexos
 
 # --- o aviso de reinicio ao trocar de idioma
 Checar "Janela: trocar de idioma oferece reiniciar para completar" `
-    ([bool]($jan -match '(?s)function Set-Idioma.{0,6000}Reiniciar o programa agora\?'))
+    ([bool]($jan -match '(?s)function Offer-ReinicioIdioma.{0,6000}Reiniciar o programa agora\?'))
 Checar "Janela: com a fila RODANDO o reinicio nao e oferecido" `
-    ([bool]($jan -match '(?s)Set-Idioma.{0,6000}\$Estado\.Atual -in @\("rodando","pausado"\).{0,200}return'))
+    ([bool]($jan -match '(?s)function Offer-ReinicioIdioma.{0,6000}\$Estado\.Atual -in @\("rodando","pausado"\).{0,200}return'))
 Checar "Janela: a pergunta vem com NAO pre-selecionado (regra da 16.12)" `
     ([bool]($jan -match '(?s)Reiniciar o programa agora\?.{0,900}"YesNo", "Question", "No"'))
 Checar "Janela: a pergunta existe nas duas linguas" `
@@ -2614,6 +2615,63 @@ if ($jan -match "(\`$reLink = \[regex\][^\r\n]+)") {
 } else {
     Checar "EXECUTANDO: o regex de link pode ser isolado" $false
 }
+
+Titulo "33. A PERGUNTA DE REINICIO E DO CLIQUE, NUNCA DO ARRANQUE (17.04)"
+<#  Defeito achado em uso na madrugada de 10/09, e ele nasceu na 17.03:
+    a pergunta "reiniciar agora?" foi escrita DENTRO do Set-Idioma. So que
+    o arranque tambem chama Set-Idioma, para aplicar o idioma guardado da
+    sessao anterior. Entao quem tinha escolhido ingles abria o programa e
+    era recebido pela pergunta - e responder Sim estourava:
+
+      "Nao sera possivel definir Visibility nem chamar Show, ShowDialog ou
+       WindowInteropHelper.EnsureHandle depois que uma Janela for fechada."
+
+    Cinco sessoes do log de 01:26 terminam nessa linha. Estes testes nao
+    guardam o sintoma: guardam a SEPARACAO que o resolve.  #>
+
+Checar "Janela: existe Offer-ReinicioIdioma (a pergunta mora fora do Set-Idioma)" `
+    ([bool]($jan -match 'function Offer-ReinicioIdioma'))
+
+# O teste que importa: o Set-Idioma NAO pode mais conter a pergunta.
+# Sem ele, um 'conserto' futuro que devolva o bloco para dentro do
+# Set-Idioma passa despercebido e o defeito volta inteiro.
+$corpoSetIdioma = ""
+if ($jan -match '(?s)function Set-Idioma\(\[string\]\$Novo\) \{(.*?)\nfunction ') {
+    $corpoSetIdioma = $Matches[1]
+}
+Checar "Janela: o corpo do Set-Idioma foi localizado" `
+    ($corpoSetIdioma.Length -gt 500)
+Checar "Janela: Set-Idioma NAO pergunta se quer reiniciar (era o defeito)" `
+    (-not ($corpoSetIdioma -match 'Reiniciar o programa agora\?'))
+Checar "Janela: Set-Idioma NAO fecha a janela" `
+    (-not ($corpoSetIdioma -match '\$Janela\.Close\(\)'))
+Checar "Janela: Set-Idioma NAO reabre o programa" `
+    (-not ($corpoSetIdioma -match 'Start-Process'))
+
+# Quem pergunta e o clique.
+Checar "Janela: o clique no botao de idioma chama Offer-ReinicioIdioma" `
+    ([bool]($jan -match '(?s)\$UI\.btnIdioma\.add_Click\(\{.{0,800}Offer-ReinicioIdioma'))
+Checar "Janela: e so depois de o Set-Idioma ter trocado de verdade" `
+    ([bool]($jan -match '(?s)Set-Idioma \$alvo.{0,400}\$script:Lang -eq \$alvo.{0,80}Offer-ReinicioIdioma'))
+
+# E o arranque NAO pergunta.
+$arranque = ""
+if ($jan -match '(?s)(\$arqPref = Get-CaminhoIdioma.{0,900}?\n\} catch \{ \})') {
+    $arranque = $Matches[1]
+}
+Checar "Janela: o bloco de arranque do idioma foi localizado" `
+    ($arranque.Length -gt 100)
+Checar "Janela: o arranque aplica o idioma guardado" `
+    ([bool]($arranque -match 'Set-Idioma "EN"'))
+Checar "Janela: o arranque NAO oferece reinicio (a causa do estouro)" `
+    (-not ($arranque -match 'Offer-ReinicioIdioma'))
+
+# Cinto e suspensorio: chamada cedo demais nao pode estourar.
+Checar "Janela: Offer-ReinicioIdioma desiste se a janela ainda nao foi exibida" `
+    ([bool]($jan -match '(?s)function Offer-ReinicioIdioma.{0,3000}-not \$Janela\.IsLoaded.{0,300}return'))
+Checar "Janela: e diz no log por que nao ofereceu" `
+    ([bool]($jan -match 'IDIOMA: janela ainda nao exibida - reinicio nao oferecido'))
+
 
 Titulo "21. A PROPRIA BATERIA NAO PODE TER ERRO DE EXECUCAO (2.4)"
 <#  Este teste olha para dentro: $Error junta todo erro nao-terminante que

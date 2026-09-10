@@ -17,6 +17,50 @@
 
 
 ==============================================================================
+ INSTALLER 1.8.1  -  10/09/2026
+==============================================================================
+ Components: ENGINE 14.49 | WINDOW 17.04 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
+             TESTAR_LAFIRMA 3.13 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+
+ One defect introduced in 1.8, fixed. Nothing else changed.
+
+ THE RESTART PROMPT BELONGED TO STARTUP TOO  (17.04)
+ --------------------------------------------------------------------------
+   Reported in use, early hours of 10/09. Anyone who had chosen English
+   opened the program and was met by the "restart now?" box without having
+   clicked anything. And answering Yes threw:
+
+     "Visibility cannot be set, and Show, ShowDialog or
+      WindowInteropHelper.EnsureHandle cannot be called, after a Window
+      has closed."
+
+   Five sessions in the 01:26 log end on that line.
+
+   THE CAUSE: in 17.03 the prompt was written INSIDE Set-Idioma. But startup
+   calls Set-Idioma too - for the usual reason that most of this program
+   goes through one function: to apply the language saved from the previous
+   session. So the prompt appeared before the window had been shown, and
+   Close() landed on a window that was not on screen yet.
+
+   And at startup the question means nothing: the window is being built
+   right then, in the right language. There is nothing left to complete.
+
+   THE FIX IS THE SEPARATION: the block left Set-Idioma and became
+   Offer-ReinicioIdioma, called ONLY by the language button's click.
+   Startup calls Set-Idioma and nothing else. The running-queue guard still
+   applies, now inside the new function. And it gives up quietly if the
+   window has not been shown yet - belt and braces, with the reason logged.
+
+   THE BATTERY (3.13): section 33, 13 tests. They do not guard the symptom,
+   they guard the separation: Set-Idioma's body is extracted and fails if it
+   ever contains the prompt, the Close() or the Start-Process again; the
+   button handler must call both, in order; and the startup block is
+   extracted and fails if it names the new function. The window's function
+   count went from 145 to 146.
+
+
+==============================================================================
  INSTALLER 1.8  -  09/09/2026    *** IT MEASURES, IT NO LONGER ASSUMES ***
 ==============================================================================
  Components: ENGINE 14.49 | WINDOW 17.03 | SUBTITLE FIXER 2.27 | REOCR 1.29

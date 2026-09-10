@@ -69,7 +69,7 @@ Game of Thrones S08E01      ->  SIMPLE FEL       153 nits of 1,000
 Saving Private Ryan (1998)  ->  COMPLEX FEL    1,608 nits of 1,000
 ```
 
-> ⚠️ **Red does not mean the conversion ruins the file.** Shield, Apple TV, Zidoo, Dune and TVs **already discard** the extra layer today — on those devices Profile 7 already plays the way the converted file will. Who actually loses something is whoever owns a dual-layer decoder (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2).
+> ⚠️ **Red does not mean the conversion ruins the file.** Shield, Apple TV, Fire TV, Zidoo, Dune, Windows and LG CX or newer TVs **already discard** the extra layer today — on those devices Profile 7 already plays the way the converted file will. **Inside an MKV**, which is what this program makes, only Ugoos/CoreELEC, the Chromecast with Google TV and a PC running MPV, JRiver or another libplacebo player decode the extra layer. Disc players (OPPO UDP-203/205, Panasonic UB820/UB9000, Sony X700/X800M2) and the LG C7-C9 TVs combine both layers only from M2TS, TS or MP4.
 
 **The limits, said plainly:**
 

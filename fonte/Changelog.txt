@@ -19,6 +19,50 @@
 
 
 ================================================================================
+ INSTALADOR 1.8.1  -  10/09/2026
+================================================================================
+ Componentes: MOTOR 14.49  |  JANELA 17.04  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.13  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ Correcao de um defeito introduzido na 1.8. Nada mais mudou.
+
+ A PERGUNTA DE REINICIO ERA DO ARRANQUE TAMBEM  (17.04)
+ --------------------------------------------------------------------------
+   Relatado em uso, madrugada de 10/09. Quem tinha escolhido ingles abria o
+   programa e era recebido pela caixa "reiniciar agora?", sem ter clicado em
+   nada. E responder Sim estourava:
+
+     "Nao sera possivel definir Visibility nem chamar Show, ShowDialog ou
+      WindowInteropHelper.EnsureHandle depois que uma Janela for fechada."
+
+   Cinco sessoes do log de 01:26 terminam nessa linha.
+
+   A CAUSA: na 17.03 a pergunta nasceu DENTRO do Set-Idioma. So que o
+   arranque tambem chama Set-Idioma - e para o mesmo motivo de sempre, boa
+   parte do programa passa por uma funcao unica: aplicar o idioma guardado
+   da sessao anterior. Entao a pergunta saia antes de a janela ter sido
+   exibida, e o Close() caia numa janela que ainda nao existia na tela.
+
+   E no arranque a pergunta nao faz sentido nenhum: a janela esta sendo
+   construida naquele instante, no idioma certo. Nao ha nada a completar.
+
+   O CONSERTO E A SEPARACAO: o bloco saiu do Set-Idioma e virou
+   Offer-ReinicioIdioma, chamada SO pelo clique no botao de idioma. O
+   arranque chama Set-Idioma e mais nada. A trava de fila rodando continua
+   valendo, agora dentro da funcao nova. E ela desiste em silencio se a
+   janela ainda nao foi exibida - cinto e suspensorio, com a razao escrita
+   no log.
+
+   A BATERIA (3.13): secao 33, 13 testes. Eles nao guardam o sintoma,
+   guardam a separacao: o corpo do Set-Idioma e extraido e reprova se
+   voltar a conter a pergunta, o Close() ou o Start-Process; o handler do
+   botao tem que chamar as duas na ordem; e o bloco de arranque e extraido
+   e reprova se citar a funcao nova. A contagem de funcoes da janela subiu
+   de 145 para 146.
+
+
+================================================================================
  INSTALADOR 1.8  -  09/09/2026     *** O PROGRAMA PASSOU A MEDIR, NAO SUPOR ***
 ================================================================================
  Componentes: MOTOR 14.49  |  JANELA 17.03  |  CORRETOR 2.27  |  REOCR 1.29

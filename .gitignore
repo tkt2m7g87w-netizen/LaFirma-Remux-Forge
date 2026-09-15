@@ -92,3 +92,13 @@ ACHADO_*.md
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# ---- Gerado pelo instalador na maquina do usuario - nunca versionar ----
+fonte/VERSAO.txt
+
+# ---- O .iss vive na raiz; copia em fonte/ e duplicata ----
+fonte/LaFirma_Setup.iss
+
+# ---- Ferramentas de bancada (desenvolvimento) ----
+fonte/Bancada_CensoCompleto.*
+Bancada_CensoCompleto.*

@@ -466,6 +466,15 @@
    For the MEL x FEL spreadsheet by title. Manual, patient work that serves
    as a second opinion for everybody.
 
+ An honest caveat about these two acknowledgements: they are for KNOWLEDGE,
+ not for code. Not one line of DoVi_Scripts or dovi_convert is in here, and
+ this program is not derived from either. Profile conversion is done by
+ dovi_tool (quietvoid), called directly. What came from the community is what
+ matters before any code: that MEL and FEL are not the same thing, that
+ discarding a FEL which raises brightness has a consequence on the picture,
+ and that this gets checked title by title instead of assumed. This program
+ measures because that discussion happened.
+
 
 ------------------------------------------------------------------------------
  14. WHERE TO CHECK AND LEARN MORE

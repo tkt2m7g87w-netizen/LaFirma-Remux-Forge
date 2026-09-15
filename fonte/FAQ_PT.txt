@@ -450,6 +450,15 @@
    Pela planilha de MEL x FEL por título. Trabalho manual e paciente, que
    serve de segunda opinião para todo mundo.
 
+ Uma ressalva honesta sobre estes dois agradecimentos: eles são por
+ CONHECIMENTO, não por código. Nenhuma linha do DoVi_Scripts ou do
+ dovi_convert está aqui dentro, e este programa não é derivado de nenhum dos
+ dois. A conversão de perfil é feita pelo dovi_tool (quietvoid), chamado
+ diretamente. O que veio da comunidade foi o que importa antes do código: que
+ MEL e FEL não são a mesma coisa, que descartar uma FEL que levanta o brilho
+ tem consequência na imagem, e que isso se confere título por título em vez
+ de supor. Este programa mede porque essa discussão existiu.
+
 
 ------------------------------------------------------------------------------
  14. ONDE CONFERIR E APRENDER MAIS

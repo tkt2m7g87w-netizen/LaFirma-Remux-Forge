@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.16"
+$Versao = "3.27"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -137,15 +137,23 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      Set-Idioma - 16.92).
 # 3.1: janela 131 -> 135 (Get-NomeCorEL, Get-CorEL, Get-ChipEL - a escala de
 #      cor num lugar so - e Traduzir-Frase, para o texto montado - 16.94).
+# 3.27: janela 172 -> 173 (Get-PlanoDoDisco, extraida para poder ser
+#       executada pela bateria - 17.17).
+# 3.26: motor 89 -> 90 (Test-EhLegendaPtBrCandidata - 14.54);
+#       janela 170 -> 172 (Test-EhLegendaPtBr e Update-BarraMedirEL - 17.16).
+# 3.25: motor 88 -> 89 (Test-OcrPedidoNaMao - 14.53);
+#       janela 167 -> 170 (Get-MarcadosMedindo e Redesenhar-Resumo - 17.15).
+# 3.24: janela 164 -> 167 (Get-TextoEspera, Get-MotivoCenso e
+#       Update-DicaCenso - 17.14).
 # 3.13: janela 145 -> 146 (Offer-ReinicioIdioma - 17.04)
 # 3.12: janela 143 -> 145 (Get-VerboExibido e Get-VerboCanonico - 17.03)
 # 3.10: janela 141 -> 143 (Get-PastaDados, Get-CaminhoIdioma - 17.02)
 # 3.6: janela 136 -> 141 (Get-CaminhoCalibragem, Get-Percentil,
 #      Registrar-Calibragem, Carregar-Calibragem e Fechar-MedidaDoVideo - a
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
-# 3.2: janela 135 -> 136 (Get-FatorDisco - o fator 1,6x/3,15x num lugar so,
+# 3.2: janela 135 -> 136 (Get-FatorEspacoDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 86; "LaFirma_JANELA.ps1" = 146
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 90; "LaFirma_JANELA.ps1" = 173
                "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
@@ -350,7 +358,14 @@ foreach ($ps1 in @(Get-ChildItem -LiteralPath $raiz -Filter *.ps1 -ErrorAction S
     if ($nomeBat -eq "Abrir_LaFirma_JANELA.bat") {
         Checar ("$($ps1.BaseName).bat - NAO segura a janela (e GUI, nao console)") ($t -notmatch '(?m)^\s*pause\s*$')
     } else {
-        Checar ("$($ps1.BaseName).bat - segura a janela (pause)")      ($t -match '(?m)^\s*pause\s*$')
+        <#  3.18: segurar a janela nao e sinonimo de "pause".
+            A bancada 2.1 virou um MENU que volta a pedir arquivo no fim de
+            cada rodada - ela segura a janela melhor do que um pause, e por
+            um motivo melhor: o Diego testa varios .mkv em sequencia e a 2.0
+            fechava a cada um. O que o teste tem que exigir e que a janela
+            NAO feche sozinha; pause e uma das duas formas de conseguir isso. #>
+        Checar ("$($ps1.BaseName).bat - segura a janela (pause ou menu)") `
+            (($t -match '(?m)^\s*pause\s*$') -or ($t -match '(?m)^\s*set /p\s'))
     }
 }
 
@@ -468,7 +483,7 @@ Checar "Janela: cada etapa tem sua propria conta (segundos, nao peso por GB)" `
     ($jan -match 'function Get-SegundosDasEtapas' -and $jan -match 'ExtracaoSegPorGb' -and
      $jan -match 'RemontagemSegPorGb' -and $jan -match 'RemontagemDiretoSegPorGb')
 Checar "Janela: a velocidade do disco de origem e MEDIDA antes de estimar" `
-    ($jan -match 'function Measure-VelocidadeOrigem' -and $jan -match 'function Get-FatorDisco' -and
+    ($jan -match 'function Measure-VelocidadeOrigem' -and $jan -match 'function Get-FatorEspacoDisco' -and
      $jan -match 'SensibilidadeDisco')
 Checar "Janela: o fator de disco fica preso entre 1x e 8x" `
     ($jan -match 'if \(\$f -lt 1\.0\) \{ return 1\.0 \}' -and $jan -match 'if \(\$f -gt 8\.0\) \{ return 8\.0 \}')
@@ -718,7 +733,7 @@ Checar "Janela: so Profile 7 COM EL entra na fila de medicao" `
     ([bool]($jan -match '\$dv\.Perfil -eq 7 -and \$dv\.Camadas -match "EL"'))
 
 Checar "Janela: o runspace NAO morre enquanto a fase B ainda mede" `
-    ([bool]($jan -match '\$script:MedindoEL = \(\[int\]\$m\.MedirEL -gt 0\)[\s\S]{0,80}if \(-not \$script:MedindoEL\)'))
+    ([bool]($jan -match '\$script:MedindoEL = \(\[int\]\$m\.MedirEL -gt 0\)[\s\S]{0,250}if \(-not \$script:MedindoEL\)'))
 
 Checar "Janela: quem encerra o runspace depois de medir e o el_fim" `
     ([bool]($jan -match '"el_fim"\s*\{[\s\S]{0,700}?Stop-Motor'))
@@ -1119,8 +1134,12 @@ Checar "Janela: FEL sem expansao e LARANJA (ressalva, nao alarme)" `
     brilho expandido, antes da frase. #>
 Checar "Janela: FEL COM expansao e VERMELHO (o unico caso que estraga)" `
     ([bool]($jan -match '(?s)\$m\.Expande -eq \$true.{0,200}\$v\.DiagDVcor = "vermelho"'))
-Checar "Janela: so o caso que expande muda o selo para nao recomendado" `
-    (([regex]::Matches($jan, 'CONVERS\u00c3O N\u00c3O RECOMENDADA')).Count -eq 1)
+<#  3.18: eram DUAS ocorrencias a partir da 17.09 - a linha do diagnostico e
+    o selo do cartao final, que passou a repetir a ressalva (o Ryan saia todo
+    verde). O que o teste guarda continua sendo o mesmo: a frase so aparece
+    onde ha EXPANSAO de brilho, nunca no MEL nem no Simple FEL. #>
+Checar "Janela: so o caso que expande usa 'nao recomendado' (diagnostico + cartao)" `
+    (([regex]::Matches($jan, 'CONVERS\u00c3O N\u00c3O RECOMENDADA')).Count -eq 2)
 Checar "Janela: MEL continua verde (nao ha ressalva a fazer)" `
     ([bool]($jan -match 'MEL: EL vazia, descarte sem perda'))
 
@@ -2214,17 +2233,22 @@ Titulo "25. A PERGUNTA DO DISCO DIZ O QUE ACONTECE COM ESTA FILA (16.93)"
     Ryan CABIA sozinho (258 GB de pico contra 276 livres), quem nao cabia era
     o Troy, DEPOIS dele. A informacao existia e nao estava na tela. #>
 
+<#  3.27: a simulacao saiu de dentro de Update-Disco e virou funcao pura
+    (17.17), para a bateria poder EXECUTAR ela com arquivos reais - ver a
+    secao 46. O que o teste garante e o mesmo: a conta percorre a fila na
+    ordem, cobrando o fator do motor por arquivo. #>
 Checar "Janela: a conta percorre a fila na ordem, como o motor decide" `
     (($jan -match '\$script:DiscoCabem') -and ($jan -match '\$script:DiscoNaoCabem') -and
-     ($jan -match 'foreach \(\$v in \$ativos\) \{[\s\S]{0,200}\$precisaEste = \[double\]\$v\.Bytes \* \(Get-FatorDisco \$v\)'))
+     ($jan -match 'function Get-PlanoDoDisco') -and
+     ($jan -match 'foreach \(\$v in @\(\$Videos\)\) \{[\s\S]{0,200}\$precisaEste = \[double\]\$v\.Bytes \* \(Get-FatorEspacoDisco \$v\)'))
 <#  3.2: o fator saiu de duas copias para uma funcao (16.95). O P5 forcou
     isso: a coluna dele tem seta e mesmo assim ele nao passa pelo dovi_tool. #>
 Checar "Janela: o fator de disco mora numa funcao unica" `
-    ([bool]($jan -match 'function Get-FatorDisco'))
+    ([bool]($jan -match 'function Get-FatorEspacoDisco'))
 Checar "Janela: o P5 nao paga 3,15x - ele nao passa pelo dovi_tool" `
-    ([bool]($jan -match '(?s)function Get-FatorDisco.{0,900}if \(\$v\.P5 -eq \$true\) \{ return 1\.6 \}'))
+    ([bool]($jan -match '(?s)function Get-FatorEspacoDisco.{0,900}if \(\$v\.P5 -eq \$true\) \{ return 1\.6 \}'))
 Checar "Janela: as duas contas de disco usam a MESMA funcao" `
-    ((@([regex]::Matches($jan, 'Get-FatorDisco \$v')).Count) -ge 2)
+    ((@([regex]::Matches($jan, 'Get-FatorEspacoDisco \$v')).Count) -ge 2)
 Checar "Janela: o que fica no disco depois e a SAIDA, nao o pico" `
     ([bool]($jan -match '\$sobrando = \$sobrando - \(Get-TamanhoEstimadoVideo \$v\)'))
 Checar "Janela: guarda QUAL e o primeiro arquivo que fica de fora" `
@@ -2732,6 +2756,1182 @@ Checar "Janela: os tres tipos de rotulo continuam cobertos" `
       ($jan -match '(?s)function Traduzir-Arvore.{0,4000}Controls\.TabItem')))
 Checar "Janela: as colunas do GridView continuam trocadas fora da arvore" `
     ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,9000}\$lst\.View\.Columns'))
+
+
+Titulo "35. O CENSO COMPLETO E UM BOTAO, E SO ONDE A DUVIDA EXISTE (17.08 / 14.50 - item A)"
+<#  O autor do dovi_convert apontou que amostra nao prova Complex FEL. O
+    censo completo e a resposta - e tudo o que estes testes guardam e o
+    DESENHO da resposta, nao o numero que ela devolve:
+
+      1. quem le o filme inteiro e o MOTOR, nao a janela;
+      2. o botao nasce desligado e so acende em Complex FEL;
+      3. quem diz o que e Complex FEL continua sendo Get-NomeCorEL - uma
+         regra, um lugar (o bug do audio da 16.79/16.80 foi dois lugares);
+      4. e o runspace do censo NAO chama funcao da janela. Este ultimo e o
+         teste que a 17.06 nao tinha: a nota do audio foi escrita com uma
+         funcao da janela dentro do runspace de leitura e todo arquivo caiu
+         em "Nao Foi Possivel Ler". A armadilha agora tem cerca.  #>
+
+Checar "Motor: existe Get-CensoCompletoDV (o censo do filme inteiro)" `
+    ([bool]($mot -match 'function Get-CensoCompletoDV'))
+Checar "Motor: o censo le o RPU por PIPE (sem gravar 60-80 GB de .hevc)" `
+    ([bool]($mot -match 'extract-rpu'))
+Checar "Motor: e o pipe e montado pelo cmd (o PS 5.1 estraga pipe binario)" `
+    ([bool]($mot -match '(?s)function Invoke-PipeExtractRpu.{0,3000}cmd\.exe /c'))
+<#  14.52: a linha do pipe e GRAVADA num .cmd e o cmd recebe so o caminho
+    dele. Passar a linha como argumento deixava o PowerShell 5.1 reescrever
+    as aspas, e o Bloodsport - que mora em pasta com espaco - falhava com
+    erro do proprio cmd. #>
+Checar "Motor: o pipe vai por ARQUIVO .cmd, nunca como argumento" `
+    ([bool]($mot -match 'pipe_rpu\.cmd'))
+Checar "Motor: o .cmd e gravado em ANSI (UTF-8 quebraria caminho com acento)" `
+    ([bool]($mot -match '(?s)function Invoke-PipeExtractRpu.{0,3000}\[System\.Text\.Encoding\]::Default'))
+Checar "Motor: e o % e escapado (senao nome com % apaga meio caminho)" `
+    ([bool]($mot -match '(?s)function Invoke-PipeExtractRpu.{0,3000}Replace\("%", "%%"\)'))
+Checar "Motor: o censo NAO monta mais a linha do pipe a mao" `
+    (-not ($mot -match '(?s)function Get-CensoCompletoDV.{0,9000}cmd\.exe /c \$linha'))
+Checar "Motor: o censo conta CENAS distintas, como a amostra conta" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,9000}min_pq, max_pq, avg_pq -Unique'))
+Checar "Motor: reaproveita a regua ja lida (nao le o master duas vezes)" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,3000}MasterMaxConhecido'))
+Checar "Motor: a pasta temporaria do censo e apagada mesmo se der erro" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,12000}finally.{0,600}Remove-Item'))
+Checar "Motor: o censo NAO escreve na pasta do filme do usuario" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,6000}GetTempPath'))
+Checar "Motor: o censo devolve QUANTO custou (senao nao da para comparar)" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,3000}SegundosRpu') -and
+     [bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,3000}SegundosCenso'))
+
+Checar "Janela: o botao do censo existe no XAML" `
+    ([bool]($jan -match 'x:Name="btnCenso"'))
+Checar "Janela: e ele NASCE desligado" `
+    ([bool]($jan -match 'x:Name="btnCenso"[^>]{0,200}IsEnabled="False"'))
+Checar "Janela: existe Test-PodeCenso (quem pode pedir o censo)" `
+    ([bool]($jan -match 'function Test-PodeCenso'))
+Checar "Janela: Test-PodeCenso pergunta a Get-NomeCorEL (uma regra, um lugar)" `
+    ([bool]($jan -match '(?s)function Test-PodeCenso.{0,1200}Get-NomeCorEL'))
+Checar "Janela: e exige vermelho, ou seja, Complex FEL" `
+    ([bool]($jan -match '(?s)function Test-PodeCenso.{0,1200}-eq "vermelho"'))
+Checar "Janela: MEL nao pode pedir censo (so FEL/MISTO passam)" `
+    ([bool]($jan -match '(?s)function Test-PodeCenso.{0,900}ELtipo\)" -ne "FEL".{0,120}-ne "MISTO".{0,120}return \$false'))
+Checar "Janela: o botao segue a linha selecionada (Update-Diagnostico decide)" `
+    ([bool]($jan -match '(?s)function Update-Diagnostico.{0,4000}btnCenso\.IsEnabled = \(\(Test-PodeCenso'))
+Checar "Janela: sem linha selecionada o botao apaga" `
+    ([bool]($jan -match '(?s)function Update-Diagnostico.{0,1200}btnCenso\.IsEnabled = \$false'))
+Checar "Janela: nao conta o mesmo filme duas vezes (CensoFeito apaga o botao)" `
+    ([bool]($jan -match '(?s)function Update-Diagnostico.{0,4000}CensoFeito'))
+Checar "Janela: o clique chama Start-Censo" `
+    ([bool]($jan -match '(?s)btnCenso\.add_Click.{0,300}Start-Censo'))
+Checar "Janela: o censo roda em RUNSPACE proprio (nao congela a tela)" `
+    ([bool]($jan -match '(?s)function Start-Censo.{0,3000}runspacefactory'))
+Checar "Janela: e o runspace recebe o caminho do motor para abrir pela AST" `
+    ([bool]($jan -match '(?s)function Start-Censo.{0,3000}SetVariable\("CaminhoMotor"'))
+Checar "Janela: Stop-Censo devolve o runspace (senao vaza a cada clique)" `
+    ([bool]($jan -match '(?s)function Stop-Censo.{0,1200}Dispose'))
+
+<#  A ARMADILHA DA 17.06, COM CERCA.
+    O bloco do runspace do censo e extraido inteiro e reprovado se citar
+    qualquer funcao que so existe na janela. La dentro quem fala e Avisar. #>
+$blocoCenso = ""
+$mC = [regex]::Match($jan, '(?s)\$script:TrabalhoCenso = \{.*?\n\}\r?\n')
+if ($mC.Success) { $blocoCenso = $mC.Value }
+Checar "Janela: o bloco do runspace do censo foi localizado" ($blocoCenso -ne "")
+if ($blocoCenso -ne "") {
+    Checar "Janela: o runspace do censo NAO chama funcao da janela (defeito da 17.06)" `
+        (-not ($blocoCenso -match 'Escrever-Log'))
+    Checar "Janela: quem fala de dentro do runspace do censo e a Avisar" `
+        ([bool]($blocoCenso -match 'Avisar '))
+    Checar "Janela: e ele avisa o custo medido, nao so o veredicto" `
+        ([bool]($blocoCenso -match 'SegundosRpu') -and [bool]($blocoCenso -match 'SegundosCenso'))
+}
+Checar "Janela: o resultado do censo tem tratamento na fila de mensagens" `
+    ([bool]($jan -match '"censo_fim"'))
+<#  3.18 - O TESTE QUE FALTAVA, E POR QUE ELE FALTAVA.
+
+    A 17.08 passou nos 27 testes desta secao e o botao nao fazia NADA. O
+    motivo: eu escrevi $v.Path e o objeto do video tem $v.Caminho. Todos os
+    testes olhavam o DESENHO (roda em runspace, so em Complex FEL, nao chama
+    funcao da janela) e nenhum olhava os NOMES DOS CAMPOS - e nome de campo
+    errado, em PowerShell, e sempre mudo: vira string vazia e segue.
+
+    Este teste extrai os campos que a LEITURA de fato cria no objeto do
+    video e reprova se Start-Censo pedir um que nao existe. Mesma ideia da
+    secao 13: nao confere o que eu quis dizer, confere o que esta escrito. #>
+$camposDoVideo = @()
+$mObj = [regex]::Match($jan, '(?s)\$d = @\{ Nome = \$a\.BaseName.*?\r?\n\s*\}')
+Checar "Janela: o objeto do video (o que a leitura cria) foi localizado" ($mObj.Success)
+if ($mObj.Success) {
+    $camposDoVideo = @([regex]::Matches($mObj.Value, '([A-Za-z_][A-Za-z0-9_]*)\s*=') |
+                       ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    Checar ("Janela: {0} campos lidos do objeto do video" -f $camposDoVideo.Count) ($camposDoVideo.Count -ge 20)
+
+    $mSC = [regex]::Match($jan, '(?s)function Start-Censo \{.*?\n\}')
+    Checar "Janela: o corpo do Start-Censo foi localizado" ($mSC.Success)
+    if ($mSC.Success) {
+        $pedidos = @([regex]::Matches($mSC.Value, '\$v\.([A-Za-z_][A-Za-z0-9_]*)') |
+                     ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+        $inexistentes = @($pedidos | Where-Object { $camposDoVideo -notcontains $_ })
+        Checar "Janela: o censo le SO campos que o objeto do video tem (o bug da 17.08)" `
+            ($inexistentes.Count -eq 0) ("nao existem no objeto: " + ($inexistentes -join ", "))
+        Checar "Janela: e o caminho do arquivo vem de Caminho, nao de Path" `
+            ([bool]($mSC.Value -match '\$v\.Caminho') -and (-not ($mSC.Value -match '\$v\.Path')))
+    }
+}
+
+Checar "Idioma: o rotulo do botao do censo tem traducao" `
+    ($(  $arqIC = Join-Path $Fonte "IDIOMA_EN.txt"
+         if (Test-Path -LiteralPath $arqIC) {
+             $tIC = Get-Content -Raw -LiteralPath $arqIC
+             ($tIC -match "Censo Completo\tFull Census") -and ($tIC -match "Contando\.\.\.\tCounting")
+         } else { $false }  ))
+
+
+Titulo "36. A REGUA PODE ESTAR TORTA, E O LOG PASSA A DIZER ISSO (14.50 - itens C e D)"
+<#  A segunda metade da critica do dovi_convert: o pico do mastering display
+    e metadado DECLARADO, e release erra. O programa nao pode provar que
+    errou - mas quando a MAIORIA das cenas passa da regua, ele para de
+    fingir que ela e confiavel.
+
+    E a suspeita vai para o LOG, nunca para a linha do diagnostico: a linha
+    diz o que foi detectado e o que sera feito (regra da 16.79). #>
+
+Checar "Motor: a medida carrega ReguaSuspeita" `
+    ([bool]($mot -match 'ReguaSuspeita\s*=\s*\$false'))
+Checar "Motor: e o motivo junto (numero sem frase nao explica nada)" `
+    ([bool]($mot -match 'ReguaSuspeitaMotivo'))
+Checar "Motor: a suspeita exige MAIORIA das cenas acima da regua" `
+    ([bool]($mot -match 'PctAcimaDoMaster -ge 50\.0'))
+Checar "Motor: e um piso de cenas (com 5 cenas, 60% sao 3 cenas)" `
+    ([bool]($mot -match 'CenasNoCenso -ge 20'))
+Checar "Motor: a frase diz SUSPEITA, nunca 'regua errada'" `
+    (([bool]($mot -match 'suspeita de pico declarado abaixo do real')) -and
+     (-not ($mot -match 'a regua esta errada')))
+Checar "Motor: sem regua declarada nao ha suspeita (nao inventa acusacao)" `
+    ([bool]($mot -match '\$res\.MasterMax -gt 0 -and \[int\]\$res\.CenasNoCenso -gt 0'))
+Checar "Janela: a regua suspeita vai para o LOG" `
+    ([bool]($jan -match 'REGUA SUSPEITA'))
+Checar "Janela: e NAO entra na linha do diagnostico (regra da 16.79)" `
+    (-not ($jan -match 'DiagDVrot\s*=\s*[^\r\n]*REGUA SUSPEITA'))
+Checar "Janela: a suspeita chega na linha do video (sobrevive a redesenho)" `
+    ([bool]($jan -match 'ELreguaSuspeita'))
+
+Checar "Motor: o log e copiado para o lado do arquivo convertido (item C)" `
+    ([bool]($mot -match '\.LaFirma\.log\.txt'))
+Checar "Motor: a copia so sai para quem converteu de verdade" `
+    ([bool]($mot -match '(?s)LaFirma\.log\.txt|Status -eq "OK"') -and
+     [bool]($mot -match '(?s)\$resultados \| Where-Object \{ \$_\.Status -eq "OK" -or \$_\.Status -eq "OK_PARCIAL" \}'))
+Checar "Motor: a copia vem DEPOIS da limpeza de ANSI (senao sai suja)" `
+    ([bool]($mot -match '(?s)PadraoAnsi.{0,2500}LaFirma\.log\.txt'))
+Checar "Motor: falhar ao copiar o log NAO derruba nada (a conversao acabou)" `
+    ([bool]($mot -match '(?s)LaFirma\.log\.txt.{0,1200}catch'))
+Checar "Motor: a copia NAO substitui o relatorio final" `
+    ([bool]($mot -match 'Log Completo Salvo em'))
+
+
+
+Titulo "37. O QUE A 1.8.2 ENTREGOU E NAO FUNCIONOU (17.09 / 14.51)"
+<#  Tres coisas passaram na bateria de 17.08 e falharam na mao do Diego.
+    Nenhuma delas era logica errada - eram testes olhando para o lado errado:
+
+      1. o botao do censo: campo com nome errado (secao 35, ja coberto);
+      2. a copia do log: escrita num lugar que a JANELA nunca executa;
+      3. o cartao final: o Ryan saiu todo verde depois de o proprio programa
+         ter escrito [CONVERSAO NAO RECOMENDADA] no log.  #>
+
+Checar "Janela: quem copia o log para a pasta de saida e a JANELA" `
+    ([bool]($jan -match 'LaFirma\.log\.txt'))
+Checar "Janela: e a copia sai no FIM DA FILA (Show-Resumo), nao no motor" `
+    ([bool]($jan -match '(?s)function Show-Resumo.{0,12000}LaFirma\.log\.txt'))
+Checar "Janela: a copia sai do log DA SESSAO (o que o botao Log mostra)" `
+    ([bool]($jan -match '(?s)\$script:LogArquivo.{0,3000}LaFirma\.log\.txt'))
+Checar "Janela: le o log com FileShare (ele esta aberto para escrita agora)" `
+    ([bool]($jan -match 'FileShare\]::ReadWrite'))
+Checar "Janela: so copia para quem converteu de verdade" `
+    ([bool]($jan -match '(?s)Status\)" -eq "OK" -or "\$\(\$_\.Status\)" -eq "OK_PARCIAL".{0,3000}LaFirma\.log\.txt'))
+Checar "Janela: falhar a copia NAO derruba o fim da fila" `
+    ([bool]($jan -match '(?s)LaFirma\.log\.txt.{0,1500}catch.{0,400}COPIA DO LOG'))
+
+Checar "Motor: o veredicto da camada entra no OBJETO de resultado" `
+    ([bool]($mot -match 'SeloEL\s*=')) 
+Checar "Motor: com o motivo junto (selo sem frase nao explica nada)" `
+    ([bool]($mot -match 'MotivoEL\s*='))
+Checar "Motor: o selo da camada e zerado por ARQUIVO (nao herda do anterior)" `
+    ([bool]($mot -match '\$script:SeloELdoArquivo\s*=\s*""'))
+Checar "Motor: e ele e preenchido de onde o veredicto ja sai (Get-TipoCamadaDV)" `
+    ([bool]($mot -match '\$script:SeloELdoArquivo\s*=\s*"\$\(\$diagEL\.Selo\)"')) 
+Checar "Janela: o cartao final tem ramo para o Complex FEL" `
+    ([bool]($jan -match '(?s)function Get-SelosResultado.{0,4000}"EXPANDE"')) 
+Checar "Janela: e para o Simple FEL" `
+    ([bool]($jan -match '(?s)function Get-SelosResultado.{0,4000}"RESSALVA"'))
+Checar "Janela: o selo da ressalva NAO e verde (era o defeito do Ryan)" `
+    (-not ($jan -match 'CONVERSAO NAO RECOMENDADA", "ok"')) 
+Checar "Janela: e o Profile 8.1 convertido continua verde ao lado dele" `
+    ([bool]($jan -match 'Dolby Vision . Profile 8\.1 - CONVERTIDO", "ok"'))
+
+<#  A bancada: nao pode voltar a perguntar antes de rodar, nem a fechar
+    depois de um arquivo so. #>
+$pBan = Join-Path $Fonte "Bancada_CensoCompleto.ps1"
+$pBanBat = Join-Path $Fonte "Bancada_CensoCompleto.bat"
+if ((Test-Path -LiteralPath $pBan) -and (Test-Path -LiteralPath $pBanBat)) {
+    $tBan = Get-Content -Raw -LiteralPath $pBan
+    $tBat = Get-Content -Raw -LiteralPath $pBanBat
+    Checar "Bancada: arrastar o arquivo NAO faz pergunta nenhuma antes de medir" `
+        ([bool]($tBat -match '(?m)^if not "%~1"=="" \(')) 
+    Checar "Bancada: e o .bat volta ao menu em vez de fechar" `
+        ([bool]($tBat -match '(?m)^:MENU')) 
+    Checar "Bancada: a falha do RPU escreve o motivo no log (nao so na tela)" `
+        ([bool]($tBan -match '\$script:Erro = "o dovi_tool nao produziu RPU'))
+    <#  exit dentro do try pularia a planilha. A falha da MEDICAO tem que
+        sair por return, para o finally somar a linha com ok=nao. Os dois
+        exit que sobraram sao de ANTES do try (arquivo ou ferramenta que nem
+        existe) - ali nao ha medida nenhuma a registrar. #>
+    Checar "Bancada: a falha do RPU sai por RETURN, nao por exit (senao perde a linha)" `
+        ([bool]($tBan -match '(?s)FALHOU: o dovi_tool nao produziu RPU.{0,900}return'))
+    Checar "Bancada: a planilha tenta de novo quando o Excel esta com ela aberta" `
+        ([bool]($tBan -match 'for \(\$t = 1; \$t -le 3'))
+    Checar "Bancada: e se nao der, grava numa planilha alternativa (nao perde a medida)" `
+        ([bool]($tBan -match 'bancada_censo_medidas_'))
+    Checar "Bancada: a coluna ok diz o MOTIVO quando falha" `
+        ([bool]($tBan -match '"nao - " \+ \(\$script:Erro'))
+    Checar "Bancada: recusa o que nem e video ANTES de medir (o .xlsx arrastado)" `
+        ([bool]($tBan -match '\$extsVideo -notcontains'))
+    Checar "Bancada: o cabecalho na tela diz a versao de verdade" `
+        ([bool]($tBan -match 'BANCADA 2\.3 - CENSO COMPLETO'))
+    <#  3.19 - O DEFEITO "ABRE E FECHA", COM CERCA.
+
+        A guarda de extensao da 2.1 derrubou o gesto mais natural que existe
+        aqui: arrastar a PASTA do filme. "Bloodsport...HDR10P.H- CONVERTIDO"
+        tem Extension ".H- CONVERTIDO" - fora da lista de video - e o script
+        saia com exit 1 antes da primeira linha. Log de ZERO byte, janela
+        fechando na cara.
+
+        Dois testes, porque foram dois erros: aceitar pasta (o que faltava
+        fazer) e nunca sair calado (o que fez o defeito chegar sem
+        explicacao). #>
+    Checar "Bancada: PASTA e um pedido valido, nao motivo de recusa" `
+        ([bool]($tBan -match '\$entrada\.PSIsContainer'))
+    Checar "Bancada: e ela procura os videos dentro, por extensao" `
+        ([bool]($tBan -match '(?s)PSIsContainer.{0,1200}\$extsVideo -contains'))
+    Checar "Bancada: NENHUMA recusa sai calada - todas escrevem no log" `
+        ($(  $mEnt = [regex]::Match($tBan, '(?s)# -+ entrada.*?\$gb  = \[math\]')
+             if ($mEnt.Success) { -not ($mEnt.Value -match 'Write-Host') } else { $false }  )) `
+        "ha Write-Host no bloco de entrada - ele nao vai para o log"
+    Checar "Bancada: o caminho recebido vai para o log ANTES de ser julgado" `
+        ([bool]($tBan -match 'Dizer \(" Recebido: \{0\}"'))
+    Checar "Bancada: dois logs no mesmo segundo nao se comem (milissegundos)" `
+        ([bool]($tBan -match 'HHmmss_fff'))
+    <#  3.19 - O PIPE NAO VIAJA MAIS COMO ARGUMENTO.
+        O PowerShell 5.1 reescreve as aspas ao passar argumento para programa
+        nativo; com espaco no caminho, o que chega ao cmd nao e a linha que
+        foi escrita. Foi assim que o Bloodsport falhou dizendo "A sintaxe do
+        nome do arquivo... esta incorreta" - erro do cmd, nao do ffmpeg. #>
+    Checar "Bancada: o pipe do RPU e gravado num .cmd, nao passado em string" `
+        ([bool]($tBan -match 'pipe_rpu\.cmd'))
+    Checar "Bancada: e nenhum cmd.exe /c recebe a linha montada a mao" `
+        (-not ($tBan -match 'cmd\.exe /c \$linha'))
+}
+
+
+Titulo "38. A MEDICAO MEL x FEL VIROU CHAVE, E O CUSTO E MEDIDO NOS DOIS ESTADOS (17.10)"
+<#  A queixa de 10/09: "esse lance do FEL x MEL esta gerando um custo de
+    tempo para apenas comecar a conversao, q antes era so abrir o programa,
+    apontar a pasta e dar F1".
+
+    O que estes testes guardam NAO e a chave - e a HONESTIDADE dela. Uma
+    chave que desliga um trabalho e esconde o custo nao responde pergunta
+    nenhuma; o que responde e a linha que sai NOS DOIS ESTADOS, com os
+    mesmos campos, para poder ser comparada lado a lado. #>
+
+Checar "Janela: existe a chave da medicao, com padrao LIGADO" `
+    ([bool]($jan -match '\$script:MedirELLigado\s*=\s*\$true'))
+Checar "Janela: a preferencia e GUARDADA entre sessoes" `
+    ([bool]($jan -match 'function Salvar-MedirEL') -and [bool]($jan -match 'function Carregar-MedirEL'))
+Checar "Janela: e guardada na pasta de dados (nao na do script - licao da 17.02)" `
+    ([bool]($jan -match '(?s)function Get-CaminhoMedirEL.{0,400}Get-PastaDados'))
+Checar "Janela: preferencia ilegivel volta ao padrao LIGADO (duvida nao vira veredicto faltando)" `
+    ([bool]($jan -match '(?s)function Carregar-MedirEL.{0,900}-ne "0" -and'))
+Checar "Janela: a chave e lida ANTES da primeira leitura" `
+    ([bool]($jan -match '(?s)Carregar-MedirEL.{0,600}Start-Leitura'))
+Checar "Janela: o botao da chave existe no XAML" `
+    ([bool]($jan -match 'x:Name="btnMedirEL"'))
+<#  3.25: na 17.15 o corpo do clique saiu de dentro do handler e virou
+    Invoke-TrocarMedirEL, porque agora SAO DOIS botoes (o de baixo e o gemeo
+    da barra). Os testes seguem a regra, nao o lugar: uma acao so, chamada
+    pelos dois. #>
+Checar "Janela: o clique alterna, guarda e RELE a pasta" `
+    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,1800}Salvar-MedirEL.{0,900}Start-Leitura'))
+Checar "Janela: a chave NAO pode ser trocada com a fila rodando" `
+    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,600}rodando","pausado"'))
+Checar "Janela: os DOIS botoes chamam a mesma acao (uma regra, um lugar)" `
+    ([bool]($jan -match 'btnMedirEL\.add_MouseLeftButtonUp\(\{ Invoke-TrocarMedirEL \}\)') -and
+     [bool]($jan -match 'btnMedirELTopo\.add_Click\(\{ Invoke-TrocarMedirEL \}\)'))
+<#  3.25: a escala mudou na 17.15 - ambar era a cor da DUVIDA e desligar a
+    medicao nao e duvida, e decisao. Verde ligado / vermelho desligado. #>
+<#  3.26: a 17.16 pos um TERCEIRO estado na frente dos outros dois (medindo,
+    em ciano), entao a janela de busca precisa alcancar depois dele. O que o
+    teste garante continua sendo o mesmo: verde ligada, vermelha desligada. #>
+Checar "Janela: ligada, a chave fica VERDE" `
+    ([bool]($jan -match '(?s)function Update-BotaoMedirEL.{0,2200}Cores\.okdim'))
+Checar "Janela: desligada, a chave fica VERMELHA" `
+    ([bool]($jan -match '(?s)function Update-BotaoMedirEL.{0,2800}Cores\.err'))
+Checar "Janela: medindo, a chave fica CIANO (o terceiro estado)" `
+    ([bool]($jan -match '(?s)function Update-BotaoMedirEL.{0,900}MedindoEL.{0,400}Cores\.emCurso'))
+Checar "Janela: e existe a barrinha da medicao" `
+    ([bool]($jan -match 'function Update-BarraMedirEL') -and [bool]($jan -match 'x:Name="barraMedirEL"'))
+Checar "Janela: e o gemeo da barra le o MESMO estado (nao refaz a regra)" `
+    ([bool]($jan -match '(?s)function Update-BotaoMedirEL.{0,2600}lblMedirELTopo'))
+Checar "Janela: a chave vai ao runspace como DADO (a leitura nao pergunta nada)" `
+    ([bool]($jan -match 'SetVariable\("MedirEL"'))
+Checar "Janela: e a fase B so mede quando ela esta ligada" `
+    ([bool]($jan -match '\$pendentesEL\.Count -gt 0 -and -not \$MedirEL'))
+Checar "Janela: desligada, NAO pula em silencio - diz quantos ficaram sem veredicto" `
+    ([bool]($jan -match 'MEDICAO MEL x FEL DESLIGADA'))
+Checar "Janela: a linha comparavel sai com a chave LIGADA" `
+    ([bool]($jan -match 'MEDICAO MEL x FEL: LIGADA'))
+Checar "Janela: e sai tambem com ela DESLIGADA (senao nao ha A/B)" `
+    ([bool]($jan -match 'MEDICAO MEL x FEL: DESLIGADA'))
+Checar "Janela: as duas linhas trazem segundos por GB (pastas diferentes se comparam)" `
+    ([bool]($jan -match 's/GB'))
+Checar "Janela: o GB de cada pendente viaja junto (sem ele nao ha s/GB)" `
+    ([bool]($jan -match 'Gb = \(\$a\.Length / 1GB\)'))
+Checar "Idioma: os dois estados da chave tem traducao" `
+    ($(  $arqIM = Join-Path $Fonte "IDIOMA_EN.txt"
+         if (Test-Path -LiteralPath $arqIM) {
+             $tIM = Get-Content -Raw -LiteralPath $arqIM
+             ($tIM -match "Medir MEL x FEL: Ligado\t") -and ($tIM -match "Medir MEL x FEL: Desligado\t")
+         } else { $false }  ))
+
+
+Titulo "39. OS DOIS DEFEITOS ACHADOS USANDO A 17.10 (17.11)"
+<#  1. O cartao de PULADO dizia sempre "Ja Existia na Pasta de Saida", e o
+       motor tem TRES caminhos de pular. No print de 10/09 23h56 a mesma
+       caixa dizia "Ja Existia na Pasta de Saida" e, logo abaixo, "espaco
+       insuficiente - faltam ~47,68 GB". Frase que contradiz a linha de
+       baixo e pior do que frase nenhuma.
+
+    2. O Iniciar matava a medicao em curso. Com a chave LIGADA - ou seja,
+       com o usuario tendo pedido o veredicto - o F1 interrompia a fase B,
+       a linha ficava "EL nao medida", e o motor remedia o mesmo arquivo 30s
+       depois. Trabalho duas vezes, veredicto nenhum na tela. #>
+
+Checar "Janela: a frase do PULADO e LIDA do motivo, nao chumbada" `
+    ([bool]($jan -match 'function Get-FrasePulado'))
+Checar "Janela: e o cartao usa essa funcao" `
+    ([bool]($jan -match '"PULADO"\s*\{ Get-FrasePulado \$R \}'))
+Checar "Janela: falta de espaco tem frase propria (nao e 'ja existia')" `
+    ([bool]($jan -match 'Espaço Insuficiente em Disco'))
+Checar "Janela: e ela diz NAO INICIADO (nem chegou a comecar - licao da 14.44)" `
+    ([bool]($jan -match 'Não Iniciado - Espaço Insuficiente'))
+Checar "Janela: o contador do resumo separa os dois motivos" `
+    ([bool]($jan -match 'Não Iniciados \(Sem Espaço\)'))
+Checar "Janela: e 'Ja Existiam' conta so quem de fato ja existia" `
+    ([bool]($jan -match '\$jaExistia = @\(\$pulado \| Where-Object \{ -not \(Test-PuladoPorEspaco'))
+Checar "Motor: os tres caminhos de PULADO continuam gravando o motivo" `
+    ((([regex]::Matches($mot, 'Status = "PULADO"')).Count -ge 3) -and
+     ([bool]($mot -match 'Motivo = \("espaco insuficiente')) -and
+     ([bool]($mot -match 'Motivo = "ja existia na pasta de saida"')))
+
+Checar "Janela: o Iniciar pergunta antes de matar a medicao em curso" `
+    ([bool]($jan -match 'function Test-EsperarMedicao'))
+Checar "Janela: e ele pergunta ANTES de qualquer outra trava" `
+    ([bool]($jan -match '(?s)function Invoke-Iniciar \{.{0,400}Test-EsperarMedicao.{0,200}Test-PodeIniciar'))
+Checar "Janela: a pergunta so aparece se a medicao esta rodando E a chave ligada" `
+    ([bool]($jan -match '(?s)function Test-EsperarMedicao.{0,600}-not \$script:MedindoEL.{0,300}-not \$script:MedirELLigado'))
+Checar "Janela: ESPERAR vem pre-selecionado (e a opcao que nao joga fora trabalho)" `
+    ([bool]($jan -match '(?s)function Test-EsperarMedicao.{0,3000}"YesNo", "Question", "Yes"'))
+Checar "Janela: a pergunta existe nas duas linguas" `
+    ([bool]($jan -match '(?s)function Test-EsperarMedicao.{0,3000}Lang -eq "EN"'))
+Checar "Janela: as duas respostas vao para o log" `
+    ([bool]($jan -match 'INICIAR: esperando a medicao') -and
+     [bool]($jan -match 'INICIAR: usuario preferiu comecar agora'))
+Checar "Janela: quem esperou comeca sozinho quando a medicao termina" `
+    ([bool]($jan -match '(?s)"el_fim".{0,2500}\$script:IniciarAposMedir.{0,700}Invoke-Iniciar'))
+Checar "Janela: e isso acontece DEPOIS do Stop-Motor (dois runspaces nao convivem)" `
+    ([bool]($jan -match '(?s)"el_fim".{0,2000}Stop-Motor.{0,900}IniciarAposMedir'))
+Checar "Janela: enquanto espera, a TELA diz por que o Iniciar esta apagado" `
+    ([bool]($jan -match 'x:Name="lblEsperandoMedida"'))
+Checar "Janela: uma leitura nova cancela a espera (a fila mandada nao existe mais)" `
+    ([bool]($jan -match '(?s)function Start-Leitura.{0,900}IniciarAposMedir'))
+Checar "Idioma: o aviso de espera e a frase do disco tem traducao" `
+    ($(  $arqIW = Join-Path $Fonte "IDIOMA_EN.txt"
+         if (Test-Path -LiteralPath $arqIW) {
+             $tIW = Get-Content -Raw -LiteralPath $arqIW
+             ($tIW -match "Esperando a medi") -and ($tIW -match "Espaço Insuficiente em Disco\t")
+         } else { $false }  ))
+
+
+Titulo "40. O TRAVAMENTO DO MODAL E O INGLES DO CARTAO FINAL (17.12)"
+<#  1. MessageBox do WPF roda um laco de mensagens PROPRIO: o mundo NAO para
+       atras dela. A medicao podia terminar com a caixa aberta, e ao
+       responder "Sim" a janela passava a esperar um aviso que ja tinha
+       passado - Iniciar apagado para sempre. A regra: entre PERGUNTAR e
+       AGIR o estado pode ter mudado, e quem pergunta reconfere ao voltar
+       (mesma armadilha da 16.23, no Cancelar).
+
+    2. O cartao final, a grade, os selos e o rodape de progresso eram
+       montados por CODIGO e nunca passaram pela traducao - a varredura so
+       alcanca o que o XAML declarou. Em ingles a tela ficava meio a meio. #>
+
+Checar "Janela: depois da pergunta, o estado da medicao e RECONFERIDO" `
+    ([bool]($jan -match '(?s)MessageBox\]::Show\(\$msg, \$titulo.{0,2500}\$r -eq "Yes" -and -not \$script:MedindoEL'))
+Checar "Janela: se a medicao ja acabou, comeca agora em vez de esperar para sempre" `
+    ([bool]($jan -match 'a medicao terminou enquanto a pergunta estava aberta'))
+Checar "Janela: e isso vem ANTES de marcar que vai esperar" `
+    ([bool]($jan -match '(?s)-and -not \$script:MedindoEL.{0,400}return \$false.{0,300}\$script:IniciarAposMedir = \$true'))
+
+Checar "Janela: existe Traduzir-LinhaContador (rotulo : valor)" `
+    ([bool]($jan -match 'function Traduzir-LinhaContador'))
+Checar "Janela: ela preserva a largura (as duas colunas alinham os dois-pontos)" `
+    ([bool]($jan -match '(?s)function Traduzir-LinhaContador.{0,1800}PadRight\(\$largura\)'))
+Checar "Janela: as linhas do resumo passam por ela" `
+    ([bool]($jan -match 'txtContadores\.Text = \(\(@\(\$linhas\) \| ForEach-Object \{ Traduzir-LinhaContador'))
+Checar "Janela: o detalhamento tambem" `
+    ([bool]($jan -match 'txtDetalhamento\.Text = \(\(@\(\$det\) \| ForEach-Object \{ Traduzir-LinhaContador'))
+Checar "Janela: os ROTULOS da grade do cartao passam pela traducao" `
+    ([bool]($jan -match '\$r1\.Text = Traduzir-Frase'))
+Checar "Janela: e os VALORES tambem" `
+    ([bool]($jan -match '\$r2\.Text = Traduzir-Frase'))
+Checar "Janela: os selos do cartao passam pela traducao" `
+    ([bool]($jan -match '\$st\.Text = Traduzir-Frase'))
+Checar "Janela: a Situacao e o Motivo do PULADO passam pela traducao" `
+    ([bool]($jan -match 'Traduzir "Situação"')) 
+Checar "Janela: o rodape do resumo (pasta e log) passa pela traducao" `
+    ([bool]($jan -match 'Traduzir "Pasta de Saída:"'))
+Checar "Janela: os rotulos ETAPA/VIDEO/FILA nao tem espaco preso no Text" `
+    ((($jan -match 'Text="ETAPA" Margin=') -and
+      ($jan -match 'Text="VÍDEO" Margin=') -and
+      ($jan -match 'Text="FILA" Margin='))) `
+    "espaco no fim do Text nao casa com a tabela (o Trim do carregador come)"
+
+<#  EXECUTANDO de verdade: carrega a tabela e as tres funcoes do fonte e
+    confere que nenhuma destas frases volta em portugues. Contar entradas na
+    tabela nao prova nada - o que prova e a frase montada saindo traduzida. #>
+$tradOk = $true
+$tradFalha = ""
+try {
+    $astT = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    foreach ($nf in @("Carregar-Idioma","Traduzir","Traduzir-Frase","Traduzir-LinhaContador")) {
+        $fd = @($astT.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq $nf }, $true))
+        if ($fd.Count -eq 0) { throw "nao achei $nf" }
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+    $script:PastaScript = $Fonte
+    Carregar-Idioma | Out-Null
+    $script:Lang = "EN"
+    $casos = @(
+        @{ F = "Total de Vídeos na Fila       : 1"; Modo = "linha" },
+        @{ F = "Não Iniciados (Sem Espaço)    : 1"; Modo = "linha" },
+        @{ F = "Tempo Total                   : 00m 04s"; Modo = "linha" },
+        @{ F = "Dolby Vision Convertido para Profile 8.1  : 0"; Modo = "linha" },
+        @{ F = "Dolby Vision → Profile 8.1 - CONVERTIDO"; Modo = "frase" },
+        @{ F = "Complex FEL - CONVERSÃO NÃO RECOMENDADA"; Modo = "frase" },
+        @{ F = "Container Final"; Modo = "frase" },
+        @{ F = "Tempo de Processamento"; Modo = "frase" },
+        @{ F = "Duração / Taxa de Quadros"; Modo = "frase" },
+        @{ F = "Qualidade da Legenda"; Modo = "frase" },
+        @{ F = "Não Iniciado - Espaço Insuficiente em Disco"; Modo = "frase" },
+        @{ F = "Ignorado - Já Existia na Pasta de Saída"; Modo = "frase" },
+        @{ F = "Cancelado pelo Usuário"; Modo = "frase" },
+        @{ F = "ETAPA"; Modo = "frase" },
+        @{ F = "VÍDEO"; Modo = "frase" },
+        @{ F = "FILA"; Modo = "frase" },
+        @{ F = "Situação"; Modo = "seca" },
+        @{ F = "Motivo"; Modo = "seca" },
+        @{ F = "Pasta de Saída:"; Modo = "seca" }
+    )
+    foreach ($c in $casos) {
+        $saida = switch ($c.Modo) {
+            "linha" { Traduzir-LinhaContador $c.F }
+            "frase" { Traduzir-Frase $c.F }
+            default { Traduzir $c.F }
+        }
+        if ($saida -eq $c.F) { $tradOk = $false; $tradFalha = $c.F; break }
+    }
+} catch { $tradOk = $false; $tradFalha = $_.Exception.Message }
+Checar "EXECUTANDO EN: nenhuma frase do cartao/rodape volta em portugues" $tradOk `
+    ("ficou em portugues: " + $tradFalha)
+
+
+<#  3.25 - EXECUTANDO as frases novas da 17.15. Duas delas ja tinham sido
+    quebradas por ORDEM DE REGRA (a generica comendo a especifica) - "medindo"
+    na 17.14 e " a Pedido" agora. Conferir que a entrada existe na tabela nao
+    pega esse defeito: so a frase montada, passando pelas regras na ordem
+    real, pega. Por isso estes casos sao executados, e nao lidos. #>
+$novasOk = $true
+$novasFalha = ""
+try {
+    $script:Lang = "EN"
+    $casosNovos = @(
+        # Rodape: cada linha e colagem de rotulo + valor.
+        @{ F = "Começou: 01h20   Decorrido: 02m 41s"; Proibido = @("Começou","Decorrido") },
+        @{ F = "Começou: 01h20   Decorrido: 02m 41s   Vídeo 1 de 3"; Proibido = @("Vídeo","de 3") },
+        @{ F = "Começou: 01h20   Decorrido: 02m 41s   Deve Terminar por Volta das 11h48   ·   Tempo Restante: 1h 13min"
+           ; Proibido = @("Deve Terminar","Tempo Restante","Começou","Decorrido") },
+        @{ F = "Começou: 01h20   Decorrido: 02m 41s   Terminando Agora"; Proibido = @("Terminando Agora") },
+        @{ F = "Começou: 01h20   Decorrido: 02m 41s   ❙❙ PAUSADO POR VOCÊ há 00m 30s"; Proibido = @("PAUSADO POR VOCÊ") },
+        # O nome da etapa chega AQUI ja traduzido na origem (ver Update-Rodape):
+        # o que este caso prova e que a moldura "A Seguir: [n/N] ..." traduz.
+        @{ F = ("A Seguir: [3/4] " + (Traduzir "Conversão de Legenda PGS para .SRT")); Proibido = @("A Seguir") },
+        @{ F = "Conversão de Legenda PGS para .SRT"; Proibido = @("Conversão de Legenda"); Seca = $true },
+        @{ F = "A Seguir: Resumo da Conversão"; Proibido = @("A Seguir","Resumo da Conversão") },
+        @{ F = "A Seguir: Limpeza dos Temporários"; Proibido = @("Limpeza dos Temporários") },
+        @{ F = "A Seguir: Conferência do Arquivo Final e Limpeza"; Proibido = @("Conferência") },
+        @{ F = "Livre Agora 207,57 GB"; Proibido = @("Livre Agora") },
+        # Cartao final
+        @{ F = "Começou às 01h20 - Terminou às 01h25 - Tempo Total 05m 12s"
+           ; Proibido = @("Começou às","Terminou às","Tempo Total") },
+        @{ F = "Começou às 01h20 - Interrompida às 01h25 - Tempo Total 05m 12s"
+           ; Proibido = @("Interrompida às") },
+        # Diagnostico com ESCOLHA MANUAL (nenhuma tinha traducao ate a 17.15)
+        @{ F = "→ [ESCOLHA MANUAL] TrueHD Mantido a Pedido - Conversão Desligada"
+           ; Proibido = @("Mantido a Pedido","Conversão Desligada") },
+        @{ F = "→ [ESCOLHA MANUAL] PGS → .SRT a Pedido"; Proibido = @("a Pedido") },
+        @{ F = "→ [ESCOLHA MANUAL] PGS → .SRT a Pedido - a Legenda Anterior Foi Descartada"
+           ; Proibido = @("a Pedido","Legenda Anterior") },
+        @{ F = "→ [ESCOLHA MANUAL] Sem Legenda PT-BR no Arquivo Final"; Proibido = @("Sem Legenda PT-BR no Arquivo") },
+        @{ F = "→ [ESCOLHA MANUAL] Todas as Faixas de Áudio Excluídas por Você"; Proibido = @("Excluídas por Você") },
+        @{ F = "→ [ESCOLHA MANUAL] DTS-HD Excluído a Pedido"; Proibido = @("Excluído a Pedido") },
+        # Coluna SITUACAO e a linha da PGS redundante
+        @{ F = "Fora da Fila - Não Será Convertido"; Proibido = @("Fora da Fila","Não Será Convertido") },
+        @{ F = "Já Existe .SRT - OCR Não Necessário"; Proibido = @("Já Existe","Não Necessário") },
+        # Painel de ferramentas (rotulo + papel + a frase da ausencia)
+        @{ F = "Conversão de Perfil Dolby Vision 7 → 8.1 (dovi_tool)"; Proibido = @("Conversão de Perfil"); Seca = $true },
+        @{ F = "obrigatória"; Proibido = @("obrigatória"); Seca = $true },
+        @{ F = "opcional"; Proibido = @("opcional"); Seca = $true },
+        @{ F = "- NÃO ENCONTRADA, A CONVERSÃO NÃO RODA"; Proibido = @("NÃO ENCONTRADA"); Seca = $true },
+        @{ F = "Pasta de Saída é a Mesma da Origem - o Arquivo Convertido Sobrescreveria o Original"
+           ; Proibido = @("Pasta de Saída é a Mesma"); Seca = $true },
+        # A frase do MEL x FEL, que a regra da palavra solta ja comeu uma vez
+        @{ F = "→ [SERÁ CONVERTIDO] Profile 8.1 — medindo a camada de melhoria (MEL x FEL)…"
+           ; Proibido = @("medindo","camada de melhoria") }
+    )
+    foreach ($c in $casosNovos) {
+        $saida = if ($c.Seca) { Traduzir $c.F } else { Traduzir-Frase $c.F }
+        foreach ($proibido in $c.Proibido) {
+            if ($saida -like ("*" + $proibido + "*")) {
+                $novasOk = $false
+                $novasFalha = "'" + $c.F + "' -> '" + $saida + "' (sobrou: " + $proibido + ")"
+                break
+            }
+        }
+        if (-not $novasOk) { break }
+    }
+} catch { $novasOk = $false; $novasFalha = $_.Exception.Message }
+Checar "EXECUTANDO EN: o rodape, o cartao e a ESCOLHA MANUAL saem inteiros em ingles" $novasOk $novasFalha
+
+
+<#  3.25 - A REGRA VIRA TESTE: TEXTO DE TELA COM ACENTO NAO PODE SER ESCRITO
+    CRU.
+
+    Esta rodada teve QUATRO defeitos da mesma familia (rodape, cartao final,
+    ESCOLHA MANUAL, painel de ferramentas) e todos apareceram do mesmo jeito:
+    alguem escreveu `$UI.algumaCoisa.Text = "frase em portugues"` e a
+    varredura de traducao nao alcanca isso - ela so pega rotulo declarado no
+    XAML.
+
+    Achar um de cada vez, por foto do Diego, nao termina nunca. Entao o teste
+    para de olhar frases especificas e passa a olhar a REGRA: toda escrita
+    direta em .Text com acento portugues tem que passar por Traduzir ou
+    Traduzir-Frase. A unica excecao e o nome do proprio idioma no botao, que
+    por definicao nao se traduz.
+
+    Se este teste reprovar, nao ha frase "nova demais" para consertar: ou
+    passa pela traducao, ou entra nesta lista com um motivo escrito. #>
+$cruas = @()
+$excecoes = @('$UI.lblIdioma.Text')
+foreach ($linha in ($jan -split "`r?`n")) {
+    if ($linha -notmatch '\.Text\s*=') { continue }
+    if ($linha -match 'Traduzir') { continue }
+    if ($linha -notmatch '[ÁÂÃÀÉÊÍÓÔÕÚÇáâãàéêíóôõúç]') { continue }
+    $ehExcecao = $false
+    foreach ($ex in $excecoes) { if ($linha -like ("*" + $ex + "*")) { $ehExcecao = $true } }
+    if ($ehExcecao) { continue }
+    $cruas += $linha.Trim()
+}
+Checar "Janela: a varredura de idioma tambem troca as DICAS (ToolTip)" `
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,4000}\$d = \$o\.ToolTip.{0,200}\$o\.ToolTip = \$Mapa\[\$d\]'))
+Checar "Janela: nenhum texto de tela com acento e escrito sem passar pela traducao" `
+    ($cruas.Count -eq 0) `
+    ($(if ($cruas.Count -eq 0) { "" } else { "cruas: " + (($cruas | Select-Object -First 3) -join " | ") }))
+
+<#  E o alinhamento: as duas colunas do resumo tem os dois-pontos na mesma
+    coluna. Um rotulo em ingles mais curto nao pode puxar o ':' para tras. #>
+$alinhaOk = $true
+try {
+    $duas = @("Total de Vídeos na Fila       : 1", "Convertidos com Sucesso       : 0")
+    $pos = @($duas | ForEach-Object { (Traduzir-LinhaContador $_).LastIndexOf(":") })
+    $alinhaOk = ($pos[0] -eq $pos[1])
+} catch { $alinhaOk = $false }
+Checar "EXECUTANDO EN: os dois-pontos continuam alinhados depois de traduzir" $alinhaOk
+
+<#  3.23: na 17.12 isto era uma linha solta no caminho do clique. Nao
+    segurava - Fill-Faixas reescrevia por cima. Agora quem garante e o dono
+    unico da dica, e e ele que o teste tem que olhar. #>
+Checar "Janela: o nome do arquivo sai da frente do aviso de espera" `
+    ([bool]($jan -match '(?s)function Update-AvisoEspera.{0,900}lblAbaDica\.Text = ""'))
+Checar "Janela: e volta quando a espera acaba" `
+    ([bool]($jan -match '(?s)function Restaurar-AbaDica.{0,400}DicaAntesDaEspera'))
+
+Checar "Janela: o motivo do PULADO e REDIGIDO pela tela, nao copiado do motor" `
+    ([bool]($jan -match 'function Get-MotivoPulado'))
+Checar "Janela: e ele nunca sai com a primeira letra minuscula" `
+    ([bool]($jan -match '(?s)function Get-MotivoPulado.{0,2500}Substring\(0,1\)\.ToUpper\(\)'))
+Checar "Motor: continua ASCII puro (e por isso a tela redige, nao copia)" `
+    ((@([regex]::Matches($mot, '[^\x00-\x7F]')).Count) -eq 0)
+
+
+Titulo "41. O AVISO DE ESPERA, O ROTULO DO CENSO E O CANCELAR NA TELA (17.13)"
+<#  Quatro achados do Diego usando a 17.12:
+
+    1. Esconder o nome do arquivo UMA VEZ nao segurou: quatro pontos
+       diferentes escrevem a dica da aba, e trocar o Modo chama Fill-Faixas,
+       que reescreve. O nome voltava e nunca mais saia.
+    2. O aviso de espera competia de igual para igual com um nome de release
+       de 70 caracteres - mesmo tamanho, mesmo peso.
+    3. "Contando..." nao dizia o que contava e podia ficar preso no botao.
+    4. Depois do Cancelar, o rodape passava ate 21s dizendo "Extraindo Video
+       Puro" - o tempo de a etapa em curso terminar. A demora e legitima; a
+       frase e que estava mentindo. #>
+
+Checar "Janela: existe UM lugar que escreve a dica da aba (Set-AbaDica)" `
+    ([bool]($jan -match 'function Set-AbaDica'))
+Checar "Janela: e NINGUEM escreve lblAbaDica.Text por fora dele" `
+    ($(  $fora = @([regex]::Matches($jan, '\$UI\.lblAbaDica\.Text\s*=')) 
+         # Set-AbaDica, Restaurar-AbaDica e Update-AvisoEspera sao os donos.
+         $fora.Count -le 4  )) `
+    "ha escrita direta em lblAbaDica fora do dono"
+Checar "Janela: Set-AbaDica respeita a espera (nao deixa o nome voltar)" `
+    ([bool]($jan -match '(?s)function Set-AbaDica.{0,600}IniciarAposMedir.{0,80}return'))
+Checar "Janela: e guarda o texto pedido para devolver depois" `
+    ([bool]($jan -match '(?s)function Set-AbaDica.{0,400}DicaAntesDaEspera = \$Texto'))
+Checar "Janela: existe UM lugar que liga/desliga o aviso (Update-AvisoEspera)" `
+    ([bool]($jan -match 'function Update-AvisoEspera'))
+Checar "Janela: o aviso e a dica mudam JUNTOS (sao a mesma linha da tela)" `
+    ([bool]($jan -match '(?s)function Update-AvisoEspera.{0,900}lblAbaDica\.Text = ""'))
+Checar "Janela: o aviso ganhou caixa propria com borda ambar" `
+    ([bool]($jan -match 'x:Name="avisoEspera"'))
+Checar "Janela: e esta maior e em negrito (competia com o nome do release)" `
+    ([bool]($jan -match '(?s)x:Name="lblEsperandoMedida" FontSize="13\.5" FontWeight="SemiBold"'))
+
+Checar "Janela: o rotulo do censo diz o que esta contando" `
+    ([bool]($jan -match 'Censo: contando\.\.\.'))
+Checar "Janela: existe Reset-BotaoCenso (o rotulo tinha como ficar preso)" `
+    ([bool]($jan -match 'function Reset-BotaoCenso'))
+Checar "Janela: e Stop-Censo sempre zera o rotulo junto do estado" `
+    ([bool]($jan -match '(?s)function Stop-Censo.{0,900}Reset-BotaoCenso'))
+Checar "Janela: uma leitura nova tambem encerra um censo em curso" `
+    ([bool]($jan -match '(?s)function Start-Leitura.{0,2000}CensoRodando.{0,300}Stop-Censo'))
+Checar "Idioma: o rotulo do censo rodando tem traducao" `
+    ($(  $arqIC2 = Join-Path $Fonte "IDIOMA_EN.txt"
+         if (Test-Path -LiteralPath $arqIC2) {
+             (Get-Content -Raw -LiteralPath $arqIC2) -match "Censo: contando\.\.\.\t"
+         } else { $false }  ))
+
+Checar "Janela: depois do Cancelar o rodape diz que esta cancelando" `
+    ([bool]($jan -match 'Cancelando - esperando a etapa atual terminar'))
+Checar "Janela: e essa decisao mora no PULSO, nao numa linha do clique" `
+    ([bool]($jan -match '(?s)function Update-Progresso.{0,20000}\$script:Controle\.Cancelar -and \$Estado\.Atual -in @\("rodando","pausado"\)'))
+Checar "Janela: o clique do cancelar NAO escreve no rodape (seria apagado no tique)" `
+    (-not ($jan -match '(?s)ACAO: cancelar - flag gravada.{0,600}lblEtapaNome\.Text ='))
+Checar "Janela: a cor do rotulo volta ao normal quando o motor fala de novo" `
+    ((([regex]::Matches($jan, 'lblEtapaNome\.Foreground = Pincel \$Cores\.foco')).Count -ge 3))
+Checar "Idioma: a frase do cancelamento tem traducao" `
+    ($(  $arqIX = Join-Path $Fonte "IDIOMA_EN.txt"
+         if (Test-Path -LiteralPath $arqIX) {
+             (Get-Content -Raw -LiteralPath $arqIX) -match "Cancelando - esperando a etapa atual"
+         } else { $false }  ))
+
+
+$en = Get-Content -Raw (Join-Path $Fonte "IDIOMA_EN.txt")
+Titulo "42. A TELA NAO PODE PROMETER O QUE O MOTOR NAO FAZ (17.14)"
+<#  O achado mais caro desta rodada, e o de sempre: a janela REDIGITA o que o
+    motor decide, e toda redigitacao e uma chance de discordar da fonte.
+
+    Arquivo com legenda pt-BR em TEXTO e legenda pt-BR em PGS: o motor
+    reaproveita a de texto (Caminho 1, "[NAO NECESSARIO]") e NAO roda OCR. A
+    janela punha CONVERTER na PGS assim mesmo - e marcava as duas com o mesmo
+    Papel, o que fazia o rotulo PADRAO ir para quem viesse primeiro no
+    arquivo.
+
+    Os outros dois sao de tela que nao explica: aviso de espera parado por 42
+    segundos (indistinguivel de aviso morto) e o botao de censo cinza sem
+    motivo. #>
+
+Checar "Janela: com .SRT pt-BR presente, a PGS nao e CONVERTER" `
+    ([bool]($jan -match '(?s)\$ptPgs -and \$fid -eq \[int\]\$ptPgs\.id -and \$ptTxt.{0,2000}VerboAuto = "MANTER"'))
+Checar "Janela: e ela diz o motivo no lugar do verbo" `
+    ([bool]($jan -match 'Já Existe \.SRT - OCR Não Necessário'))
+Checar "Janela: e as duas faixas param de disputar o papel leg-ptbr" `
+    ([bool]($jan -match 'Papel = "leg-pgs-extra"'))
+Checar "Idioma: o motivo da PGS redundante tem traducao" `
+    ([bool]($en -match 'Já Existe \.SRT - OCR Não Necessário\t'))
+
+Checar "Janela: o aviso de espera conta os arquivos (Get-TextoEspera)" `
+    ([bool]($jan -match 'function Get-TextoEspera'))
+Checar "Janela: e quem escreve o aviso passa por ela" `
+    ([bool]($jan -match '(?s)function Update-AvisoEspera.{0,600}lblEsperandoMedida\.Text = Get-TextoEspera'))
+Checar "Janela: cada arquivo medido desconta um da espera" `
+    ([bool]($jan -match '(?s)\$script:ELfeitos\+\+.{0,200}Update-AvisoEspera'))
+Checar "Janela: e a leitura zera a conta antes de comecar" `
+    ([bool]($jan -match '(?s)\$script:ELtotal = \[int\]\$m\.MedirEL.{0,120}\$script:ELfeitos = 0'))
+
+Checar "Janela: o botao do censo diz por que esta cinza (Get-MotivoCenso)" `
+    ([bool]($jan -match 'function Get-MotivoCenso'))
+Checar "Janela: a dica e escrita nos dois caminhos do diagnostico" `
+    ($(  @([regex]::Matches($jan, 'Update-DicaCenso')).Count -ge 3  )) `
+    "falta ligar a dica em algum caminho de Update-Diagnostico"
+Checar "Janela: a dica aparece mesmo com o botao desabilitado" `
+    ([bool]($jan -match 'ToolTipService\.ShowOnDisabled="True"'))
+Checar "Janela: o criterio continua num lugar so (a dica pergunta a Test-PodeCenso)" `
+    ([bool]($jan -match '(?s)function Get-MotivoCenso.{0,2500}Test-PodeCenso'))
+
+<#  17.14: as regras de traducao rodam EM ORDEM. A regra da palavra "medindo"
+    sozinha disparava antes da regra da frase inteira e desmanchava a frase
+    antes de ela ser testada - sobrava "measuring a camada de melhoria" na
+    tela em ingles. Especifica em cima da generica. #>
+Checar "Idioma: a frase do MEL x FEL vem ANTES da palavra 'medindo' solta" `
+    ($(  $iFrase = $en.IndexOf("~medindo a camada de melhoria")
+         $iSolta  = $en.IndexOf("~medindo`t")
+         ($iFrase -ge 0 -and $iSolta -ge 0 -and $iFrase -lt $iSolta)  )) `
+    "a regra generica vai comer a especifica"
+
+
+$en = Get-Content -Raw (Join-Path $Fonte "IDIOMA_EN.txt")
+Titulo "43. O DIAGNOSTICO INTEIRO, EM QUALQUER LINGUA E EM QUALQUER ESTADO (17.15)"
+<#  Tres achados da rodada de 01h da 17.14:
+
+    1. O cartao final ficava congelado na lingua em que nasceu. Set-Idioma ja
+       redesenhava fila, diagnostico, disco e faixas - o cartao era o unico
+       painel montado por codigo que ficou de fora, e a tela ficava meio em
+       cada lingua.
+    2. A espera do Iniciar contava arquivo DESMARCADO. Esperar por um video
+       que nao vai converter e esperar a toa.
+    3. Excluir a .SRT antiga e mandar CONVERTER a PGS (trocar de legenda)
+       respondia "Sem Legenda PT-BR no Arquivo Final" - o que foi enviado ao
+       motor estava certo, so o texto mentia. #>
+
+Checar "Janela: existe quem redesenhe o cartao final (Redesenhar-Resumo)" `
+    ([bool]($jan -match 'function Redesenhar-Resumo'))
+Checar "Janela: e Set-Idioma chama esse redesenho" `
+    ([bool]($jan -match '(?s)function Set-Idioma.{0,4000}Redesenhar-Resumo'))
+Checar "Janela: o redesenho NAO regrava o log do resumo" `
+    ([bool]($jan -match '(?s)if \(\$Redesenho\) \{ return \}.{0,1400}Escrever-Log "===== RESUMO DA CONVERSAO ====="'))
+Checar "Janela: e NAO recopia o log para a pasta de saida" `
+    ([bool]($jan -match '(?s)if \(\$Redesenho\) \{ @\(\) \}'))
+Checar "Janela: a hora e o tempo do cartao ficam guardados (nao mentem depois)" `
+    ([bool]($jan -match '\$script:ResumoHora') -and [bool]($jan -match '\$script:ResumoSeg'))
+Checar "Janela: o titulo do cartao passa pela traducao" `
+    ([bool]($jan -match '\$UI\.lblResumoTitulo\.Text = Traduzir "Conversão Concluída"'))
+Checar "Janela: e a linha de tempos tambem" `
+    ([bool]($jan -match '(?s)lblResumoTempos\.Text = Traduzir-Frase'))
+Checar "Idioma: a linha de tempos tem regra de traducao" `
+    ([bool]($en -match 'Começou às \(\.\*\) - Terminou às'))
+
+Checar "Janela: a espera olha so os arquivos MARCADOS (Get-MarcadosMedindo)" `
+    ([bool]($jan -match 'function Get-MarcadosMedindo'))
+Checar "Janela: e ela pergunta pela fila real, nao refaz o criterio" `
+    ([bool]($jan -match '(?s)function Get-MarcadosMedindo.{0,300}Get-Marcados'))
+Checar "Janela: sem marcado medindo, o Iniciar nao espera nada" `
+    ([bool]($jan -match '(?s)function Test-EsperarMedicao.{0,600}Get-MarcadosMedindo\)\.Count -eq 0.{0,300}return \$false'))
+Checar "Janela: e quando o ultimo marcado termina, a conversao comeca na hora" `
+    ([bool]($jan -match '(?s)\$script:IniciarAposMedir -and @\(Get-MarcadosMedindo\)\.Count -eq 0.{0,900}Invoke-Iniciar'))
+
+Checar "Janela: o veredicto da legenda no Manual olha TODAS as candidatas" `
+    ([bool]($jan -match '(?s)function Get-DiagLegendaComEscolha.{0,1800}leg-pgs-extra'))
+Checar "Janela: trocar de legenda nao pode dizer 'Sem Legenda PT-BR'" `
+    ([bool]($jan -match 'a Legenda Anterior Foi Descartada'))
+Checar "Janela: e a frase vermelha so sobra quando nao fica nenhuma" `
+    ([bool]($jan -match '(?s)if \(\$manter\.Count -gt 0\).{0,400}Sem Legenda PT-BR no Arquivo Final'))
+Checar "Idioma: as frases de ESCOLHA MANUAL tem traducao" `
+    ([bool]($en -match 'Sem Legenda PT-BR no Arquivo Final\t') -and [bool]($en -match '~ a Pedido\t'))
+<#  17.15: mesma armadilha de ordem da 17.14, agora com " a Pedido": a regra
+    curta cortaria a frase longa pela metade se viesse antes dela. #>
+Checar "Idioma: a frase longa de 'a Pedido' vem ANTES da curta" `
+    ($(  $iLonga = $en.IndexOf("~ a Pedido - a Legenda Anterior")
+         $iCurta  = $en.IndexOf("~ a Pedido`t")
+         ($iLonga -ge 0 -and $iCurta -ge 0 -and $iLonga -lt $iCurta)  )) `
+    "a regra generica vai comer a especifica"
+
+
+$mot = Get-Content -Raw (Join-Path $Fonte "Converter_AUTO_DIRETO.ps1")
+Titulo "44. A ORDEM MANUAL DE OCR VENCE O REAPROVEITAMENTO (14.53)"
+<#  O defeito mais caro da rodada, e ele saiu no ARQUIVO do usuario, nao na
+    tela: excluir a .SRT antiga e mandar CONVERTER a PGS gerou um MKV final
+    SEM NENHUMA LEGENDA.
+
+    O caminho: o motor testa primeiro se ja existe pt-BR em texto; achou,
+    disse "[NAO NECESSARIO]" e nao rodou OCR. Sem SRT nova, e com a antiga
+    excluida de proposito pelo usuario, o remux descartou tudo.
+
+    A regra, terceira vez neste projeto (16.31, 14.40, 14.53): a ausencia de
+    uma chave nunca e uma ordem - e a PRESENCA dela sempre e. #>
+
+Checar "Motor: existe quem saiba que o OCR foi pedido na mao" `
+    ([bool]($mot -match 'function Test-OcrPedidoNaMao'))
+Checar "Motor: e ela le a chave LegendaPgs, so aceitando id >= 0" `
+    ([bool]($mot -match "(?s)function Test-OcrPedidoNaMao.{0,1800}ContainsKey\('LegendaPgs'\).{0,400}-ge 0"))
+Checar "Motor: a EXECUCAO da legenda so reaproveita a .SRT se ninguem pediu OCR" `
+    ([bool]($mot -match '(?s)if \(Test-OcrPedidoNaMao -MkvPath \$f\.FullName\) \{.{0,400}\} else \{\s*\r?\n\s*\$trackTexto = Get-FaixaLegendaPtBrTexto'))
+Checar "Motor: e o DIAGNOSTICO anuncia a mesma coisa que vai acontecer" `
+    ([bool]($mot -match '(?s)\$diagLegendaTexto = \$null.{0,300}if \(-not \(Test-OcrPedidoNaMao'))
+Checar "Motor: -1 continua sendo a ordem contraria (nao converta nenhuma)" `
+    ([bool]($mot -match "(?s)ContainsKey\('LegendaPgs'\).{0,200}-lt 0.{0,80}return \`$null"))
+<#  O automatico NAO pode ter mudado: sem escolha manual, uma legenda de
+    texto pronta continua ganhando do OCR - e a regra que a 17.14 acabou de
+    acertar do lado da janela. #>
+Checar "Motor: sem escolha manual, o texto pronto continua vencendo o OCR" `
+    ([bool]($mot -match '(?s)function Test-OcrPedidoNaMao.{0,1500}if \(-not \$e\) \{ return \$false \}'))
+
+
+Titulo "45. UMA LEGENDA INGLESA CARIMBADA DE BRASILEIRA (14.54 / 17.16)"
+<#  O defeito desta rodada que saiu no ARQUIVO: no Modo Manual dava para
+    marcar CONVERTER na PGS de INGLES, e o programa convertia. O log escreveu
+    "Legenda PT-BR Encontrada na Faixa 5 'SDH'" e o MKV final saiu com uma
+    legenda em ingles rotulada "Portugues (Brasil) [OCR]", marcada como
+    padrao.
+
+    O OCR daqui e pt-BR de ponta a ponta - dicionario de 1,3M palavras em
+    portugues, Corretor que caca bloco alienigena comparando com portugues,
+    Reocr que refaz fala curta em portugues. Apontado para uma faixa inglesa
+    ele nao converte ingles: carimba ingles de brasileiro.
+
+    DUAS trancas, porque esta estraga arquivo: a janela nao oferece o verbo,
+    e o motor recusa a ordem se ela chegar assim mesmo. #>
+
+Checar "Janela: o dropdown de legenda nao-ptBR nao oferece CONVERTER" `
+    ([bool]($jan -match '(?s)function Get-OpcoesVerbo.{0,2200}-not \(Test-EhLegendaPtBr \$f\).{0,90}"MANTER", "EXCLUIR"'))
+Checar "Janela: e quem GRAVA o verbo confere de novo (desenho nao e regra)" `
+    ([bool]($jan -match '(?s)\$novo -eq "CONVERTER" -and \$f\.Tipo -eq "subtitles" -and -not \(Test-EhLegendaPtBr'))
+Checar "Janela: o criterio de 'e pt-BR' pergunta ao PAPEL, nao refaz regra" `
+    ([bool]($jan -match '(?s)function Test-EhLegendaPtBr\(\$f\).{0,400}leg-ptbr.{0,80}leg-pgs-extra'))
+Checar "Motor: existe o portao de idioma da ordem manual" `
+    ([bool]($mot -match 'function Test-EhLegendaPtBrCandidata'))
+Checar "Motor: e a ordem manual so passa se a faixa puder ser pt-BR" `
+    ([bool]($mot -match '(?s)if \(Test-EhLegendaPtBrCandidata \$pgsEscolhida\[0\]\) \{ return \$pgsEscolhida\[0\] \}'))
+Checar "Motor: a recusa vai para o log com o motivo (nunca em silencio)" `
+    ([bool]($mot -match 'NAO e uma legenda pt-BR'))
+<#  O zip _reocr do GOT mostrou CINCO blocos em portugues perfeito no meio de
+    uma legenda inteira em ingles. Nao foi milagre: o SRT veio da PGS
+    inglesa e o Reocr foi buscar a imagem na faixa que ELE escolhe sozinho -
+    a pt-BR. Duas deteccoes da mesma coisa em lugares diferentes, a familia
+    de defeito da 16.79. Agora o motor manda o id. #>
+Checar "Motor: o Reocr recebe a faixa que GEROU o srt (nao redescobre)" `
+    ([bool]($mot -match '(?s)function Invoke-ReocrLegenda.{0,400}\$IdFaixaPgs'))
+Checar "Motor: e o id viaja como -Track na linha de comando" `
+    ([bool]($mot -match '(?s)\$null -ne \$IdFaixaPgs.{0,80}"-Track"'))
+Checar "Motor: id 0 e valido (testa contra null, nao por verdade simples)" `
+    ([bool]($mot -match '\$null -ne \$IdFaixaPgs'))
+Checar "Motor: a chamada real passa a PGS de origem" `
+    ([bool]($mot -match 'Invoke-ReocrLegenda -MkvPath \$f\.FullName -SrtPath \$srtPtBr -IdFaixaPgs'))
+
+Checar "Motor: pt-PT nao conta como pt-BR" `
+    ([bool]($mot -match '(?s)function Test-EhLegendaPtBrCandidata.{0,900}pt-PT.{0,120}return \$false'))
+
+<#  A conta do disco que enxergava a fila inteira existia desde a 16.93 e
+    ninguem olhava para ela: a pergunta do Iniciar so disparava pela conta
+    AGREGADA, que nao sabe que o disco encolhe entre um arquivo e o outro.
+    Resultado real (13/09): tela verde-amarela, GOT converteu, e o Ryan
+    morreu na vez dele por 2,95 GB - depois de 10 minutos de fila. #>
+Checar "Janela: a fila que nao cabe INTEIRA tambem para o Iniciar" `
+    ([bool]($jan -match '(?s)function Test-PodeIniciar.{0,3000}\$script:DiscoFalta -gt 0 -or \$script:DiscoNaoCabem -gt 0'))
+Checar "Janela: e a pergunta diz QUAL dos dois casos e" `
+    ([bool]($jan -match 'A fila cabe agora, mas não até o fim'))
+Checar "Janela: a barra do disco tambem avisa (verde nao pode esconder isso)" `
+    ([bool]($jan -match '(?s)\$script:DiscoNaoCabem -gt 0 -and \$sobra -ge 0.{0,600}Cabe Agora, Mas Não Até o Fim'))
+Checar "Idioma: o aviso da fila que aperta no meio tem traducao" `
+    ([bool]($en -match 'Cabe Agora, Mas Não Até o Fim'))
+
+<#  "Deixou DTS como audio principal, ta certo isso?" - a regra estava certa
+    nos cinco caminhos; o que faltava era o log PROVAR qual saiu marcada, e
+    dizer quando o modo seguro legitimamente nao mexe em nada. #>
+Checar "Motor: o log diz sempre qual faixa de audio ficou como padrao" `
+    ([bool]($mot -match 'AUDIO PADRAO:'))
+Checar "Motor: inclusive quando o modo seguro nao mexe na marcacao" `
+    ([bool]($mot -match '(?s)if \(\$audioSemRestricao\) \{\s*\r?\n\s*Say "        AUDIO PADRAO: nao alterado'))
+Checar "Motor: e quando a padrao e a faixa NOVA" `
+    ([bool]($mot -match 'AUDIO PADRAO: a faixa NOVA'))
+
+<#  3.26: "no inicio dizia 1:25 para terminar, achei estranho". A previsao
+    tinha acertado (1h25 previsto x 1h20 real, 6%), mas descobrir isso exigiu
+    abrir dois logs e subtrair na mao. Mesma licao da AUDIO PADRAO: a regra
+    estava certa e faltava PROVA no log. #>
+Checar "Janela: o log fecha previsto x real por ARQUIVO" `
+    ([bool]($jan -match 'PREVISAO: .{0,60}previsto \{1:N0\}s \| real \{2:N0\}s \| erro'))
+Checar "Janela: e da FILA inteira, no resumo" `
+    ([bool]($jan -match 'PREVISAO DA FILA: previsto'))
+Checar "Janela: a previsao da fila usa o mesmo total que o cartao mostra" `
+    ([bool]($jan -match '(?s)PREVISAO DA FILA.{0,300}\$totalSeg'))
+
+Checar "Janela: a dica da chave de medicao esta nos DOIS botoes" `
+    ([bool]($jan -match '(?s)\$UI\.btnMedirELTopo\.ToolTip = \$dicaEL.{0,120}\$UI\.btnMedirEL\.ToolTip')) `
+    "o de baixo ficou sem dica"
+Checar "Janela: a linha dos Capitulos passa pelo tradutor do verbo" `
+    ([bool]($jan -match 'Get-VerboExibido "MANTER"'))
+Checar "Janela: os botoes do fim traduzem quando o cartao aparece" `
+    ([bool]($jan -match 'lblNovaConversao\.Text = \(\[char\]0x21BB\)'))
+
+
+Titulo "46. O ROTEIRO DE TESTE, EXECUTADO COM OS ARQUIVOS REAIS (17.17)"
+<#  O Diego: "eu nao vou refazer tudo isso, faca testes sinteticos de acordo
+    com os arquivos enviados".
+
+    Tem razao, e a resposta certa nao e ele repetir seis roteiros na mao: e a
+    bateria repetir por ele, toda vez, para sempre. Esta secao MONTA os
+    arquivos dele a partir do que os MediaInfo e os logs registraram - faixa
+    por faixa, com id, codec, nome e idioma reais - e EXECUTA as funcoes de
+    verdade em cima disso.
+
+    Os numeros dos cenarios nao foram inventados. Saem de:
+      GOT S08E01 : MediaInfo do convertido + log de 13/09 10h02
+      Ryan       : log de 13/09 10h13 (o que foi pulado por 2,95 GB)
+      Se7en      : MediaInfo do convertido2 de 11/09
+
+    O que esta secao NAO cobre, e por honestidade fica escrito: nada que
+    dependa de WPF de verdade (o desenho do botao, a barra na tela, o
+    dropdown aberto). Ela cobre a REGRA por tras de cada um - que e onde os
+    defeitos desta rodada estavam. #>
+
+# ---- as faixas reais, como o mkvmerge as entrega -------------------------
+function NovaFaixa($id, $tipo, $codec, $nome, $lang, $ietf) {
+    [pscustomobject]@{
+        Id = $id; Tipo = $tipo; Codec = $codec; Nome = $nome
+        Lang = $lang; Ietf = $ietf; Papel = "extra"
+        VerboAuto = "EXCLUIR"; VerboUsuario = $null; DetalheAuto = ""
+        Relevante = $true; Bytes = 0; Marcas = ""
+        properties = [pscustomobject]@{ track_name = $nome; language = $lang; language_ietf = $ietf }
+    }
+}
+# GOT S08E01: video, TrueHD Atmos, 2x AC-3, PGS pt-BR (4) e PGS SDH ingles (5)
+$gotFaixas = @(
+    (NovaFaixa 0 "video"     "HEVC"        "" "und" ""),
+    (NovaFaixa 1 "audio"     "AC-3"        "Stereo" "pt" ""),
+    (NovaFaixa 2 "audio"     "TrueHD Atmos" "Surround" "eng" "en"),
+    (NovaFaixa 3 "audio"     "AC-3"        "Surround 5.1" "eng" "en"),
+    (NovaFaixa 4 "subtitles" "HDMV PGS"    "" "por" "pt-BR"),
+    (NovaFaixa 5 "subtitles" "HDMV PGS"    "SDH" "eng" "en")
+)
+# Os papeis que a LEITURA atribui neste arquivo (ver Fill-Faixas / a leitura):
+$gotFaixas[4].Papel = "leg-ptbr"; $gotFaixas[4].VerboAuto = "CONVERTER"
+$gotFaixas[5].Papel = "leg-eng";  $gotFaixas[5].VerboAuto = "MANTER"
+
+$fnJan = @("Get-OpcoesVerbo","Test-EhLegendaPtBr","Get-VerboExibido","Get-VerboCanonico",
+           "Get-FatorEspacoDisco","Get-PlanoDoDisco","Get-TamanhoEstimadoVideo","Get-TamanhoEstimadoFaixa",
+           "Format-GB","Get-DiagLegendaComEscolha","Test-TemEscolha","Get-CodecCurto","Test-VerboBloqueado")
+$carregouJan = $true
+try {
+    $astJ = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    foreach ($nf in $fnJan) {
+        $fd = @($astJ.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq $nf }, $true))
+        if ($fd.Count -eq 0) { throw "nao achei $nf na janela" }
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+} catch { $carregouJan = $false; $erroJan = $_.Exception.Message }
+Checar "EXECUTANDO: as funcoes da janela carregam do fonte" $carregouJan $(if ($carregouJan) { "" } else { $erroJan })
+
+if ($carregouJan) {
+    $script:Lang = "PT"
+    # ---- ITEM 1: a PGS inglesa nao pode oferecer CONVERTER ---------------
+    $opsIngles = @(Get-OpcoesVerbo $gotFaixas[5])
+    Checar "GOT real: o dropdown da PGS 'SDH' inglesa NAO tem CONVERTER" `
+        (@($opsIngles) -notcontains "CONVERTER") ("saiu: " + ($opsIngles -join "/"))
+    Checar "GOT real: e ela continua podendo ser MANTIDA ou EXCLUIDA" `
+        ((@($opsIngles) -contains "MANTER") -and (@($opsIngles) -contains "EXCLUIR")) `
+        ("saiu: " + ($opsIngles -join "/"))
+
+    # ---- ITEM 2: o automatico NAO pode ter mudado ------------------------
+    $opsPtBr = @(Get-OpcoesVerbo $gotFaixas[4])
+    Checar "GOT real: a PGS pt-BR continua podendo ser CONVERTIDA" `
+        (@($opsPtBr) -contains "CONVERTER") ("saiu: " + ($opsPtBr -join "/"))
+    Checar "GOT real: o audio principal nao perdeu nada (MANTER/CONVERTER)" `
+        ($(  $fa = $gotFaixas[2]; $fa.Papel = "audio-principal"
+             $o = @(Get-OpcoesVerbo $fa)
+             (@($o) -contains "CONVERTER") -and (@($o) -contains "MANTER") -and (@($o).Count -eq 2)  ))
+
+    # ---- ITEM 3: o espaco, com os numeros reais de 13/09 -----------------
+    <#  Naquele dia: livre 275,29 GB no inicio; GOT 20,62 GB (P7->P8.1, fator
+        3,15) deixando ~19,05 GB na saida; Ryan 81,99 GB (P7->P8.1) exigindo
+        ~258,26 GB. O motor recusou o Ryan por 2,95 GB. A conta da tela tem
+        que chegar exatamente nisso. #>
+    function VideoFalso($nome, $gb, $saidaGb) {
+        [pscustomobject]@{
+            Nome = $nome; Bytes = ([double]$gb * 1GB); ColDV = "P7 FEL → P8.1"; P5 = $false
+            Faixas = @(); DurSeg = 0; SaidaForcada = ([double]$saidaGb * 1GB)
+        }
+    }
+    # Get-TamanhoEstimadoVideo depende das faixas; nos testes o valor real ja
+    # e conhecido (o arquivo pronto), entao ele entra direto pelo atalho.
+    function Get-TamanhoEstimadoVideo($v) {
+        if ($v.PSObject.Properties.Name -contains 'SaidaForcada') { return [double]$v.SaidaForcada }
+        return [double]$v.Bytes
+    }
+    $filaReal = @( (VideoFalso "GOT S08E01" 20.62 19.05), (VideoFalso "Saving Private Ryan" 81.99 76.39) )
+    $planoReal = Get-PlanoDoDisco -Videos $filaReal -Livre (275.29 * 1GB)
+
+    Checar "Espaco real 13/09: a conta ve que UM arquivo fica de fora" `
+        ([int]$planoReal.NaoCabem -eq 1) ("NaoCabem = " + $planoReal.NaoCabem)
+    Checar "Espaco real 13/09: e o que fica de fora e o RYAN (nao o GOT)" `
+        ("$($planoReal.PrimeiroFora)" -eq "Saving Private Ryan") ("primeiro fora: " + $planoReal.PrimeiroFora)
+    <#  O motor mediu 2,95 GB de falta naquele dia. A tela trabalha com a
+        SAIDA ESTIMADA do GOT (19,05 GB e o tamanho final real), entao os dois
+        numeros nao sao identicos por construcao - mas tem que ficar na mesma
+        ordem de grandeza, senao a tela esta avisando de outro problema. #>
+    $faltaGb = [double]$planoReal.FaltaNoPrimeiroFora / 1GB
+    Checar "Espaco real 13/09: a falta bate com os ~2,95 GB que o motor mediu" `
+        ($faltaGb -gt 0.5 -and $faltaGb -lt 12.0) ("a conta deu {0:N2} GB" -f $faltaGb)
+    <#  E o contraprova: com disco sobrando, a mesma fila passa inteira. Sem
+        isto o teste acima passaria com uma funcao que diz "nao cabe" sempre. #>
+    $planoFolgado = Get-PlanoDoDisco -Videos $filaReal -Livre (900.0 * 1GB)
+    Checar "Espaco: com folga, a mesma fila passa inteira (contraprova)" `
+        ([int]$planoFolgado.NaoCabem -eq 0 -and [int]$planoFolgado.Cabem -eq 2)
+    <#  E o caso que a 17.16 conserta: a fila CABE agora (a conta agregada da
+        positivo) e mesmo assim alguem fica de fora no meio do caminho. E
+        exatamente o estado que nao existia antes. #>
+    Checar "Espaco: 'cabe agora mas nao ate o fim' e um estado alcancavel" `
+        ($(  $pico = [double]$filaReal[1].Bytes * 3.15
+             $livreTeste = 275.29 * 1GB
+             $p = Get-PlanoDoDisco -Videos $filaReal -Livre $livreTeste
+             ($livreTeste -ge $pico) -and ([int]$p.NaoCabem -gt 0)  )) `
+        "o pico de um arquivo cabe no livre, mas a fila em ordem nao"
+
+    # ---- ITEM 6 (parte): o veredicto da legenda no Manual ----------------
+    $gotManual = [pscustomobject]@{ Modo = "Manual"; Faixas = $gotFaixas }
+    $gotFaixas[4].VerboUsuario = "CONVERTER"
+    $rLeg = Get-DiagLegendaComEscolha $gotManual
+    Checar "GOT real: converter a PGS pt-BR no Manual da veredicto verde" `
+        ($null -ne $rLeg -and "$($rLeg[1])" -eq "verde") ("saiu: " + $(if ($rLeg) { "$($rLeg[0]) [$($rLeg[1])]" } else { "(null)" }))
+    $gotFaixas[4].VerboUsuario = $null
+}
+
+# ---- ITEM 1 e 2 do lado do MOTOR, com as faixas reais --------------------
+$carregouMot = $true
+try {
+    $astM = [System.Management.Automation.Language.Parser]::ParseInput($mot, [ref]$null, [ref]$null)
+    foreach ($nf in @("Test-EhLegendaPtBrCandidata","Resolve-FaixasDoRemux")) {
+        $fd = @($astM.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq $nf }, $true))
+        if ($fd.Count -eq 0) { throw "nao achei $nf no motor" }
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+} catch { $carregouMot = $false; $erroMot = $_.Exception.Message }
+Checar "EXECUTANDO: as funcoes do motor carregam do fonte" $carregouMot $(if ($carregouMot) { "" } else { $erroMot })
+
+if ($carregouMot) {
+    Checar "GOT real: o motor recusa a PGS 'SDH' inglesa como pt-BR" `
+        (-not (Test-EhLegendaPtBrCandidata $gotFaixas[5]))
+    Checar "GOT real: e aceita a PGS pt-BR do mesmo arquivo" `
+        (Test-EhLegendaPtBrCandidata $gotFaixas[4])
+
+    # ---- ITEM 4: o audio padrao, nos cinco caminhos ---------------------
+    <#  Se7en real: principal DTS-HD MA (id 1) e um E-AC-3 ja existente
+        (id 2). O motor reaproveita o E-AC-3 - entao ELE tem que ser o
+        padrao, e nao o DTS. Era exatamente a pergunta do Diego. #>
+    $script:EscolhasTeste = @{}
+    function Get-EscolhaManual([string]$MkvPath) {
+        if ($script:EscolhasTeste.ContainsKey($MkvPath)) { return $script:EscolhasTeste[$MkvPath] }
+        return $null
+    }
+    function PadraoDe($esc, $ids, $def) {
+        $script:EscolhasTeste = @{}
+        if ($esc) { $script:EscolhasTeste["Se7en.mkv"] = $esc }
+        $r = Resolve-FaixasDoRemux -Arquivo "Se7en.mkv" -IdsAudio $ids -IdAudioDefault $def `
+                                   -IdsLegenda @(3) -AudioSemRestricao $false -LegendaSemRestricao $false
+        return $r
+    }
+    Checar "Se7en real: no automatico, o E-AC-3 reaproveitado e o padrao (nao o DTS)" `
+        ($(  $r = PadraoDe $null @(1,2) 2; [int]$r.AudioDefault -eq 2  ))
+    Checar "Se7en real: mantendo os dois na mao, o padrao continua o E-AC-3" `
+        ($(  $r = PadraoDe @{AudioManter=@(1,2)} @(1,2) 2; [int]$r.AudioDefault -eq 2  ))
+    Checar "Se7en real: mantendo so o DTS, o padrao cai nele (nao ha outro)" `
+        ($(  $r = PadraoDe @{AudioManter=@(1)} @(1,2) 2; [int]$r.AudioDefault -eq 1  ))
+    Checar "Se7en real: convertendo o principal, a padrao e a faixa NOVA" `
+        ($(  $r = PadraoDe @{AudioManter=@(1); ConverterPrincipal=$true} @(1) $null
+             $null -eq $r.AudioDefault  )) `
+        "null aqui quer dizer 'a faixa nova sera a padrao', marcada no proprio mkvmerge"
+    Checar "Se7en real: a padrao escolhida sempre existe na lista que sai" `
+        ($(  $r = PadraoDe @{AudioManter=@(2)} @(1,2) 1
+             (@($r.Audio) -contains $r.AudioDefault)  ))
+}
+
+# ---- ITEM 5: o contador da medicao, sem WPF -----------------------------
+<#  A barra e o rotulo dependem de WPF; a CONTA nao. Ela e o que decide o que
+    aparece - "1 de 2" e a fracao da barrinha - e e ela que o teste percorre. #>
+$fracOk = $true
+$fracFalha = ""
+foreach ($caso in @(
+    @{ tot = 2; feitos = 0; esperaEmCurso = 1; esperaFrac = 0.0 },
+    @{ tot = 2; feitos = 1; esperaEmCurso = 2; esperaFrac = 0.5 },
+    @{ tot = 2; feitos = 2; esperaEmCurso = 2; esperaFrac = 1.0 },
+    @{ tot = 3; feitos = 1; esperaEmCurso = 2; esperaFrac = ([double]1/3) }
+)) {
+    $emCurso = [math]::Min($caso.tot, $caso.feitos + 1)
+    $fr = [double]$caso.feitos / [double]$caso.tot
+    if ($fr -lt 0) { $fr = 0 } elseif ($fr -gt 1) { $fr = 1 }
+    if ($emCurso -ne $caso.esperaEmCurso -or [math]::Abs($fr - $caso.esperaFrac) -gt 0.001) {
+        $fracOk = $false
+        $fracFalha = ("tot={0} feitos={1} -> {2} de {2}, fracao {3}" -f $caso.tot, $caso.feitos, $emCurso, $fr)
+        break
+    }
+}
+Checar "Medicao: o contador nunca passa do total e a barra nunca estoura" $fracOk $fracFalha
+
+
+<#  3.27 - NOME DE FUNCAO DUPLICADO NUNCA MAIS.
+
+    A 17.17 achou DUAS funcoes chamadas Get-FatorDisco no mesmo arquivo, com
+    significados diferentes (velocidade do disco x espaco em disco). Em
+    PowerShell a ultima definicao vence, entao a de espaco respondia tambem
+    para quem queria a de velocidade - e devolvia 1,6 constante para chamadas
+    sem argumento. Passou despercebido desde a 16.95 porque o codigo roda sem
+    erro nenhum: ele so responde a pergunta errada.
+
+    Nao ha como escrever um teste para "o Get-FatorDisco certo" - o teste tem
+    que ser contra a CLASSE do defeito. Nome repetido e ambiguidade silenciosa
+    e nao pode existir nestes arquivos, ponto. #>
+foreach ($arqDup in @("LaFirma_JANELA.ps1", "Converter_AUTO_DIRETO.ps1")) {
+    $pDup = Join-Path $Fonte $arqDup
+    if (-not (Test-Path -LiteralPath $pDup)) { continue }
+    $astDup = [System.Management.Automation.Language.Parser]::ParseFile($pDup, [ref]$null, [ref]$null)
+    <#  So as funcoes de NIVEL SUPERIOR. As que vivem dentro dos blocos de
+        runspace (Avisar, Enviar) repetem de proposito: cada bloco tem o seu
+        escopo, elas nao se enxergam, e cada uma manda para a fila com o tipo
+        de log daquele trabalho. Repetir ali e correto; repetir no topo do
+        arquivo e a armadilha da 17.17. O criterio e a coluna: funcao de topo
+        comeca na 1, funcao aninhada esta indentada. #>
+    $nomes = @($astDup.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) |
+               Where-Object { $_.Extent.StartColumnNumber -eq 1 } |
+               ForEach-Object { $_.Name })
+    $repetidos = @($nomes | Group-Object | Where-Object { $_.Count -gt 1 } | ForEach-Object { "$($_.Name) (x$($_.Count))" })
+    Checar "$arqDup - nenhuma funcao definida duas vezes" `
+        ($repetidos.Count -eq 0) `
+        ("duplicadas: " + ($repetidos -join ", ") + " - em PowerShell a ultima vence, em silencio")
+}
+
+
+<#  3.27 - O QUE NAO PODE ENTRAR NO INSTALADOR DO USUARIO FINAL.
+
+    "fonte\*" e recursivo e Excludes e lista de BLOQUEIO, nao de permissao -
+    entao TODO arquivo novo que aparece em fonte\ entra no instalador por
+    padrao, calado. Foi assim que o VERSAO.txt (que o proprio instalador
+    gera), o LaFirma_Setup.iss (o script de compilacao) e a Bancada de
+    desenvolvimento passaram a ser empacotados sem ninguem reparar.
+
+    Nao da para testar "o Diego lembrou de excluir". Da para testar a lista. #>
+$pIss2 = ""
+foreach ($cand in @((Join-Path (Split-Path -Parent $Fonte) "LaFirma_Setup.iss"),
+                    (Join-Path $Fonte "LaFirma_Setup.iss"))) {
+    if (Test-Path -LiteralPath $cand) { $pIss2 = $cand; break }
+}
+if ($pIss2 -eq "") {
+    Pular "Instalador: material interno fora do pacote" "LaFirma_Setup.iss nao esta nesta pasta"
+} else {
+    $iss2 = [System.IO.File]::ReadAllText($pIss2, [System.Text.Encoding]::UTF8)
+    foreach ($proibido in @("VERSAO.txt", "LaFirma_Setup.iss", "Bancada_CensoCompleto.ps1", "Bancada_CensoCompleto.bat")) {
+        # O padrao abre a aspa de proposito: 'Excludes:[^"]*' pararia no
+        # proprio caractere que comeca a lista, e o teste mediria nada.
+        Checar ("Instalador: '$proibido' esta nos Excludes") `
+            ([bool]($iss2 -match ('Excludes: "[^"]*' + [regex]::Escape($proibido)))) `
+            "arquivo de desenvolvimento ou gerado sendo empacotado para o usuario final"
+    }
+}
 
 
 Titulo "21. A PROPRIA BATERIA NAO PODE TER ERRO DE EXECUCAO (2.4)"

@@ -4,7 +4,7 @@
 #  ffmpeg + dovi_tool + mkvmerge (+ OCR de legenda PT-BR opcional via PgsToSrt)
 # ============================================================================
 #
-#  VERSAO: 14.49 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
+#  VERSAO: 14.54 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
 #  ----------------------------------------------------------------------
 #  REGRA DE VERSIONAMENTO (definida com o usuario):
 #    - Atualizacao GRANDE (muda comportamento/logica): sobe o numero maior
@@ -15,6 +15,28 @@
 #
 #  Historico (v1.0 -> v2.0 reconstruido a partir das evidencias documentadas
 #  nos proprios comentarios do script; v3.0 em diante e registrado na hora).
+#
+#   v14.54 (a ordem manual de OCR passou a ter idioma: apontada para uma
+#           legenda que nao e pt-BR, ela e recusada com o motivo no log -
+#           antes o motor obedecia e carimbava ingles de brasileiro; e o log
+#           passou a dizer sempre qual faixa de audio ficou como padrao
+#           - 13/09/2026)
+#
+#   v14.53 (a ordem manual de OCR vence o reaproveitamento da .SRT - e o
+#           arquivo parava de sair sem legenda nenhuma - 11/09/2026)
+#
+#        DEFEITO MEDIDO (Se7en, 11/09 01h20). O usuario excluiu a .SRT antiga
+#        e mandou CONVERTER a PGS, para gerar uma nova. A janela enviou a
+#        ordem certa - 'legenda manter [] | PGS p/ OCR = 2', esta no log.
+#        O motor testa primeiro se ja existe pt-BR em TEXTO, achou a faixa 3,
+#        escreveu '[NAO NECESSARIO]' e nao rodou OCR. Sem SRT nova e sem a
+#        antiga (excluida de proposito), o [5/5] montou o arquivo final SEM
+#        NENHUMA LEGENDA.
+#        Terceira aparicao da mesma licao (16.31, 14.40 e agora esta), desta
+#        vez pelo avesso: se a AUSENCIA de uma chave nunca e uma ordem, a
+#        PRESENCA dela sempre e. 'LegendaPgs = <id>' quer dizer "converta
+#        ESTA", e nao "use isto se voce nao tiver ideia melhor".
+#        No automatico nada muda: texto pronto continua ganhando do OCR.
 #
 #   v14.37 (2.0 / item 1: o motor passou a dizer MEL x FEL - 04/09/2026)
 #   v14.38 (o log passou a guardar o CONTEXTO do L1: pico do master e o
@@ -934,7 +956,7 @@
 #         de video via ffmpeg, conversao Dolby Vision para Profile 8.1 via
 #         dovi_tool, remux final via mkvmerge, log via Start-Transcript.
 # ============================================================================
-$SCRIPT_VERSION  = "14.49"
+$SCRIPT_VERSION  = "14.54"
 $SCRIPT_CODINOME = "LaFirma"
 #
 #  PASTA TEMPORARIA: SEMPRE NO MESMO DISCO DO ARQUIVO DE ORIGEM
@@ -2732,6 +2754,24 @@ function Get-FaixaCompativelC2Externa {
     return $null
 }
 
+<#  v14.54: quem pode ser a legenda pt-BR. Mesmas perguntas que os tres
+    seletores ja fazem (nome, language, language_ietf), num lugar so, para a
+    recusa da ordem manual nao virar um quarto criterio divergente. Aceita
+    portugues GENERICO: o release brasileiro mal etiquetado ('por' sem
+    regiao) e caso comum e legitimo. O que ela barra e o que se identifica
+    como OUTRA lingua - ingles, espanhol - e o portugues de Portugal. #>
+function Test-EhLegendaPtBrCandidata {
+    param($Faixa)
+    if (-not $Faixa) { return $false }
+    $nome = "$($Faixa.properties.track_name)"
+    $lang = "$($Faixa.properties.language)"
+    $ietf = "$($Faixa.properties.language_ietf)"
+    if ($ietf -match "(?i)^pt-PT\b" -or $nome -match "(?i)iberian|portugal|\bpt-?pt\b") { return $false }
+    if ($ietf -match "(?i)^pt-BR" -or $nome -match "(?i)\b(bras|brazil|pt-?br)") { return $true }
+    if ($lang -match "^(por|pt)$" -or $ietf -match "(?i)^pt") { return $true }
+    return $false
+}
+
 function Find-PtBrPgsTrack {
     # Acha a legenda PT-BR "principal" (completa) em PGS - EXCLUINDO
     # explicitamente qualquer faixa marcada como "forcada" (forced_track) e
@@ -2777,7 +2817,39 @@ function Find-PtBrPgsTrack {
         $jm = Get-MkvJson -MkvPath $MkvPath
         if ($jm) {
             $pgsEscolhida = @($jm.tracks | Where-Object { $_.type -eq "subtitles" -and $_.id -eq $escManual['LegendaPgs'] })
-            if ($pgsEscolhida.Count -gt 0) { return $pgsEscolhida[0] }
+            if ($pgsEscolhida.Count -gt 0) {
+                <#  v14.54 - A ORDEM MANUAL APONTAVA PARA UMA LEGENDA INGLESA,
+                    E O MOTOR OBEDECIA.
+
+                    ACHADO (GOT S08E01, 13/09 10h05). No Modo Manual o usuario
+                    marcou CONVERTER na PGS de INGLES ('SDH', faixa 5). Esta
+                    funcao devolveu a faixa escolhida sem olhar o idioma, e o
+                    log escreveu a frase que denuncia tudo:
+
+                        Legenda PT-BR Encontrada na Faixa 5 'SDH'
+
+                    O arquivo final saiu com uma legenda EM INGLES rotulada
+                    "Portugues (Brasil) [OCR]" e marcada como padrao.
+
+                    A 14.53 ensinou que a PRESENCA da chave e uma ordem. Esta
+                    versao ensina o resto: uma ordem que o programa nao sabe
+                    executar continua sendo uma ordem que ele nao executa. O
+                    OCR daqui e pt-BR de ponta a ponta - dicionario de 1,3M
+                    palavras em portugues, Corretor que caca bloco alienigena
+                    comparando com portugues, Reocr que refaz fala curta em
+                    portugues. Apontado para uma faixa inglesa ele nao
+                    "converte ingles": ele carimba ingles de brasileiro.
+
+                    Recusar em silencio seria o defeito da 16.31 de novo, so
+                    que do outro lado. Entao a recusa vai para o log, com o
+                    motivo, e o automatico decide. A janela ja nem oferece o
+                    verbo (17.16) - esta e a segunda tranca. #>
+                if (Test-EhLegendaPtBrCandidata $pgsEscolhida[0]) { return $pgsEscolhida[0] }
+                $nomeRec = "$($pgsEscolhida[0].properties.track_name)"
+                if ($nomeRec -eq "") { $nomeRec = "$($pgsEscolhida[0].properties.language)" }
+                Say ("        [AVISO] A faixa " + $escManual['LegendaPgs'] + " '" + $nomeRec +
+                     "' NAO e uma legenda pt-BR - o OCR deste programa e pt-BR e so. Ordem manual recusada.") "Yellow"
+            }
         }
     }
     $json = Get-MkvJson -MkvPath $MkvPath
@@ -2841,6 +2913,42 @@ function Get-RotuloFaixa {
     if (-not $t) { return $null }
     if (-not [string]::IsNullOrWhiteSpace($t.properties.track_name)) { return $t.properties.track_name }
     return $t.codec
+}
+
+function Test-OcrPedidoNaMao {
+    <#  v14.53 - A ORDEM MANUAL DE OCR PERDIA PARA O REAPROVEITAMENTO.
+
+        DEFEITO MEDIDO (Se7en, 11/09 01h20, log do proprio arquivo). O Diego
+        excluiu a .SRT antiga (feita por OCR numa rodada anterior) e mandou
+        CONVERTER a PGS, para gerar uma nova. A janela enviou exatamente isso:
+
+            ESCOLHA MANUAL: ... | legenda manter [] | PGS p/ OCR = 2
+
+        O motor ignorou. A etapa de legenda testa PRIMEIRO se ja existe uma
+        pt-BR em texto; achou a faixa 3, escreveu "[NAO NECESSARIO]" e nao
+        rodou OCR nenhum. Sem SRT nova, e com LegendaManter vazio (porque a
+        antiga foi excluida de proposito), o [5/5] descartou tudo:
+
+            Legenda Reaproveitada:  - Demais Legendas Descartadas [OK]
+
+        O arquivo final saiu SEM NENHUMA LEGENDA. Nao foi a janela: ela
+        mandou certo, e o log prova.
+
+        A licao e a mesma da 16.31 e da 14.40, pela terceira vez e agora do
+        avesso: se a AUSENCIA de uma chave nunca e uma ordem, a PRESENCA
+        dela sempre e. 'LegendaPgs = <id>' quer dizer "converta ESTA" - e
+        uma ordem, nao uma sugestao para quando o motor nao tiver ideia
+        melhor. O automatico continua igual: sem escolha manual, texto
+        pronto sempre vence OCR.
+
+        Valor negativo (-1) continua sendo a ordem contraria ("nao converta
+        nenhuma") e nao entra aqui. #>
+    param([string]$MkvPath)
+    $e = Get-EscolhaManual $MkvPath
+    if (-not $e) { return $false }
+    if (-not $e.ContainsKey('LegendaPgs')) { return $false }
+    if ($null -eq $e['LegendaPgs']) { return $false }
+    return ([int]$e['LegendaPgs'] -ge 0)
 }
 
 function Get-FaixaLegendaPtBrTexto {
@@ -3435,6 +3543,29 @@ function Get-TipoCamadaDV {
             ffprobe. Agora eles aparecem, marcados como o que sao: outra
             regua, para comparar arquivo com arquivo, nunca com o L1 deste. #>
         ReguaUsada     = "nenhuma"   # "master" | "nenhuma"
+        <#  14.50 - A REGUA TORTA, MEDIDA EM VEZ DE SO LEMBRADA (item D).
+
+            O autor do dovi_convert apontou o limite do metodo: o pico do
+            mastering display e METADADO DECLARADO pelo release, e release
+            erra. Ate a 14.49 a resposta do projeto era honesta mas passiva -
+            escrevia no FAQ que a regua pode estar errada e seguia usando ela
+            como se estivesse certa.
+
+            O censo do L1 ja da, de graca, um indicio de QUANDO ela errou: se
+            a MAIORIA das cenas lidas passa da regua, o mais provavel nao e
+            que o filme inteiro expanda brilho o tempo todo - e que o pico
+            declarado esteja abaixo do master real.
+
+            E SINAL, NAO VEREDICTO. Por isso o campo se chama Suspeita e a
+            frase diz "suspeita", nunca "errada": o programa nao tem como
+            saber qual dos dois numeros mentiu. Ele so para de fingir que a
+            regua e confiavel quando ela propria se contradiz.
+
+            O piso de 20 cenas existe porque com 5 cenas "60% passaram" nao
+            quer dizer nada - sao 3 cenas. #>
+        ReguaSuspeita       = $false
+        ReguaSuspeitaMotivo = ""
+        PctAcimaDoMaster    = 0.0
         CtnMaxCLL      = 0
         CtnMaxFALL     = 0
         L5Lido         = $false
@@ -3732,6 +3863,24 @@ function Get-TipoCamadaDV {
 
         Sem o pico do master declarado nao ha regua, e ai Expande fica $null:
         nao da para afirmar nem negar, e a frase diz isso. #>
+    <#  14.50 - A REGUA SE CONTRADIZ? DIGA (item D).
+
+        Roda ANTES do veredicto de Expande porque e sobre ele que a suspeita
+        recai: se a regua esta torta, "expande brilho" pode ser so a regua
+        baixa demais. O veredicto NAO muda - continua sendo o mesmo criterio
+        de sempre - mas passa a viajar com o aviso colado. #>
+    if ($res.MasterMax -gt 0 -and [int]$res.CenasNoCenso -gt 0) {
+        $res.PctAcimaDoMaster = [math]::Round(
+            100.0 * [double]$res.CenasAcimaDoMaster / [double]$res.CenasNoCenso, 2)
+        if ([int]$res.CenasNoCenso -ge 20 -and $res.PctAcimaDoMaster -ge 50.0) {
+            $res.ReguaSuspeita = $true
+            $res.ReguaSuspeitaMotivo = ("{0} de {1} cena(s) lida(s) ({2}%) passam dos {3} nits declarados pelo master. Um master de verdade nao costuma ser estourado pela maioria das proprias cenas - suspeita de pico declarado abaixo do real, nao de filme claro." -f `
+                [int]$res.CenasAcimaDoMaster, [int]$res.CenasNoCenso,
+                $res.PctAcimaDoMaster.ToString("0.##", $inv),
+                ([double]$res.MasterMax).ToString("0", $inv))
+        }
+    }
+
     if ($res.Tipo -eq "FEL" -or $res.Tipo -eq "MISTO") {
         if ($res.MasterMax -gt 0 -and $res.MaxCLL -gt 0) {
             $res.Expande = ([double]$res.MaxCLL -ge [double]$res.MasterMax)
@@ -3801,6 +3950,213 @@ function Get-TipoCamadaDV {
     try { $res.SegundosMedindo = [math]::Round($relogioMedida.Elapsed.TotalSeconds, 1) } catch { }
 
     $script:CacheTipoEL = $res
+    return $res
+}
+
+function Invoke-PipeExtractRpu {
+    <#  14.52 / 2.3 - O PIPE PASSOU A SER UM ARQUIVO .cmd, NAO UMA STRING.
+    
+        O Bloodsport falhou em 10/09 21:55 com uma mensagem que NAO e do ffmpeg:
+    
+            A sintaxe do nome do arquivo, do nome do diretorio ou do rotulo do
+            volume esta incorreta.
+    
+        Isso e o proprio cmd reclamando da linha que recebeu. O Ryan e o Troy
+        passavam porque moram direto em ...\FILMESS\; o Bloodsport mora em
+    
+            ...\FILMESS\Bloodsport...HDR10P.H- CONVERTIDO\
+    
+        - pasta COM ESPACO. A linha era montada como uma string so, com quatro
+        caminhos entre aspas dentro de um par de aspas externo, e entregue a
+        "cmd.exe /c". O PowerShell 5.1 REESCREVE as aspas ao passar argumentos
+        para um executavel nativo; com um caminho que tem espaco, o que chega do
+        outro lado ja nao e a linha que foi escrita.
+    
+        Nao ha como citar isso "do jeito certo" - a reescrita acontece depois de
+        nos. Entao a linha para de viajar como argumento: ela e GRAVADA num .cmd
+        na pasta temporaria e o cmd recebe so o caminho desse arquivo, que e um
+        argumento unico e simples. O cmd le a linha do disco, byte por byte,
+        exatamente como foi escrita.
+    
+        ANSI, nao UTF-8: e a pagina de codigo que o cmd assume ao ler um .cmd.
+        Gravar em UTF-8 quebraria caminho com acento - a familia de bug que se
+        estava consertando, so que em outro alfabeto.
+    
+        E o '%' vira '%%': dentro de um .cmd ele abre variavel. Nome de arquivo
+        com % existe, e um deles apagaria metade do caminho em silencio. #>
+    param(
+        [string]$Ffmpeg, [string]$Entrada, [string]$DoviTool,
+        [string]$SaidaRpu, [string]$PastaTmp
+    )
+    $arqCmd = Join-Path $PastaTmp "pipe_rpu.cmd"
+    $linha = ('"{0}" -hide_banner -nostdin -v error -i "{1}" -map 0:v:0 -c copy -bsf:v hevc_mp4toannexb -f hevc - | "{2}" extract-rpu -i - -o "{3}"' -f `
+              $Ffmpeg, $Entrada, $DoviTool, $SaidaRpu)
+    $linha = $linha.Replace("%", "%%")
+    [System.IO.File]::WriteAllLines($arqCmd, @("@echo off", $linha), [System.Text.Encoding]::Default)
+    return @(& cmd.exe /c $arqCmd 2>&1)
+}
+
+function Get-CensoCompletoDV {
+    <#  14.50 - O CENSO COMPLETO, SOB DEMANDA (item A).
+
+        POR QUE ELE EXISTE
+
+        A medicao normal le UMA AMOSTRA: tres a cinco trechos curtos, porque
+        ela roda em TODO arquivo da fila e tem que caber no tempo de abrir o
+        programa. O autor do dovi_convert apontou, com razao, que amostra nao
+        prova Complex FEL - e a documentacao dele mostra o mesmo desenho: um
+        'scan' amostrado para o dia a dia, e um 'inspect' completo para quem
+        quer certeza. Esta funcao e o nosso 'inspect'.
+
+        POR QUE ELE E BOTAO, E NAO AUTOMATICO
+
+        Medido na bancada, em 10/09, em dois filmes reais:
+            Ryan  (81,99 GB, 2h49) - censo completo 109,4s | amostra  22,2s
+            Troy  (~65 GB,  2h43) - censo completo 128,7s | amostra  25,6s
+        Cinco vezes o custo da amostra, por arquivo. Numa fila de dez filmes
+        isso e vinte minutos parado antes de a conversao comecar - o oposto
+        do "abrir, apontar a pasta, F1" que o programa promete. Entao ele so
+        roda quando o usuario PEDE, e so onde a duvida existe: em Complex FEL.
+
+        O QUE ELE FAZ
+
+        Extrai o RPU do filme INTEIRO por pipe (ffmpeg -> dovi_tool, sem
+        gravar o .hevc: seriam 60-80 GB) e conta TODAS as cenas do L1, em vez
+        das poucas dezenas da amostra. Nao decodifica imagem nenhuma - RPU e
+        metadado; e por isso que 82 GB saem em menos de dois minutos.
+
+        O QUE ELE NAO FAZ
+
+        Nao toca no arquivo do usuario, nao escreve na pasta dele e NAO muda
+        o veredicto sozinho. Ele devolve numeros; quem fala e a janela. #>
+    param(
+        [Parameter(Mandatory = $true)][string]$MkvPath,
+        [double]$MasterMaxConhecido = 0.0
+    )
+    $ErrorActionPreference = "Continue"
+    $inv = [System.Globalization.CultureInfo]::InvariantCulture
+
+    $res = New-Object PSObject -Property ([ordered]@{
+        Ok                  = $false
+        Erro                = ""
+        QuadrosNoRpu        = 0
+        CenasNoCenso        = 0
+        CenasAcimaDoMaster  = 0
+        PctAcimaDoMaster    = 0.0
+        PicoDeCena          = 0.0
+        MasterMax           = 0.0
+        ReguaSuspeita       = $false
+        ReguaSuspeitaMotivo = ""
+        RpuMb               = 0.0
+        SegundosRpu         = 0.0
+        SegundosCenso       = 0.0
+        Segundos            = 0.0
+    })
+
+    if (-not (Test-Path -LiteralPath $MkvPath)) {
+        $res.Erro = "Arquivo nao encontrado"
+        return $res
+    }
+
+    # A regua: reaproveita a que a medicao por amostra ja leu, quando ela
+    # existe. Uma leitura, um lugar - a duplicata foi o bug da 16.79/16.80.
+    $res.MasterMax = [double]$MasterMaxConhecido
+    if ($res.MasterMax -le 0) {
+        try {
+            $b = Get-BrilhoDoContainer -MkvPath $MkvPath
+            if ($b -and $b.MasterMax -gt 0) { $res.MasterMax = [double]$b.MasterMax }
+        } catch { }
+    }
+
+    $base = Split-Path -Parent $MkvPath
+    if (-not $base -or -not (Test-Path -LiteralPath $base)) { $base = $env:TEMP }
+    <#  A pasta temporaria NAO vai para o lado do filme: o Diego so quer ver
+        na pasta dele o que ele mandou fazer. Vai para o TEMP do Windows, e
+        e apagada no finally mesmo se der erro no meio. #>
+    $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("LaFirma_censo_" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+    try {
+        [System.IO.Directory]::CreateDirectory($tmp) | Out-Null
+    } catch {
+        $res.Erro = "Nao consegui criar a pasta temporaria do censo"
+        return $res
+    }
+
+    $relogio = [System.Diagnostics.Stopwatch]::StartNew()
+    try {
+        $rpuBin = Join-Path $tmp "filme.bin"
+
+        <#  O PowerShell 5.1 estraga pipe BINARIO entre dois processos
+            nativos - converte os bytes para texto no meio do caminho. Foi a
+            armadilha da 14.37. Quem monta o pipe e o cmd, que passa os bytes
+            intactos - e desde a 14.52 ele recebe a linha por ARQUIVO, nunca
+            como argumento (ver Invoke-PipeExtractRpu). #>
+        $saida = Invoke-PipeExtractRpu -Ffmpeg $ffmpeg -Entrada $MkvPath `
+                    -DoviTool $doviTool -SaidaRpu $rpuBin -PastaTmp $tmp
+        $res.SegundosRpu = [math]::Round($relogio.Elapsed.TotalSeconds, 1)
+
+        if (-not (Test-Path -LiteralPath $rpuBin) -or (Get-Item -LiteralPath $rpuBin).Length -eq 0) {
+            $res.Erro = "O dovi_tool nao produziu RPU do filme inteiro"
+            return $res
+        }
+        $res.RpuMb = [math]::Round((Get-Item -LiteralPath $rpuBin).Length / 1MB, 2)
+
+        $relogio.Restart()
+        $voltarPara = (Get-Location).Path
+        try {
+            Set-Location -LiteralPath $tmp
+            $nada = & $doviTool "export" "-i" "$rpuBin" "--levels" "level1" 2>&1
+        } finally {
+            # Volta SEMPRE, mesmo se o export morrer no meio: deixar o
+            # processo com a pasta corrente num TEMP que sera apagado logo
+            # abaixo travaria o proprio Remove-Item.
+            Set-Location -LiteralPath $voltarPara
+        }
+        $res.SegundosCenso = [math]::Round($relogio.Elapsed.TotalSeconds, 1)
+
+        $csvL1 = Join-Path $tmp "L1_export.csv"
+        if (-not (Test-Path -LiteralPath $csvL1)) {
+            $res.Erro = "O export nao gerou L1_export.csv"
+            return $res
+        }
+
+        $linhas = @(Import-Csv -LiteralPath $csvL1)
+        $res.QuadrosNoRpu = $linhas.Count
+        # Cada CENA e um bloco de quadros com o mesmo trio min/max/avg -
+        # contar os trios distintos conta cenas. Mesma conta da amostra.
+        $cenas = @($linhas | Select-Object -Property min_pq, max_pq, avg_pq -Unique)
+        foreach ($c in $cenas) {
+            $cod = 0.0
+            [double]::TryParse("$($c.max_pq)", [System.Globalization.NumberStyles]::Float, $inv, [ref]$cod) | Out-Null
+            if ($cod -le 0) { continue }
+            $nits = ConvertFrom-PQ -CodigoPQ $cod
+            $res.CenasNoCenso = $res.CenasNoCenso + 1
+            if ($nits -gt $res.PicoDeCena) { $res.PicoDeCena = $nits }
+            if ($res.MasterMax -gt 0 -and $nits -gt $res.MasterMax) {
+                $res.CenasAcimaDoMaster = $res.CenasAcimaDoMaster + 1
+            }
+        }
+
+        # Mesma regra de regua torta da amostra (14.50), com uma amostra que
+        # agora e o filme inteiro - aqui o piso de 20 cenas nunca aperta.
+        if ($res.MasterMax -gt 0 -and [int]$res.CenasNoCenso -gt 0) {
+            $res.PctAcimaDoMaster = [math]::Round(
+                100.0 * [double]$res.CenasAcimaDoMaster / [double]$res.CenasNoCenso, 2)
+            if ([int]$res.CenasNoCenso -ge 20 -and $res.PctAcimaDoMaster -ge 50.0) {
+                $res.ReguaSuspeita = $true
+                $res.ReguaSuspeitaMotivo = ("{0} de {1} cena(s) do filme inteiro ({2}%) passam dos {3} nits declarados pelo master - suspeita de pico declarado abaixo do real." -f `
+                    [int]$res.CenasAcimaDoMaster, [int]$res.CenasNoCenso,
+                    $res.PctAcimaDoMaster.ToString("0.##", $inv),
+                    ([double]$res.MasterMax).ToString("0", $inv))
+            }
+        }
+
+        $res.Ok = $true
+    } catch {
+        $res.Erro = $_.Exception.Message
+    } finally {
+        $res.Segundos = [math]::Round([double]$res.SegundosRpu + [double]$res.SegundosCenso, 1)
+        try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch { }
+    }
     return $res
 }
 
@@ -4682,8 +5038,35 @@ function Invoke-CorretorLegenda {
          ponteiro se o arquivo novo existir, nao estiver vazio e for desta
          rodada. Se qualquer coisa falhar, segue com o .srt que ja tinha.
 #>
+<#  v14.54 - O RE-OCR ESCOLHIA A FAIXA SOZINHO, E PODIA ESCOLHER OUTRA.
+
+    O zip _reocr do GOT (13/09) explica o "que loucura foi essa" do Diego: no
+    meio de uma legenda inteira em ingles, CINCO blocos sairam em portugues
+    perfeito -
+
+        ANTES : 'DIRAH: | hear the dragon burnt up / a thousand Lannister men.'
+        DEPOIS: 'Soube que o dragao / queimou mil dos Lannister.'
+        ANTES : 'WOLKAN: Welcome back, my lady.'
+        DEPOIS: 'Bem-vinda de volta, milady.'
+
+    Nao foi milagre nem alucinacao do Tesseract. O SRT daquela rodada veio da
+    PGS INGLESA (o defeito que a 14.54 fecha do outro lado), e o Reocr, ao
+    refazer os blocos suspeitos, foi buscar a imagem na faixa que ELE escolhe
+    sozinho - a pt-BR. Duas faixas diferentes no mesmo arquivo, e o resultado
+    foi esse Frankenstein.
+
+    A causa principal ja esta trancada. Mas a porta que permitiu o
+    descasamento continua aberta: o Reocr aceita -Track e o motor nunca
+    passava, entao ele redescobria a faixa por conta propria. Duas deteccoes
+    da mesma coisa em lugares diferentes e a familia de defeito que este
+    projeto persegue desde a 16.79 - elas concordam ate o dia em que nao
+    concordam.
+
+    Agora o motor manda o ID DA FAIXA QUE GEROU O SRT. Nao ha o que
+    redescobrir: a imagem que o Reocr le e, por construcao, a mesma que
+    produziu o texto que ele esta corrigindo. #>
 function Invoke-ReocrLegenda {
-    param([string]$MkvPath, [string]$SrtPath)
+    param([string]$MkvPath, [string]$SrtPath, $IdFaixaPgs)
     if (-not $temReocr) { return $null }
     if (-not (Test-Path -LiteralPath $SrtPath)) { return $null }
 
@@ -4691,6 +5074,9 @@ function Invoke-ReocrLegenda {
     $psi.FileName = "powershell.exe"
     $argsReocr = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$reocrLegenda",
                    "$MkvPath", "$SrtPath", "-SemPausa")
+    # v14.54: id 0 e valido - o teste e contra $null, nunca por verdade
+    # simples (a armadilha do PowerShell que ja mordeu na 14.18).
+    if ($null -ne $IdFaixaPgs) { $argsReocr += @("-Track", "$IdFaixaPgs") }
     if ($tesseractExe -ne "") { $argsReocr += @("-TesseractExe", "$tesseractExe") }
     $psi.Arguments = ConvertTo-ArgString $argsReocr
     $psi.RedirectStandardOutput = $true
@@ -5091,6 +5477,11 @@ foreach ($f in $files) {
     # sabe a pasta real dos arquivos ($f.DirectoryName), que e onde a pasta
     # _ddvt_temp_ nasce - e ela pode estar em qualquer lugar, nao so em
     # 00_Arquivos_Base (no Homem-Aranha estava em 00_Arquivos_Base\ORIGINAL\).
+    # 14.51: zerado por ARQUIVO - senao o segundo video da fila herda o
+    # veredicto do primeiro, que e a familia de bug da 16.76.
+    $script:SeloELdoArquivo   = ""
+    $script:MotivoELdoArquivo = ""
+
     if (-not $script:FaxinaJaFeita) {
         $script:FaxinaJaFeita = $true
         $pastasParaVarrer = New-Object System.Collections.ArrayList
@@ -5248,6 +5639,26 @@ foreach ($f in $files) {
                 que o resultado e sempre sem perda (licao 12).
                 Nada aqui muda o que a conversao faz - so conta o que ela e. #>
             $diagEL = Get-TipoCamadaDV -MkvPath $f.FullName -PastaTemp $WorkDir
+            <#  14.51 - O VEREDICTO DA CAMADA VIRA DADO, NAO SO LINHA DE TELA.
+
+                O Diego converteu o Ryan em 10/09 e perguntou, olhando o
+                cartao final: "um Ryan sair todo verde assim seria o justo?".
+                Nao era. O motor tinha escrito, uma hora antes, no MESMO log:
+
+                  [CONVERSAO NAO RECOMENDADA] FEL com expansao de brilho: o
+                  arquivo pede 1608 nits e foi masterizado para 1000.
+
+                e o cartao terminou com quatro selos verdes. As duas coisas
+                sao verdadeiras - a conversao FEZ o que prometeu, e o arquivo
+                ERA um caso de ressalva - mas so uma delas sobreviveu ate o
+                fim, e foi a boa. Isso e a tela mentindo por omissao.
+
+                A causa e estrutural: o cartao e montado a partir do OBJETO de
+                resultado, campo a campo (v14.29 aprendeu isso com a nota da
+                legenda), e o veredicto da camada nunca entrou nesse objeto -
+                ele so existia como linha impressa. #>
+            $script:SeloELdoArquivo   = "$($diagEL.Selo)"
+            $script:MotivoELdoArquivo = "$($diagEL.Motivo)"
             $rotuloEL = switch ($diagEL.Tipo) {
                 "MEL"           { "MEL (Enhancement Layer Minima, Sem Imagem)" }
                 "FEL"           { "FEL (Enhancement Layer Completa, Com Imagem)" }
@@ -5374,7 +5785,13 @@ foreach ($f in $files) {
         # esse diagnostico so checava PGS, entao para arquivos com PT-BR ja
         # em texto (sem PGS) ele dizia erroneamente "nenhuma legenda
         # identificada", quando na verdade o [5/7] ia reaproveitar a .srt.
-        $diagLegendaTexto = Get-FaixaLegendaPtBrTexto -MkvPath $f.FullName
+        # v14.53: quem mandou converter uma PGS na mao nao quer o
+        # reaproveitamento - nem no diagnostico, que tem que anunciar o que
+        # vai mesmo acontecer.
+        $diagLegendaTexto = $null
+        if (-not (Test-OcrPedidoNaMao -MkvPath $f.FullName)) {
+            $diagLegendaTexto = Get-FaixaLegendaPtBrTexto -MkvPath $f.FullName
+        }
         if ($diagLegendaTexto) {
             $nomeLegTexto = $diagLegendaTexto.properties.track_name
             if ([string]::IsNullOrWhiteSpace($nomeLegTexto)) {
@@ -5923,7 +6340,14 @@ foreach ($f in $files) {
         $script:UltimoBlocoReocr = 0
         $nomeLegendaPgsOrigem = $null    # Nome da faixa PGS pt-BR de origem, se convertida via OCR
 
-        $trackTexto = Get-FaixaLegendaPtBrTexto -MkvPath $f.FullName
+        # v14.53: a ordem manual de OCR vence o reaproveitamento. Sem ela,
+        # nada muda - texto pronto continua ganhando do OCR no automatico.
+        $trackTexto = $null
+        if (Test-OcrPedidoNaMao -MkvPath $f.FullName) {
+            Say "        Legenda: OCR pedido na mao - a faixa de texto existente nao sera reaproveitada" "DarkGray"
+        } else {
+            $trackTexto = Get-FaixaLegendaPtBrTexto -MkvPath $f.FullName
+        }
         if ($trackTexto) {
             # ---- Caminho 1: PT-BR ja pronta em texto (SRT/ASS) -----------
             # v14.10: faixa sem nome saia com aspas vazias no log
@@ -6135,7 +6559,7 @@ foreach ($f in $files) {
                         $iniReocrReal = $iniReocr
                         if ($viaSeconv) { $iniReocrReal = $fimSeconv }
                         SaySub "Re-OCR de falas curtas (Reocr_Legenda / Tesseract PSM 6)" $iniReocrReal 100
-                        $reocrRes = Invoke-ReocrLegenda -MkvPath $f.FullName -SrtPath $srtPtBr
+                        $reocrRes = Invoke-ReocrLegenda -MkvPath $f.FullName -SrtPath $srtPtBr -IdFaixaPgs $idLegendaPtBrOriginalPgs
                         if ($reocrRes -and $reocrRes.Caminho) {
                             $srtPtBr = $reocrRes.Caminho
                             if ($reocrRes.Trocados -gt 0) {
@@ -6343,6 +6767,35 @@ foreach ($f in $files) {
                 $padrao = if ($idAud -eq $idAudioDefault) { "yes" } else { "no" }
                 $flagsOriginal += @("--default-track", "${idAud}:${padrao}")
             }
+        }
+        <#  v14.54 - QUAL FAIXA DE AUDIO FICOU COMO PADRAO, SEMPRE NO LOG.
+
+            Pergunta do Diego, 13/09: "converti o Se7en e pedi para converter
+            o DTS, ele fez o trabalho certo, mas deixou DTS como audio
+            principal, ta certo isso? Pq quando converte TrueHD -> E-AC-3 JOC
+            ele deixa default o E-AC-3, igual deixa a nova SRT."
+
+            Pergunta certa, e a resposta curta e NAO: quando existe uma faixa
+            melhor para a TV, ela e que tem que nascer marcada. A regra ja
+            estava escrita e os cinco caminhos foram conferidos um a um -
+            faixa nova ganha, senao a compativel reaproveitada, senao a
+            principal. O que faltava era PROVA: o log nao dizia qual saiu
+            marcada, entao a unica forma de conferir era abrir o MediaInfo do
+            arquivo pronto.
+
+            E existe um caminho que legitimamente NAO mexe no padrao: o MODO
+            SEGURO (nenhuma faixa compativel, conversao falhou). Ali o arquivo
+            sai com a marcacao que ja tinha - e, sem esta linha, isso era
+            indistinguivel de defeito.
+
+            Log autossuficiente e regra do projeto. Se acontecer de novo, a
+            resposta esta a uma linha de distancia. #>
+        if ($audioSemRestricao) {
+            Say "        AUDIO PADRAO: nao alterado - modo seguro, o arquivo mantem a marcacao de origem" "DarkGray"
+        } elseif ($null -eq $idAudioDefault) {
+            Say "        AUDIO PADRAO: a faixa NOVA (E-AC-3) - as originais mantidas ficam nao-padrao" "DarkGray"
+        } else {
+            Say ("        AUDIO PADRAO: faixa " + $idAudioDefault + " (" + (Get-RotuloFaixa -MkvPath $f.FullName -Id $idAudioDefault) + ")") "DarkGray"
         }
 
         if (-not $legendaSemRestricao) {
@@ -6782,6 +7235,10 @@ foreach ($f in $files) {
             NotaLegendaDefeitos  = $script:NotaLegendaDefeitos
             NotaLegendaPct       = $script:NotaLegendaPct
             NotaLegendaBlocos    = $script:NotaLegendaBlocos
+            # 14.51: o veredicto da camada viaja com o resultado, para o
+            # cartao final poder repetir a ressalva que o log ja deu.
+            SeloEL        = "$($script:SeloELdoArquivo)"
+            MotivoEL      = "$($script:MotivoELdoArquivo)"
             Fps           = $fpsRaw
             Tamanho       = Format-Tamanho $tamanhoFinal
             DuracaoVideo  = Format-Duracao $duracaoTotal
@@ -7228,5 +7685,59 @@ Line
             [System.IO.File]::WriteAllText($LogFile, $conteudoLog, (New-Object System.Text.UTF8Encoding($false)))
         } catch { }
     }
+
+    <#  14.50 - UMA COPIA DO LOG AO LADO DO ARQUIVO CONVERTIDO (item C).
+
+        O RELATORIO FINAL E A COPIA DO LOG NAO SAO A MESMA COISA, e a
+        diferenca e a razao deste bloco existir:
+
+          o RELATORIO e o cartao que fecha a fila - ele responde "deu certo?".
+          Vive na tela e no _logs, junto com todos os outros.
+
+          a COPIA e a PROCEDENCIA do arquivo. Ela responde, seis meses depois,
+          "de onde saiu este .mkv, com qual dovi_tool, com qual audio, com que
+          veredicto de camada?" - e essa pergunta se faz OLHANDO PARA O
+          ARQUIVO, na pasta dele, nao vasculhando _logs por data.
+
+        Por isso ela nasce com o NOME do arquivo convertido: quem apaga o
+        video apaga o log junto, sem sobra, e quem move o video leva a
+        procedencia com ele.
+
+        ATENCAO - ESTE BLOCO SO RODA NO MODO CONSOLE. A janela NAO executa o
+        motor como script: ela carrega as funcoes pela AST e roda apenas o
+        "foreach ($f in $files)". Tudo que mora fora desse laco - este finally
+        inclusive - nunca acontece na interface. Esta e a mesma licao que o
+        comentario da v14.9 ja registrava sobre a faxina, e eu a repeti na
+        14.50: entreguei a copia do log e ela nao saiu na pasta do Diego,
+        porque ele so usa a janela. A copia do modo JANELA e escrita pela
+        propria janela, no fim da fila (17.09).
+
+        Ela vem DEPOIS da limpeza de ANSI, senao a copia sairia suja - a
+        mesma ordem que a v11.1 teve que aprender com o proprio $LogFile.
+
+        Falhar aqui nao custa nada: a conversao acabou, o log oficial esta
+        gravado em _logs, e o pior caso e o arquivo ficar sem a copia. #>
+    try {
+        $convertidos = @($resultados | Where-Object { $_.Status -eq "OK" -or $_.Status -eq "OK_PARCIAL" })
+        if ($convertidos.Count -gt 0 -and (Test-Path -LiteralPath $LogFile)) {
+            $textoLog = [System.IO.File]::ReadAllText($LogFile)
+            foreach ($c in $convertidos) {
+                $nomeBase = "$($c.Episodio)"
+                if ($nomeBase -eq "") { continue }
+                # O nome vem do episodio, nao do caminho: o P5 sai .mp4 e o
+                # resto sai .mkv, e a copia nao precisa saber qual foi.
+                $destino = Join-Path $OutputDir ($nomeBase + ".LaFirma.log.txt")
+                [System.IO.File]::WriteAllText($destino, $textoLog, (New-Object System.Text.UTF8Encoding($false)))
+            }
+            if ($convertidos.Count -eq 1) {
+                Say ("  Copia do Log ao Lado do Arquivo: {0}.LaFirma.log.txt" -f "$($convertidos[0].Episodio)") "DarkGray"
+            } else {
+                Say ("  Copia do Log ao Lado de Cada um dos {0} Arquivos Convertidos" -f $convertidos.Count) "DarkGray"
+            }
+        }
+    } catch {
+        try { Say ("  Nao consegui gravar a copia do log na pasta de saida: {0}" -f $_.Exception.Message) "Yellow" } catch { }
+    }
+
     Read-Host "Pressione ENTER para Fechar" | Out-Null
 }

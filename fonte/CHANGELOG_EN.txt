@@ -17,48 +17,609 @@
 
 
 ==============================================================================
+ INSTALLER 1.9.2  -  15/09/2026         *** THE WRONG FUNCTION WAS WINNING ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.17 | TESTAR_LAFIRMA 3.27
+
+ TWO FUNCTIONS WITH THE SAME NAME, SINCE 16.95  (17.17)
+ --------------------------------------------------------------------------
+   There were TWO functions called Get-FatorDisco in this file: the disk
+   SPEED factor (used for time estimates) and the disk SPACE factor (1.6x or
+   3.15x, added in 16.95). In PowerShell the LAST definition wins, so the
+   space one answered for both - and returned a constant 1.6 to callers that
+   pass no argument.
+
+   The proof was in the logs all along: 10,715 MB/s and 7,601 MB/s both
+   printing the same 1.60x, a number the correct function cannot produce
+   (anything above the 445 MB/s reference floors at 1.00). Logs from before
+   16.95 printed 1.00x.
+
+   Since 16.95 the time estimate had been ignoring disk speed and using a
+   disguised constant - feeding the very 170% spread the calibration warning
+   kept reporting at startup. Each function is now named after what it
+   measures, and the test suite FAILS on any top-level function defined
+   twice: this defect throws no error, it just answers the wrong question.
+
+ THE TEST SCRIPT BECAME PART OF THE SUITE  (17.17)
+ --------------------------------------------------------------------------
+   Section 46 rebuilds the user's own files from what the MediaInfo dumps and
+   logs recorded - track by track, with real ids, codecs, names and languages
+   - and runs the real functions against them: the English SDH track offering
+   no CONVERT, the pt-BR track still converting, the 13/09 queue leaving the
+   Ryan out by the right margin, the five audio-default paths, the
+   measurement counter. What it does not cover is written down too: anything
+   that needs real WPF.
+
+   For that, the queue simulation moved out of Update-Disco into a pure
+   function (Get-PlanoDoDisco). It was born in 16.93 surrounded by UI calls,
+   which is how it spent three versions calculating correctly and being
+   ignored.
+
+ AN ENGLISH SUBTITLE STAMPED AS BRAZILIAN  (14.54 / 17.16)  *** WORST ***
+ --------------------------------------------------------------------------
+   In Manual mode you could set CONVERT on the ENGLISH PGS track ('SDH'), and
+   the program did it. The log wrote "PT-BR subtitle found on track 5 'SDH'"
+   and the final file came out with an ENGLISH subtitle labelled
+   "Portugues (Brasil) [OCR]", marked as default.
+
+   This program converts PT-BR subtitles. That is not a preference, it is the
+   definition of what it does: the OCR uses a 1.3M-word Brazilian Portuguese
+   dictionary, the Corrector hunts alien blocks by comparing against
+   Portuguese, the Re-OCR redoes short lines in Portuguese. Pointed at an
+   English track it does not "convert English": it stamps English as
+   Brazilian.
+
+   The verb no longer exists for it, and the ENGINE refuses the order if it
+   arrives anyway, with the reason in the log. Two locks, because this one
+   ruins files.
+
+ THE QUEUE STARTED KNOWING THE SECOND FILE WOULD NOT FIT  (17.16)
+ --------------------------------------------------------------------------
+   The screen went amber-green ("Enough Space, But the Disk Will Be Tight"),
+   the first file converted for ten minutes, and the second died at the start
+   of its turn, 2.95 GB short.
+
+   The calculation that catches this has existed since 16.93: it walks the
+   queue IN ORDER and subtracts what each conversion LEAVES in the output.
+   What was missing was wiring its result into the decision - the Start
+   question only fired on the AGGREGATE calculation, which does not know the
+   disk shrinks between one file and the next. "Fits now, but not to the end"
+   is now a state of its own.
+
+ "IT LEFT DTS AS THE MAIN AUDIO - IS THAT RIGHT?"  (14.54)
+ --------------------------------------------------------------------------
+   Fair question, and the short answer is no: when a better track for the TV
+   exists, that is the one that gets marked. The rule was already right in
+   all five paths. What was missing was PROOF - the log never said which one
+   came out marked. It says so now, including when SAFE MODE legitimately
+   leaves the original marking alone.
+
+ FIVE PORTUGUESE BLOCKS INSIDE AN ENGLISH SUBTITLE  (14.54)
+ --------------------------------------------------------------------------
+   The _reocr zip explains it: the SRT came from the ENGLISH PGS, and the
+   Re-OCR went looking for the image on the track IT picks by itself - the
+   pt-BR one. Two different tracks in the same file. The main cause is now
+   locked, but the door that allowed the mismatch was still open: the engine
+   never passed -Track, so the Re-OCR rediscovered the track on its own. Two
+   detections of the same thing in different places - the 16.79 family. The
+   engine now sends the ID OF THE TRACK THAT PRODUCED THE SRT.
+
+ "IT SAID 1:25 TO FINISH, THAT SEEMED ODD"  (17.16)
+ --------------------------------------------------------------------------
+   Checked the log: the estimate was RIGHT - 1h25 predicted against ~1h20
+   real, 6% error (GOT -8%, Ryan -5%). But finding that out meant opening two
+   logs and subtracting by hand. Same lesson as AUDIO PADRAO: the rule was
+   correct and the PROOF was missing. The log now closes the loop with
+   PREVISAO per file and PREVISAO DA FILA in the summary - predicted, real,
+   and error in %.
+
+ THE MEASUREMENT GOT A BAR AND A COUNTER  (17.16)
+ --------------------------------------------------------------------------
+   The switch becomes a THIRD state while measuring - cyan, "Measuring MEL x
+   FEL: 1 of 2", with a small progress bar. The window already had the count
+   since 17.14; what was missing was showing it.
+
+ WHAT WAS STILL PORTUGUESE ON THE ENGLISH CARD  (17.16)
+ --------------------------------------------------------------------------
+   Seals write in UPPER CASE and the 17.15 rule was in normal case; the
+   subtitle grade is a collage of verdict + sentence + numbers; the two
+   end-of-run buttons are born after the language switch; the Chapters row
+   was the only verb in the table not going through the verb translator.
+   All fixed. The measurement switch tooltip is now on both buttons.
+
+ THE FINAL FILE CAME OUT WITH NO SUBTITLES AT ALL  (14.53)  *** WORST ***
+ --------------------------------------------------------------------------
+   This one landed in the user's FILE, not on screen. Dropping the old .SRT
+   and setting the PGS to CONVERT - swapping one subtitle for a fresh one -
+   produced an MKV with no subtitle track.
+
+   The WINDOW sent the right thing; the file's own log proves it. The ENGINE
+   ignored it: the subtitle step checks first whether a pt-BR text subtitle
+   already exists, found it, logged "[NOT NEEDED]" and ran no OCR. With no
+   new SRT, and the old one dropped on purpose, the remux discarded
+   everything. That is also why no .srt file appeared next to the MKV - that
+   file is a by-product of the OCR, and the OCR never ran.
+
+   Third appearance of one lesson (16.31, 14.40, now this), this time
+   inverted: if the ABSENCE of a key is never an order, its PRESENCE always
+   is. "LegendaPgs = <id>" means "convert THIS one". Automatic mode is
+   unchanged: a ready text subtitle still beats OCR.
+
+ THE WHOLE FOOTER WAS STILL IN PORTUGUESE  (17.15)
+ --------------------------------------------------------------------------
+   Started / Elapsed / Should Finish Around / Time Left / Next: - none of
+   those lines is a fixed label; they are all label + value glued together
+   every tick. Each one now goes through the translator as it is written.
+
+ "IN QUEUE" ON A FILE THAT IS NOT IN THE QUEUE  (17.15)
+ --------------------------------------------------------------------------
+   Unticked videos still read "In Queue" in the normal colour while another
+   one converted. The tick box is the only thing on screen that decides who
+   converts, and the column called STATUS was the one not looking at it. It
+   now reads "Not in the Queue - Will Not Be Converted", in dim grey, and no
+   longer competes for "Next to Convert".
+
+ THE MEASUREMENT SWITCH: TWO COLOURS AND TWO PLACES  (17.15)
+ --------------------------------------------------------------------------
+   Green when on, red when off - it was the last thing on screen outside the
+   colour scale fixed in 16.94. Red here does not mean error; it means you
+   turned a check off. It also gained a twin in the top bar next to Full
+   Census, with a tooltip explaining the cost. Both buttons call ONE action
+   and are drawn by ONE function.
+
+ A COMPLETE SWEEP OF THE ON-SCREEN TEXT  (17.15)
+ --------------------------------------------------------------------------
+   Four defects of the SAME family in one round, all with one cause: someone
+   wrote $UI.something.Text = "a Portuguese sentence", and the translation
+   sweep does not reach that - it only catches labels declared in the XAML.
+
+   Finding them one photo at a time never ends, so the sweep was done at
+   once: every on-screen string now translates as it is written. The whole
+   Tools panel joined in this round (label, "required"/"optional" and both
+   missing-tool sentences), along with the source-equals-output warning,
+   "DIAGNOSIS:", "Reading the folder...", "Resume F2" and the reused-audio
+   line. Tooltips now switch language too - none of them did.
+
+   And the rule became a TEST: the suite now fails any .Text carrying
+   Portuguese accents written without going through the translator, with a
+   single declared exception (the language name on its own button).
+
+ THE FINAL CARD STAYED FROZEN IN THE LANGUAGE IT WAS BORN IN  (17.15)
+ --------------------------------------------------------------------------
+   Since 17.02 there is a list of panels that Set-Idioma redraws, because the
+   tree sweep only reaches fixed XAML labels and everything the CODE writes
+   has to be redrawn by name: queue, diagnosis, disk, tracks. The final card
+   never made that list - it only exists after the conversion ends.
+
+   It does now. The redraw is Show-Resumo itself, with three guards: on a
+   redraw it does not rewrite the log, does not re-copy the log to the output
+   folder, and does not touch the state. The finish time and total time are
+   kept, otherwise the card would claim the conversion ended just now every
+   time the language changed.
+
+   Along with it: the card title, the times line, and every MANUAL CHOICE
+   sentence in the diagnosis now have translations - none of them did.
+
+ WAITING FOR A FILE THAT IS NOT GOING TO CONVERT  (17.15)
+ --------------------------------------------------------------------------
+   Measurement runs on every Profile 7 with an EL in the folder, and that is
+   right - the queue shows a verdict for all of them. But the WAIT exists for
+   one purpose: not starting a conversion before knowing what will be
+   converted. An unticked file is not in the conversion.
+
+   "Is there still something to measure?" now asks the REAL queue. If what is
+   left measuring is all unticked, Start does not even ask; and when the last
+   TICKED file finishes, the conversion starts right away.
+
+ SWAPPING A SUBTITLE IS NOT LOSING THE SUBTITLE  (17.15)
+ --------------------------------------------------------------------------
+   Dropping the old .SRT and setting the PGS to CONVERT - swapping one
+   subtitle for a fresh one - answered "No PT-BR Subtitle in the Final File".
+   What was sent to the engine was correct; only the sentence lied. The
+   verdict function read ONE track and spoke for the whole file. It now reads
+   every pt-BR candidate and answers in the order the final file ends up in.
+
+ "AN .SRT AND A PGS ALREADY EXIST - WHY CONVERT ANOTHER ONE?"  (17.14)
+ --------------------------------------------------------------------------
+   Fair question, and the answer is: it does NOT convert, and never would.
+   On the subtitle step the engine first checks whether a pt-BR subtitle
+   already exists as TEXT; if it does, it reuses it and logs "[NOT NEEDED]".
+   No OCR runs.
+
+   The WINDOW was the one that got it wrong. Building the Video Tracks tab it
+   tagged BOTH pt-BR tracks with the same role and put CONVERT on the PGS -
+   work the engine was never going to do. With two tracks fighting over the
+   same role, the DEFAULT label also went to whichever came first in the
+   file instead of the one the engine picked.
+
+   Now, when the .SRT is there, the PGS reads KEEP with the reason beside it
+   ("Text .SRT Already Exists - No OCR Needed"). KEEP is the truth: since
+   v14.23 the original PGS stays in the final file next to the generated SRT.
+
+ THE WAITING NOTICE DID NOT SHOW THAT ANYTHING WAS MOVING  (17.14)
+ --------------------------------------------------------------------------
+   Log of 11/09: the window started waiting at 00:49:59 and the measurement
+   finished at 00:50:41. A notice that sits still for 42 seconds is
+   indistinguishable from a dead one. It now counts: "Waiting for the
+   measurement to finish... (1 of 2)".
+
+ THE CENSUS BUTTON DID NOT SAY WHY IT WAS GREY  (17.14)
+ --------------------------------------------------------------------------
+   It starts disabled and lights up in one rare case (Complex FEL, not yet
+   counted). Without an explanation that is indistinguishable from a broken
+   button. It now has a tooltip for each of the seven reasons - including
+   when it IS enabled, where it says what will happen and what it costs.
+
+ "MEASURING A CAMADA DE MELHORIA"  (17.14)
+ --------------------------------------------------------------------------
+   Half a sentence in each language. Translation rules run IN ORDER, and the
+   rule for the bare word "medindo" fired before the rule for the whole
+   sentence, taking it apart before it could be matched. The specific rule
+   moved above the generic one.
+
+ THE FILE NAME CAME BACK AND NEVER LEFT AGAIN  (17.13)
+ --------------------------------------------------------------------------
+   In 17.12 I hid the name ONCE, on the click path. But FOUR places write
+   that hint, and switching Mode calls Fill-Faixas, which rewrites it.
+   Hiding in one place while four others write is not hiding - it is chasing.
+   There is now a single owner, Set-AbaDica, and waiting wins there.
+
+ THE WAITING NOTICE BECAME AN ACTUAL NOTICE  (17.13)
+ --------------------------------------------------------------------------
+   It sat at the same size and weight as a 70-character release name, sharing
+   the line. It now has its own amber-bordered box, a bullet, larger bold
+   type - and the name leaves the line while it is showing.
+
+ "COUNTING..." DID NOT SAY WHAT IT WAS COUNTING  (17.13)
+ --------------------------------------------------------------------------
+   It became "Census: counting...", and it can no longer get stuck: whatever
+   clears the state clears the label, and a new folder read ends a census in
+   progress.
+
+ AFTER CANCEL, THE FOOTER LIED FOR UP TO 21 SECONDS  (17.13)
+ --------------------------------------------------------------------------
+   Measured: the engine took 14.6s and 21.0s to stop after the request,
+   because it only checks cancellation BETWEEN steps and was mid layer
+   measurement both times. That delay is legitimate. The defect was the
+   footer still announcing "Extracting Pure Video" through all of it, and
+   through the cleanup too. It now says it is cancelling - and that decision
+   lives in the PULSE, not in a line written on the click, because the footer
+   is rewritten every tick.
+
+
+==============================================================================
+ INSTALLER 1.8.7  -  11/09/2026     *** THE DEADLOCK I CREATED YESTERDAY ***
+==============================================================================
+ Components: ENGINE 14.52 | WINDOW 17.12 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             TESTAR_LAFIRMA 3.22
+
+ THE BOX IS MODAL, AND THE WORLD DOES NOT STOP BEHIND IT  (17.12)
+ --------------------------------------------------------------------------
+   The "wait for the measurement?" prompt that 17.11 had just introduced
+   could deadlock the conversion. A WPF MessageBox runs its OWN message loop:
+   the dispatcher timer keeps firing and the message queue keeps being read.
+   The measurement could FINISH while the box was on screen, so "el_fim" went
+   by BEFORE the window marked that it would wait for it. Start stayed
+   disabled forever.
+
+   THE RULE I BROKE: between ASKING and ACTING, state can change - whoever
+   asks re-checks on the way back. That is exactly the trap 16.23 had already
+   closed on Cancel, and I repeated it two months later on the other side of
+   the screen.
+
+ ENGLISH NEVER REACHED THE FINAL CARD  (17.12)
+ --------------------------------------------------------------------------
+   In English the completion card came out half and half: the title
+   translated, the content did not. The progress footer showed ETAPA / VIDEO
+   / FILA in Portuguese.
+
+   The cause is structural: the translation sweep reaches what the XAML
+   DECLARED. Anything built by CODE - the card grid, the seals, the two
+   counter columns, the summary footer - is written afterwards and silently
+   undoes the translation. Same lesson as 17.01: a label the code writes must
+   translate at the moment it is written.
+
+   Counter lines got their own function: they are "label ... : value" and
+   would never match the table whole. It splits at the last ":", translates
+   the label and REBUILDS AT THE SAME WIDTH, so the two summary columns keep
+   their colons aligned.
+
+ THE ENGINE'S WORDING WAS GOING STRAIGHT TO THE SCREEN  (17.12)
+ --------------------------------------------------------------------------
+   The engine is pure ASCII by contract - the battery FAILS on accents there
+   - so its text can never serve as screen copy. It is the DATA; the window
+   writes the sentence.
+
+
+==============================================================================
+ INSTALLER 1.8.6  -  11/09/2026     *** TWO SENTENCES THAT CONTRADICTED ***
+==============================================================================
+ Components: ENGINE 14.52 | WINDOW 17.11 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             TESTAR_LAFIRMA 3.21
+
+ THE CARD SAID "ALREADY EXISTED" WHEN DISK WAS MISSING  (17.11)
+ --------------------------------------------------------------------------
+   Both sentences inside the SAME box:
+
+     Status   Skipped - Already Existed in the Output Folder
+     Reason   not enough space - ~47.68 GB missing
+
+   The engine has THREE skip paths and each one records its own reason in
+   the result. The window ignored that field and hard-coded the first case.
+   A sentence that contradicts the line right below it is worse than no
+   sentence at all - it makes the user doubt both.
+
+   The label is now READ from the reason, and missing disk gets its own
+   wording: "Not Started - Not Enough Disk Space". Not started, not skipped:
+   that is the difference between "I did not do it" and "I started and
+   stopped", which 14.44 already settled on the engine side. The summary
+   counter separates the two as well - knowing disk is missing is
+   actionable.
+
+ STARTING KILLED THE MEASUREMENT IN PROGRESS  (17.11)
+ --------------------------------------------------------------------------
+   One second after measurement began, F1 killed it. The row went amber with
+   no verdict - and thirty seconds later the ENGINE measured the same file
+   again on its own, because it always measures before converting. The work
+   was done twice and the screen was left with nothing. And the switch was
+   ON, which is the user saying "I want the verdict before I decide".
+
+   Start now ASKS. Waiting is pre-selected: of the two, it is the only one
+   that does not throw work away. Answering "start now" still works - the
+   conversion does not depend on it. What changed is that the choice is the
+   user's, not a side effect of the click.
+
+
+==============================================================================
+ INSTALLER 1.8.5  -  11/09/2026     *** THE COST OF MEL x FEL, AS A NUMBER ***
+==============================================================================
+ Components: ENGINE 14.52 | WINDOW 17.10 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             TESTAR_LAFIRMA 3.20
+
+ THE COMPLAINT
+ --------------------------------------------------------------------------
+   Layer measurement is the only part of reading a folder that is not
+   instant: measured 22.65s on Ryan and 27.49s on Troy - 50.14s for two
+   files. It already runs in the background (F1 is enabled immediately), but
+   until it finishes the row carries no verdict.
+
+ THE SWITCH  (17.10)
+ --------------------------------------------------------------------------
+   "Measure MEL x FEL: On / Off", next to Select All. It lives there rather
+   than on the top bar because it changes what the READING does - and the
+   reading is what fills that list. The choice is remembered between
+   sessions, in the same data folder as the language.
+
+   Flipping it RE-READS the folder: a queue read under the previous setting
+   would show a verdict from one state and a footer from the other.
+
+   OFF, the button turns amber - the colour of doubt, which is exactly what
+   the files then carry: "EL not measured". Honest doubt, but doubt. ON stays
+   the default, and an unreadable preference falls back to it.
+
+ AND THE NUMBER, WHICH IS THE POINT
+ --------------------------------------------------------------------------
+   The switch does not exist to hide the cost - it exists to measure it. The
+   log now carries, IN BOTH STATES, the same line with the same fields:
+
+     MEDICAO MEL x FEL: LIGADA    | 2 files | 168.99 GB | 50.14s | 0.30 s/GB
+     MEDICAO MEL x FEL: DESLIGADA | 2 files | 168.99 GB |  0.00s | 0.00 s/GB
+
+   That pair is what answers "with it on it took this long, with it off it
+   took this long". One line alone answers nothing, which is why the off
+   version prints too - including how many files were left without a verdict,
+   so the saving never looks free.
+
+ WHAT THIS VERSION STILL DOES NOT DO
+ --------------------------------------------------------------------------
+   It does not make the measurement faster - it costs what it costs, and now
+   that is written down. With the switch off the Full Census button does not
+   light up: it only appears on Complex FEL, and without measurement there is
+   no Complex FEL identified.
+
+
+==============================================================================
+ INSTALLER 1.8.4  -  11/09/2026     *** A SPACE IN THE FOLDER NAME ***
+==============================================================================
+ Components: ENGINE 14.52 | WINDOW 17.09 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             TESTAR_LAFIRMA 3.19
+
+ THE RPU PIPE BROKE ON PATHS WITH SPACES  (14.52)
+ --------------------------------------------------------------------------
+   Bloodsport failed with a message that is not ffmpeg's: "The filename,
+   directory name, or volume label syntax is incorrect" - that is cmd itself
+   complaining about the line it was handed. Ryan and Troy always worked
+   because they sit directly in ...\FILMESS\; Bloodsport sits in a folder
+   whose name contains a space.
+
+   THE CAUSE: the pipe was built as ONE STRING - four quoted paths inside an
+   outer pair of quotes - and handed to "cmd.exe /c" as an argument.
+   PowerShell 5.1 REWRITES quoting when passing arguments to a native
+   executable, so with a path containing a space what arrives is no longer
+   the line that was written. There is no "correct" quoting: the rewrite
+   happens after us.
+
+   THE FIX: the line stops travelling as an argument. It is WRITTEN to a
+   .cmd file in the temp folder and cmd receives only that file's path - a
+   single simple argument. The .cmd is written in ANSI (the code page cmd
+   assumes; UTF-8 would break accented paths) and '%' is escaped as '%%'.
+
+   This covers the full census and the bench - the only two places in the
+   project that build a pipe through cmd. Normal conversion never did: it
+   calls ffmpeg with an argument array, no cmd in between.
+
+ AND BLOODSPORT ANSWERED THE HDR10+ QUESTION
+ --------------------------------------------------------------------------
+   Even with the RPU failing, the container read already gave the verdict:
+   Bloodsport (52.47 GB, 1h32) - ruler 1000 nits from the frame SEI, and
+   HDR10+ PRESENT. It is the first file we have measured carrying both Dolby
+   Vision and HDR10+ in the same container. Ryan and Troy do not.
+
+
+==============================================================================
+ INSTALLER 1.8.3  -  10/09/2026     *** WHAT 1.8.2 PROMISED AND DID NOT DO ***
+==============================================================================
+ Components: ENGINE 14.51 | WINDOW 17.09 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
+             TESTAR_LAFIRMA 3.18 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+
+ 1.8.2 shipped with 655 tests passing and THREE of its four deliverables did
+ not work in the user's hands. None of them was wrong logic. All three were
+ tests looking the wrong way.
+
+ THE CENSUS BUTTON DID NOTHING  (17.09)
+ --------------------------------------------------------------------------
+   I asked the video object for the file path using the wrong field name. In
+   PowerShell a field that does not exist raises nothing: it becomes an empty
+   string and carries on. The runspace got an empty path and the failure died
+   in the log. The 27 tests checked the DESIGN - own runspace, only on Complex
+   FEL, no window function inside it - and none checked FIELD NAMES. The
+   battery now extracts the fields the reading actually creates and fails if
+   the census asks for one that is not there.
+
+ THE LOG COPY NEVER APPEARED  (17.09 / 14.51)
+ --------------------------------------------------------------------------
+   The cause was already written in the engine, in a v14.9 comment: the window
+   loads the engine's functions and runs ONLY the file loop - anything outside
+   it never happens in the interface. I put the copy in the closing finally,
+   which is exactly that outside. It worked in console mode, which is not how
+   the program is used. The WINDOW now writes the copy at the end of the
+   queue, from its own session log.
+
+ SAVING PRIVATE RYAN CAME OUT ALL GREEN  (17.09 / 14.51)
+ --------------------------------------------------------------------------
+   An hour earlier, in the same log, the program had written [CONVERSION NOT
+   RECOMMENDED] - FEL with brightness expansion, 1,608 nits requested against
+   1,000 of the master - and the final card closed with four green seals.
+
+   Both statements were true: the conversion did everything it promised, AND
+   the file was a caveat case. Showing only the first is lying by omission,
+   and the final card is the LAST thing the user reads. The layer verdict now
+   travels in the result object (SeloEL/MotivoEL) and the card carries a red
+   "Complex FEL - CONVERSION NOT RECOMMENDED" seal next to the green one. The
+   seal does not say the conversion failed - it did not. It says what the file
+   was.
+
+ THE BENCH ASKED TOO MUCH AND CLOSED TOO EARLY  (Bench 2.1)
+ --------------------------------------------------------------------------
+   Dragging an .mkv onto the .bat now runs straight away with no questions,
+   and the window returns to a menu that accepts the next file. An RPU failure
+   writes the reason to the log and the spreadsheet instead of leaving a log
+   with only a header, and a spreadsheet held open by Excel is retried and
+   then written under a timestamped name rather than losing the measurement.
+
+
+==============================================================================
+ INSTALLER 1.8.2  -  10/09/2026     *** CERTAINTY BECAME A BUTTON ***
+==============================================================================
+ Components: ENGINE 14.50 | WINDOW 17.08 | SUBTITLE FIXER 2.27 | REOCR 1.29
+             AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
+             TESTAR_LAFIRMA 3.17 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+
+ Requires dovi_tool 2.3.3 (for export --levels level1), same as 1.8.
+
+ The author of dovi_convert pointed out the limit of our method: comparing
+ the L1 of a SAMPLE against the mastering display peak is not enough to call
+ a file Complex FEL - and the peak itself is metadata declared by the
+ release, which is often wrong. Both halves of that critique are true, and
+ each became an item in this version.
+
+ FULL CENSUS, ON DEMAND  (17.08 / 14.50)
+ --------------------------------------------------------------------------
+   New button on the toolbar: "Full Census". It reads the RPU of the WHOLE
+   FILM - every scene - instead of the three to five short excerpts the
+   normal measurement uses. It is our equivalent of dovi_convert's
+   'inspect', next to the 'scan' we already had.
+
+   IT ONLY LIGHTS UP ON COMPLEX FEL. Not to save a button: that is where the
+   question exists. On MEL there is no picture in the enhancement layer to
+   count; on Simple FEL the L1 fits inside the master and reading everything
+   would not change the verdict; with no measurement at all, the right move
+   is the sample first, which costs five times less.
+
+   AND IT IS A BUTTON, NOT AUTOMATIC, BECAUSE IT WAS MEASURED BEFORE IT WAS
+   PROMISED. Bench of 10/09, two real films:
+
+     Saving Private Ryan  81.99 GB  2h49   census 109.4s   sample 22.2s
+     Troy                 ~65 GB    2h43   census 128.7s   sample 25.6s
+
+   Five times the cost of the sample, per file. On a queue of ten films that
+   is twenty minutes of waiting before conversion even starts - the opposite
+   of the "open it, point at the folder, press F1" the program promises.
+
+   It runs in its own runspace: the queue and the conversion stay usable,
+   and the result lands in the log with the seconds of each stage.
+
+ SUSPECT RULER  (14.50)
+ --------------------------------------------------------------------------
+   The mastering display peak is the ruler the L1 is measured against, and
+   it is DECLARED metadata. Until 14.49 the project's answer was honest but
+   passive: the FAQ warned the ruler can be wrong, and the program went on
+   using it as if it were right.
+
+   The L1 census now gives, for free, a hint of WHEN it was wrong: if most
+   of the scenes read go past the ruler, the likely explanation is not that
+   the whole film expands brightness all the time - it is that the declared
+   peak sits below the real master.
+
+   IT IS A SIGNAL, NOT A VERDICT. The log line says "SUSPECT RULER", never
+   "wrong ruler": the program cannot know which of the two numbers lied. It
+   simply stops pretending the ruler is trustworthy when the ruler
+   contradicts itself. The floor is 20 scenes read and 50% above - with five
+   scenes, "60% went past" is three scenes and means nothing.
+
+   And it goes to the LOG, not to the diagnosis line. The line says what was
+   detected and what will be done; "I distrust this metadata" is neither.
+
+ A COPY OF THE LOG NEXT TO THE CONVERTED FILE  (14.50)
+ --------------------------------------------------------------------------
+   Every converted file now gets a "<name>.LaFirma.log.txt" in the output
+   folder, holding the log of that conversion.
+
+   IT DOES NOT REPLACE THE FINAL REPORT - they answer different questions.
+   The report closes the queue and answers "did it work?". The copy answers,
+   six months later, "where did this .mkv come from, with which dovi_tool,
+   which audio, which layer verdict?" - and you ask that question looking at
+   the file, in its folder, not digging through _logs by date.
+
+   That is why it carries the file's NAME: delete the video and the log goes
+   with it; move the video and the provenance travels along.
+
+ THE BENCH NOW LEAVES A TRACE  (Bancada_CensoCompleto 2.0)
+ --------------------------------------------------------------------------
+   1.0 only wrote to the screen. Run it, close the window, nothing was left
+   to compare - and comparing was the only reason it existed. Each run now
+   leaves a log in _logs and one LINE in _logs\bancada_censo_medidas.csv
+   with the timings of every stage.
+
+   It also fixed a lie of its own: on Ryan it printed "ruler NOT DECLARED"
+   while the program, on the SAME file, was comparing against "the 1,000
+   nits of the master". Not two files - two readings. In MKV the mastering
+   display peak arrives as SEI on the FIRST FRAME, not as a stream property,
+   and the bench was asking for -show_streams. It now reads the frame first,
+   as the engine always did, falls back to the stream, and SAYS which one
+   answered. The same probe also reports whether the file carries HDR10+.
+
+ WHAT THIS VERSION STILL DOES NOT DO
+ --------------------------------------------------------------------------
+   It does not regenerate the L1. The full census swaps a sample for a
+   whole-film number; it does not measure the base layer or rewrite the RPU,
+   so it does not fix a Complex FEL. That is still phase 2, and still out.
+
+   It does not decide which of the two numbers lied when the ruler is
+   suspect. It raises the suspicion in the log; the decision stays yours.
+
+   The button does not run by itself, and will not: see the measurement.
+
+
+==============================================================================
  INSTALLER 1.8.1  -  10/09/2026
 ==============================================================================
- Components: ENGINE 14.49 | WINDOW 17.07 | SUBTITLE FIXER 2.27 | REOCR 1.29
+ Components: ENGINE 14.49 | WINDOW 17.05 | SUBTITLE FIXER 2.27 | REOCR 1.29
              AUDITOR_OCR 1.1.10 | LIMPAR_TESTES 1.9
-             TESTAR_LAFIRMA 3.16 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
+             TESTAR_LAFIRMA 3.14 | AUDITAR_SRT 1.3 | MEDIR_LEGENDAS 1.0
 
- Two language defects, and one shape fix in the diagnosis.
-
- THE RUNSPACE IS ANOTHER WORLD - AGAIN  (17.07)
- --------------------------------------------------------------------------
-   17.06 broke folder reading. Every file came out as "could not be read",
-   with this line in the log: "The term 'Escrever-Log' is not recognized".
-
-   THE CAUSE: the audio note 17.06 sent to the log was written with
-   Escrever-Log - a WINDOW function - inside the READING runspace, where
-   window functions do not exist. Messages from in there go through the
-   Avisar declared in the runspace block itself.
-
-   WHAT STINGS: battery section 13 has existed since 16.82 for exactly this
-   - "NO window function is called inside the runspaces". It would have
-   failed. The battery was not run before delivery.
-
-   Besides the fix, section 24e gained a test that demands AVISAR at the
-   exact spot, not just section 13's general rule.
-
- THE AUDIO LINE IS BACK TO THE SIZE OF ITS NEIGHBOURS  (17.06)
- --------------------------------------------------------------------------
-   16.98 got the meaning right and the shape wrong. The label gained an
-   explanatory parenthesis and the line gained a whole sentence of
-   justification after the seal. Next to its neighbours - label, fact, seal -
-   that one became a paragraph: on its own it pushed the right-hand column
-   out and broke the block's alignment.
-
-   THE RULE, as Diego put it, and it holds for the whole diagnosis: the LEFT
-   detects, the RIGHT says what will be done. Which track the file flagged
-   as default is neither of those.
-
-   The note did not disappear: it went to the log, in full, naming both
-   tracks and saying why. And the rule itself is unchanged - the choice
-   still ignores the file's default flag on purpose, because in Dual Audio
-   remuxes that flag usually points at the dub. Only where it is told
-   changed.
+ Two language defects. The second one is the cause of the first.
 
  LIVE SWITCHING DID NOT REACH THE WHOLE SCREEN  (17.05)
  --------------------------------------------------------------------------
@@ -118,7 +679,7 @@
    applies, now inside the new function. And it gives up quietly if the
    window has not been shown yet - belt and braces, with the reason logged.
 
-   THE BATTERY (3.16): section 33, 13 tests; plus section 34, 10 tests on
+   THE BATTERY (3.14): section 33, 13 tests; plus section 34, 10 tests on
    the sweep - including one that fails if it ever goes back to walking the
    visual tree alone. Section 33, 13 tests. They do not guard the symptom,
    they guard the separation: Set-Idioma's body is extracted and fails if it

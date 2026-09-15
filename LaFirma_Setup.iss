@@ -73,9 +73,9 @@
 ; sintaxe de PowerShell - o Inno le como texto solto e aborta com
 ; "Text is not inside a section" (aconteceu em 26/08, linha 42).
 ; ============================================================================
-#define Versao      "1.8.1"
-#define VersaoGui   "17.07"
-#define VersaoMotor "14.49"
+#define Versao      "1.9.2"
+#define VersaoGui   "17.17"
+#define VersaoMotor "14.54"
 #define VersaoCorretor "2.27"
 #define VersaoReocr "1.29"
 #define Publicador  "Diego"
@@ -291,7 +291,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; duas vezes, e se as copias divergissem, quem ganhava era a ultima - confusao
 ; garantida no dia em que o lancador mudar.
 Source: "fonte\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-    Excludes: "COPIE_O_PROGRAMA_AQUI.txt,_testes\*,{#Lancador},README.md,LEIA_ME.txt,LEIA-ME.txt,Testar_LaFirma.ps1,Testar_LaFirma.bat,Limpar_Testes.ps1,Limpar_Testes.bat,Auditor_OCR.ps1,Auditor_OCR.bat,Reocr_Legenda.bat,deezy_work\*,*.mkv,*.mp4,*.m2ts,*.hevc,*.srt,*.sup,00_Arquivos_Base\*,01_Arquivos_Finalizados\*,_temp_conversao\*,_ddvt_temp_*\*,_logs\*,_corretor\*,_reocr\*,_auditoria_ocr\*,_retratos\*,LaFirma_motor_log_*.txt,log_conversao_*.txt,relatorio_*.txt,tools\DeeZy\apps\ffmpeg\*,tools\PgsToSrt\x86\*"
+    Excludes: "COPIE_O_PROGRAMA_AQUI.txt,_testes\*,{#Lancador},README.md,LEIA_ME.txt,LEIA-ME.txt,VERSAO.txt,LaFirma_Setup.iss,Bancada_CensoCompleto.ps1,Bancada_CensoCompleto.bat,Testar_LaFirma.ps1,Testar_LaFirma.bat,Limpar_Testes.ps1,Limpar_Testes.bat,Auditor_OCR.ps1,Auditor_OCR.bat,Reocr_Legenda.bat,deezy_work\*,*.mkv,*.mp4,*.m2ts,*.hevc,*.srt,*.sup,00_Arquivos_Base\*,01_Arquivos_Finalizados\*,_temp_conversao\*,_ddvt_temp_*\*,_logs\*,_corretor\*,_reocr\*,_auditoria_ocr\*,_retratos\*,LaFirma_motor_log_*.txt,log_conversao_*.txt,relatorio_*.txt,tools\DeeZy\apps\ffmpeg\*,tools\PgsToSrt\x86\*"
 
 ;
 ; ---- 1.7: O MANUAL TAMBEM E ENTREGA (03/09) -------------------------------
@@ -415,6 +415,25 @@ Source: "fonte\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createa
 ; falando de uma pasta _para_compilar\ que o usuario nao tem. Arquivo de recado
 ; entre a gente nao e documentacao de produto: os manuais do usuario sao o
 ; COMO_USAR_PT.txt e o HOW_TO_USE_EN.txt.
+;
+;
+; 1.9.2: entraram tres que estavam sendo empacotados sem ninguem reparar,
+; porque "fonte\*" e recursivo e Excludes e lista de BLOQUEIO, nao de
+; permissao (a armadilha ja anotada nas licoes do projeto):
+;
+;   VERSAO.txt          - e GERADO por este instalador, na secao de codigo la
+;                         embaixo, com as versoes desta compilacao. A copia que
+;                         mora em fonte\ e sobra de uma instalacao anterior:
+;                         ela ia junto, era sobrescrita no fim, e enquanto isso
+;                         ficava versionada no GitHub dizendo uma versao velha.
+;   LaFirma_Setup.iss   - o instalador estava empacotando o proprio script de
+;                         compilacao dentro de si. No repositorio ele vive na
+;                         RAIZ; a copia em fonte\ e duplicata.
+;   Bancada_Censo*      - ferramenta de BANCADA, de desenvolvimento. Mede o
+;                         censo completo de um arquivo para comparar com a
+;                         amostra; nao tem uso para quem so quer converter, e
+;                         pela regra do projeto material interno nao vai nem
+;                         para o instalador nem para a raiz do repositorio.
 ;
 ; 1.4: README.md entrou nos Excludes porque e um arquivo de scaffold antigo
 ; (datado de 29/06/2025, bem antes do projeto existir de verdade) que sobrou

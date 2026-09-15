@@ -12,6 +12,12 @@ Parar	Stop
 Abrir Origem	Open Source
 Abrir Saída	Open Output
 Atualizar	Refresh
+Censo Completo	Full Census
+Medir MEL x FEL: Ligado	Measure MEL x FEL: On
+Medir MEL x FEL: Desligado	Measure MEL x FEL: Off
+Esperando a medição terminar para começar...	Waiting for the measurement to finish...
+Não Iniciado - Espaço Insuficiente em Disco	Not Started - Not Enough Disk Space
+Contando...	Counting...
 Entenda	Learn
 Log	Log
 Ferramentas	Tools
@@ -133,6 +139,11 @@ Marque o vídeo p/ editar	Tick the video to edit
 
 # ---- Coluna DOLBY VISION enquanto mede ----
 ~ ⋯ → 	 ⋯ → 
+# 17.14: esta linha vem ANTES de '~medindo' de proposito. As regras
+# rodam em ordem, e a regra da palavra solta desmanchava a frase
+# inteira antes de ela ser testada (o Diego viu 'measuring a camada
+# de melhoria' na tela em ingles).
+~medindo a camada de melhoria \(MEL x FEL\)	measuring the enhancement layer (MEL x FEL)
 ~^P(\d)\.(\d+) medindo	P$1.$2 measuring
 ~medindo	measuring
 
@@ -167,7 +178,6 @@ Marque o vídeo p/ editar	Tick the video to edit
 # ---- Linha do Dolby Vision ----
 ~^Dolby VISION: 	Dolby VISION: 
 ~Já Está em Profile 8\.1	Already in Profile 8.1
-~medindo a camada de melhoria \(MEL x FEL\)	measuring the enhancement layer (MEL x FEL)
 ~EL não medida	EL not measured
 ~— MEL: EL vazia, descarte sem perda	— MEL: empty EL, discarded with no loss
 ~— FEL: a camada extra tem imagem, descartada	— FEL: the extra layer has picture, discarded
@@ -212,7 +222,6 @@ Marque o vídeo p/ editar	Tick the video to edit
 ~^Já Convertido$	Already Converted
 
 # ---- 17.03: a aba Faixas (grupos, padrao, extras, rodape) ----
-VÍDEO	VIDEO
 ÁUDIO	AUDIO
 LEGENDAS	SUBTITLES
 EXTRAS	EXTRAS
@@ -231,6 +240,101 @@ nenhum anexo	no attachments
 ~\[GERA FAIXA NOVA\]	[CREATES A NEW TRACK]
 ~PGS em \.SRT \(via OCR\)	PGS to .SRT (by OCR)
 
+# ---- 17.15: as frases do diagnostico com ESCOLHA MANUAL ----
+# Elas carregam o codec no meio, entao sao REGRAS, nunca linhas exatas.
+# A ordem e a execucao: a mais especifica primeiro, senao a generica
+# ' a Pedido' corta a frase longa pela metade (mesmo erro do 'medindo').
+~Todas as Faixas de Áudio Excluídas por Você	All Audio Tracks Dropped by You
+~Sem Legenda PT-BR no Arquivo Final	No PT-BR Subtitle in the Final File
+~ a Pedido - a Legenda Anterior Foi Descartada	 on Request - the Previous Subtitle Was Dropped
+~ Mantido a Pedido - Conversão Desligada	 Kept on Request - Conversion Off
+~ Mantida a Pedido - Conversão Desligada	 Kept on Request - Conversion Off
+~ Excluído a Pedido	 Dropped on Request
+~ Excluída a Pedido	 Dropped on Request
+~ a Pedido	 on Request
+
+# ---- 17.15: a linha de tempos do cartao final ----
+~^Começou às (.*) - Terminou às (.*) - Tempo Total (.*)$	Started at $1 - Finished at $2 - Total Time $3
+~^Começou às (.*) - Interrompida às (.*) - Tempo Total (.*)$	Started at $1 - Interrupted at $2 - Total Time $3
+
+# ---- 17.15: o RODAPE inteiro (montado por codigo, linha por linha) ----
+# Ordem: os pedacos longos primeiro. Cada linha do rodape e uma colagem de
+# rotulo + valor, entao o que casa e o PEDACO, nunca a frase inteira.
+~Deve Terminar por Volta das 	 Should Finish Around 
+~Tempo Restante: 	Time Left: 
+~   Terminando Agora	   Finishing Now
+~PAUSADO POR VOCÊ há 	PAUSED BY YOU for 
+~^Começou: 	Started: 
+~   Começou: 	   Started: 
+~Decorrido: 	Elapsed: 
+~   Vídeo (\d+) de (\d+)	   Video $1 of $2
+~^A Seguir: 	Next: 
+~^Livre Agora 	Free Now 
+(aguardando o motor)	(waiting for the engine)
+
+# As frases que o 'A Seguir' pode carregar, e os tempos que Format-Espera monta.
+~Conferência do Arquivo Final e Limpeza	Final File Check and Cleanup
+~Limpeza dos Temporários	Cleaning Up the Temporary Files
+~Próximo Vídeo da Fila	Next Video in the Queue
+~Resumo da Conversão	Conversion Summary
+~menos de 1 min	less than 1 min
+~(\d+)h (\d+)min	$1h $2min
+~(\d+) min	$1 min
+
+# ---- 17.16: o botao enquanto a medicao roda ----
+~^Medindo MEL x FEL: (\d+) de (\d+)$	Measuring MEL x FEL: $1 of $2
+A camada de melhoria está sendo medida agora. A fila fica livre - isto roda em segundo plano.	The enhancement layer is being measured right now. The queue stays free - this runs in the background.
+
+# ---- 17.16: o motivo do arquivo que nao comecou ----
+~^Faltam ~(.*) livres no disco de saída$	Short by ~$1 free on the output drive
+
+# ---- 17.16: os selos e a linha de qualidade do CARTAO FINAL ----
+# Os selos escrevem o resultado em CAIXA ALTA, e a regra da 17.15 estava em
+# caixa normal: sobrava 'Mantido on Request - CONVERSAO DESLIGADA' na tela
+# em ingles. Caixa alta primeiro, pelo mesmo motivo de sempre (a regra mais
+# especifica antes da mais geral).
+~ Mantido a Pedido - CONVERSÃO DESLIGADA	 Kept on Request - CONVERSION OFF
+~ Mantida a Pedido - CONVERSÃO DESLIGADA	 Kept on Request - CONVERSION OFF
+~\[SERÁ CONVERTIDO COM RESSALVA\]	[WILL BE CONVERTED WITH A CAVEAT]
+~\[SERÁ CONVERTIDA COM RESSALVA\]	[WILL BE CONVERTED WITH A CAVEAT]
+
+# A nota da legenda ja tinha suas frases na tabela (bloco do cartao final);
+# o que faltava eram os NUMEROS entre parenteses, que sao colagem.
+~ \((\d+) legendas conferidas\)	 ($1 subtitles checked)
+~ \(1 falha em (\d+) legendas\)	 (1 problem in $1 subtitles)
+~ \((\d+) falhas em (\d+) legendas\)	 ($1 problems in $2 subtitles)
+
+# 17.16: o aviso do disco que enxerga a fila inteira, na ordem.
+~Cabe Agora, Mas Não Até o Fim: (\d+) de (\d+) Arquivo\(s\) da Fila Não Vão Começar\.	Fits Now, But Not to the End: $1 of $2 File(s) in the Queue Will Not Start.
+nada agora - a conta aperta no meio da fila	nothing right now - the squeeze happens mid-queue
+
+# ---- 17.15: o painel de FERRAMENTAS (montado por codigo, nunca traduzia) ----
+Conversão de Perfil Dolby Vision 7 → 8.1 (dovi_tool)	Dolby Vision Profile 7 → 8.1 Conversion (dovi_tool)
+Extração e Remontagem de Vídeo (ffmpeg + mkvmerge)	Video Extraction and Rebuild (ffmpeg + mkvmerge)
+Leitura de Metadados (ffprobe)	Metadata Reading (ffprobe)
+OCR de Legenda PT-BR (seconv/BinaryOCR - preferencial)	PT-BR Subtitle OCR (seconv/BinaryOCR - preferred)
+OCR de Legenda PT-BR (PgsToSrt - reserva)	PT-BR Subtitle OCR (PgsToSrt - fallback)
+Áudio TrueHD → E-AC-3 Atmos (DeeZy)	TrueHD → E-AC-3 Atmos Audio (DeeZy)
+Sinal de Atmos (MediaInfo)	Atmos Signalling (MediaInfo)
+Revisão de Blocos-Lixo do OCR (Corretor_Legenda)	OCR Junk-Block Review (Corretor_Legenda)
+Re-OCR de Falas Curtas (Reocr_Legenda)	Re-OCR of Short Lines (Reocr_Legenda)
+Motor do Re-OCR (Tesseract, empacotado)	Re-OCR Engine (Tesseract, bundled)
+obrigatória	required
+opcional	optional
+- NÃO ENCONTRADA, A CONVERSÃO NÃO RODA	- NOT FOUND, THE CONVERSION WILL NOT RUN
+- não encontrada, esta parte é pulada	- not found, this part is skipped
+Pasta de Saída é a Mesma da Origem - o Arquivo Convertido Sobrescreveria o Original	Output Folder Is the Same as the Source - the Converted File Would Overwrite the Original
+
+Converter este vídeo	Convert this video
+
+# ---- 17.15: as dicas da chave de medicao (barra de cima) ----
+Mede a camada de melhoria (MEL x FEL) de cada Profile 7 ao ler a pasta. É o que dá o veredicto da coluna DOLBY VISION. Clique para desligar.	Measures the enhancement layer (MEL x FEL) of every Profile 7 while reading the folder. It is what gives the DOLBY VISION column its verdict. Click to turn it off.
+A leitura da pasta não vai medir a camada de melhoria: nenhum Profile 7 terá veredicto e todos aparecem como 'EL não medida'. Clique para ligar.	The folder read will not measure the enhancement layer: no Profile 7 gets a verdict and they all show as 'EL not measured'. Click to turn it on.
+
+# ---- 17.15: a linha que nao entra na conversao ----
+Fora da Fila - Não Será Convertido	Not in the Queue - Will Not Be Converted
+~^Fora da Fila - Não Será Convertido$	Not in the Queue - Will Not Be Converted
+
 # ---- 17.03: os nomes das etapas, que vem do motor ----
 Preparando o motor...	Starting the engine...
 Extraindo Vídeo Puro do MKV (ffmpeg, Sem Recodificar)	Extracting the raw video from the MKV (ffmpeg, no re-encode)
@@ -240,3 +344,82 @@ Conversão de Legenda PGS para .SRT	Converting PGS subtitle to .SRT
 Remontando MKV Final (mkvmerge)	Rebuilding the final MKV (mkvmerge)
 Diagnóstico do arquivo	File diagnosis
 Limpeza dos temporários	Cleaning up temporary files
+
+# ---- Rodape de progresso (17.12) ----
+ETAPA	STEP
+FILA	QUEUE
+(aguardando o motor)	(waiting for the engine)
+
+# ---- Cartao final: rotulos e frases (17.12) ----
+Situação	Status
+Motivo	Reason
+Tempo	Time
+Container Final	Final Container
+Áudio	Audio
+Legenda	Subtitle
+Áudio  (★ = faixa padrão)	Audio  (★ = default track)
+Legenda  (★ = faixa padrão)	Subtitle  (★ = default track)
+Qualidade da Legenda	Subtitle Quality
+Duração / Taxa de Quadros	Duration / Frame Rate
+Tempo de Processamento	Processing Time
+Ignorado - Já Existia na Pasta de Saída	Skipped - Already in the Output Folder
+Ignorado	Skipped
+Cancelado pelo Usuário	Cancelled by the User
+Não Finalizado - Erro	Not Finished - Error
+O arquivo convertido já estava na pasta de saída	The converted file was already in the output folder
+Não há espaço livre suficiente no disco de saída	Not enough free space on the output drive
+EXCELENTE	EXCELLENT
+BOA	GOOD
+RAZOAVEL	FAIR
+RUIM	POOR
+Nenhuma falha encontrada. Pode assistir por esta legenda.	No faults found. You can watch with this subtitle.
+Pode assistir por esta legenda.	You can watch with this subtitle.
+Dá para assistir. Se tropeçar numa fala, troque no player para a legenda PGS original.	Watchable. If a line trips you up, switch in the player to the original PGS subtitle.
+Prefira a legenda PGS original - ela está neste mesmo arquivo.	Prefer the original PGS subtitle - it is in this same file.
+
+# ---- Resumo final: as linhas das duas colunas (17.12) ----
+Total de Vídeos na Fila	Total Videos in Queue
+Convertidos com Sucesso	Converted Successfully
+Convertidos com Ressalva	Converted with Caveat
+Ignorados (Já Existiam)	Skipped (Already Existed)
+Não Iniciados (Sem Espaço)	Not Started (No Disk Space)
+Cancelados pelo Usuário	Cancelled by User
+Falharam	Failed
+Tempo Total	Total Time
+Dolby Vision Convertido para Profile 8.1	Dolby Vision Converted to Profile 8.1
+Áudio Convertido para E-AC-3[ATMOS]	Audio Converted to E-AC-3[ATMOS]
+Áudio E-AC-3[ATMOS] Reaproveitado	E-AC-3[ATMOS] Audio Reused
+Áudio E-AC-3/AC-3 Reaproveitado	E-AC-3/AC-3 Audio Reused
+Áudio Mantido a Pedido (sem converter)	Audio Kept on Request (not converted)
+Legenda PGS Convertida para .SRT	PGS Subtitle Converted to .SRT
+Legenda PT-BR [.SRT] Reaproveitada	PT-BR [.SRT] Subtitle Reused
+Legenda PT-BR [.SRT] Descartada a Pedido	PT-BR [.SRT] Subtitle Dropped on Request
+O motor não devolveu nenhum resultado.	The engine returned no results.
+Pasta de Saída:	Output Folder:
+Log completo desta sessão:	Full log of this session:
+
+# ---- Selos do cartao final (17.12) ----
+Dolby Vision → Profile 8.1 - CONVERTIDO	Dolby Vision → Profile 8.1 - CONVERTED
+Dolby Vision Já em Profile 8.1 - NÃO NECESSÁRIO	Dolby Vision Already Profile 8.1 - NOT NEEDED
+Complex FEL - CONVERSÃO NÃO RECOMENDADA	Complex FEL - CONVERSION NOT RECOMMENDED
+Simple FEL - CONVERSÃO COM RESSALVA	Simple FEL - CONVERSION WITH CAVEAT
+Legenda PGS → .SRT - CONVERTIDA	PGS Subtitle → .SRT - CONVERTED
+Legenda - NÃO NECESSÁRIA	Subtitle - NOT NEEDED
+Áudios e Legendas Extras - DESCARTADOS	Extra Audio and Subtitles - DROPPED
+Descarte de Audios e Legendas [EXTRAS]	Extra Audio and Subtitles Dropped
+
+# ---- 17.13 ----
+Censo: contando...	Census: counting...
+Cancelando - esperando a etapa atual terminar e limpando os temporários...	Cancelling - waiting for the current step to finish and cleaning up...
+
+# ---- 17.14: legenda redundante e dica do Censo Completo ----
+Já Existe .SRT - OCR Não Necessário	Text .SRT Already Exists - No OCR Needed
+Selecione um vídeo na fila para poder contar as cenas.	Select a video in the queue to count its scenes.
+Já existe um censo em andamento - espere ele terminar.	A census is already running - wait for it to finish.
+Este arquivo já foi contado - o número está no diagnóstico e no log.	This file has already been counted - the number is in the diagnosis and in the log.
+Ligue 'Medir MEL x FEL' e releia a pasta: sem a amostra não há veredicto para conferir.	Turn 'Measure MEL x FEL' on and re-read the folder: without the sample there is no verdict to check.
+A camada de melhoria deste arquivo ainda está sendo medida.	The enhancement layer of this file is still being measured.
+A camada de melhoria deste arquivo não foi medida - meça a amostra antes, ela custa 5x menos.	The enhancement layer of this file was not measured - measure the sample first, it costs 5x less.
+Só vale em Complex FEL: aqui a camada extra não carrega imagem, não há cena para contar.	Only makes sense on Complex FEL: here the extra layer carries no picture, there is no scene to count.
+Só vale em Complex FEL: aqui o L1 cabe dentro do master, contar o filme inteiro não muda o veredicto.	Only makes sense on Complex FEL: here L1 fits inside the master, counting the whole film does not change the verdict.
+Lê o filme inteiro e conta quantas cenas pedem mais brilho que o master. Demora cerca de 5x a amostra - a fila continua livre.	Reads the whole film and counts how many scenes ask for more brightness than the master. Takes about 5x the sample - the queue stays free.

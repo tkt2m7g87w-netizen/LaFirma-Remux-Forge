@@ -19,63 +19,989 @@
 
 
 ================================================================================
+ INSTALADOR 1.9.2  -  15/09/2026   *** A FUNCAO ERRADA ESTAVA GANHANDO ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.17  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.27  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ TRES ARQUIVOS QUE IAM PARA O INSTALADOR DO USUARIO FINAL  (1.9.2)
+ --------------------------------------------------------------------------
+   Achados na conferencia de subida para o GitHub. "fonte\*" no .iss e
+   RECURSIVO e Excludes e lista de BLOQUEIO, nao de permissao - entao todo
+   arquivo novo que aparece em fonte\ entra no instalador por padrao, calado.
+
+     VERSAO.txt         - e GERADO pelo proprio instalador, com as versoes da
+                          compilacao. A copia em fonte\ era sobra de uma
+                          instalacao antiga: ia junto, era sobrescrita no fim,
+                          e enquanto isso ficava versionada no GitHub dizendo
+                          1.8.1 / janela 17.05 / motor 14.49.
+     LaFirma_Setup.iss  - o instalador empacotava o proprio script de
+                          compilacao dentro de si. No repositorio ele vive na
+                          RAIZ; a copia em fonte\ e duplicata.
+     Bancada_Censo*     - ferramenta de bancada, de desenvolvimento. Pela
+                          regra do projeto, material interno nao vai nem para
+                          o instalador nem para a raiz do repositorio.
+
+   Os tres entraram nos Excludes, e a bateria passou a conferir a LISTA - nao
+   da para testar "lembrei de excluir", mas da para testar o que esta escrito.
+
+ DUAS FUNCOES COM O MESMO NOME, DESDE A 16.95  (17.17)
+ --------------------------------------------------------------------------
+   O Diego pediu testes sinteticos em vez de refazer o roteiro na mao. O
+   primeiro deles carregou "Get-FatorDisco" do fonte, calculou a fila do
+   13/09 e disse que cabia tudo - quando o motor tinha recusado o Ryan
+   naquele dia. Nao era o teste que estava errado.
+
+   Existiam DUAS funcoes com esse nome neste arquivo:
+
+     - fator de VELOCIDADE do disco (referencia/medido, preso entre 1 e 8),
+       usada na estimativa de TEMPO;
+     - fator de ESPACO (1,6x ou 3,15x), criada na 16.95, que recebe o video
+       como parametro.
+
+   Em PowerShell a ULTIMA definicao vence. A de espaco e definida depois,
+   entao era ela que existia em runtime - inclusive para as chamadas que nao
+   passam argumento nenhum. Sem video para olhar, ela caia no ramo "nao tem
+   seta na coluna" e devolvia 1,6. Sempre 1,6.
+
+   A PROVA estava nos logs o tempo todo:
+
+     origem le a 10.715 MB/s (referencia 445) -> fator 1,60x
+     origem le a  7.601 MB/s (referencia 445) -> fator 1,60x
+
+   Duas velocidades muito diferentes, o mesmo fator. Com a funcao certa,
+   qualquer leitura acima de 445 MB/s da 1,00 (o piso) - 1,60 e um numero que
+   ela nao consegue produzir. Nos logs anteriores a 16.95, quando so existia
+   uma funcao com esse nome, a mesma linha imprimia 1,00x.
+
+   Ou seja: desde a 16.95 a estimativa de tempo ignorava a velocidade do
+   disco e usava uma constante disfarcada - alimentando justamente o
+   espalhamento de 170% que a calibragem vinha denunciando no arranque.
+
+   O nome era a armadilha inteira. Cada uma passou a se chamar pelo que mede
+   (Get-FatorVelocidadeDisco e Get-FatorEspacoDisco), e a bateria passou a
+   REPROVAR qualquer funcao de topo definida duas vezes - porque este defeito
+   nao da erro nenhum: ele so responde a pergunta errada, em silencio.
+
+ O ROTEIRO DE TESTE VIROU BATERIA  (17.17)
+ --------------------------------------------------------------------------
+   "Eu nao vou refazer tudo isso, faca testes sinteticos de acordo com os
+   arquivos enviados."
+
+   A resposta certa nao e ele repetir seis roteiros na mao: e a bateria
+   repetir por ele, toda vez. A secao 46 monta os arquivos DELE a partir do
+   que os MediaInfo e os logs registraram - faixa por faixa, com id, codec,
+   nome e idioma reais - e executa as funcoes de verdade em cima disso:
+
+     GOT S08E01 : a PGS 'SDH' inglesa nao oferece CONVERTER, e o motor a
+                  recusa como pt-BR; a PGS pt-BR do mesmo arquivo continua
+                  convertendo (o automatico nao mudou).
+     13/09      : a fila GOT + Ryan com 275,29 GB livres da UM fora, e o que
+                  fica de fora e o Ryan - com contraprova de disco folgado.
+     Se7en      : os cinco caminhos do audio padrao, incluindo o que gerou a
+                  pergunta ("deixou DTS como principal?").
+     Medicao    : o contador nunca passa do total, a barra nunca estoura.
+
+   Para isso a simulacao da fila saiu de dentro de Update-Disco e virou
+   funcao pura (Get-PlanoDoDisco). Ela nasceu na 16.93 cercada de $UI.algo, e
+   por isso ficou TRES versoes calculando certo e sendo ignorada. Conta que
+   nao da para executar sozinha e conta que ninguem confere.
+
+   Fica escrito o que a secao NAO cobre: nada que dependa de WPF de verdade
+   (o desenho do botao, a barra na tela, o dropdown aberto). Ela cobre a
+   REGRA por tras de cada um - que e onde os defeitos desta rodada estavam.
+
+
+ UMA LEGENDA INGLESA CARIMBADA DE BRASILEIRA  (14.54 / 17.16)
+ --------------------------------------------------------------------------
+   No Modo Manual dava para marcar CONVERTER na PGS de INGLES ('SDH') do GOT.
+   E o programa convertia. O log escreveu, sem pestanejar:
+
+     Legenda PT-BR Encontrada na Faixa 5 'SDH'
+
+   e o arquivo final saiu com uma legenda EM INGLES rotulada
+   "Portugues (Brasil) [OCR]", marcada como padrao. Esta e a mentira mais
+   cara que esta tela ja contou, porque ela sobrevive ao programa e vai
+   parar na TV.
+
+   O programa converte legenda PT-BR. Isso nao e preferencia, e a definicao
+   do que ele faz: o OCR usa dicionario pt-BR de 1,3M palavras, o Corretor
+   caca bloco alienigena comparando com portugues, o Reocr refaz fala curta
+   em portugues. Apontado para uma faixa inglesa ele nao "converte ingles":
+   produz uma legenda inglesa com carimbo errado.
+
+   Agora o verbo nao existe para ela - o dropdown de uma legenda que nao e a
+   pt-BR oferece MANTER e EXCLUIR, que e tudo que o motor sabe fazer com ela.
+   E o MOTOR recusa a ordem se ela chegar assim mesmo, com o motivo escrito
+   no log. Duas trancas, porque esta e do tipo que estraga arquivo.
+
+   A 14.53 tinha ensinado que a PRESENCA de uma chave e uma ordem. Esta
+   versao ensina o resto: uma ordem que o programa nao sabe executar continua
+   sendo uma ordem que ele nao executa.
+
+ A FILA COMECOU SABENDO QUE O SEGUNDO NAO IA CABER  (17.16)
+ --------------------------------------------------------------------------
+   13/09, 10h13. A tela deu verde-amarelo ("Espaco Suficiente, Mas o Disco
+   Vai Ficar Apertado"), o Diego apertou F1, o GOT converteu em 10 minutos -
+   e o Ryan morreu no comeco da vez dele:
+
+     [NAO INICIADO] Espaco Insuficiente. Necessario ~258,26 GB,
+     Disponivel 255,31 GB. Faltam ~2,95 GB.
+
+   "Quando dei inicio falou q tinha 10% livre, no final era pra ter ocorrido
+   de boa. NAO PODE ACONTECER ISSO." Certo.
+
+   E o mais irritante: a conta que pega isso existe desde a 16.93. Ela
+   percorre a fila NA ORDEM e desconta do disco o que cada conversao DEIXA na
+   saida - foi assim que ela viu que, depois dos 19 GB do GOT, o Ryan nao
+   caberia mais. O que faltava era ligar o resultado dela na decisao: a
+   pergunta do Iniciar so disparava pela conta AGREGADA (soma do lote ou pico
+   de um arquivo contra o livre de AGORA), que nao sabe que o disco encolhe
+   entre um arquivo e o outro.
+
+   Duas contas, e a que estava sendo ouvida era a que nao sabia do problema.
+   Agora "cabe agora, mas nao ate o fim" e um estado por si: aparece na barra
+   e na pergunta, com o nome do primeiro que fica de fora e quanto faltaria
+   na vez dele.
+
+ "DEIXOU DTS COMO AUDIO PRINCIPAL, TA CERTO ISSO?"  (14.54)
+ --------------------------------------------------------------------------
+   Pergunta certa, e a resposta curta e NAO: quando existe uma faixa melhor
+   para a TV, ela e que nasce marcada. A regra ja estava escrita e os cinco
+   caminhos foram conferidos um a um (faixa nova ganha; senao a compativel
+   reaproveitada; senao a principal) - e ela esta correta.
+
+   O que faltava era PROVA. O log nao dizia qual saiu marcada, entao a unica
+   forma de conferir era abrir o MediaInfo do arquivo pronto. Agora a linha
+   AUDIO PADRAO sai sempre - inclusive dizendo quando o MODO SEGURO
+   legitimamente nao mexe na marcacao de origem, que sem essa linha era
+   indistinguivel de defeito.
+
+ OS CINCO BLOCOS EM PORTUGUES NO MEIO DA LEGENDA INGLESA  (14.54)
+ --------------------------------------------------------------------------
+   O zip _reocr do GOT explica o "que loucura foi essa": no meio de uma
+   legenda inteira em ingles, CINCO blocos sairam em portugues perfeito.
+
+     ANTES : 'WOLKAN: Welcome back, my lady.'
+     DEPOIS: 'Bem-vinda de volta, milady.'
+
+   Nao foi milagre. O SRT daquela rodada veio da PGS INGLESA, e o Reocr, ao
+   refazer os blocos suspeitos, foi buscar a imagem na faixa que ELE escolhe
+   sozinho - a pt-BR. Duas faixas diferentes no mesmo arquivo.
+
+   A causa principal ja esta trancada (a PGS inglesa nao chega mais ao OCR).
+   Mas a porta que permitiu o descasamento continuava aberta: o Reocr aceita
+   -Track e o motor nunca passava, entao ele redescobria a faixa por conta
+   propria. Duas deteccoes da mesma coisa em lugares diferentes e a familia
+   de defeito que este projeto persegue desde a 16.79 - elas concordam ate o
+   dia em que nao concordam. Agora o motor manda o ID DA FAIXA QUE GEROU O
+   SRT: nao ha o que redescobrir.
+
+ "DIZIA 1:25 PARA TERMINAR, ACHEI ESTRANHO"  (17.16)
+ --------------------------------------------------------------------------
+   Fui conferir no log e a previsao tinha ACERTADO:
+
+     previsto 5.140s (1h25)  ->  real ~4.800s (1h20)   erro 6%
+     GOT    previsto 1.121s  ->  real 1.030s           erro -8%
+     Ryan   previsto 4.020s  ->  real 3.804s           erro -5%
+
+   Mas para descobrir isso eu precisei abrir dois logs, casar a linha
+   'previsto' do comeco com a 'Tempo deste episodio' do fim e subtrair na
+   mao. Ninguem vai fazer isso - e nem deveria.
+
+   Mesma licao da AUDIO PADRAO: a regra estava certa e faltava PROVA. Agora
+   sai PREVISAO por arquivo e PREVISAO DA FILA no resumo, com previsto, real
+   e erro em %. De quebra, e esse numero que vai dizer se os pesos precisam
+   ser revistos - o AVISO de calibragem grita quando as rodadas se espalham,
+   mas espalhamento entre filmes DIFERENTES nao e erro; erro por arquivo e.
+
+ A MEDICAO GANHOU BARRA E CONTADOR  (17.16)
+ --------------------------------------------------------------------------
+   "Enquanto esta medindo o EL nao tem uma barra de %? As vezes demora e nao
+   da pra saber se ta indo ou se ta travado." A janela ja contava os arquivos
+   desde a 17.14; o que faltava era mostrar. A chave vira um TERCEIRO estado
+   enquanto mede - ciano, "Medindo MEL x FEL: 1 de 2", com uma barrinha.
+
+ O QUE AINDA SAIA EM PORTUGUES NO CARTAO EM INGLES  (17.16)
+ --------------------------------------------------------------------------
+   - Os selos escrevem em CAIXA ALTA e a regra da 17.15 estava em caixa
+     normal: sobrava "Mantido on Request - CONVERSAO DESLIGADA", meia frase
+     em cada lingua.
+   - A nota da legenda ("RUIM - Prefira a legenda PGS original") e colagem de
+     veredicto + frase + numeros: cada pedaco passa por si agora.
+   - Os botoes Nova Conversao e Encerrar Programa nascem DEPOIS da troca de
+     idioma - a varredura nao os alcanca. Traduzem quando o cartao aparece.
+   - O verbo da linha Capitulos ("MANTER") era o unico da tabela que nao
+     passava pelo tradutor de verbos.
+   - [SERA CONVERTIDO COM RESSALVA] e o motivo do arquivo pulado.
+
+   E a dica da chave de medicao, que existia so no botao de cima, passou a
+   estar nos dois.
+
+
+ O ARQUIVO FINAL SAIU SEM NENHUMA LEGENDA  (14.53)  *** O MAIS GRAVE ***
+ --------------------------------------------------------------------------
+   Este saiu no ARQUIVO do usuario, nao na tela. No Se7en ele excluiu a .SRT
+   antiga e mandou CONVERTER a PGS - trocar uma legenda pela outra. O MKV
+   final veio sem legenda nenhuma.
+
+   A JANELA mandou certo, e o log do proprio arquivo prova:
+
+     ESCOLHA MANUAL: ... | legenda manter [] | PGS p/ OCR = 2
+
+   O MOTOR ignorou. A etapa de legenda testa primeiro se ja existe uma pt-BR
+   em TEXTO; achou a faixa 3, escreveu "[NAO NECESSARIO] Legenda 'PT-BR .SRT'
+   na Faixa 3" e nao rodou OCR nenhum. Sem SRT nova, e com a antiga fora por
+   ordem do usuario, o [5/5] fez o que lhe mandaram:
+
+     Legenda Reaproveitada:  - Demais Legendas Descartadas [OK]
+
+   E POR ISSO NAO SAIU O .SRT NA PASTA tambem: o arquivo .srt ao lado do MKV
+   e um subproduto do OCR. Sem OCR, sem arquivo. Nao foi removido nada - ele
+   nunca chegou a existir naquela rodada.
+
+   A LICAO, TERCEIRA APARICAO (16.31, 14.40, agora esta), desta vez pelo
+   avesso: se a AUSENCIA de uma chave nunca e uma ordem, a PRESENCA dela
+   sempre e. "LegendaPgs = <id>" quer dizer "converta ESTA", e nao "use isto
+   se voce nao tiver ideia melhor". O reaproveitamento continua sendo a regra
+   do AUTOMATICO - so deixou de atropelar quem escolheu na mao. O diagnostico
+   do motor tambem passou a anunciar o que vai mesmo acontecer.
+
+ O CARTAO FINAL FICAVA CONGELADO NA LINGUA EM QUE NASCEU  (17.15)
+ --------------------------------------------------------------------------
+   "Diagnostico final quando cancelado ainda fica em pt mesmo mudando pra
+   ingles no final... fechei e depois uma parte ficou em ingles e outra parte
+   nao."
+
+   Certo nas duas metades. Desde a 17.02 existe uma lista de paineis que
+   Set-Idioma redesenha, porque a varredura da arvore so alcanca rotulo fixo
+   do XAML e tudo que o CODIGO escreve precisa ser refeito por nome: fila,
+   diagnostico, disco, faixas. O cartao final nunca entrou nessa lista - ele
+   so existe depois que a conversao termina, que e justamente quando ninguem
+   estava olhando.
+
+   Agora entra. O redesenho e a propria Show-Resumo (ela ja remontava tudo do
+   zero a partir dos resultados), com tres travas: no redesenho ela nao
+   reescreve o log, nao recopia o log para a pasta de saida e nao mexe no
+   estado - trocar de lingua nao e uma conversao nova. A hora do fim e o
+   tempo total ficam guardados, senao o cartao passaria a dizer que a
+   conversao terminou agora, a cada troca de lingua.
+
+   Junto: o titulo ("Conversao Concluida" / "Interrompida") e a linha de
+   tempos nunca passaram pela traducao, e nenhuma das frases de ESCOLHA
+   MANUAL tinha entrada na tabela. Todas ganharam.
+
+ ESPERAR POR UM ARQUIVO QUE NAO VAI CONVERTER  (17.15)
+ --------------------------------------------------------------------------
+   "Se eu deixei selecionado so o Ryan e dei comecar, e sim ele ta esperando
+   1/2 blz, mas quando vai pro 2/2 pra analisar, o 2/2 nao tava selecionado
+   pra converter, entao nao me importa ele terminar de ler, nao e?"
+
+   Nao e mesmo. A medicao roda em todo Profile 7 com EL da pasta, e isso esta
+   certo - a fila mostra o veredicto de todos e ele pode marcar outro depois.
+   Mas a ESPERA existe para um fim so: nao comecar a converter sem saber o
+   que vai ser convertido. Arquivo desmarcado nao entra na conversao.
+
+   Quem responde "ainda falta medir?" passa a perguntar pela FILA REAL
+   (Get-Marcados, que ja e quem define quem entra). Se o que sobrou medindo
+   esta todo desmarcado, o Iniciar nem pergunta. E quando o ultimo MARCADO
+   termina, a conversao comeca na hora: a medicao restante e interrompida
+   pelo mesmo caminho da chave desligada, e o log diz quantos ficaram sem
+   medir.
+
+ O RODAPE INTEIRO ESTAVA EM PORTUGUES NA TELA EM INGLES  (17.15)
+ --------------------------------------------------------------------------
+   "Comecou, decorrido, deve terminar por volta das, tempo restante, tudo
+   isso ainda nao tem traducao... e o 'A seguir: [3/4] Conversao de Legenda',
+   todo aquele contexto ali tambem nao."
+
+   Nenhuma daquelas linhas e rotulo fixo: todas sao colagem de rotulo +
+   valor, montadas a cada tique. Agora cada uma passa por Traduzir-Frase na
+   hora em que e escrita, e a tabela ganhou as regras dos pedacos (o valor
+   fica onde esta, so o rotulo muda).
+
+ "NA FILA" NUM ARQUIVO QUE NAO ESTA NA FILA  (17.15)
+ --------------------------------------------------------------------------
+   Ele desmarcou dois videos, deixou um, e os desmarcados continuaram
+   escritos "Na Fila" na cor normal enquanto o outro convertia. Ele mesmo
+   desmontou a frase: "ele nao ta na fila, ele nao vai converter, nao faz
+   sentido... teria q ser outra informacao e em outra cor, cinza claro".
+
+   "Na Fila" era o texto de todo arquivo sem ramo proprio - e desmarcado
+   nunca teve ramo. O checkbox e a unica coisa da tela que decide quem
+   converte, e a coluna chamada SITUACAO era justo a que nao olhava para ele.
+   Agora le "Fora da Fila - Nao Sera Convertido", em cinza apagado: nao e
+   alerta, nao e erro, e ausencia. E essa linha nao disputa mais o "Proximo
+   a Converter" - quem nao entra na conversao nao pode ser o proximo dela.
+
+ A CHAVE DA MEDICAO: DUAS CORES E DOIS LUGARES  (17.15)
+ --------------------------------------------------------------------------
+   "Ligado fica cinza podre... coloca ele verde. E esse amarelo quando ta
+   desligado - na vdd ele pode ser vermelho ne?"
+
+   Pode e deve. Era a unica coisa da tela fora da escala de cores fixada na
+   16.94: ligado saia no cinza da borda (ausencia de cor, nao "ligado") e
+   desligado no ambar da DUVIDA - so que desligar a medicao nao e duvida, e
+   decisao. A duvida e a consequencia, e ela ja aparece onde deve: no "EL nao
+   medida" ambar da coluna.
+
+     LIGADO     verde     - vai medir, o veredicto sai
+     DESLIGADO  vermelho  - nao vai medir, nenhum arquivo tera veredicto
+
+   Vermelho aqui nao quer dizer erro, do mesmo jeito que o vermelho do
+   Complex FEL nao quer dizer bloqueado: quer dizer "voce desligou uma
+   verificacao". E ela ganhou um gemeo na barra de cima, do lado do Censo,
+   com dica explicando o custo. Os dois botoes chamam UMA acao e sao
+   desenhados por UMA funcao.
+
+ A VARREDURA COMPLETA DO TEXTO DE TELA  (17.15)
+ --------------------------------------------------------------------------
+   Quatro defeitos da MESMA familia numa rodada so (rodape, cartao final,
+   ESCOLHA MANUAL, painel de Ferramentas) e todos com a mesma causa: alguem
+   escreveu $UI.algo.Text = "frase em portugues", e a varredura de traducao
+   nao alcanca isso - ela so pega rotulo declarado no XAML.
+
+   Achar um de cada vez, por foto, nao termina nunca. Entao a varredura foi
+   feita de uma vez: TODA escrita de texto de tela com acento passou a
+   traduzir na hora em que e escrita. Entraram nesta rodada o painel de
+   Ferramentas inteiro (rotulo, "obrigatoria"/"opcional" e as duas frases de
+   ausencia), o aviso de origem = saida, "DIAGNOSTICO:", "Lendo a pasta...",
+   "Retomar F2" e a linha do audio reaproveitado.
+
+   As DICAS (ToolTip) tambem passaram a trocar de lingua - nenhuma trocava.
+
+   E a regra virou TESTE: a bateria agora reprova qualquer .Text com acento
+   portugues escrito sem passar pela traducao, com uma unica excecao
+   declarada (o nome do proprio idioma no botao). Nao ha mais frase "nova
+   demais" para escapar - ou passa pela traducao, ou entra na lista com um
+   motivo escrito.
+
+ TROCAR DE LEGENDA NAO E FICAR SEM LEGENDA  (17.15)
+ --------------------------------------------------------------------------
+   No Se7en ele excluiu a .SRT antiga (OCR de uma rodada anterior) e mandou
+   CONVERTER a PGS, para gerar uma nova. A tela respondeu "[ESCOLHA MANUAL]
+   Sem Legenda PT-BR no Arquivo Final".
+
+   O que foi ENVIADO ao motor estava certo - o log de 01:17 mostra id 2 ->
+   CONVERTER e id 3 -> EXCLUIR, e a porta manual manda LegendaPgs = 2 com o
+   id 3 fora do LegendaManter. Errado era so o texto: a funcao do veredicto
+   olhava UMA faixa (a de papel leg-ptbr) e falava pelo arquivo inteiro. Com
+   a PGS redundante ganhando papel proprio na 17.14, "a faixa" deixou de ser
+   uma so.
+
+   Agora ela olha todas as candidatas e responde na ordem em que o arquivo
+   final fica: se alguma vai ser convertida, o final tem legenda nova (e a
+   frase diz que a anterior foi descartada); senao, se alguma fica, e a que
+   ficou; a frase vermelha so sobra quando nao resta nenhuma.
+
+
+ "SE JA EXISTE UMA .SRT E UMA PGS PARA QUE CONVERTER OUTRA?"  (17.14)
+ --------------------------------------------------------------------------
+   A pergunta do Diego estava certa e a resposta e: NAO CONVERTE. Nunca ia
+   converter. O motor, na etapa de legenda, testa primeiro se ja existe uma
+   pt-BR em TEXTO - se existe, ele a reaproveita e escreve no log
+   "[NAO NECESSARIO] Legenda 'PT-BR .SRT' na Faixa N". OCR nao roda.
+
+   Quem errou foi a JANELA. Ao montar a aba Faixas ela marcava as DUAS faixas
+   pt-BR (a .SRT e a PGS) com o mesmo papel e punha CONVERTER na PGS - um
+   trabalho que o motor nao ia fazer. De quebra, com duas faixas disputando o
+   mesmo papel, o rotulo PADRAO da legenda ia para a que viesse primeiro na
+   ordem do arquivo, e nao para a que o motor escolheu.
+
+   Agora, quando a .SRT existe, a PGS le MANTER com o motivo do lado ("Já
+   Existe .SRT - OCR Não Necessário"). MANTER e a verdade: desde a v14.23 a
+   PGS original continua no arquivo final, ao lado do SRT.
+
+   A LICAO, de novo: a tela redigita o que o motor decide, e toda redigitacao
+   e uma chance de discordar da fonte. O ramo "as duas existem" era o unico
+   que nunca tinha sido percorrido.
+
+ O AVISO DE ESPERA NAO DIZIA SE ALGUMA COISA ANDAVA  (17.14)
+ --------------------------------------------------------------------------
+   Log de 11/09: 00:49:59 a janela comecou a esperar, 00:50:41 a medicao
+   terminou. A foto caiu no meio: Ryan ja medido, Troy ainda "P7 medindo". O
+   aviso estava CERTO - e mesmo assim ele leu como travado, porque um aviso
+   parado por 42 segundos e indistinguivel de um aviso morto.
+
+   Ele passa a contar: "Esperando a medicao terminar para comecar... (1 de
+   2)". A janela ja tinha os dois numeros, so nao os mostrava.
+
+ O BOTAO DE CENSO NAO DIZIA POR QUE ESTAVA CINZA  (17.14)
+ --------------------------------------------------------------------------
+   "esse botao de censo nao entedi porra nenhuma direto fica cinza."
+
+   Ele nasce apagado e acende num caso raro (Complex FEL ainda nao contado).
+   Sem explicacao, do lado de fora isso e identico a um botao quebrado - a
+   mesma armadilha do botao Modo na m3c24. Agora ele tem dica em portugues e
+   ingles para cada um dos sete motivos, inclusive quando esta aceso, onde
+   ela diz o que vai acontecer e quanto custa.
+
+ "MEASURING A CAMADA DE MELHORIA"  (17.14)
+ --------------------------------------------------------------------------
+   Meia frase em cada lingua na tela em ingles. A tabela tem uma regra para a
+   frase inteira e outra para a palavra "medindo" sozinha, e as regras rodam
+   em ORDEM: a da palavra disparava primeiro e desmanchava a frase antes de
+   ela ser testada. A regra especifica foi para cima da generica.
+
+
+ O NOME DO ARQUIVO VOLTAVA E NUNCA MAIS SAIA  (17.13)
+ --------------------------------------------------------------------------
+   Fotos 3 e 4 do Diego, mesma tela, so o Modo trocado: na primeira o aviso
+   de espera esta sozinho na linha; na segunda o nome do release voltou e
+   espremeu o aviso contra a borda.
+
+   A CAUSA E A LICAO: na 17.12 eu escondi o nome UMA VEZ, no caminho do
+   clique. Mas QUATRO pontos escrevem aquela dica (selecao vazia, video
+   ilegivel, nome do video, e o vazio do Fill-Faixas) - e trocar o Modo chama
+   Fill-Faixas. Esconder num lugar e deixar quatro escrevendo nao e esconder,
+   e correr atras.
+
+   Agora existe UM dono: Set-AbaDica. Todo mundo passa por ele, e la a espera
+   tem prioridade. O texto pedido fica guardado, entao quando a espera acaba
+   a dica volta sem ninguem recalcular nada. Mesma regra que ja valeu para o
+   audio (16.79), para a cor (16.94) e para o veredicto (16.84): uma regra,
+   um lugar.
+
+ O AVISO DE ESPERA VIROU AVISO DE VERDADE  (17.13)
+ --------------------------------------------------------------------------
+   Ele estava no mesmo tamanho e no mesmo peso de um nome de release de 70
+   caracteres, disputando a mesma linha. Agora tem caixa propria com borda
+   ambar, ponto na frente, fonte maior e negrito - e o nome sai da linha
+   enquanto ele estiver na tela.
+
+ "CONTANDO..." NAO DIZIA O QUE CONTAVA  (17.13)
+ --------------------------------------------------------------------------
+   O Diego clicou no Censo Completo, viu o botao cinza escrito "Contando..."
+   e perguntou o que era aquilo. Virou "Censo: contando...".
+
+   E ele tinha como ficar PRESO: o rotulo so voltava no fim do censo. Se a
+   pasta fosse relida no meio, o botao ficava "contando" sobre um arquivo que
+   nem estava mais na tela. Agora quem zera o estado zera o rotulo junto, e
+   uma leitura nova encerra o censo em curso.
+
+ DEPOIS DO CANCELAR, O RODAPE MENTIA POR ATE 21 SEGUNDOS  (17.13)
+ --------------------------------------------------------------------------
+   Medido nos logs de 11/09: o motor levou 14,6s e 21,0s para encerrar depois
+   do pedido. Isso NAO e travamento - ele so checa o cancelamento entre
+   etapas, e nas duas vezes estava no meio da medicao de camada da amostra
+   (~21s). Interromper um processo externo no meio deixaria lixo no disco.
+
+   O defeito era outro: durante esses segundos o rodape continuava
+   anunciando "Extraindo Video Puro do MKV", e seguia com o mesmo texto
+   durante a faxina. O usuario le a TELA, nao o log - e a tela dizia que
+   estava trabalhando no que ele acabou de mandar parar. A demora era
+   legitima; a frase e que estava mentindo.
+
+   Agora o rodape diz "Cancelando - esperando a etapa atual terminar e
+   limpando os temporarios...", em ambar. E a decisao mora no PULSO, nao numa
+   linha escrita no clique: o rodape e reescrito a cada tique e apagaria
+   qualquer texto posto de fora. Quando o estado sai de rodando, a frase some
+   sozinha.
+
+ A BATERIA (3.23)
+ --------------------------------------------------------------------------
+   Secao 41, 17 testes. Um deles CONTA as escritas diretas em lblAbaDica e
+   reprova se aparecer uma quinta - era exatamente esse espalhamento que
+   fazia o nome voltar. Contagem da janela: 160 -> 164.
+
+
+================================================================================
+ INSTALADOR 1.8.7  -  11/09/2026     *** O TRAVAMENTO QUE EU CRIEI ONTEM ***
+================================================================================
+ Componentes: MOTOR 14.52  |  JANELA 17.12  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.22  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ A CAIXA E MODAL, E O MUNDO NAO PARA ATRAS DELA  (17.12)
+ --------------------------------------------------------------------------
+   A pergunta "esperar a medicao terminar?", que a 17.11 acabou de criar,
+   podia travar a conversao para sempre.
+
+   MessageBox do WPF roda um laco de mensagens PROPRIO enquanto esta aberta:
+   o DispatcherTimer continua batendo e a fila de mensagens continua sendo
+   lida. Ou seja, a medicao podia TERMINAR com a caixa na tela - e o "el_fim"
+   passava ANTES de a janela marcar que ia esperar por ele.
+
+   Relato do Diego: "cliquei sim e ja tinha lido e apareceu que tava
+   esperando". A janela ficava esperando um aviso que ja tinha acontecido,
+   com o Iniciar apagado. Dai ele clicava em tudo - e "tudo" e justamente o
+   que a tela deixa clicar quando NAO esta rodando, porque a conversao nunca
+   comecou. O "bugou pra caraio, conseguia selecionar, ligar, desligar" era
+   isso: a tela estava correta, o estado e que estava parado no lugar errado.
+
+   A REGRA QUE EU QUEBREI: entre PERGUNTAR e AGIR o estado pode ter mudado.
+   Quem pergunta reconfere ao voltar. E exatamente a armadilha que a 16.23 ja
+   tinha fechado no Cancelar - a conversao podia terminar enquanto a pergunta
+   estava aberta - e que eu repeti dois meses depois, do outro lado da tela.
+
+   Agora, se a medicao acabou com a caixa aberta, a conversao comeca na hora,
+   e o log diz por que nao esperou.
+
+ O INGLES NUNCA CHEGOU AO CARTAO FINAL  (17.12)
+ --------------------------------------------------------------------------
+   Em ingles, o cartao de conversao concluida saia meio a meio: o TITULO
+   traduzia e o conteudo nao. O rodape de progresso mostrava ETAPA / VIDEO /
+   FILA em portugues no meio da tela inglesa.
+
+   A CAUSA e estrutural e vale registrar: a varredura de traducao (17.05)
+   alcanca o que o XAML DECLAROU. Tudo que e montado por CODIGO - a grade do
+   cartao, os selos, as duas colunas de contadores, o rodape do resumo - e
+   escrito depois, e desfaz a traducao em silencio. E a mesma licao da 17.01,
+   quando o rotulo "Atualizar/Parar" nao traduzia: rotulo que o codigo
+   escreve traduz NA HORA em que e escrito.
+
+   Agora passam pela traducao: os rotulos e os valores da grade, os selos, a
+   Situacao e o Motivo, as linhas dos contadores e do detalhamento, e o
+   rodape com a pasta de saida e o log.
+
+   E as linhas de contador ganharam funcao propria (Traduzir-LinhaContador):
+   elas sao "rotulo ... : valor" e nunca casariam inteiras com a tabela. Ela
+   parte no ultimo ":", traduz o rotulo e REMONTA COM A MESMA LARGURA - as
+   duas colunas do resumo alinham os dois-pontos, e um rotulo ingles mais
+   curto desmancharia a coluna.
+
+   Os rotulos ETAPA / VIDEO / FILA tinham um espaco preso no fim do Text, e o
+   carregador da tabela faz Trim - nunca casavam. O espaco virou Margin.
+
+ "espaco insuficiente" IA PARA A TELA COMO O MOTOR ESCREVEU  (17.12)
+ --------------------------------------------------------------------------
+   Minusculo no comeco e sem cedilha, no meio de um cartao todo capitalizado.
+
+   O motor e ASCII puro por contrato - a bateria REPROVA acento nele - entao
+   o texto dele nunca vai servir de frase de tela. Ele e o DADO; quem redige
+   e a janela. Agora o cartao escreve "Faltam ~46,80 GB livres no disco de
+   saida", e um motivo que a tela ainda nao conhece sai pelo menos com a
+   primeira letra maiuscula.
+
+ E O NOME DO ARQUIVO SAIU DA FRENTE DO AVISO
+ --------------------------------------------------------------------------
+   O nome do release (70 caracteres) dividia a linha com "Esperando a medicao
+   terminar...". Enquanto a espera dura, a dica com o nome some - quem espera
+   precisa saber POR QUE espera, nao qual linha esta selecionada. Ela volta
+   quando a conversao comeca.
+
+ A BATERIA (3.22)
+ --------------------------------------------------------------------------
+   Secao 40, 22 testes - e dois deles EXECUTAM: carregam a tabela e as
+   funcoes de traducao do proprio fonte e reprovam se QUALQUER frase do
+   cartao, dos selos, dos contadores ou do rodape voltar em portugues. Outro
+   confere que os dois-pontos continuam alinhados depois de traduzir.
+   Contar entradas na tabela nao prova nada; a frase montada saindo
+   traduzida, sim. Contagem da janela: 158 -> 160.
+
+
+================================================================================
+ INSTALADOR 1.8.6  -  11/09/2026     *** DUAS FRASES QUE SE CONTRADIZIAM ***
+================================================================================
+ Componentes: MOTOR 14.52  |  JANELA 17.11  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.21  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ Dois defeitos achados pelo Diego usando a 17.10, na mesma noite.
+
+ O CARTAO DIZIA "JA EXISTIA" QUANDO FALTAVA DISCO  (17.11)
+ --------------------------------------------------------------------------
+   Print de 10/09 23h56, as duas frases dentro da MESMA caixa:
+
+     Situacao   Ignorado - Ja Existia na Pasta de Saida
+     Motivo     espaco insuficiente - faltam ~47,68 GB
+
+   E o resumo em cima contava "Ignorados (Ja Existiam): 1" para um arquivo
+   que nunca tinha estado na pasta de saida.
+
+   A CAUSA: o motor tem TRES caminhos de PULADO - ja existia na saida (dois
+   deles) e espaco insuficiente - e cada um grava o proprio motivo no
+   resultado. A tela ignorava esse campo e chumbava a frase do primeiro
+   caso. Uma frase que contradiz a linha logo abaixo e pior do que nao ter
+   frase nenhuma: ela faz o usuario duvidar das duas.
+
+   Agora o rotulo e LIDO do motivo, e falta de disco tem frase propria -
+   "Nao Iniciado - Espaco Insuficiente em Disco". "Nao iniciado", e nao
+   "ignorado", porque e a diferenca entre "nao fiz" e "comecei e parei", que
+   a 14.44 ja tinha fixado do lado do motor. O contador do resumo tambem
+   separa os dois: saber que falta disco e acionavel - da para liberar
+   espaco e rodar de novo.
+
+   Mesma licao da 15.1d, que ja tinha valido para as cores: ler o dado
+   gravado onde a decisao foi tomada, nunca deduzir na tela.
+
+ O INICIAR MATAVA A MEDICAO EM CURSO  (17.11)
+ --------------------------------------------------------------------------
+   Medido no log de 10/09 23h55, com a chave LIGADA:
+
+     23:55:22.405  Medindo a camada de melhoria de 1 arquivo(s)...
+     23:55:23.689  CLIQUE: Iniciar
+     23:55:25.370  Medicao interrompida - marcados como EL nao medida
+
+   Um segundo depois de a medicao comecar, o F1 a matou. A linha ficou
+   ambar, sem veredicto - e trinta segundos depois o MOTOR mediu o MESMO
+   arquivo de novo, sozinho, porque ele sempre mede antes de converter. O
+   trabalho foi feito duas vezes e a tela nao ficou com nada.
+
+   E a chave estava LIGADA. Ligar a medicao e dizer "quero o veredicto antes
+   de decidir" - e a tela comecava a conversao justamente antes de ter o
+   veredicto para mostrar.
+
+   Agora o Iniciar PERGUNTA. Esperar vem pre-selecionado: das duas, e a
+   unica que nao joga trabalho fora. Quem responde "comecar agora" continua
+   podendo - a conversao nao depende disso. O que mudou e que a escolha
+   passou a ser do usuario, e nao efeito colateral do clique. Enquanto
+   espera, a tela diz por que o Iniciar esta apagado; e se a pasta for lida
+   de novo, a espera e cancelada (a fila que ele mandou converter ja nao
+   existe).
+
+   Com a chave DESLIGADA a pergunta nao aparece: nao ha medicao para
+   esperar.
+
+ A BATERIA (3.21)
+ --------------------------------------------------------------------------
+   Secao 39, 18 testes. Contagem da janela: 155 -> 158.
+
+ O QUE ESTA VERSAO AINDA NAO FAZ
+ --------------------------------------------------------------------------
+   Nao evita a medicao dupla quando o usuario escolhe "comecar agora" - o
+   motor mede por conta propria antes de converter, e isso e o que garante
+   que ele nunca converte as cegas. Aproveitar a medida da tela no motor
+   seria duas fontes para o mesmo fato, que e a familia de bug da 16.79.
+
+
+================================================================================
+ INSTALADOR 1.8.5  -  11/09/2026     *** O CUSTO DO MEL x FEL, EM NUMERO ***
+================================================================================
+ Componentes: MOTOR 14.52  |  JANELA 17.10  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.20  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ A QUEIXA, DE 10/09
+ --------------------------------------------------------------------------
+   "Esse lance do FEL x MEL esta gerando um custo de tempo para apenas
+   comecar o processo de conversao, q antes era so abrir o programa, apontar
+   a pasta e dar F1."
+
+   Ela e justa. A medicao de camada e o UNICO trabalho da leitura da pasta
+   que nao e instantaneo. Medido em 10/09: 22,65s no Ryan e 27,49s no Troy -
+   50,14s para dois arquivos. Ela ja roda em segundo plano (o F1 fica
+   liberado na hora), mas ate ela terminar a linha nao tem veredicto.
+
+ A CHAVE  (17.10)
+ --------------------------------------------------------------------------
+   "Medir MEL x FEL: Ligado / Desligado", ao lado de Marcar Todos. Fica ali,
+   e nao na barra de cima, porque ela muda o que a LEITURA faz - e a leitura
+   e o que enche aquela lista. A escolha e guardada entre sessoes, na mesma
+   pasta de dados do idioma (a licao da 17.02: pasta do script nao serve
+   quando o programa mora em Program Files).
+
+   Trocar a chave RELE a pasta. Uma fila lida com a chave anterior estaria
+   mostrando veredicto de um estado e rodape de outro.
+
+   DESLIGADA, O BOTAO FICA AMBAR - a cor da duvida, que e exatamente o que os
+   arquivos passam a ter: "EL nao medida". Duvida honesta, mas duvida. Por
+   isso LIGADO continua sendo o padrao, e preferencia ilegivel volta para
+   ele: falta de arquivo nao pode virar falta de veredicto em silencio.
+
+ E O NUMERO, QUE E O PONTO
+ --------------------------------------------------------------------------
+   A chave nao existe para esconder o custo - existe para medi-lo. O log
+   passa a trazer, NOS DOIS ESTADOS, a mesma linha com os mesmos campos:
+
+     MEDICAO MEL x FEL: LIGADA    | 2 arquivo(s) | 168,99 GB | 50,14s | 0,30 s/GB
+     MEDICAO MEL x FEL: DESLIGADA | 2 arquivo(s) | 168,99 GB |  0,00s | 0,00 s/GB
+
+   E esse par que responde "com isso ligado durou tanto, com isso desligado
+   durou tanto". Uma linha so nao responde nada, e por isso a versao
+   desligada tambem sai - inclusive dizendo quantos arquivos ficaram sem
+   veredicto, para a economia nunca parecer de graca.
+
+   O "s/GB" esta ali porque duas pastas de tamanhos diferentes nao se
+   comparam pelo total - so pela taxa.
+
+ A BATERIA (3.20)
+ --------------------------------------------------------------------------
+   Secao 38, 17 testes. Eles nao guardam a chave: guardam a HONESTIDADE
+   dela - que a linha comparavel sai nos DOIS estados, que a versao
+   desligada diz quantos ficaram sem veredicto, que o padrao e ligado e que
+   preferencia ilegivel volta ao padrao. Contagem da janela: 151 -> 155.
+
+ O QUE ESTA VERSAO AINDA NAO FAZ
+ --------------------------------------------------------------------------
+   Nao acelera a medicao - ela custa o que custa, e agora esta escrito.
+   Com a chave desligada o botao Censo Completo nao acende: ele so aparece
+   em Complex FEL, e sem medicao nao ha Complex FEL identificado.
+
+
+================================================================================
+ INSTALADOR 1.8.4  -  11/09/2026     *** PASTA COM ESPACO NO NOME ***
+================================================================================
+ Componentes: MOTOR 14.52  |  JANELA 17.09  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.19  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ Depende do dovi_tool 2.3.2 -> 2.3.3, o mesmo exigido desde a 1.8.
+
+ O PIPE DO RPU QUEBRAVA COM ESPACO NO CAMINHO  (14.52)
+ --------------------------------------------------------------------------
+   O Bloodsport falhou em 10/09 21:55 com uma mensagem que NAO e do ffmpeg:
+
+     A sintaxe do nome do arquivo, do nome do diretorio ou do rotulo do
+     volume esta incorreta.
+
+   Isso e o proprio cmd reclamando da linha que recebeu. O Ryan e o Troy
+   sempre passaram porque moram direto em ...\FILMESS\; o Bloodsport mora
+   em "...\Bloodsport...HDR10P.H- CONVERTIDO\" - pasta COM ESPACO.
+
+   A CAUSA: a linha do pipe era montada como UMA STRING, com quatro caminhos
+   entre aspas dentro de um par de aspas externo, e entregue a "cmd.exe /c"
+   como argumento. O PowerShell 5.1 REESCREVE as aspas ao passar argumento
+   para executavel nativo - com um caminho que tem espaco, o que chega do
+   outro lado ja nao e a linha que foi escrita. Nao ha citacao "certa": a
+   reescrita acontece depois de nos.
+
+   O CONSERTO: a linha para de viajar como argumento. Ela e GRAVADA num .cmd
+   na pasta temporaria, e o cmd recebe so o caminho desse arquivo - um
+   argumento unico e simples. O cmd le a linha do disco, exatamente como foi
+   escrita. O .cmd e gravado em ANSI (a pagina de codigo que o cmd assume ao
+   ler um .cmd; UTF-8 quebraria caminho com acento), e o '%' e escapado como
+   '%%', senao um nome de arquivo com % apagaria metade do caminho calado.
+
+   Vale para o CENSO COMPLETO e para a bancada - sao os dois unicos lugares
+   do projeto que montam pipe pelo cmd. A conversao normal nunca passou por
+   aqui: ela chama o ffmpeg com vetor de argumentos, sem cmd no meio.
+
+ E O BLOODSPORT RESPONDEU A PERGUNTA DO HDR10+
+ --------------------------------------------------------------------------
+   Mesmo com o RPU falhando, a leitura do container ja tinha dado o veredicto
+   que faltava desde 10/09:
+
+     Bloodsport.1988.PROPER.UHD...DV.HDR10P  52,47 GB  1h32
+       Regua  : 1000 nits [lida do quadro (SEI)]
+       HDR10+ : PRESENTE
+
+   E o primeiro arquivo medido por nos com Dolby Vision e HDR10+ no mesmo
+   container. Ryan e Troy nao tem.
+
+ A BATERIA (3.19)
+ --------------------------------------------------------------------------
+   Cinco testes novos: o pipe tem que ir por arquivo .cmd, o .cmd tem que
+   ser ANSI, o % tem que ser escapado, e reprova quem voltar a montar a
+   linha a mao para o "cmd.exe /c". Contagem do motor: 87 -> 88 funcoes.
+
+ BANCADA 2.3
+ --------------------------------------------------------------------------
+   Mesmo conserto do pipe. Junto vieram, da 2.2: pasta arrastada passou a ser
+   um pedido valido (ela varre, acha os videos dentro e mede um por um), e
+   nenhuma recusa sai calada - o caminho recebido vai para o log ANTES de
+   qualquer julgamento, e o nome do log ganhou milissegundos.
+
+
+================================================================================
+ INSTALADOR 1.8.3  -  10/09/2026     *** O QUE A 1.8.2 PROMETEU E NAO FEZ ***
+================================================================================
+ Componentes: MOTOR 14.51  |  JANELA 17.09  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.18  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ Depende do dovi_tool 2.3.2 -> 2.3.3, o mesmo exigido desde a 1.8.
+
+ A 1.8.2 saiu com 655 testes passando e TRES das quatro entregas nao
+ funcionaram na mao do usuario. Nenhuma delas era logica errada. As tres eram
+ testes olhando para o lado errado, e vale escrever qual:
+
+ O BOTAO DO CENSO NAO FAZIA NADA  (17.09)
+ --------------------------------------------------------------------------
+   Clicava e nada acontecia. Eu pedi o endereco do arquivo ao objeto do video
+   pelo nome errado de campo; o objeto guarda isso em Caminho. Em PowerShell,
+   campo que nao existe nao da erro: vira string vazia e segue. O runspace
+   recebia caminho vazio, o motor devolvia "Arquivo nao encontrado" e a falha
+   morria no log.
+
+   Os 27 testes da secao 35 conferiam o DESENHO - roda em runspace proprio,
+   so acende em Complex FEL, nao chama funcao da janela. Nenhum conferia os
+   NOMES DOS CAMPOS. Agora a bateria extrai os campos que a LEITURA cria e
+   reprova se o censo pedir um que nao existe.
+
+ A COPIA DO LOG NUNCA SAIU  (17.09 / 14.51)
+ --------------------------------------------------------------------------
+   Conferido na pasta de saida do Ryan: o .mkv e o .srt estavam la, o
+   .LaFirma.log.txt nao.
+
+   A causa ja estava escrita no proprio motor, num comentario da v14.9: "A
+   JANELA executa SO o foreach ($f in $files) do motor - tudo que fica fora
+   dele nunca roda na interface". Eu pus a copia no finally do fim do arquivo,
+   que e exatamente esse "fora dele". Funcionava no modo console, que o Diego
+   nao usa.
+
+   Agora quem copia e a JANELA, no fim da fila, do log DELA - que e o log que
+   o botao Log mostra e o unico que descreve a sessao inteira. O modo console
+   continua com o bloco de la.
+
+ O RYAN SAIU TODO VERDE  (17.09 / 14.51)
+ --------------------------------------------------------------------------
+   Pergunta do Diego, olhando o cartao final: "um Ryan sair todo verde assim
+   seria o justo?". Nao seria. Uma hora antes, no MESMO log, o programa tinha
+   escrito:
+
+     [CONVERSAO NAO RECOMENDADA] FEL com expansao de brilho: o arquivo pede
+     1608 nits e foi masterizado para 1000.
+
+   e o cartao fechou com quatro selos verdes.
+
+   As duas afirmacoes eram verdadeiras - a conversao fez tudo o que prometeu,
+   E o arquivo era um caso de ressalva. Mostrar so a primeira e mentir por
+   omissao, e o cartao final e a ULTIMA coisa que o usuario le: se a ressalva
+   nao estiver ali, ela nao existiu.
+
+   A causa e a mesma que a v14.29 ja tinha encontrado com a nota da legenda:
+   o cartao e montado a partir do OBJETO de resultado, campo a campo, e
+   ignora linha solta de saida. O veredicto da camada nunca entrou nesse
+   objeto. Agora entra (SeloEL/MotivoEL), e o cartao ganha um selo vermelho
+   "Complex FEL - CONVERSAO NAO RECOMENDADA" ao lado do verde do Profile 8.1.
+   O selo NAO diz que a conversao falhou - ela nao falhou. Ele diz o que o
+   arquivo era.
+
+ A BANCADA PERGUNTAVA DEMAIS E FECHAVA CEDO  (Bancada 2.1)
+ --------------------------------------------------------------------------
+   Testar cinco filmes eram cinco aberturas do .bat e dez Enter em perguntas
+   que ninguem pediu. Arrastar o .mkv agora roda direto, sem pergunta
+   nenhuma, e no fim a janela volta para um menu que aceita o proximo
+   arquivo. Nota e segundos da amostra viraram opcoes do menu.
+
+   Alem disso: falha do RPU agora escreve o MOTIVO no log e na planilha
+   (antes sobrava um log so com o cabecalho - "nao aconteceu nada e gerou
+   log"), e a planilha, quando esta aberta no Excel, e tentada de novo e
+   depois gravada com o horario no nome, em vez de a medida se perder depois
+   de dois minutos medindo.
+
+ O QUE ESTA VERSAO AINDA NAO FAZ
+ --------------------------------------------------------------------------
+   Nao regenera o L1 - continua sendo a fase 2, e continua fora.
+   Nao decide qual numero mentiu quando a regua e suspeita.
+   O censo completo continua sendo botao, e nao automatico: 5x a amostra.
+
+
+================================================================================
+ INSTALADOR 1.8.2  -  10/09/2026     *** A CERTEZA VIROU BOTAO ***
+================================================================================
+ Componentes: MOTOR 14.50  |  JANELA 17.08  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.17  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ Depende do dovi_tool 2.3.2 -> 2.3.3 (o export --levels level1), o mesmo
+ exigido desde a 1.8.
+
+ O autor do dovi_convert apontou o limite do nosso metodo: comparar o L1 de
+ uma AMOSTRA com o pico do mastering display nao basta para afirmar Complex
+ FEL, e o proprio pico e metadado declarado pelo release, que erra. As duas
+ metades da critica sao verdadeiras e cada uma virou um item nesta versao.
+
+ CENSO COMPLETO, SOB DEMANDA  (17.08 / 14.50)
+ --------------------------------------------------------------------------
+   Botao novo na barra: "Censo Completo". Ele le o RPU do FILME INTEIRO -
+   todas as cenas - em vez dos tres a cinco trechos curtos da medicao
+   normal. E o equivalente ao 'inspect' do dovi_convert, ao lado do 'scan'
+   que ja tinhamos.
+
+   ELE SO ACENDE EM COMPLEX FEL. Nao e economia de botao: e onde a pergunta
+   existe. Em MEL nao ha imagem na camada extra para contar; em Simple FEL o
+   L1 cabe dentro do master e ler tudo nao muda o veredicto; sem medicao
+   nenhuma o certo e medir a amostra antes, que custa cinco vezes menos.
+
+   E POR QUE ELE E BOTAO, E NAO AUTOMATICO: porque foi MEDIDO antes de ser
+   prometido. Bancada de 10/09, dois filmes reais:
+
+     Saving Private Ryan  81,99 GB  2h49   censo 109,4s   amostra 22,2s
+     Troy                 ~65 GB    2h43   censo 128,7s   amostra 25,6s
+
+   Cinco vezes o custo da amostra, por arquivo. Numa fila de dez filmes
+   seriam vinte minutos parado antes de a conversao comecar - o oposto do
+   "abrir, apontar a pasta, F1" que o programa promete.
+
+   Ele roda em runspace proprio: a fila e a conversao continuam livres, e o
+   resultado cai no log, com os segundos de cada etapa.
+
+ REGUA SUSPEITA  (14.50)
+ --------------------------------------------------------------------------
+   O pico do mastering display e a regua contra a qual o L1 e medido, e ele
+   e metadado DECLARADO. Ate a 14.49 a resposta do projeto era honesta mas
+   passiva: o FAQ avisava que a regua pode estar errada, e o programa seguia
+   usando ela como se estivesse certa.
+
+   Agora o censo do L1 entrega, de graca, um indicio de QUANDO ela errou: se
+   a maioria das cenas lidas passa da regua, o mais provavel nao e que o
+   filme inteiro expanda brilho o tempo todo - e que o pico declarado esteja
+   abaixo do master real.
+
+   E SINAL, NAO VEREDICTO. A linha do log diz "REGUA SUSPEITA", nunca
+   "regua errada": o programa nao tem como saber qual dos dois numeros
+   mentiu. Ele so para de fingir que a regua e confiavel quando ela propria
+   se contradiz. O piso e de 20 cenas lidas e 50% acima - com cinco cenas,
+   "60% passaram" sao tres cenas e nao querem dizer nada.
+
+   E vai para o LOG, nao para a linha do diagnostico. A linha diz o que foi
+   detectado e o que sera feito; "desconfio do metadado" nao e nenhum dos
+   dois. Mesma regra da 16.79.
+
+ UMA COPIA DO LOG AO LADO DO ARQUIVO CONVERTIDO  (14.50)
+ --------------------------------------------------------------------------
+   Cada arquivo convertido passa a receber, na pasta de saida, um
+   "<nome>.LaFirma.log.txt" com o log daquela conversao.
+
+   ELE NAO SUBSTITUI O RELATORIO FINAL - sao perguntas diferentes. O
+   relatorio fecha a fila e responde "deu certo?". A copia responde, seis
+   meses depois, "de onde saiu este .mkv, com qual dovi_tool, com qual
+   audio, com que veredicto de camada?" - e essa pergunta se faz olhando
+   para o arquivo, na pasta dele, nao vasculhando _logs por data.
+
+   Por isso ela leva o NOME do arquivo: quem apagar o video apaga o log
+   junto, e quem mover o video leva a procedencia com ele.
+
+ A BANCADA PASSOU A DEIXAR RASTRO  (Bancada_CensoCompleto 2.0)
+ --------------------------------------------------------------------------
+   A 1.0 so escrevia na tela. Rodou, fechou a janela, nao sobrou nada para
+   comparar depois - e comparar era o unico motivo de ela existir. Agora
+   cada rodada deixa um log em _logs e uma LINHA em
+   _logs\bancada_censo_medidas.csv, com os tempos de cada etapa, o tamanho,
+   a duracao e uma nota livre. E dessa planilha que sai o "com isto ligado
+   durou tanto, com aquilo desligado durou tanto".
+
+   E ELA CORRIGIU UMA MENTIRA PROPRIA: no Ryan, a 1.0 escrevia "regua NAO
+   DECLARADA" ao mesmo tempo que o programa, no MESMO arquivo, comparava
+   contra "os 1.000 nits do master". Nao eram dois arquivos - eram duas
+   leituras. Em MKV o pico do mastering display chega como SEI do PRIMEIRO
+   QUADRO, nao como propriedade do stream, e a bancada estava pedindo
+   -show_streams. Agora ela le o quadro primeiro, como o motor sempre leu,
+   cai no stream so como reserva, e DIZ de onde leu. De quebra, o mesmo
+   probe responde se o arquivo tem HDR10+.
+
+ O QUE ESTA VERSAO AINDA NAO FAZ
+ --------------------------------------------------------------------------
+   Nao regenera o L1. O censo completo troca uma amostra por um numero do
+   filme inteiro; ele nao mede a base layer nem reescreve o RPU, e portanto
+   nao conserta um Complex FEL - continua sendo a fase 2, e continua fora.
+
+   Nao decide qual dos dois numeros mentiu quando a regua e suspeita. Ele
+   levanta a suspeita e escreve no log; a decisao continua sua.
+
+   O botao nao roda sozinho, e nao vai rodar: ver a medida acima.
+
+ A BATERIA (3.17)
+ --------------------------------------------------------------------------
+   Secao 35: o censo completo - a funcao existe no motor, nao decide nada
+   sozinha, o botao nasce desligado, so acende em Complex FEL e reprova se
+   alguem chamar Escrever-Log dentro do runspace do censo (a armadilha da
+   17.06, agora com teste). Secao 36: a regua suspeita e a copia do log.
+   A contagem de funcoes subiu: motor de 86 para 87, janela de 146 para 151
+   (as duas do bloco do runspace novo entram na conta).
+
+
+================================================================================
  INSTALADOR 1.8.1  -  10/09/2026
 ================================================================================
- Componentes: MOTOR 14.49  |  JANELA 17.07  |  CORRETOR 2.27  |  REOCR 1.29
+ Componentes: MOTOR 14.49  |  JANELA 17.05  |  CORRETOR 2.27  |  REOCR 1.29
               AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
-              TESTAR_LAFIRMA 3.16  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+              TESTAR_LAFIRMA 3.14  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
 
- Dois defeitos do idioma, e um acerto de forma no diagnostico.
-
- O RUNSPACE E OUTRO MUNDO - DE NOVO  (17.07)
- --------------------------------------------------------------------------
-   A 17.06 quebrou a leitura da pasta. Todo arquivo saia como "Nao Foi
-   Possivel Ler", com esta linha no log:
-
-     Erro lendo <arquivo>: O termo 'Escrever-Log' nao e reconhecido como
-     nome de cmdlet, funcao, arquivo de script ou programa operavel.
-
-   A CAUSA: a nota do audio que a 17.06 mandou para o log foi escrita com
-   Escrever-Log - que e funcao da JANELA - dentro do runspace de LEITURA.
-   Ali dentro as funcoes da janela nao existem. Quem manda mensagem de la e
-   a Avisar declarada no proprio bloco do runspace.
-
-   O QUE DOI: a secao 13 da bateria existe desde a 16.82 exatamente para
-   pegar isto - "NENHUMA funcao da janela e chamada dentro dos runspaces".
-   Ela teria reprovado. A bateria nao foi rodada antes da entrega.
-
-   ALEM DO CONSERTO, a secao 24e ganhou um teste que exige AVISAR no ponto
-   exato, e nao so a regra geral da secao 13.
-
- A LINHA DO AUDIO VOLTOU AO TAMANHO DAS VIZINHAS  (17.06)
- --------------------------------------------------------------------------
-   A 16.98 acertou o sentido e estragou a forma. O rotulo ganhou um
-   parentese explicativo e a linha ganhou uma frase inteira de justificativa
-   depois do selo:
-
-     ÁUDIO PRINCIPAL (o que o programa converte): TrueHD Atmos 7.1
-     [DETECTADO] · o arquivo marca outra faixa como padrão (AC-3 5.1) — a
-     escolha aqui é pelo codec, não pela marca
-
-   Do lado das vizinhas, que sao rotulo + fato + selo, essa virava um
-   paragrafo. Sozinha empurrava a coluna da direita e quebrava o alinhamento
-   do bloco inteiro.
-
-   A REGRA, dita pelo Diego e que vale para o diagnostico todo: a ESQUERDA
-   detecta, a DIREITA diz o que sera feito. Qual faixa o arquivo marcava
-   como padrao nao e nenhuma das duas coisas.
-
-     ÁUDIO PRINCIPAL: TrueHD Atmos 7.1 [DETECTADO]
-
-   74 caracteres, o mesmo comprimento das vizinhas.
-
-   A NOTA NAO SE PERDEU: foi para o log, inteira, nomeando as duas faixas e
-   dizendo o porque. Quem quer entender a escolha abre o log.
-
-   E A REGRA CONTINUA A MESMA: a escolha ignora de proposito a marca de
-   padrao do arquivo, porque em remux Dual Audio ela costuma apontar a
-   dublagem que o grupo preferiu, e o programa quer o TrueHD/Atmos. So mudou
-   onde isso e contado.
+ Dois defeitos do idioma. O segundo e a causa do primeiro.
 
  A TROCA AO VIVO NAO ALCANCAVA A TELA INTEIRA  (17.05)
  --------------------------------------------------------------------------
@@ -108,8 +1034,6 @@
    versoes.
 
  A PERGUNTA DE REINICIO ERA DO ARRANQUE TAMBEM  (17.04)
-
- A PERGUNTA DE REINICIO ERA DO ARRANQUE TAMBEM  (17.04)
  --------------------------------------------------------------------------
    Relatado em uso, madrugada de 10/09. Quem tinha escolhido ingles abria o
    programa e era recebido pela caixa "reiniciar agora?", sem ter clicado em
@@ -136,10 +1060,9 @@
    janela ainda nao foi exibida - cinto e suspensorio, com a razao escrita
    no log.
 
-   A BATERIA (3.16): secao 33, 13 testes; e a secao 34, 10 testes da
+   A BATERIA (3.14): secao 33, 13 testes; e a secao 34, 10 testes da
    varredura - inclusive o que reprova se ela voltar a andar so na arvore
-   visual. Secao 33, 13 testes. Eles nao guardam o sintoma,
-   guardam a separacao: o corpo do Set-Idioma e extraido e reprova se
+   visual. Os testes nao guardam o sintoma, guardam a separacao: o corpo do Set-Idioma e extraido e reprova se
    voltar a conter a pergunta, o Close() ou o Start-Process; o handler do
    botao tem que chamar as duas na ordem; e o bloco de arranque e extraido
    e reprova se citar a funcao nova. A contagem de funcoes da janela subiu

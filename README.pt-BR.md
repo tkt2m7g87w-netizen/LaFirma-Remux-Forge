@@ -18,7 +18,7 @@
 | | Onde |
 |---|---|
 | **Instalador** | [Releases](../../releases/latest) |
-| Espelho | [Proton Drive](https://drive.proton.me/urls/TY10BEQW70#GOgarsvsnVPi) · [MEGA](https://mega.nz/file/zeQCTTDK#oFn_ReBQVBjq77bUVctdJLJspm9bd9A4KK0vtCLK4u8) |
+| Espelho | [Proton Drive](https://drive.proton.me/urls/6DYE4H7M0G#pwvdUdFvgfaU) · [MEGA](https://mega.nz/file/SC4CkTgD#_5z5HJ6QbQm-ruFXr28uMdZjk7Xlgw4yYlYqw19KTCI) |
 
 Baixe, instale e use. **As ferramentas já vão dentro do instalador** — não precisa baixar mais nada.
 
@@ -154,17 +154,15 @@ A legenda em imagem vira texto `.SRT` limpo, corrigido contra um dicionário de 
 
 A faixa PGS original **continua no arquivo final**. O `.SRT` é uma faixa a mais, não uma troca.
 
-**E o programa só aponta o OCR para uma faixa em português.** Faixa em inglês, espanhol ou qualquer outra língua não recebe a opção de converter — nem no modo manual. Um OCR de PT-BR apontado para inglês não converte inglês: ele carimba inglês de brasileiro, e o arquivo sai com uma legenda em inglês rotulada "Português (Brasil)". Quando a faixa não é PT-BR, o verbo simplesmente não existe, e o motor recusa a ordem se ela chegar por outro caminho.
-
 ### 💾 Lote e espaço em disco
 
 Coloque um arquivo só ou uma temporada inteira. Antes de começar, o programa **simula a fila inteira na ordem em que o motor vai processar** e diz três coisas: quantos arquivos cabem, qual é o primeiro que não cabe, e quanto faltaria na vez dele.
 
-Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minutos de trabalho jogados fora. Isso inclui a fila que **cabe agora mas não até o fim**: se o espaço acaba no meio do caminho, o programa diz isso antes de começar, e não no arquivo número sete.
+Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minutos de trabalho jogados fora.
 
 ### 🎛️ Automático ou manual
 
-Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**. O manual manda no automático — com um limite só: ele não oferece conversão de legenda que não seja PT-BR, porque isso o programa não sabe fazer.
+Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**.
 
 ### 🌍 Duas línguas
 
@@ -206,25 +204,37 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 ## 🖼️ Telas do programa
 
-**1. Análise inicial** — leitura da fila, cálculo de espaço em disco e diagnóstico de cada arquivo.
+**1. Análise inicial, medição LIGADA** — a fila é lida e cada arquivo recebe seu veredicto (MEL, Simple FEL, Complex FEL). A linha que está sendo medida diz isso enquanto acontece.
 
-[![Análise inicial](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
+[![Análise inicial, medição LIGADA](https://i.ibb.co/GfrSfP7R/01-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-LIGADO-INGLES.jpg)](https://ibb.co/cKsnKTJQ)
 
-**2. Modo automático** — o mapeamento de faixas que o programa decidiu.
+**2. A mesma tela, medição DESLIGADA** — a leitura é imediata e a coluna da camada diz `EL não medida` em vez de chutar. Nada fica verde sem leitura por trás.
 
-[![Modo automático](https://i.ibb.co/h1V3dKRK/image.png)](https://ibb.co/h1V3dKRK)
+[![A mesma tela, medição DESLIGADA](https://i.ibb.co/BD0ZRG6/02-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-DESLIGADO-INGLES.jpg)](https://ibb.co/fRjp79N)
 
-**3. Modo manual** — controle total para manter, converter ou excluir cada áudio e legenda.
+**3. A mesma tela em português** — a interface inteira troca por uma bandeira ao lado do botão Entenda, e a escolha fica guardada entre as sessões.
 
-[![Modo manual](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
+[![A mesma tela em português](https://i.ibb.co/hRmh32c5/03-PRIMEIRA-PAGINA-DO-PROGRAMA-PORTUGUES.jpg)](https://ibb.co/bgKqcNFh)
 
-**4. Conversão em andamento** — acompanhamento por etapas, em tempo real.
+**4. Modo automático** — o motor de decisão mapeia cada faixa e escreve, lado a lado, o que encontrou à esquerda e o que vai fazer à direita.
 
-[![Conversão em andamento](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
+[![Modo automático](https://i.ibb.co/zh3fzqgr/04-MODOS-AUTOMATICO-INGLES.jpg)](https://ibb.co/pvHXSYTx)
 
-**5. Resumo final** — relatório com verificação de integridade e a nota da legenda.
+**5. Modo manual** — faixa por faixa: manter, converter ou excluir. O manual manda no automático, com um limite só — legenda que não é PT-BR não recebe a opção de converter.
 
-[![Resumo final](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
+[![Modo manual](https://i.ibb.co/jPL8m6Zd/05-MODOS-MANUAL-INGLES.jpg)](https://ibb.co/dwQfFWJS)
+
+**6. Conversão em andamento** — etapa por etapa, com porcentagem real, a ferramenta que está rodando e quanto falta.
+
+[![Conversão em andamento](https://i.ibb.co/3xps97h/06-DURANTE-A-CONVERSAO-PROGRESSO-INGLES.jpg)](https://ibb.co/N093dsY)
+
+**7. Conversão em andamento, mais adiante** — a fila mantém marcada a linha que está convertendo — não é preciso adivinhar qual arquivo está sendo processado.
+
+[![Conversão em andamento, mais adiante](https://i.ibb.co/Kx3frPc8/07-DURANTE-A-CONVERSAO-PROGRESSO-INGLES-2.jpg)](https://ibb.co/Ld2cZFDs)
+
+**8. Relatório final** — o que foi feito em cada arquivo, a verificação de integridade do MKV pronto e a nota da legenda que o programa gerou.
+
+[![Relatório final](https://i.ibb.co/v62nXZJC/08-RELATORIO-FINAL-INGLES.jpg)](https://ibb.co/xtVTFJMK)
 
 ---
 

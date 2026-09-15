@@ -18,7 +18,7 @@
 | | Where |
 |---|---|
 | **Installer** | [Releases](../../releases/latest) |
-| Mirror | [Proton Drive](https://drive.proton.me/urls/TY10BEQW70#GOgarsvsnVPi) · [MEGA](https://mega.nz/file/zeQCTTDK#oFn_ReBQVBjq77bUVctdJLJspm9bd9A4KK0vtCLK4u8) |
+| Mirror | [Proton Drive](https://drive.proton.me/urls/6DYE4H7M0G#pwvdUdFvgfaU) · [MEGA](https://mega.nz/file/SC4CkTgD#_5z5HJ6QbQm-ruFXr28uMdZjk7Xlgw4yYlYqw19KTCI) |
 
 Download, install and run. **The tools ship inside the installer** — nothing else to download.
 
@@ -154,17 +154,15 @@ Image-based PGS becomes clean `.SRT` text, spellchecked against a 1.3 million wo
 
 The original PGS track **stays in the final file**. The `.SRT` is one extra track, not a replacement.
 
-**And the program only points the OCR at a Portuguese track.** An English, Spanish or any other non-Portuguese track is never offered the convert option — not even in manual mode. A PT-BR OCR pointed at English does not convert English: it stamps English as Brazilian, and the file comes out with an English subtitle labelled "Portugues (Brasil)". When the track is not pt-BR the verb simply does not exist, and the engine refuses the order if it arrives by some other route.
-
 ### 💾 Batch and disk space
 
 Queue a single file or a whole season. Before starting, the program **simulates the entire queue in the order the engine will process it** and tells you three things: how many files fit, which is the first one that does not, and how much would be missing by its turn.
 
-A file that does not fit **never even starts** — no temporary folder, no 20 minutes of work thrown away. That includes the queue that **fits now but not to the end**: if the space runs out halfway through, the program says so before starting, not at file number seven.
+A file that does not fit **never even starts** — no temporary folder, no 20 minutes of work thrown away.
 
 ### 🎛️ Auto or manual
 
-Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**. Manual overrides automatic, with one limit: it will not offer subtitle conversion for anything other than pt-BR, because that is not something this program knows how to do.
+Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**.
 
 ### 🌍 Two languages
 
@@ -206,25 +204,37 @@ The program has a **Learn** button with 14 sections explaining what the conversi
 
 ## 🖼️ Screenshots
 
-**1. Initial analysis** — queue reading, disk-space calculation and per-file diagnosis.
+**1. Initial analysis, measurement ON** — the queue is read and each file gets its verdict (MEL, Simple FEL, Complex FEL). The row being measured says so while it happens.
 
-[![Initial analysis](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
+[![Initial analysis, measurement ON](https://i.ibb.co/GfrSfP7R/01-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-LIGADO-INGLES.jpg)](https://ibb.co/cKsnKTJQ)
 
-**2. Auto mode** — detailed track mapping decided by the program.
+**2. The same screen, measurement OFF** — reading is immediate and the layer column says `EL not measured` instead of guessing. Nothing is painted green without a reading behind it.
 
-[![Auto mode](https://i.ibb.co/h1V3dKRK/image.png)](https://ibb.co/h1V3dKRK)
+[![The same screen, measurement OFF](https://i.ibb.co/BD0ZRG6/02-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-DESLIGADO-INGLES.jpg)](https://ibb.co/fRjp79N)
 
-**3. Manual mode** — full control to keep, convert or drop each audio and subtitle.
+**3. The same screen in Portuguese** — the whole interface switches by a flag next to the Learn button, and the choice survives between sessions.
 
-[![Manual mode](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
+[![The same screen in Portuguese](https://i.ibb.co/hRmh32c5/03-PRIMEIRA-PAGINA-DO-PROGRAMA-PORTUGUES.jpg)](https://ibb.co/bgKqcNFh)
 
-**4. Conversion progress** — real-time per-step tracking with performance metrics.
+**4. Auto mode** — the decision engine maps every track and writes, side by side, what it found on the left and what it will do on the right.
 
-[![Conversion progress](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
+[![Auto mode](https://i.ibb.co/zh3fzqgr/04-MODOS-AUTOMATICO-INGLES.jpg)](https://ibb.co/pvHXSYTx)
 
-**5. Summary & quality evaluation** — final report with integrity check and subtitle grade.
+**5. Manual mode** — track by track: keep, convert or drop. Manual overrides automatic, with one limit — a subtitle that is not pt-BR is never offered the convert option.
 
-[![Summary](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
+[![Manual mode](https://i.ibb.co/jPL8m6Zd/05-MODOS-MANUAL-INGLES.jpg)](https://ibb.co/dwQfFWJS)
+
+**6. Conversion in progress** — step by step, with real percentages, the tool that is running and how much time is left.
+
+[![Conversion in progress](https://i.ibb.co/3xps97h/06-DURANTE-A-CONVERSAO-PROGRESSO-INGLES.jpg)](https://ibb.co/N093dsY)
+
+**7. Conversion in progress, later on** — the queue keeps the converting row marked, so you never have to guess which file is being processed.
+
+[![Conversion in progress, later on](https://i.ibb.co/Kx3frPc8/07-DURANTE-A-CONVERSAO-PROGRESSO-INGLES-2.jpg)](https://ibb.co/Ld2cZFDs)
+
+**8. Final report** — what was done to each file, the integrity check on the finished MKV and the grade of the subtitle the program generated.
+
+[![Final report](https://i.ibb.co/v62nXZJC/08-RELATORIO-FINAL-INGLES.jpg)](https://ibb.co/xtVTFJMK)
 
 ---
 

@@ -154,15 +154,17 @@ A legenda em imagem vira texto `.SRT` limpo, corrigido contra um dicionário de 
 
 A faixa PGS original **continua no arquivo final**. O `.SRT` é uma faixa a mais, não uma troca.
 
+**E o programa só aponta o OCR para uma faixa em português.** Faixa em inglês, espanhol ou qualquer outra língua não recebe a opção de converter — nem no modo manual. Um OCR de PT-BR apontado para inglês não converte inglês: ele carimba inglês de brasileiro, e o arquivo sai com uma legenda em inglês rotulada "Português (Brasil)". Quando a faixa não é PT-BR, o verbo simplesmente não existe, e o motor recusa a ordem se ela chegar por outro caminho.
+
 ### 💾 Lote e espaço em disco
 
 Coloque um arquivo só ou uma temporada inteira. Antes de começar, o programa **simula a fila inteira na ordem em que o motor vai processar** e diz três coisas: quantos arquivos cabem, qual é o primeiro que não cabe, e quanto faltaria na vez dele.
 
-Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minutos de trabalho jogados fora.
+Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minutos de trabalho jogados fora. Isso inclui a fila que **cabe agora mas não até o fim**: se o espaço acaba no meio do caminho, o programa diz isso antes de começar, e não no arquivo número sete.
 
 ### 🎛️ Automático ou manual
 
-Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**.
+Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**. O manual manda no automático — com um limite só: ele não oferece conversão de legenda que não seja PT-BR, porque isso o programa não sabe fazer.
 
 ### 🌍 Duas línguas
 

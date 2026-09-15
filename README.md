@@ -154,15 +154,17 @@ Image-based PGS becomes clean `.SRT` text, spellchecked against a 1.3 million wo
 
 The original PGS track **stays in the final file**. The `.SRT` is one extra track, not a replacement.
 
+**And the program only points the OCR at a Portuguese track.** An English, Spanish or any other non-Portuguese track is never offered the convert option — not even in manual mode. A PT-BR OCR pointed at English does not convert English: it stamps English as Brazilian, and the file comes out with an English subtitle labelled "Portugues (Brasil)". When the track is not pt-BR the verb simply does not exist, and the engine refuses the order if it arrives by some other route.
+
 ### 💾 Batch and disk space
 
 Queue a single file or a whole season. Before starting, the program **simulates the entire queue in the order the engine will process it** and tells you three things: how many files fit, which is the first one that does not, and how much would be missing by its turn.
 
-A file that does not fit **never even starts** — no temporary folder, no 20 minutes of work thrown away.
+A file that does not fit **never even starts** — no temporary folder, no 20 minutes of work thrown away. That includes the queue that **fits now but not to the end**: if the space runs out halfway through, the program says so before starting, not at file number seven.
 
 ### 🎛️ Auto or manual
 
-Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**.
+Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**. Manual overrides automatic, with one limit: it will not offer subtitle conversion for anything other than pt-BR, because that is not something this program knows how to do.
 
 ### 🌍 Two languages
 

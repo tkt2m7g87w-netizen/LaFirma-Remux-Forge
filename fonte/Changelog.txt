@@ -19,6 +19,68 @@
 
 
 ================================================================================
+ INSTALADOR 1.9.3  -  15/09/2026   *** A FILA NAO DIZIA QUEM ESTAVA MEDINDO ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.18  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.28  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ O BOTAO DIZIA "2 DE 3" E A FILA NAO DIZIA QUEM ERA O 2  (17.18)
+ --------------------------------------------------------------------------
+   Achado do Diego, 15/09, na foto da fila em ingles: o botao anunciava
+   "Measuring MEL x FEL: 2 of 3" e as TRES linhas da coluna SITUACAO diziam
+   "Queued". O unico jeito de saber qual estava na vez era olhar a coluna
+   Dolby Vision procurando quem ainda tinha "P7 medindo" - adivinhacao, do
+   mesmo tipo que a 16.38 ja tinha tirado da conversao ("da pra ver qual
+   video esta convertendo, olhando a lista").
+
+   Agora a linha que esta sendo medida fica em DESTAQUE e em CIANO:
+
+     > Medindo Camada - 2 de 3
+
+   Ciano porque e a mesma coisa que o "Convertendo" ciano: esta acontecendo
+   agora, neste arquivo. Verde nao serve (verde e "ja e" ou "vai ser"),
+   cinza nao serve (cinza e ausencia). As outras linhas continuam "Na Fila",
+   e quando a medicao daquele arquivo termina a linha volta ao normal.
+
+   A conta e a MESMA do aviso de espera ("Esperando a medicao terminar...
+   (2 de 3)"): a medicao anda na ordem da fila, entao o primeiro arquivo que
+   ainda esta em MEDINDO e o que o runspace esta lendo neste instante. Uma
+   funcao (Get-MedicaoEmCurso), um lugar - se a ordem mudar um dia, as duas
+   frases da tela mudam juntas.
+
+ "PROXIMO A CONVERTER" SUMIA AO REDESENHAR A LISTA  (17.18)
+ --------------------------------------------------------------------------
+   O mesmo relato trouxe o segundo defeito: "a primeira vez q ta lendo a
+   primeira linha fica verde escrito proxima conversao, quando vai para
+   proxima fica tudo em fila cinza".
+
+   O rotulo verde nao sumia porque deixou de ser verdade. Sumia porque a
+   condicao era $Fase -eq "inicial", e $Fase e o MOTIVO do redesenho, nao o
+   estado do programa. Redesenhar por causa da medicao (Fill-Fila "el") ou
+   da troca de idioma (Fill-Fila "idioma") passava um motivo que nao era
+   "inicial" - e o ramo do "Proximo a Converter" simplesmente nao rodava.
+
+   Quem responde "ja comecou a converter?" e o ESTADO, e agora e ele que
+   decide. O rotulo sobrevive a qualquer redesenho que nao seja uma mudanca
+   de estado de verdade.
+
+ TRADUCAO
+ --------------------------------------------------------------------------
+   "Medindo Camada - N de M" -> "Measuring Layer - N of M", por regra de
+   padrao (os numeros viajam), na mesma secao das outras frases montadas da
+   coluna SITUACAO.
+
+ BATERIA 3.27 -> 3.28
+ --------------------------------------------------------------------------
+   Secao 47: a conta de "quem esta medindo agora" executada de verdade
+   (nenhum medindo, o primeiro, o do meio, o ultimo, chave desligada), o
+   ramo novo da coluna SITUACAO, a regra de traducao da frase, e a prova de
+   que "Proximo a Converter" sobrevive a um redesenho com motivo "el" e com
+   motivo "idioma" - que e exatamente o que estava quebrado.
+
+
+================================================================================
  INSTALADOR 1.9.2  -  15/09/2026   *** A FUNCAO ERRADA ESTAVA GANHANDO ***
 ================================================================================
  Componentes: MOTOR 14.54  |  JANELA 17.17  |  CORRETOR 2.27  |  REOCR 1.29

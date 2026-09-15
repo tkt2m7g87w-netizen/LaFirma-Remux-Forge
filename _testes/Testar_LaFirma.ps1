@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.27"
+$Versao = "3.28"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -153,7 +153,7 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
 # 3.2: janela 135 -> 136 (Get-FatorEspacoDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 90; "LaFirma_JANELA.ps1" = 173
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 90; "LaFirma_JANELA.ps1" = 174
                "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
@@ -3931,6 +3931,142 @@ if ($pIss2 -eq "") {
             ([bool]($iss2 -match ('Excludes: "[^"]*' + [regex]::Escape($proibido)))) `
             "arquivo de desenvolvimento ou gerado sendo empacotado para o usuario final"
     }
+}
+
+
+Titulo "47. QUAL DELES ESTA SENDO MEDIDO AGORA (17.18)"
+<#  O botao dizia "Measuring MEL x FEL: 2 of 3" e as tres linhas da fila
+    diziam "Queued". Duas coisas quebradas no mesmo desenho:
+
+      1. a fila nao dizia QUEM era o 2;
+      2. o "Proximo a Converter" sumia, porque a condicao olhava o MOTIVO do
+         redesenho ($Fase) em vez do estado do programa.
+
+    O ramo da coluna e desenho (WPF), mas a CONTA e a REGRA nao sao - e e
+    onde os dois defeitos moravam. Esta secao executa a conta e le a regra. #>
+
+# ---- a conta, executada de verdade --------------------------------------
+$fnMed = @("Get-Marcados","Get-MarcadosMedindo","Get-MedicaoEmCurso")
+$carregouMed = $true
+try {
+    $astM = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    foreach ($nf in $fnMed) {
+        $fd = @($astM.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                                $args[0].Name -eq $nf -and $args[0].Extent.StartColumnNumber -eq 1 }, $true))
+        if ($fd.Count -eq 0) { throw "nao achei $nf na janela" }
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+} catch { $carregouMed = $false; $erroMed = $_.Exception.Message }
+Checar "EXECUTANDO: as funcoes da medicao carregam do fonte" $carregouMed $(if ($carregouMed) { "" } else { $erroMed })
+
+if ($carregouMed) {
+    function VidEL($nome, $eltipo, $marcado) {
+        [pscustomobject]@{ Nome = $nome; ELtipo = $eltipo; Marcado = $marcado; Ignorar = $false }
+    }
+    # Os tres arquivos reais do Diego, na ordem em que a fila os leu.
+    $nomeA = "Game.of.Thrones.S08E01"; $nomeB = "Saving.Private.Ryan.1998"; $nomeC = "Troy.2004"
+
+    $script:MedirELLigado = $true
+    $script:MedindoEL     = $true
+    $script:ELtotalFila   = 3
+
+    # nenhum medido ainda -> e o primeiro
+    $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: com ninguem medido ainda, quem esta na vez e o PRIMEIRO" `
+        ($null -ne $m -and $m.Nome -eq $nomeA -and $m.Posicao -eq 1 -and $m.Total -eq 3) `
+        ("saiu: " + $(if ($null -eq $m) { "null" } else { "$($m.Nome) $($m.Posicao)/$($m.Total)" }))
+
+    # o primeiro ja tem veredicto -> e o do meio, e a conta bate com o botao
+    $script:Videos = @((VidEL $nomeA "FEL" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: com o primeiro medido, a vez e do segundo - e diz '2 de 3'" `
+        ($null -ne $m -and $m.Nome -eq $nomeB -and $m.Posicao -eq 2 -and $m.Total -eq 3) `
+        ("saiu: " + $(if ($null -eq $m) { "null" } else { "$($m.Nome) $($m.Posicao)/$($m.Total)" }))
+
+    # so o ultimo falta
+    $script:Videos = @((VidEL $nomeA "FEL" $true), (VidEL $nomeB "FEL" $true), (VidEL $nomeC "MEDINDO" $true))
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: no ultimo, a conta nao estoura o total ('3 de 3')" `
+        ($null -ne $m -and $m.Nome -eq $nomeC -and $m.Posicao -eq 3 -and $m.Total -eq 3)
+
+    # todos medidos -> nao ha ninguem na vez, e a fila volta ao normal
+    $script:Videos = @((VidEL $nomeA "FEL" $true), (VidEL $nomeB "FEL" $true), (VidEL $nomeC "MEL" $true))
+    Checar "Medicao: terminou tudo, nenhuma linha continua escrita 'Medindo'" `
+        ($null -eq (Get-MedicaoEmCurso))
+
+    # a chave desligada nao pode deixar linha nenhuma em ciano
+    $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    $script:MedirELLigado = $false
+    Checar "Medicao: com a chave DESLIGADA, ninguem aparece medindo" ($null -eq (Get-MedicaoEmCurso))
+    $script:MedirELLigado = $true
+    $script:MedindoEL = $false
+    Checar "Medicao: sem medicao em curso, ninguem aparece medindo" ($null -eq (Get-MedicaoEmCurso))
+    $script:MedindoEL = $true
+
+    <#  Desmarcado nao esta na fila desta conversao - a 17.15 ja tinha tirado
+        ele do "Na Fila", nao pode voltar pelo ciano. #>
+    $script:Videos = @((VidEL $nomeA "MEDINDO" $false), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    $script:ELtotalFila = 2
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: arquivo DESMARCADO nunca e o que esta medindo" `
+        ($null -ne $m -and $m.Nome -eq $nomeB)
+
+    # o total guardado nao pode ficar menor que a fila que ainda falta
+    $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    $script:ELtotalFila = 0
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: sem total guardado, a conta se conserta ('1 de 3', nunca '1 de 0')" `
+        ($null -ne $m -and $m.Posicao -eq 1 -and $m.Total -eq 3) `
+        ("saiu: " + $(if ($null -eq $m) { "null" } else { "$($m.Posicao)/$($m.Total)" }))
+
+    $script:Videos = @()
+    $script:MedindoEL = $false
+}
+
+# ---- o ramo da coluna SITUACAO e a condicao que estava errada ------------
+Checar "Janela: Fill-Fila pergunta UMA vez por redesenho quem esta medindo" `
+    ([bool]($jan -match '(?s)function Fill-Fila.{0,1200}\$medindoAgora = Get-MedicaoEmCurso.{0,400}for \(\$i = 0'))
+Checar "Janela: a coluna SITUACAO tem ramo proprio para o que esta sendo medido" `
+    ([bool]($jan -match 'Medindo Camada . \{0\} de \{1\}'))
+Checar "Janela: e ele pinta de ciano (emCurso), como o 'Convertendo'" `
+    ([bool]($jan -match '(?s)Medindo Camada .{0,200}\$corSit = \$Cores\.emCurso'))
+Checar "Janela: o ramo do medindo vem ANTES do 'Proximo a Converter'" `
+    ([bool]($jan -match '(?s)\$medindoAgora\.Nome.{0,1500}Proximo a Converter'))
+<#  A condicao errada. $Fase e o MOTIVO do redesenho ("el", "idioma"), nao o
+    estado do programa - e por isso o rotulo verde sumia sozinho. #>
+Checar "Janela: 'Proximo a Converter' olha o ESTADO, nao o motivo do redesenho" `
+    ([bool]($jan -match '\$primeiroAtivo -and \$Estado\.Atual -eq "inicial"')) `
+    "com \$Fase, redesenhar por causa da medicao ou do idioma apagava o rotulo"
+Checar 'Janela: e nao sobrou nenhum $Fase decidindo o "Proximo a Converter"' `
+    (-not ($jan -match '\$primeiroAtivo -and \$Fase -eq "inicial"'))
+<#  Os dois redesenhos que quebravam o rotulo continuam existindo - o teste
+    acima so vale enquanto eles passam um motivo diferente de "inicial". #>
+Checar "Janela: o redesenho da medicao continua passando motivo proprio ('el')" `
+    ([bool]($jan -match 'Fill-Fila "el"'))
+Checar "Janela: e o da troca de idioma tambem ('idioma')" `
+    ([bool]($jan -match 'Fill-Fila "idioma"'))
+
+# ---- a traducao da frase montada ----------------------------------------
+if ($fnsTrad.Count -eq 3 -and (Test-Path -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt"))) {
+    $guardaPastaM = $script:PastaScript
+    try {
+        $script:PastaScript = $Fonte
+        $script:Lang = "EN"; $script:MapaEN = @{}; $script:MapaPT = @{}
+        $script:RegrasEN = New-Object System.Collections.ArrayList
+        [void](Carregar-Idioma)
+        $simAtual = [string][char]0x25B6
+        $paresM = @(
+          @{ Pt = "$simAtual Medindo Camada " + [char]0xB7 + " 2 de 3"; En = "$simAtual Measuring Layer " + [char]0xB7 + " 2 of 3" },
+          @{ Pt = "$simAtual Medindo Camada " + [char]0xB7 + " 1 de 12"; En = "$simAtual Measuring Layer " + [char]0xB7 + " 1 of 12" })
+        foreach ($c in $paresM) {
+            $saiu = Traduzir-Frase $c.Pt
+            Checar ("Idioma: '" + $c.Pt + "' vira '" + $c.En + "'") ($saiu -eq $c.En) ("saiu: $saiu")
+        }
+        $script:Lang = "PT"
+    } finally { $script:PastaScript = $guardaPastaM }
+} else {
+    Pular "Idioma: a frase de 'Medindo Camada' tem traducao" "as funcoes de idioma nao carregaram"
 }
 
 

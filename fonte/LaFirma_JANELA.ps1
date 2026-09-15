@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.17
+#  LaFirma - JANELA 17.18
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -39,6 +39,24 @@
 #    <# 16.xx: ... #> espalhados ao lado do codigo. Para saber o que mudou
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
+#
+#    17.18  15/09/2026  A FILA NAO DIZIA QUEM ESTAVA SENDO
+#                        MEDIDO - E PERDIA O "PROXIMO A
+#                        CONVERTER" AO REDESENHAR.
+#                        - O botao dizia "Medindo MEL x FEL:
+#                          2 de 3" e as tres linhas da fila
+#                          diziam "Na Fila". Agora a linha que
+#                          esta sendo medida fica em ciano,
+#                          "Medindo Camada - 2 de 3", com a
+#                          mesma conta do aviso de espera.
+#                        - "Proximo a Converter" olhava o MOTIVO
+#                          do redesenho ($Fase), nao o estado do
+#                          programa. Redesenhar por causa da
+#                          medicao ("el") ou da troca de idioma
+#                          ("idioma") apagava o rotulo verde da
+#                          tela. Agora quem responde e o ESTADO.
+#                        - Achado do Diego, 15/09, na foto da
+#                          fila em ingles.
 #
 #    17.17  15/09/2026  DUAS FUNCOES COM O MESMO NOME, E A
 #                        ERRADA GANHANDO DESDE A 16.95.
@@ -757,7 +775,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.17"
+$SCRIPT_VERSION = "17.18"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -5071,6 +5089,9 @@ function Fill-Fila([string]$Fase) {
     $selAntes = $UI.lstFila.SelectedIndex
     $script:LinhasFila.Clear()
     $primeiroAtivo = $true
+    # 17.18: uma consulta por redesenho, nao uma por linha - a lista nao pode
+    # dizer "2 de 3" numa linha e "3 de 3" na de baixo do mesmo desenho.
+    $medindoAgora = Get-MedicaoEmCurso
     for ($i = 0; $i -lt $script:Videos.Count; $i++) {
         $v = $script:Videos[$i]
 
@@ -5187,7 +5208,27 @@ function Fill-Fila([string]$Fase) {
                 nao disputa o "Proximo a Converter": quem nao entra na
                 conversao nao pode ser o proximo dela. #>
             $sit = "Fora da Fila - Não Será Convertido"; $corSit = $Cores.dim2
-        } elseif ($primeiroAtivo -and $Fase -eq "inicial") {
+        } elseif ($null -ne $medindoAgora -and "$($v.Nome)" -eq "$($medindoAgora.Nome)") {
+            <#  17.18: ciano porque e a MESMA coisa que o "Convertendo" ciano -
+                esta acontecendo agora, neste arquivo. Verde nao serve (verde e
+                "ja e / vai ser"), cinza nao serve (cinza e ausencia). E a
+                linha fica em destaque pelo mesmo motivo da 16.38: o que esta
+                acontecendo agora nao pode ter o mesmo peso do que espera. #>
+            $est = $Destaque
+            $sit = "$($Sim.Atual) Medindo Camada · {0} de {1}" -f $medindoAgora.Posicao, $medindoAgora.Total
+            $corSit = $Cores.emCurso
+        } elseif ($primeiroAtivo -and $Estado.Atual -eq "inicial") {
+            <#  17.18: a condicao era "$Fase -eq 'inicial'" - o Fase e o MOTIVO
+                do redesenho, nao o estado do programa. Redesenhar por causa da
+                medicao (Fill-Fila "el") ou da troca de idioma (Fill-Fila
+                "idioma") apagava o "Proximo a Converter" da tela, porque
+                "el" nao e "inicial".
+                Foi o que o Diego viu: "a primeira vez q ta lendo a primeira
+                linha fica verde escrito proxima conversao, quando vai para
+                proxima fica tudo em fila cinza". O rotulo nao sumia porque
+                deixou de ser verdade - sumia porque a lista foi redesenhada
+                por outro motivo.
+                Quem responde "ja comecou a converter?" e o ESTADO. #>
             $est = $Destaque
             $sit = "$($Sim.Atual) Proximo a Converter"; $corSit = $Cores.okdim
             $primeiroAtivo = $false
@@ -10153,6 +10194,34 @@ function Restaurar-AbaDica {
     Get-Marcados ja e quem define quem entra. #>
 function Get-MarcadosMedindo {
     return @(Get-Marcados | Where-Object { "$($_.ELtipo)" -eq "MEDINDO" })
+}
+
+<#  17.18 - QUAL DELES ESTA SENDO MEDIDO AGORA.
+
+    O botao dizia "Medindo MEL x FEL: 2 de 3" e a fila nao dizia QUEM era o 2.
+    Tres linhas escritas "Na Fila", e o unico jeito de descobrir qual estava
+    na vez era olhar a coluna Dolby Vision procurando quem ainda tinha
+    "P7 medindo" - adivinhacao, do mesmo tipo que a 16.38 ja tinha tirado da
+    conversao ("da pra ver qual video esta convertendo, olhando a lista").
+
+    A medicao anda na ordem da fila: quem ja foi medido tem veredicto, e o
+    primeiro que ainda esta em MEDINDO e o que o runspace esta lendo neste
+    instante. Nao e heuristica - e a mesma conta que o Get-TextoEspera ja
+    fazia para escrever "(2 de 3)", so que agora ela tambem diz o nome.
+
+    Uma conta, um lugar: se a ordem da medicao mudar um dia, muda aqui e as
+    duas frases da tela mudam juntas. #>
+function Get-MedicaoEmCurso {
+    if (-not $script:MedindoEL)     { return $null }
+    if (-not $script:MedirELLigado) { return $null }
+    $fila = @(Get-MarcadosMedindo)
+    if ($fila.Count -eq 0) { return $null }
+    $total = [int]$script:ELtotalFila
+    if ($total -lt $fila.Count) { $total = $fila.Count }
+    $pos = $total - $fila.Count + 1
+    if ($pos -lt 1)      { $pos = 1 }
+    if ($pos -gt $total) { $pos = $total }
+    return [PSCustomObject]@{ Nome = "$($fila[0].Nome)"; Posicao = $pos; Total = $total }
 }
 
 function Test-EsperarMedicao {

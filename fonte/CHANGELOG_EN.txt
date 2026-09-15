@@ -17,6 +17,57 @@
 
 
 ==============================================================================
+ INSTALLER 1.9.3  -  15/09/2026     *** THE QUEUE DID NOT SAY WHO WAS BEING
+                                        MEASURED ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.18 | TESTAR_LAFIRMA 3.28
+
+ THE BUTTON SAID "2 OF 3" AND THE QUEUE DID NOT SAY WHICH ONE  (17.18)
+ --------------------------------------------------------------------------
+   The button announced "Measuring MEL x FEL: 2 of 3" while all THREE rows
+   of the STATUS column read "Queued". The only way to tell which file was
+   being read was to scan the Dolby Vision column looking for whichever
+   still said "P7 measuring" - guesswork, the same kind 16.38 had already
+   removed from the conversion itself.
+
+   The row being measured is now highlighted and cyan:
+
+     > Measuring Layer - 2 of 3
+
+   Cyan because it means the same thing the cyan "Converting" means: this is
+   happening right now, in this file. Green would be wrong (green is "it is"
+   or "it will be"), grey would be wrong (grey is absence). The other rows
+   stay "Queued", and the row returns to normal as soon as its measurement
+   finishes.
+
+   The count is the SAME one the wait notice already used. Measurement walks
+   the queue in order, so the first file still marked MEASURING is the one
+   the runspace is reading at this instant. One function, one place.
+
+ "NEXT TO CONVERT" DISAPPEARED ON REDRAW  (17.18)
+ --------------------------------------------------------------------------
+   Second defect from the same report: the green "Next to Convert" label
+   vanished from the first row as soon as measurement moved to the next file.
+
+   It did not vanish because it stopped being true. The condition tested the
+   REASON for the redraw, not the state of the program: redrawing because of
+   the measurement, or because the language was switched, passed a reason
+   that was not "initial", and the branch simply did not run.
+
+   What answers "has the conversion started?" is the STATE, and that is what
+   decides now. The label survives any redraw that is not a real state
+   change.
+
+ TESTS 3.27 -> 3.28
+ --------------------------------------------------------------------------
+   Section 47 executes the "who is being measured now" arithmetic (none, the
+   first, the middle, the last, switch off), the new STATUS branch, its
+   translation rule, and proves that "Next to Convert" survives a redraw
+   triggered by the measurement and by a language switch - which is exactly
+   what was broken.
+
+
+==============================================================================
  INSTALLER 1.9.2  -  15/09/2026         *** THE WRONG FUNCTION WAS WINNING ***
 ==============================================================================
  Components: ENGINE 14.54 | WINDOW 17.17 | TESTAR_LAFIRMA 3.27

@@ -73,8 +73,8 @@
 ; sintaxe de PowerShell - o Inno le como texto solto e aborta com
 ; "Text is not inside a section" (aconteceu em 26/08, linha 42).
 ; ============================================================================
-#define Versao      "1.9.2"
-#define VersaoGui   "17.17"
+#define Versao      "1.9.3"
+#define VersaoGui   "17.18"
 #define VersaoMotor "14.54"
 #define VersaoCorretor "2.27"
 #define VersaoReocr "1.29"

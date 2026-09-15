@@ -102,6 +102,7 @@ Encerrar Programa	Quit
 
 # ---- Coluna SITUACAO ----
 ~Etapa (\d+)/(\d+)	Step $1/$2
+~^(.*)Medindo Camada · (\d+) de (\d+)$	$1Measuring Layer · $2 of $3
 ~Convertendo · 	Converting · 
 ~Pausado · 	Paused · 
 ~^(.*)Nada a Converter$	$1Nothing to Convert

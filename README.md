@@ -76,9 +76,19 @@ The `tools\` folder holds hundreds of MB of **other people's** programs, each un
 
 ## What it is
 
-**LaFirma Remux Forge** was designed to eliminate media playback incompatibility on Smart TVs (LG, Samsung), players (Shield, Apple TV, Zidoo) and media servers (**Plex**, **Jellyfin**, **Emby**).
+**LaFirma Remux Forge** takes a UHD `.mkv` remux (the file ripped straight from a 4K Blu-ray) and delivers the same movie in a format that plays directly on the TV, the player and the media server (**Plex**, **Jellyfin**, **Emby**) — no on-the-fly transcoding by the server and no re-encoding of the picture.
 
-It is an orchestration bridge: we built the GUI, the decision logic and the PowerShell engine that connect and automate established community utilities (`ffmpeg`, `mkvmerge`, `dovi_tool`, `PgsToSrt`, `Tesseract`, `DeeZy`). Works on single files or whole TV seasons.
+It removes the three roadblocks these files carry:
+
+| In the original remux | The problem | What LaFirma does |
+|---|---|---|
+| **Dolby Vision Profile 7** (dual layer, the Blu-ray format) | Many devices and apps do not recognise Dolby Vision in this format and show plain HDR10 | Converts to **Profile 8.1** (single layer), the format everything that plays Dolby Vision accepts — **without re-encoding the video**. It first **measures** what the extra layer carries (see below) |
+| **TrueHD Atmos / DTS-HD / DTS:X audio** | Many TVs and streamers cannot play it: no sound, or the server has to convert the audio on every play | Converts to **E-AC-3** — TrueHD **keeps Atmos** |
+| **PGS subtitles** (images) | The server has to burn the subtitle into the picture, re-encoding the whole movie while you watch | **OCRs the PT-BR subtitle** into a text **.srt**, corrected and with a quality grade |
+
+The result is an `.mkv` ready for direct play, plus the `.srt` next to it. Works on a single file or whole TV seasons, with a queue, a time estimate and a per-file diagnosis before it starts.
+
+Under the hood the program orchestrates established community tools (`dovi_tool`, `mkvmerge`, `ffmpeg`, `DeeZy`, `PgsToSrt`, `Tesseract`). The interface, the decision logic and the PowerShell engine are ours.
 
 ---
 

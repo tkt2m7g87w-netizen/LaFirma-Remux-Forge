@@ -76,9 +76,19 @@ A pasta `tools\` tem centenas de MB de programas de **outras pessoas**, cada um 
 
 ## O que é
 
-O **LaFirma Remux Forge** foi criado para resolver de forma definitiva os problemas de incompatibilidade de mídia em Smart TVs (LG, Samsung), players (Shield, Apple TV, Zidoo) e servidores de mídia (**Plex**, **Jellyfin**, **Emby**).
+O **LaFirma Remux Forge** pega um remux UHD em `.mkv` (o arquivo tirado direto do Blu-ray 4K) e entrega o mesmo filme num formato que toca direto na TV, no player e no servidor de mídia (**Plex**, **Jellyfin**, **Emby**), sem o servidor precisar converter na hora e sem recodificar a imagem.
 
-Ele é uma ponte de automação: nós fizemos a interface, a lógica de decisão e o motor em PowerShell que conectam e orquestram ferramentas consagradas da comunidade (`ffmpeg`, `mkvmerge`, `dovi_tool`, `PgsToSrt`, `Tesseract`, `DeeZy`). Serve para um arquivo só ou para temporadas inteiras.
+Ele resolve três travas desses arquivos:
+
+| No remux original | O problema | O que o LaFirma faz |
+|---|---|---|
+| **Dolby Vision Perfil 7** (duas camadas, formato do Blu-ray) | Muitos aparelhos e apps não reconhecem o Dolby Vision nesse formato e mostram só HDR10 | Converte para **Perfil 8.1** (camada única), o formato que tudo que toca Dolby Vision aceita — **sem recodificar o vídeo**. Antes, **mede** o que a camada extra carrega (veja abaixo) |
+| **Áudio TrueHD Atmos / DTS-HD / DTS:X** | Muitas TVs e streamers não tocam: fica sem som ou o servidor tem que converter o áudio a cada play | Converte para **E-AC-3** — o TrueHD **mantém o Atmos** |
+| **Legenda PGS** (imagem) | O servidor tem que "queimar" a legenda no vídeo, recodificando o filme inteiro enquanto você assiste | Faz o **OCR da legenda PT-BR** e gera um **.srt** de texto, corrigido e com nota de qualidade |
+
+O resultado é um `.mkv` pronto para tocar direto, mais o `.srt` ao lado. Serve para um arquivo só ou para temporadas inteiras, com fila, previsão de tempo e diagnóstico de cada arquivo antes de começar.
+
+Por baixo, o programa orquestra ferramentas consagradas da comunidade (`dovi_tool`, `mkvmerge`, `ffmpeg`, `DeeZy`, `PgsToSrt`, `Tesseract`). A interface, a lógica de decisão e o motor em PowerShell são nossos.
 
 ---
 

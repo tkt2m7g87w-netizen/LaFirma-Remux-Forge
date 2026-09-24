@@ -39,10 +39,8 @@
 ;  curtas - o que troca "INF TOL" por "Nao!" - portanto funciona numa maquina
 ;  recem-formatada, sem instalar nada.
 ;
-;  O seconv.exe (motor de OCR preferencial) e opcional na compilacao, mas se
-;  ele estiver la o Latin.db TEM que estar junto - o motor exige os dois
-;  ("$temSeconv = (Test-Path $seconv) -and (Test-Path $seconvDb)"). seconv
-;  sozinho e 79 MB de peso morto que nunca roda.
+;  O seconv/SubtitleEdit SAIU do instalador na 2.0.7 - ver a trava mais
+;  abaixo. Quem faz o OCR de legenda e o PgsToSrt (precisa do .NET 8).
 ; ============================================================================
 
 #define Nome        "LaFirma Remux Forge"
@@ -73,11 +71,11 @@
 ; sintaxe de PowerShell - o Inno le como texto solto e aborta com
 ; "Text is not inside a section" (aconteceu em 26/08, linha 42).
 ; ============================================================================
-#define Versao      "1.9.3"
-#define VersaoGui   "17.18"
-#define VersaoMotor "14.54"
-#define VersaoCorretor "2.27"
-#define VersaoReocr "1.29"
+#define Versao      "2.0"
+#define VersaoGui   "19.15"
+#define VersaoMotor "14.14"
+#define VersaoCorretor "2.34"
+#define VersaoReocr "1.30"
 #define Publicador  "Diego"
 #define Janela      "LaFirma_JANELA.ps1"
 #define Lancador    "Abrir_LaFirma_JANELA.vbs"
@@ -120,36 +118,14 @@
   #error FALTA fonte\LaFirma_PTBR_1.3M.dic.gz - dicionario de 1.296.517 palavras (3,07 MB). E o que o Corretor 2.9+ e o Reocr 1.2+ usam. Com o de 50k no lugar dele volta a familia de falso positivo que a 2.9 fechou ("blipou", "pulso EM"). NAO substitua um pelo outro: sao dois arquivos, dois papeis.
 #endif
 
-; ---- seconv/BinaryOCR: opcional, mas nunca pela metade --------------------
-#define SeconvExe "fonte\tools\SubtitleEdit\seconv.exe"
-#define SeconvDb  "fonte\tools\SubtitleEdit\Latin.db"
-#if FileExists(AddBackslash(SourcePath) + SeconvExe)
-  #if !FileExists(AddBackslash(SourcePath) + SeconvDb)
-    #error fonte\tools\SubtitleEdit\ tem o seconv.exe mas NAO tem o Latin.db. O motor exige os dois juntos - com so um deles o seconv nunca roda e vira 79 MB de peso morto no instalador. Copie o Latin.db de %AppData%\Subtitle Edit\Ocr\ para o lado do seconv.exe.
-  #else
-    #define TemSeconvLocal
-  #endif
-#else
-  #pragma message "AVISO: fonte\tools\SubtitleEdit\seconv.exe nao encontrado. O instalador vai sair sem o motor de OCR preferencial - toda instalacao vai cair no PgsToSrt/Tesseract. Funciona, mas e o caminho que produz os blocos-lixo tipo OITECT."
-#endif
-
-; ---- libSkiaSharp.dll: NAO E RESTOLHO, E DEPENDENCIA REAL DO SECONV ------
-; A auditoria de 13/08 concluiu que esta DLL era "restolho do pacote da GUI"
-; porque o seconv.exe e single-file self-contained, e ela foi apagada de
-; fonte\tools\SubtitleEdit\. A conclusao estava ERRADA, e o defeito ficou
-; escondido por 12 dias porque a maquina de teste tinha o SubtitleEdit
-; instalado e a DLL era encontrada por la.
-; Na primeira instalacao limpa de verdade (25/08 19h43, sem SubtitleEdit no
-; sistema) o seconv morreu na largada:
-;     PGS OCR failed: The type initializer for 'SkiaSharp.SKImageInfo'
-;     threw an exception.  -> Converted 0 file(s)
-; O motor de OCR PREFERENCIAL estava fora do ar em qualquer maquina limpa.
-; Por isso ela vira trava de compilacao junto com o Latin.db: as tres pecas
-; do seconv sao inseparaveis.
-#define SkiaDll "fonte\tools\SubtitleEdit\libSkiaSharp.dll"
-#if !FileExists(AddBackslash(SourcePath) + SkiaDll)
-  #error FALTA fonte\tools\SubtitleEdit\libSkiaSharp.dll - o seconv.exe DEPENDE dela, apesar de ser single-file. Sem ela o OCR preferencial falha com "The type initializer for SkiaSharp.SKImageInfo threw an exception" em qualquer maquina que nao tenha o SubtitleEdit instalado por fora. Recupere o arquivo do SeConv-Windows-x64.zip ou da pasta do SubtitleEdit e ponha em fonte\tools\SubtitleEdit\.
-#endif
+; ---- seconv: FORA DO INSTALADOR desde a 2.0.7 -----------------------------
+; Recusado em todos os filmes medidos de 13/08 a 22/09; a legenda final
+; sempre foi a do PgsToSrt. Ninguem precisa apagar nada a mao:
+;   - no PACOTE, tools\SubtitleEdit\* entrou nos Excludes do [Files] (o mesmo
+;     jeito que o resto do que nao vai no pacote e deixado de fora);
+;   - na ATUALIZACAO por cima, o [InstallDelete] mais abaixo tira a pasta
+;     velha. O motor ainda sabe usar o seconv como reserva (so se faltar o
+;     PgsToSrt), mas o instalador nao entrega nem guarda o seconv.
 
 ; ---- Tesseract standalone: EMPACOTADO desde a 14.23 ----------------------
 ; Ate a 1.4 o tesseract.exe era a UNICA peca do programa que nao vinha no
@@ -210,7 +186,7 @@ AppName={#NomeCompleto}
 AppVersion={#Versao}
 AppVerName={#NomeCompleto} {#Versao}
 AppPublisher={#Publicador}
-VersionInfoVersion={#Versao}
+VersionInfoVersion=2.0.0.0
 VersionInfoDescription={#NomeCompleto} - conversor Dolby Vision Perfil 8.1
 
 ; C:\LaFirma - caminho CURTO e SEM ESPACO, e fora de Program Files de proposito:
@@ -242,28 +218,74 @@ SolidCompression=yes
 WizardStyle=modern
 ; Precisa de admin para criar C:\ e para instalar o .NET Runtime.
 PrivilegesRequired=admin
+; 2.0: o [InstallDelete] apaga de proposito o atalho VELHO do menu Iniciar do
+; usuario (ver la). Aviso do compilador sobre area por usuario: esperado.
+UsedUserAreasWarning=no
+; 2.0: o instalador rodava em modo 32 bits. Com isso {sys} virava SysWOW64 e
+; os atalhos abriam o wscript.exe de 32 bits, que abria o PowerShell de 32
+; bits - e o icone da barra de tarefas saia em branco (atalho e processo com
+; arquiteturas diferentes). As ferramentas sao todas x64: o instalador agora
+; roda em modo 64 bits e os atalhos apontam para o System32 de verdade.
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 
+; ============================================================================
+; 2.0 - O INSTALADOR PASSOU A PERGUNTAR A LINGUA, E A LINGUA VALE PARA TUDO.
+;
+; Pedido do Diego: "adiciona no instalador se a pessoa pode ja instalar em
+; ingles ou em portugues o programa".
+;
+; Sao tres coisas amarradas numa escolha so, e essa e a graca:
+;   1. as telas do assistente saem na lingua escolhida;
+;   2. a LICENCA aparece na lingua escolhida (LicenseFile por idioma);
+;   3. o PROGRAMA abre nessa lingua - o instalador grava IDIOMA.txt, que e
+;      exatamente o arquivo que a janela le no arranque desde a 17.02.
+;
+; Sem o item 3, alguem instalaria em ingles e o programa abriria em portugues
+; na primeira execucao: escolha que a tela seguinte ignora e pior que escolha
+; nenhuma.
+; ============================================================================
 [Languages]
-Name: "brazilian"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+Name: "brazilian"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"; \
+    LicenseFile: "licenca\EULA_PT.txt"
+Name: "english";   MessagesFile: "compiler:Default.isl"; \
+    LicenseFile: "licenca\EULA_EN.txt"
 
 [CustomMessages]
 brazilian.CriandoPastas=Criando as pastas de trabalho...
-#ifdef TemSeconvLocal
-brazilian.InstalandoRuntime=Instalando o .NET Desktop Runtime 8 (usado pela rede de seguranca do OCR de legenda)...
-#else
 brazilian.InstalandoRuntime=Instalando o .NET Desktop Runtime 8 (necessario para o OCR de legenda)...
-#endif
 brazilian.AtalhoConsole=Converter pelo Console (avancado)
 brazilian.AtalhoBase=Pasta de Arquivos Base
 brazilian.AtalhoSaida=Pasta de Arquivos Finalizados
+brazilian.GravandoIdioma=Guardando o idioma escolhido...
+; 2.0: a mesma lista em ingles. Mensagem sem par na outra lingua sai em
+; portugues no meio de um assistente em ingles - a mesma familia de defeito
+; que a janela persegue desde a 17.01.
+english.CriandoPastas=Creating the working folders...
+english.InstalandoRuntime=Installing .NET Desktop Runtime 8 (required for subtitle OCR)...
+english.AtalhoConsole=Convert from the Console (advanced)
+english.AtalhoBase=Source Files Folder
+english.AtalhoSaida=Finished Files Folder
+english.GravandoIdioma=Saving the chosen language...
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
+[InstallDelete]
+; 2.0.7: quem atualiza por cima de uma versao antiga ficaria com os 91 MB do
+; seconv esquecidos na pasta. Sai junto com a atualizacao.
+Type: filesandordirs; Name: "{app}\tools\SubtitleEdit"
+; 2.0: instalador ANTIGO (agosto) criava o atalho no menu Iniciar do USUARIO,
+; com o mesmo AppUserModelID e icone fixo em C:\LaFirma\icone. Ele ficou para
+; tras e o Windows usa ELE para o botao da barra de tarefas: instalado fora de
+; C:\LaFirma, o icone apontado nao existe e o botao sai em branco.
+Type: files; Name: "{userprograms}\LaFirma Remux Forge.lnk"
+Type: files; Name: "{userdesktop}\LaFirma Remux Forge.lnk"
+
 [Files]
 ; ---- O programa inteiro, com tudo que estiver dentro de fonte\ -------------
 ; Este Source e RECURSIVO (recursesubdirs createallsubdirs): tudo que estiver
-; em fonte\ entra sozinho, inclusive tools\SubtitleEdit\, Corretor_Legenda.ps1,
+; em fonte\ entra sozinho, inclusive Corretor_Legenda.ps1,
 ; Auditor_OCR.*, Reocr_Legenda.* e o Auditor_OCR.dic.gz. NAO e preciso criar
 ; entrada nova aqui pra arquivo novo - basta ele estar em fonte\.
 ;
@@ -291,7 +313,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; duas vezes, e se as copias divergissem, quem ganhava era a ultima - confusao
 ; garantida no dia em que o lancador mudar.
 Source: "fonte\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
-    Excludes: "COPIE_O_PROGRAMA_AQUI.txt,_testes\*,{#Lancador},README.md,LEIA_ME.txt,LEIA-ME.txt,VERSAO.txt,LaFirma_Setup.iss,Bancada_CensoCompleto.ps1,Bancada_CensoCompleto.bat,Testar_LaFirma.ps1,Testar_LaFirma.bat,Limpar_Testes.ps1,Limpar_Testes.bat,Auditor_OCR.ps1,Auditor_OCR.bat,Reocr_Legenda.bat,deezy_work\*,*.mkv,*.mp4,*.m2ts,*.hevc,*.srt,*.sup,00_Arquivos_Base\*,01_Arquivos_Finalizados\*,_temp_conversao\*,_ddvt_temp_*\*,_logs\*,_corretor\*,_reocr\*,_auditoria_ocr\*,_retratos\*,LaFirma_motor_log_*.txt,log_conversao_*.txt,relatorio_*.txt,tools\DeeZy\apps\ffmpeg\*,tools\PgsToSrt\x86\*"
+    Excludes: "COPIE_O_PROGRAMA_AQUI.txt,_testes\*,{#Lancador},README.md,LEIA_ME.txt,LEIA-ME.txt,VERSAO.txt,LaFirma_Setup.iss,Bancada_CensoCompleto.ps1,Bancada_CensoCompleto.bat,Testar_LaFirma.ps1,Testar_LaFirma.bat,Limpar_Testes.ps1,Limpar_Testes.bat,Auditor_OCR.ps1,Auditor_OCR.bat,Reocr_Legenda.bat,deezy_work\*,*.mkv,*.mp4,*.m2ts,*.hevc,*.srt,*.sup,00_Arquivos_Base\*,01_Arquivos_Finalizados\*,_temp_conversao\*,_ddvt_temp_*\*,_logs\*,_corretor\*,_reocr\*,_auditoria_ocr\*,_retratos\*,LaFirma_motor_log_*.txt,log_conversao_*.txt,relatorio_*.txt,tools\DeeZy\apps\ffmpeg\*,tools\PgsToSrt\x86\*,tools\SubtitleEdit\*"
 
 ;
 ; ---- 1.7: O MANUAL TAMBEM E ENTREGA (03/09) -------------------------------
@@ -440,7 +462,12 @@ Source: "fonte\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createa
 ; solto dentro de fonte\ - nao e lido por nenhum script nem citado em nenhum
 ; outro lugar do projeto. Sem o Exclude ele seria copiado pra dentro de
 ; {app} em toda instalacao, sem nenhuma utilidade pro usuario final.
-Source: "icone\LaFirmaRemuxForge.ico"; DestDir: "{app}\icone"; Flags: ignoreversion
+; 2.0: a licenca fica tambem instalada, para poder ser relida depois de
+; instalado - aceitar um texto que some nao deixa como conferir o que se
+; aceitou.
+Source: "licenca\EULA_PT.txt"; DestDir: "{app}\licenca"; Flags: ignoreversion
+Source: "licenca\EULA_EN.txt"; DestDir: "{app}\licenca"; Flags: ignoreversion
+Source: "icone\LaFirmaRemuxForge.ico"; DestDir: "{app}\icone"; Flags: ignoreversion uninsrestartdelete
 Source: "lancador\{#Lancador}"; DestDir: "{app}"; Flags: ignoreversion
 
 ; ---- .NET Desktop Runtime 8: so e extraido se realmente faltar na maquina --
@@ -509,6 +536,7 @@ Filename: "{sys}\wscript.exe"; \
     Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
+Type: files; Name: "{userprograms}\LaFirma Remux Forge.lnk"
 ; 1.4.1: DESINSTALAR PASSOU A SIGNIFICAR SUMIR DE VERDADE.
 ;
 ; Ate aqui esta secao removia apenas as pastas de trabalho, e o Inno remove
@@ -535,14 +563,9 @@ Type: files;          Name: "{app}\*.txt"
 Type: files;          Name: "{app}\*.md"
 
 [Code]
-var
-  RuntimeFoiInstalado: Boolean;
-
 { ---- Deteccao do .NET Desktop Runtime 8 --------------------------------------
   Quem precisa do .NET aqui e o PgsToSrt.exe, que e um app .NET framework-
-  dependent. O seconv.exe NAO precisa: ele e publicado self-contained e
-  single-file (confirmado no workflow oficial build-seconv.yml do Subtitle
-  Edit), entao carrega o proprio runtime dentro dos 79 MB dele.
+  dependent - e desde a 2.0 e o UNICO OCR de legenda (o seconv saiu).
   A checagem e por PASTA de versao instalada, que e o jeito que nao depende
   do 'dotnet' estar no PATH.                                                }
 function TemWindowsDesktop8(): Boolean;
@@ -619,6 +642,27 @@ begin
   end;
 end;
 
+{ ---- 2.0: a lingua escolhida no assistente vira a lingua do PROGRAMA --------
+  A janela le IDIOMA.txt no arranque desde a 17.02 - conteudo "EN" abre em
+  ingles, qualquer outra coisa abre em portugues. Entao o instalador nao
+  precisa de nenhum mecanismo novo: ele so grava o mesmo arquivo que o botao
+  de idioma ja grava. Um caminho, um formato, dois donos que concordam.
+
+  Nao e critico: se a gravacao falhar, o programa abre em portugues, que e o
+  padrao de sempre - por isso nada aqui aborta a instalacao.                 }
+procedure GravarIdiomaEscolhido();
+var
+  Alvo, Valor: String;
+begin
+  if ActiveLanguage() = 'english' then
+    Valor := 'EN'
+  else
+    Valor := 'PT';
+  Alvo := ExpandConstant('{app}\IDIOMA.txt');
+  if not SaveStringToFile(Alvo, Valor, False) then
+    Log('LaFirma: nao consegui gravar IDIOMA.txt - o programa abrira em portugues.');
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   Codigo: Integer;
@@ -626,32 +670,32 @@ begin
   if CurStep = ssPostInstall then
   begin
     EscreverVersaoTxt();
+    GravarIdiomaEscolhido();
 
     { Confere DEPOIS de instalar. Se ainda faltar o runtime, avisa e oferece
       abrir a pagina da Microsoft - nunca deixa o usuario descobrir sozinho
-      la na etapa 5/7 que a legenda nao saiu.
+      la na etapa 4/5 que a legenda nao saiu.
 
-      1.4: o texto agora depende de o seconv ter sido empacotado ou nao. Com
-      o seconv junto, faltar o .NET NAO desliga o OCR - desliga so a rede de
-      seguranca (PgsToSrt + Corretor_Legenda). Dizer "o OCR fica desligado"
-      nesse caso seria mentira, e mentira que assusta o usuario a toa.     }
+      2.0: sem o seconv, faltar o .NET desliga o OCR de legenda inteiro -
+      por isso a caixa diz exatamente isso.                               }
     if PrecisaDotNet() then
     begin
-#ifdef TemSeconvLocal
-      if MsgBox('O .NET Desktop Runtime 8 nao foi encontrado neste computador.' + #13#10 + #13#10 +
-                'O OCR de legenda continua funcionando: o motor principal de OCR (seconv/BinaryOCR) ' +
-                'vem junto com o programa e nao depende do .NET.' + #13#10 + #13#10 +
-                'O que fica desligado e a REDE DE SEGURANCA (PgsToSrt + Corretor_Legenda), que so ' +
-                'entra em acao quando o motor principal falha em algum arquivo.' + #13#10 + #13#10 +
-                'Quer abrir a pagina de download da Microsoft agora?',
-                mbConfirmation, MB_YESNO) = IDYES then
-#else
-      if MsgBox('O .NET Desktop Runtime 8 nao foi encontrado neste computador.' + #13#10 + #13#10 +
+{ 2.0: estas caixas eram so em portugues. Num assistente em ingles elas
+  apareceriam em portugues - a mesma familia de defeito que a janela persegue
+  desde a 17.01. E a etapa citada era "5/7": o motor roda CINCO etapas desde
+  a 15.x, e o numero errado aqui mandaria o usuario procurar uma etapa que
+  nao existe. }
+      if ActiveLanguage() = 'english' then
+        Codigo := MsgBox('.NET Desktop Runtime 8 was not found on this computer.' + #13#10 + #13#10 +
+                'Without it the program installs and converts normally, but subtitle OCR ' +
+                '(PGS to SRT, stage 4/5) is disabled.' + #13#10 + #13#10 +
+                'Open the Microsoft download page now?', mbConfirmation, MB_YESNO)
+      else
+        Codigo := MsgBox('O .NET Desktop Runtime 8 nao foi encontrado neste computador.' + #13#10 + #13#10 +
                 'Sem ele o programa instala e converte normalmente, mas o OCR de legenda ' +
-                '(PGS para SRT, etapa 5/7) fica desligado.' + #13#10 + #13#10 +
-                'Quer abrir a pagina de download da Microsoft agora?',
-                mbConfirmation, MB_YESNO) = IDYES then
-#endif
+                '(PGS para SRT, etapa 4/5) fica desligado.' + #13#10 + #13#10 +
+                'Quer abrir a pagina de download da Microsoft agora?', mbConfirmation, MB_YESNO);
+      if Codigo = IDYES then
       begin
         ShellExec('open', '{#LinkRuntime}', '', '', SW_SHOWNORMAL, ewNoWait, Codigo);
       end;
@@ -748,6 +792,14 @@ begin
     DelTree(PastaBase,  True, True, True);
     DelTree(PastaFinal, True, True, True);
   end;
+
+  { 2.0: _logs e icone sobravam depois de desinstalar (medido em Program
+    Files (x86)): o [UninstallDelete] roda enquanto o Explorer ainda segura o
+    .ico dos atalhos. Aqui, no fim, os atalhos ja sairam - segunda tentativa.
+    Se ainda estiver preso, o flag uninsrestartdelete do .ico apaga no
+    proximo reinicio. }
+  DelTree(ExpandConstant('{app}\_logs'), True, True, True);
+  DelTree(ExpandConstant('{app}\icone'), True, True, True);
 
   { Se depois de tudo a pasta do programa ficou vazia, ela tambem sai - senao
     fica uma casca vazia em C:\ que o usuario tem que apagar a mao. }

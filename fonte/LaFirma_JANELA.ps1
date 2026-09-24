@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 17.18
+#  LaFirma - JANELA 19.15
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -39,6 +39,127 @@
 #    <# 16.xx: ... #> espalhados ao lado do codigo. Para saber o que mudou
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
+#
+#    19.15  23/09/2026  Remontagem com video extraido: 8s + 4,5 s/GB (era 51 + 3,6)
+#    19.14  23/09/2026  Pasta de saida so com .mkv + .srt (sem copia do log)
+#    19.13  23/09/2026  Arquivo pulado nao vira 'erro -100%' na previsao
+#    19.12  23/09/2026  Grande teste final: [F12] do topo traduzido na troca
+#                       de idioma; rodape do arquivo seguinte nao herda o
+#                       relogio do anterior; OCR parado em 10% nao infla mais
+#                       o restante
+#    19.11  23/09/2026  Espaco: o cartao diz QUAL disco faltou; "Livre Agora"
+#                       mostra a origem (e a saida, quando e outro disco)
+#    19.10  23/09/2026  Teste de aceite da 2.0.9 + auditoria: a pausa saia
+#                       das contas do rodape (restante subia de 196s para
+#                       422s depois de 29s pausado); pausa que atravessava a
+#                       troca de etapa sumia; cancelar pausado ficava
+#                       "PAUSADO"; fechar nao parava censo/medicao; titulo
+#                       sem o numero de videos; sub-etapa repetida no log
+#    19.9   23/09/2026  Desfeito o rotulo "[PERDA EM ...]": volta o cabecalho
+#                       de sempre, e o censo so acrescenta o numero
+#    19.8   23/09/2026  O Iniciar quebrava: @() em cima da List dos videos
+#                       ("Os tipos de argumento nao correspondem")
+#    19.7   23/09/2026  Censo vai para o motor e o rotulo vira "PERDA EM N DE
+#                       M CENAS"; pausa e etapa cancelada nao entram mais na
+#                       calibragem; medicao velha nao ressuscita ao trocar de
+#                       pasta; titulo mostra a versao de verdade
+#    19.6   23/09/2026  Revisao geral: F5 e Atualizar nao matam mais a
+#                       conversao; Start-Motor nao joga fora el_fim/censo_fim;
+#                       medicao nao renasce no meio da conversao; cartao do P5
+#    19.5   22/09/2026  A cor volta a seguir so a classificacao: o censo
+#                       acrescenta numeros, nunca troca vermelho por laranja
+#    19.4   22/09/2026  A fila passou a ser repintada quando o censo muda
+#                       a cor: a linha de baixo virava laranja e a coluna
+#                       de cima ficava vermelha, na mesma tela
+#    19.3   22/09/2026  O [ESC] recusado passou a dizer o motivo real (o
+#                       mesmo conserto que o F11 ganhou na 18.22), e a
+#                       frase do veredicto da legenda ficou curta
+#    19.2   22/09/2026  O Complex FEL deixou de ser um so vermelho: com o
+#                       Censo Completo na mao, pico isolado (menos de 1%
+#                       das cenas e no maximo 2x o master) desce para
+#                       laranja. A camada NAO e reclassificada
+#    19.1   22/09/2026  A previsao do censo passou a olhar o DISCO, que e
+#                       quem manda no relogio, e o cartao final le o arquivo
+#                       com o selo [BL+RPU] no nome
+#    19.0   18/09/2026  2.0: a calibragem que se anulava (licao 49), a barra
+#                       com [F3]/[F4], traducoes fechadas e o instalador
+#                       bilingue com EULA
+#    18.24  18/09/2026  65 janelas do Explorer empilhadas: F3/F4 sem freio.
+#                       Agora reaproveita a janela aberta, e freia por pasta
+#    18.23  18/09/2026  A barra na ordem dele: Origem, Saida, Atualizar - e
+#                       [F3] e [F4] abrindo as pastas
+#    18.22  18/09/2026  O [F11] que sumia com o censo rodando, a dica que
+#                       congelava, e o F11 que travou para sempre (licao 47)
+#    18.21  18/09/2026  UMA PORTA SO (o botao do censo tinha tres donos), o
+#                       freio dos 2s, F5/F12 travados com o censo rodando, a
+#                       porcentagem por duracao e o [F12] que faltava
+#    18.20  17/09/2026  O CENSO VOLTOU A FUNCIONAR (eu tinha quebrado na 18.19)
+#    18.19  17/09/2026  CENSO CANCELADO NAO VIRA VEREDICTO (RPU PELA METADE)
+#    18.18  17/09/2026  UM DONO POR BOTAO; [F1] ANTES DO ROTULO; RECUSA FALA
+#    18.17  17/09/2026  PROGRESSO REAL DO CENSO; A MEDICAO VOLTA SOZINHA; F5
+#    18.16  17/09/2026  O BOTAO DO CENSO PARA; F11/F12; ROTULO SO COM %
+#    18.15  17/09/2026  O CMD DO PIPE TAMBEM MORRE; PROVA DE VIDA OLHA OS DOIS
+#    18.14  17/09/2026  CANCELAR O CENSO VALE NA HORA (o dovi_tool e parado)
+#    18.13  17/09/2026  CABECALHO E DA ABA; O CENSO PROVA QUE ESTA VIVO
+#    18.12  17/09/2026  FECHAR PARA TODOS OS RELOGIOS (erro de 10/09 01:26:31)
+#    18.11  17/09/2026  NAO PROMETE MEDICAO QUE NAO EXISTE; FAIXAS UMA VEZ SO
+#    18.10  17/09/2026  O BOTAO DO CENSO ENTROU NO PADRAO DE CORES DA CASA
+#    18.09  17/09/2026  O CONTADOR DO CENSO PASSOU A DIZER QUANTO FALTA
+#    18.08  17/09/2026  A MEDICAO MORRIA PARA SEMPRE, E A ESPERA FICAVA PENDURADA
+#    18.07  17/09/2026  O CENSO MOSTRA QUE ESTA VIVO, E SEM ESPACO E VERMELHO
+#    18.06  17/09/2026  O PROGRAMA DESMARCAVA ARQUIVO SOZINHO (a caixinha e o indice)
+#    18.05  17/09/2026  A LINHA E O CAMINHO, NAO O INDICE - E O CACHE GUARDAVA MEIA VERDADE
+#    18.04  17/09/2026  O CENSO CONGELAVA A JANELA 92s, E A MEDIDA NAO SE PERDE MAIS
+#    18.03  17/09/2026  VEREDICTO DO RYAN NA LINHA DO DRAGON: A SERIE NAO VIRAVA
+#    18.02  17/09/2026  A MEDICAO NUNCA MEDIU: BANDEIRA DE OUTRO DONO
+#    18.01  16/09/2026  A TELA FECHA NA HORA, O TRABALHO FECHA QUANDO PUDER
+#    18.00  16/09/2026  OS TRES TRABALHOS, SEPARADOS - o modelo, nao o remendo
+#    17.24  16/09/2026  A JANELA TRAVAVA ACHANDO QUE AINDA LIA
+#    17.23  16/09/2026  A CHAVE RELIA A PASTA A TOA (28x, 254s)
+#    17.22  16/09/2026  A FAIXA DE PAUSADO NAO TRADUZIA
+#    17.21  16/09/2026  O ESTADO DA MEDICAO MORRIA PELA METADE
+#    17.20  15/09/2026  TRES DEFEITOS DA 17.19, ACHADOS
+#                        PELO DIEGO EM QUINZE MINUTOS.
+#                        - "Terminou de medir e ficou
+#                          mostrando ainda": a fila seguia
+#                          com "Medindo Camada - 3 de 3"
+#                          depois de todos medidos. Ele leu
+#                          como o programa TRAVADO.
+#                        - O "Proximo a Converter" verde caia
+#                          na linha DE BAIXO enquanto a de
+#                          cima era medida.
+#                        - Arquivo DESMARCADO sendo medido
+#                          aparecia cinza ("Fora da Fila") e
+#                          nenhuma linha acendia, com o botao
+#                          dizendo "2 de 3".
+#                        - Causa comum: a 17.18 deduzia, e
+#                          deducao se corrige sozinha a cada
+#                          redesenho. Virou estado - e estado
+#                          precisa de quem o apague. Eu
+#                          apaguei a variavel sem redesenhar.
+#
+#    17.19  15/09/2026  A 17.18 DEDUZIA QUEM ESTAVA SENDO
+#                        MEDIDO - E A DEDUCAO ERRAVA.
+#                        - Achado do Diego na tela: a coluna
+#                          dizia um numero e o botao dizia
+#                          outro, e a posicao andava para tras.
+#                        - Dois furos: o runspace mede TODOS os
+#                          pendentes (marcados ou nao), e o
+#                          total era fotografado uma vez -
+#                          desmarcar/remarcar no meio da
+#                          medicao mudava a conta debaixo da
+#                          formula.
+#                        - E a 17.18 criou a TERCEIRA contagem
+#                          da mesma coisa na tela (botao, aviso
+#                          de espera, deducao).
+#                        - Agora o laco que mede manda "el_ini"
+#                          com indice, posicao e total antes de
+#                          cada arquivo. Ninguem deduz.
+#                        - O aviso de espera deixou de usar a
+#                          forma "X de Y" do botao: ele responde
+#                          outra pergunta ("faltam N da sua
+#                          fila") e escrito igual parecia o
+#                          mesmo contador se contradizendo.
 #
 #    17.18  15/09/2026  A FILA NAO DIZIA QUEM ESTAVA SENDO
 #                        MEDIDO - E PERDIA O "PROXIMO A
@@ -775,7 +896,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "17.18"
+$SCRIPT_VERSION = "19.15"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -806,7 +927,7 @@ $SCRIPT_VERSION = "17.18"
 
     Sem o arquivo (rodando direto da pasta de desenvolvimento, sem instalar)
     cai no valor abaixo - que e so um piso, nao a verdade. #>
-$APP_VERSAO = "1.5.0"
+$APP_VERSAO = "2.0"
 try {
     <#  $script:PastaScript so nasce la na linha ~185; aqui em cima ele ainda
         e $null e o Join-Path devolveria caminho errado. Por isso a pasta e
@@ -818,7 +939,15 @@ try {
     $arqVersao = Join-Path $pastaDoScript "VERSAO.txt"
     if (Test-Path -LiteralPath $arqVersao) {
         foreach ($ln in @(Get-Content -LiteralPath $arqVersao -ErrorAction SilentlyContinue)) {
-            if ($ln -match '^\s*Produto\s*:\s*(\S+)') { $APP_VERSAO = $Matches[1]; break }
+            <#  2.0.7: o VERSAO.txt do ultimo INSTALADOR vencia sempre. Quem cola
+                os .ps1 novos em cima (o fluxo de teste) via "v1.9.3" no titulo por
+                25 builds - e nao dava para saber de qual build era um log. Agora
+                vale o MAIOR dos dois. #>
+            if ($ln -match '^\s*Produto\s*:\s*(\S+)') {
+                $vArq = $Matches[1]
+                try { if ([version]$vArq -gt [version]$APP_VERSAO) { $APP_VERSAO = $vArq } } catch { }
+                break
+            }
         }
     }
 } catch { }
@@ -908,6 +1037,7 @@ $script:UltimoRodapeEm    = $null
 $script:SuaveChave = ""               # 16.73: filtro do tempo restante
 $script:SuaveValor = 0.0
 $script:SuaveEm    = $null
+$script:MotivoVazio = ""
 $script:AmostrasDisco = @()           # 16.74: as tres leituras do disco
 $script:CachePinceis = @{}
 function Pincel([string]$Hex) {
@@ -933,6 +1063,56 @@ $script:PastaScript = Split-Path -Parent $script:CaminhoScript
 # 16.24: o log da janela passou a morar em _logs\, em vez de ficar solto na
 # raiz do programa. Se a pasta nao puder ser criada, cai de volta na raiz -
 # log no lugar antigo ainda e melhor que uma sessao inteira sem log.
+function Get-PastaDados {
+    <#  17.02 - ONDE O PROGRAMA GUARDA O QUE E DELE.
+
+        O idioma escolhido e a calibragem do tempo eram gravados na pasta
+        do proprio programa. Funciona quando o LaFirma mora em C:\LaFirma,
+        e falha calada quando ele mora em Program Files - o Windows nega a
+        escrita e o catch engolia o erro. Era esse o defeito de "escolhi
+        ingles, fechei e voltou em portugues": a escolha nunca chegou ao
+        disco.
+
+        Agora: tenta a pasta do programa (que continua sendo o lugar certo
+        para quem instala em C:\LaFirma, e mantem o que ja esta gravado);
+        se ela nao aceita escrita, cai para %LOCALAPPDATA%\LaFirma, que e
+        do usuario e sempre aceita. O teste e uma escrita de verdade, nao
+        um palpite pelo caminho. #>
+    if ($script:PastaDados) { return $script:PastaDados }
+    $cand = $script:PastaScript
+    try {
+        $sonda = Join-Path $cand ".lafirma_escrita.tmp"
+        [System.IO.File]::WriteAllText($sonda, "x")
+        [System.IO.File]::Delete($sonda)
+    } catch {
+        $cand = Join-Path $env:LOCALAPPDATA "LaFirma"
+        try { if (-not (Test-Path -LiteralPath $cand)) { New-Item -ItemType Directory -Path $cand -Force | Out-Null } }
+        catch { $cand = $script:PastaScript }
+    }
+    $script:PastaDados = $cand
+    return $cand
+}
+
+<#  17.19 - A SESSAO INTEIRA SEM LOG, EM SILENCIO.
+
+    O log tentava _logs\ e, se nao desse, a raiz do programa. As duas ficam
+    DENTRO da pasta de instalacao - entao numa instalacao em Program Files (ou
+    qualquer pasta sem escrita) as duas falham, o StreamWriter estoura num
+    catch vazio, $LogEscritor fica nulo e o programa roda a sessao toda sem
+    gravar uma linha. Sem aviso nenhum.
+
+    E justamente quem tem o problema e quem fica sem a prova dele: "me manda o
+    log" nao tem resposta.
+
+    A licao 23 ja existia para isto - Get-PastaDados decide ESCREVENDO, nao
+    olhando o caminho - e o log era a unica escrita do programa que ainda nao
+    a usava. Agora usa, na mesma ordem das outras: pasta do programa primeiro
+    (quem instala em C:\LaFirma nao muda nada), %LOCALAPPDATA%\LaFirma
+    depois.
+
+    E quando cai para a pasta de dados, a PRIMEIRA linha do log diz isso - o
+    caminho novo aparece no painel Log, senao vira "sumiu". #>
+$script:LogCaiuParaDados = $false
 $script:PastaLogs = Join-Path $script:PastaScript "_logs"
 try { [System.IO.Directory]::CreateDirectory($script:PastaLogs) | Out-Null } catch { }
 if (-not (Test-Path -LiteralPath $script:PastaLogs)) { $script:PastaLogs = $script:PastaScript }
@@ -945,7 +1125,19 @@ $script:LogEscritor = $null
 try {
     $script:LogEscritor = New-Object System.IO.StreamWriter($script:LogArquivo, $false, [System.Text.Encoding]::UTF8)
     $script:LogEscritor.AutoFlush = $true
-} catch { }
+} catch {
+    <#  17.19: a pasta do programa nao aceita escrita. Em vez de ficar sem log,
+        vai para a pasta de dados do usuario - a mesma que guarda o idioma e a
+        calibragem desde a 17.02. #>
+    try {
+        $pastaAlt = Join-Path (Get-PastaDados) "_logs"
+        [System.IO.Directory]::CreateDirectory($pastaAlt) | Out-Null
+        $script:LogArquivo = Join-Path $pastaAlt ("LaFirma_motor_log_{0}.txt" -f (Get-Date -Format "yyyy-MM-dd_HHmmss"))
+        $script:LogEscritor = New-Object System.IO.StreamWriter($script:LogArquivo, $false, [System.Text.Encoding]::UTF8)
+        $script:LogEscritor.AutoFlush = $true
+        $script:LogCaiuParaDados = $true
+    } catch { }
+}
 
 function Escrever-Log([string]$Texto, [string]$Tipo = "INFO") {
     $linha = "[{0}] [{1}] {2}" -f (Get-Date -Format "HH:mm:ss.fff"), $Tipo.PadRight(5), $Texto
@@ -965,6 +1157,14 @@ function Registrar-Ambiente {
     Escrever-Log ("CLR / .NET   : {0}" -f [System.Environment]::Version)
     Escrever-Log ("Apartamento  : {0} (WPF exige STA)" -f [Threading.Thread]::CurrentThread.GetApartmentState())
     Escrever-Log ("Arquivo      : {0}" -f $script:CaminhoScript)
+    <#  17.19: so aparece quando houve desvio. Linha que so existe quando algo
+        saiu do padrao vale mais que uma linha fixa dizendo o obvio. #>
+    if ($script:LogCaiuParaDados) {
+        Escrever-Log ("LOG: a pasta do programa nao aceita escrita - este log esta em {0}" -f $script:LogArquivo) "AVISO"
+    }
+    if (-not $script:LogEscritor) {
+        $script:LogLinhas.Add("[--------] [AVISO] LOG: nao foi possivel gravar em disco - o painel Log desta sessao e tudo que existe")
+    }
 }
 
 # ============================================================================
@@ -985,7 +1185,12 @@ function Registrar-Ambiente {
 #  da janela - o DispatcherTimer garante isso.
 
 $script:FilaMsg  = New-Object 'System.Collections.Concurrent.ConcurrentQueue[object]'
-$script:Controle = [hashtable]::Synchronized(@{ Pausar = $false; Cancelar = $false; Rodando = $false })
+<#  17.24: PararMedicao e um canal VIVO para a fase B, separado do Cancelar.
+    Cancelar derruba a leitura INTEIRA; este so diz "pule a medicao" - a fase
+    A termina e a fila fica completa. Sem ele, desligar a chave no meio de uma
+    leitura so tinha um caminho: matar o runspace, que e o que quebrou a
+    janela no log de 16/09 18:06. #>
+$script:Controle = [hashtable]::Synchronized(@{ Pausar = $false; Cancelar = $false; Rodando = $false; PararMedicao = $false; MedSerieViva = 0 })
 $script:MotorPS = $null; $script:MotorRunspace = $null; $script:MotorHandle = $null
 $script:TsAcao = $null      # hora do F1/F2, para medir a latencia do ack do motor
 $script:TsCancel = $null    # hora do ESC, para medir quanto o motor levou para encerrar
@@ -1109,8 +1314,17 @@ $script:TempoEtapa = @{
         pelos dois pontos: 51s + 1,49 s/GB - e ela devolve 172s e 113s, os
         dois na mosca. Com video extraido so ha um ponto (Troy, 87 GB, 365s):
         mesmo intercepto, 3,6 s/GB. #>
-    RemontagemSegFixo    = 51      # os dois casos pagam este pedaco
-    RemontagemSegPorGb   = 3.6     # com video extraido (remonta + apaga temporario)
+    <#  19.15 (2.0.18): a reta do caso COM video extraido estava errada. O
+        intercepto de 51s veio do remux direto e foi emprestado para o outro
+        caso com um ponto so (Troy). Tres filmes medidos em 23/09, duas vezes
+        cada (a etapa 5 inteira, com conferencia e limpeza):
+            GoT 20,6 GB -> 102/104/99s   Ryan 82 GB -> 359/368s   Troy 87 GB -> 406/396s
+        A reta por eles: 8s + 4,5 s/GB - devolve 101, 377 e 400. Com os 51s o
+        GoT saia previsto em 136s para 100 reais, e era essa a maior parte do
+        -27% dele. O remux direto continua com os 51s dele (medidos). #>
+    RemontagemSegFixo    = 51      # remux direto (sem video extraido)
+    RemontagemExtraidoSegFixo = 8  # com video extraido - 19.15
+    RemontagemSegPorGb   = 4.5     # com video extraido (remonta + apaga temporario) - 19.15
     RemontagemDiretoSegPorGb = 1.49 # remux direto do original, sem temporario
     DiagnosticoSeg       = 4
     <#  16.70: A CONFERENCIA E A LIMPEZA CUSTAM TEMPO E NINGUEM CONTAVA.
@@ -1181,12 +1395,19 @@ $script:MbPorSegReferencia = 445.0
 
     Entao ele deixou de ser fixo. A cada arquivo convertido o programa grava
     quanto aquele arquivo REALMENTE custou por GB e por peso, e a proxima
-    estimativa usa a MEDIANA das ultimas cinco rodadas. Auto-calibra na
-    maquina de quem esta usando, com o disco de quem esta usando.
+    estimativa usa o P75 das ultimas cinco rodadas. Auto-calibra na maquina de
+    quem esta usando, com o disco de quem esta usando.
 
-    Mediana e nao media de proposito: uma conversao interrompida no meio, ou
-    uma que pegou o computador ocupado, entra na lista como um numero absurdo
-    - a media iria atras dele, a mediana ignora.
+    P75 e nao media, e nao mediana - as tres foram MEDIDAS antes da escolha, e
+    a conta esta no bloco do Get-Percentil, mais abaixo. O resumo: a media vai
+    atras de uma rodada esquisita, a mediana e a mais exata na media mas
+    subestima 23% no pior caso, e subestimar promete um tempo que nao vai ser
+    cumprido. O p75 troca exatidao media por nao prometer o que nao cumpre.
+
+    (Ate a 17.19 este paragrafo dizia "MEDIANA", enquanto o codigo chama
+    Get-Percentil 0.75 desde a 16.99. Comentario que descreve o que o codigo
+    NAO faz e a licao 2 virada para dentro: a proxima pessoa "conserta" o
+    codigo certo para bater com o texto errado.)
 
     O valor abaixo continua sendo o de partida: e o que vale na primeira
     execucao, e o que volta se o arquivo de calibragem sumir ou vier ilegivel.
@@ -1201,6 +1422,68 @@ $script:CalibMin = 0.004
 $script:CalibMax = 0.060
 $script:CalibArquivo = "CALIBRAGEM.txt"
 $script:CalibUsadas = @()
+
+<#  ============================================================================
+    2.0 - A CALIBRAGEM SE ANULAVA. PROVA ALGEBRICA E NUMERICA.
+
+    "vc continua errando feio" e, toda sessao, o proprio programa avisando:
+
+      CALIBRAGEM: as rodadas se espalham 44% entre si (0,0125 a 0,0180) ... a
+      estimativa vai continuar errando por arquivo ate os pesos serem revistos.
+
+    O aviso estava certo no diagnostico e a correcao nunca podia funcionar,
+    porque desde a 16.64 a constante de calibragem NAO TEM EFEITO NENHUM sobre
+    a estimativa. A algebra, com k = SegPorGbPorPeso:
+
+      peso_i = round( s_i / (Gb * k) )        (Get-PesoDeSegundos)
+      est    = Gb * k * SOMA(peso_i)          (Set-LoteParaConverter)
+      est    = Gb * k * SOMA( s_i / (Gb * k) ) = SOMA( s_i )
+
+    O k CANCELA. Medido com os numeros reais do Saving Private Ryan (81,99 GB,
+    etapas 193,6 / 213,2 / 2524 / 387,8 / 346,2 s):
+
+      k = 0,0125  -> soma de pesos 3576 -> estimativa 3.665,0s
+      k = 0,0153  -> soma de pesos 2921 -> estimativa 3.664,2s
+      k = 0,0176  -> soma de pesos 2540 -> estimativa 3.665,3s
+      k = 0,0400  -> soma de pesos 1118 -> estimativa 3.666,6s
+
+    A constante varia 3,2x e a estimativa anda 1,6 SEGUNDO em 3.665 - que e o
+    arredondamento do peso para inteiro, nada mais. Cada linha gravada em
+    CALIBRAGEM.txt era, na verdade, k vezes o erro daquele arquivo; e o "44%
+    de espalhamento" era o erro por arquivo se espalhando 44%, relatado como
+    se fosse a calibragem.
+
+    Ou seja: o programa vinha prometendo, em toda sessao, uma auto-correcao
+    que ele nao fazia. Licao 2 na escala de um modelo inteiro.
+
+    O QUE MUDA AGORA
+
+    1. A calibragem sai de DENTRO da conta de peso e passa a multiplicar os
+       SEGUNDOS previstos. Fora do laco, ela nao tem como se anular.
+    2. E ela deixa de ser UM numero para o arquivo inteiro e passa a ser UM
+       POR ETAPA. Esse era o motivo real dos 44%: um filme TrueHD longo e
+       pequeno e um filme DTS curto e grande erram em direcoes OPOSTAS, e um
+       escalar unico nao descreve as duas formas ao mesmo tempo. Com um fator
+       por etapa, "esta maquina e 20% mais lenta no audio" deixa de brigar com
+       "este disco e 10% mais rapido na remontagem".
+    3. O peso continua existindo e continua derivado dos segundos - ele e a
+       LARGURA DA REGUA, e a regua nao mudou. O que mudou e quem decide o
+       tempo previsto.
+
+    LICAO 49: UM NUMERO QUE APARECE NOS DOIS LADOS DA MESMA CONTA NAO E UM
+              AJUSTE - E UMA TROCA DE UNIDADE. Antes de confiar numa
+              constante de calibragem, varie ela e veja o resultado mudar.
+    ============================================================================ #>
+$script:FatorEtapaPadrao = @(1.0, 1.0, 1.0, 1.0, 1.0)
+$script:FatorEtapa       = @(1.0, 1.0, 1.0, 1.0, 1.0)
+# Limites de sanidade POR ETAPA: uma etapa que saiu 4x do previsto nao e a
+# maquina - e outra coisa (cancelamento, pausa longa, arquivo trocado).
+$script:FatorEtapaMin = 0.25
+$script:FatorEtapaMax = 4.00
+$script:CalibEtapaArquivo = "CALIBRAGEM_ETAPAS.txt"
+# 19.15: "remontagem2" - a base da etapa 5 mudou; o historico antigo foi medido
+# contra a reta velha e aplicado na nova daria +9%. Recomeca do zero.
+$script:NomeEtapaCalib = @("extracao", "dovi", "audio", "legenda", "remontagem2")
 
 # --- pesos antigos, guardados so pra nao perder a referencia do Fallout ---
 $script:PesosComAudio  = @(1, 60, 65, 921, 1, 143, 1)
@@ -1251,7 +1534,7 @@ $script:TrabalhoMotor = {
     # tres. Parametro nao depende de escopo nenhum: o valor e ligado ao nome
     # no momento da chamada, igual a qualquer funcao. param() TEM que ser a
     # primeira instrucao do bloco - a mesma regra que quebrou o motor 13.3.
-    param($EscolhasDaJanela)
+    param($EscolhasDaJanela, $CensosDaJanela)
     function Enviar($m) { $Fila.Enqueue($m) }
     function Avisar([string]$t, [string]$tipo = "MOTOR") { Enviar @{ T = "log"; Texto = $t; Tipo = $tipo } }
     try {
@@ -1332,6 +1615,7 @@ $script:TrabalhoMotor = {
         $script:swVideo = [System.Diagnostics.Stopwatch]::StartNew()
         $script:swEtapa = [System.Diagnostics.Stopwatch]::StartNew()
         $script:ultimaRepintura = $null
+        $script:ultimaLinhaMotor = ""
         $script:idxVideo = -1
         $script:etapaIdx = 0
         # 16.37: cinco etapas de trabalho (o diagnostico e a limpeza sairam
@@ -1405,7 +1689,13 @@ $script:TrabalhoMotor = {
                 # console ela E a tela ("preparando OCR..." piscando no lugar
                 # da barra); aqui ela sumia e a etapa 5/7 ficava 1m44s parada
                 # em 0% sem dizer o que estava acontecendo.
-                Enviar @{ T = "log"; Texto = $lim; Tipo = "MOTOR" }
+                # 2.0.10: o SaySub do motor escreve a sub-etapa DUAS vezes - a
+                # linha "- OCR completo (...)" e, logo atras, a mesma frase como
+                # repintura. No log saiam as duas, uma embaixo da outra (log de
+                # 23/09: OCR, Corretor e Reocr repetidos). A repintura que so
+                # repete a linha anterior vira nota da etapa, e nao linha nova.
+                $eco = ("$($script:ultimaLinhaMotor)" -replace '^-\s+', '').Trim()
+                if ($lim -ne $eco) { Enviar @{ T = "log"; Texto = $lim; Tipo = "MOTOR" } }
                 Enviar @{ T = "nota"; Texto = $lim }
                 return
             } else {
@@ -1482,6 +1772,7 @@ $script:TrabalhoMotor = {
                 $script:swEtapa.Restart()
                 Enviar @{ T = "etapa"; Idx = $novo }
             }
+            $script:ultimaLinhaMotor = $lim
             Enviar @{ T = "log"; Texto = $lim; Tipo = "MOTOR" }
         }
         function Show-Barra($Pct) {
@@ -1555,6 +1846,17 @@ $script:TrabalhoMotor = {
             Avisar "porta manual FECHADA (nenhuma escolha recebida)" "PROVA"
         }
 
+        # --- 6c. 2.0.7: o censo do filme inteiro vai para o motor ----------
+        # O motor so tinha a AMOSTRA e escrevia "NAO RECOMENDADA" em cima de
+        # um censo que a janela ja tinha feito (TROTF: 15 de 2.225 cenas).
+        # Mesmo truque do nome proprio da porta manual (6b).
+        if ($CensosDaJanela -and $CensosDaJanela.Count -gt 0) {
+            $script:CensosDoFilme = $CensosDaJanela
+            Avisar ("censo do filme inteiro enviado para {0} arquivo(s)" -f $CensosDaJanela.Count) "PROVA"
+        } else {
+            $script:CensosDoFilme = $null
+        }
+
         # --- 7. o proprio foreach do motor ---------------------------------
         $laco = @($ast.FindAll({
             $args[0] -is [System.Management.Automation.Language.ForEachStatementAst] -and
@@ -1606,7 +1908,7 @@ $script:TrabalhoCenso = {
         $doviTool = & $achar "dovi_tool.exe"
         if (-not $ffmpeg -or -not $doviTool) {
             Avisar "CENSO: sem ffmpeg ou dovi_tool nao da para ler o RPU do filme inteiro." "ERRO"
-            Enviar @{ T = "censo_fim"; Idx = $Idx; Ok = $false; Erro = "ferramenta ausente" }
+            Enviar @{ T = "censo_fim"; Serie = $Serie; Idx = $Idx; Caminho = "$Caminho"; Ok = $false; Erro = "ferramenta ausente" }
             return
         }
 
@@ -1625,7 +1927,7 @@ $script:TrabalhoCenso = {
         . ([scriptblock]::Create(($defs -join "`r`n`r`n")))
         if (-not (Get-Command "Get-CensoCompletoDV" -CommandType Function -ErrorAction SilentlyContinue)) {
             Avisar "CENSO: o motor nao tem Get-CensoCompletoDV." "ERRO"
-            Enviar @{ T = "censo_fim"; Idx = $Idx; Ok = $false; Erro = "funcao ausente no motor" }
+            Enviar @{ T = "censo_fim"; Serie = $Serie; Idx = $Idx; Caminho = "$Caminho"; Ok = $false; Erro = "funcao ausente no motor" }
             return
         }
 
@@ -1634,7 +1936,7 @@ $script:TrabalhoCenso = {
 
         if (-not $r.Ok) {
             Avisar ("CENSO COMPLETO de '{0}': FALHOU - {1}" -f $Nome, "$($r.Erro)") "ERRO"
-            Enviar @{ T = "censo_fim"; Idx = $Idx; Ok = $false; Erro = "$($r.Erro)" }
+            Enviar @{ T = "censo_fim"; Serie = $Serie; Idx = $Idx; Caminho = "$Caminho"; Ok = $false; Erro = "$($r.Erro)" }
             return
         }
 
@@ -1661,23 +1963,76 @@ $script:TrabalhoCenso = {
                 [math]::Round([double]$r.Segundos / [double]$AmostraSeg, 1)) "LEITURA"
         }
 
-        Enviar @{ T = "censo_fim"; Idx = $Idx; Ok = $true; Erro = ""
+        Enviar @{ T = "censo_fim"; Serie = $Serie; Idx = $Idx; Caminho = "$Caminho"; Ok = $true; Erro = ""
                   Quadros = [int]$r.QuadrosNoRpu; Cenas = [int]$r.CenasNoCenso
                   CenasAcima = [int]$r.CenasAcimaDoMaster; Pct = [double]$r.PctAcimaDoMaster
                   PicoCena = [double]$r.PicoDeCena; MasterMax = [double]$r.MasterMax
                   ReguaSuspeita = [bool]$r.ReguaSuspeita
                   ReguaSuspeitaMotivo = "$($r.ReguaSuspeitaMotivo)"
+                  <#  18.20: o tamanho do RPU VIAJA na mensagem. A 18.19 criou
+                      uma trava que confere este numero e eu esqueci de manda-lo
+                      - entao ele chegava vazio, valia zero, e TODO censo
+                      completo era descartado como se fosse pela metade. #>
+                  RpuMb = [double]$r.RpuMb
                   Seg = [double]$r.Segundos }
     } catch {
         Enviar @{ T = "log"; Texto = ("ERRO no censo completo: {0}" -f $_.Exception.Message); Tipo = "ERRO" }
-        Enviar @{ T = "censo_fim"; Idx = $Idx; Ok = $false; Erro = $_.Exception.Message }
+        Enviar @{ T = "censo_fim"; Serie = $Serie; Idx = $Idx; Caminho = "$Caminho"; Ok = $false; Erro = $_.Exception.Message }
     }
 }
 
-$script:TrabalhoLeitura = {
-    function Enviar($m) { $Fila.Enqueue($m) }
-    function Avisar([string]$t, [string]$tipo = "LEITURA") { Enviar @{ T = "log"; Texto = $t; Tipo = $tipo } }
-    try {
+<#  ============================================================================
+    18.00 - OS TRES TRABALHOS, SEPARADOS
+
+    Ate a 17.24 a MEDICAO (fase B) morava DENTRO da leitura da pasta (fase A).
+    Um runspace so, fazendo duas coisas com tempos de vida diferentes:
+
+        fase A - ler faixas/audio/DV   ~4s por arquivo   SEMPRE necessaria
+        fase B - medir MEL x FEL      14-26s por arquivo  so com a chave ligada
+
+    Isso obrigava contorcao atras de contorcao, e cada uma criou a proxima. Em
+    24 horas sairam quatro builds remendando a mesma area (1.9.6 a 1.9.9), duas
+    delas consertando o que a anterior quebrou. O Diego resumiu: "vc vem com
+    novas builds mto rapidas, mexe so um negocinho e vem mais teste".
+
+    O QUE A JUNCAO CUSTAVA, medido nos logs dele de 16/09:
+
+      1. A JANELA CONGELAVA DE VERDADE. Parar a medicao so tinha um caminho:
+         matar o runspace. E Stop-Motor espera o runspace morrer com
+         AsyncWaitHandle.WaitOne(1500) NA THREAD DA INTERFACE. Medido quatro
+         vezes no log dele: 1,52s / 1,93s / 2,01s / 1,91s de janela parada.
+         Era o "quando desliga ele fica la medindo ainda por um tempo".
+
+      2. LIGAR A CHAVE RELIA A PASTA INTEIRA, porque a unica forma de comecar
+         a medir era comecar uma leitura. 28 releituras numa sessao, 254,5s.
+
+      3. LIGAR A CHAVE MATAVA O CENSO. 18:32:22 ele pediu o censo (105s de
+         trabalho); 18:32:23,4 ligou a chave; 18:32:23,8 o censo morreu, porque
+         releitura mata censo. Ele esperou por um trabalho ja cancelado.
+
+      4. UM BOTAO, SEIS MENSAGENS. A chave tinha seis saidas diferentes, cada
+         uma um "if" que eu somei quando um caso quebrou. Isso nao e modelo, e
+         casuistica - e do lado de fora vira comportamento imprevisivel.
+
+    AGORA SAO TRES TRABALHOS INDEPENDENTES, cada um com um dono:
+
+      LER A PASTA   disparada por: trocar pasta, Atualizar, abrir o programa
+                    cancelada por: Parar leitura, trocar pasta
+      MEDIR CAMADA  disparada por: a chave ligada + existe arquivo sem veredicto
+                    cancelada por: a chave desligada
+      CENSO         disparado por: o botao Censo
+                    cancelado por: novo censo, inicio de conversao
+
+    Nenhum derruba o outro. Cancelar a medicao virou erguer uma flag e voltar
+    NA HORA - nao ha mais espera na thread da interface.
+
+    O PREAMBULO (achar ferramentas + abrir o motor pela AST) e o MESMO para a
+    leitura e para a medicao, e por isso mora em UM lugar so, aqui embaixo.
+    Duas copias divergem - e a divergencia silenciosa entre dois lugares que
+    deviam dizer a mesma coisa e a familia de defeito que este projeto persegue
+    desde a 16.79. Cada trabalho injeta este texto e confere $PreparoOk. #>
+$script:PreambuloTrabalho = @'
+        $PreparoOk = $false
         # --- 1. ferramentas ---
         $achar = {
             param($nome)
@@ -1754,8 +2109,9 @@ $script:TrabalhoLeitura = {
             @{ Chip = "dovi_tool"; Rotulo = "Conversão de Perfil Dolby Vision 7 → 8.1 (dovi_tool)"; Papel = "obrigatória"; Ok = [bool]$dovi_tool; Caminho = $dovi_tool }
             @{ Chip = "mkvmerge";  Rotulo = "Extração e Remontagem de Vídeo (ffmpeg + mkvmerge)";   Papel = "obrigatória"; Ok = ([bool]$ffmpeg -and [bool]$mkvmerge); Caminho = $mkvmerge }
             @{ Chip = "";          Rotulo = "Leitura de Metadados (ffprobe)";                        Papel = "obrigatória"; Ok = [bool]$ffprobe; Caminho = $ffprobe }
-            @{ Chip = "seconv";    Rotulo = "OCR de Legenda PT-BR (seconv/BinaryOCR - preferencial)"; Papel = "opcional";    Ok = $temSeconvJanela; Caminho = $seconvExe }
-            @{ Chip = "PgsToSrt";  Rotulo = "OCR de Legenda PT-BR (PgsToSrt - reserva)";             Papel = "opcional";    Ok = [bool]$pgstosrt; Caminho = $pgstosrt }
+            # 2.0.7: o seconv saiu do instalador (recusado em todos os filmes medidos
+            # desde 13/08). O PgsToSrt deixou de ser "reserva" - e ELE o OCR.
+            @{ Chip = "PgsToSrt";  Rotulo = "OCR de Legenda PT-BR (PgsToSrt)";             Papel = "opcional";    Ok = [bool]$pgstosrt; Caminho = $pgstosrt }
             @{ Chip = "DeeZy";     Rotulo = "Áudio TrueHD → E-AC-3 Atmos (DeeZy)";                   Papel = "opcional";    Ok = [bool]$deezy; Caminho = $deezy }
             @{ Chip = "";          Rotulo = "Sinal de Atmos (MediaInfo)";                            Papel = "opcional";    Ok = (Test-Path -LiteralPath $mediainfo); Caminho = $mediainfo }
             # 16.38: TRES LINHAS QUE FALTAVAM.
@@ -1772,14 +2128,14 @@ $script:TrabalhoLeitura = {
 
         if (-not $mkvmerge -or -not $ffprobe) {
             Avisar "Sem mkvmerge ou ffprobe nao da para diagnosticar nada." "ERRO"
-            Enviar @{ T = "leitura_fim"; Ok = 0; Erros = 1; Seg = 0 }
+            $PreparoOk = $false
             return
         }
 
         # --- 2. abrir o motor pela AST (sem executa-lo) ---
         if (-not (Test-Path -LiteralPath $CaminhoMotor)) {
             Avisar "Converter_AUTO_DIRETO.ps1 nao encontrado ao lado da GUI." "ERRO"
-            Enviar @{ T = "leitura_fim"; Ok = 0; Erros = 1; Seg = 0 }
+            $PreparoOk = $false
             return
         }
         $errosSint = $null; $tokens = $null
@@ -1809,13 +2165,27 @@ $script:TrabalhoLeitura = {
         $faltam = @($exigidas | Where-Object { -not (Get-Command $_ -CommandType Function -ErrorAction SilentlyContinue) })
         if ($faltam.Count -gt 0) {
             Avisar ("FALTARAM funcoes no motor: {0}" -f ($faltam -join ", ")) "ERRO"
-            Enviar @{ T = "leitura_fim"; Ok = 0; Erros = 1; Seg = 0 }
+            $PreparoOk = $false
             return
         }
+        $PreparoOk = $true
+'@
 
+<#  Quem falhar no preparo avisa do SEU jeito: a leitura manda "leitura_fim",
+    a medicao manda "el_fim". O preambulo so diz SE deu certo - ele nao sabe
+    quem o chamou, e nao deve saber. #>
+$script:TrabalhoLeitura = {
+    function Enviar($m) { $Fila.Enqueue($m) }
+    function Avisar([string]$t, [string]$tipo = "LEITURA") { Enviar @{ T = "log"; Texto = $t; Tipo = $tipo } }
+    try {
+        . ([scriptblock]::Create($Preambulo))
+        if (-not $PreparoOk) {
+            Enviar @{ T = "leitura_fim"; SerieL = $SerieL; Ok = 0; Erros = 1; Seg = 0 }
+            return
+        }
         # --- 3. varrer a pasta ---
         $arquivos = @(Get-ChildItem -LiteralPath $PastaOrigem -Filter *.mkv -File -ErrorAction SilentlyContinue | Sort-Object Name)
-        Enviar @{ T = "leitura_ini"; Total = $arquivos.Count }
+        Enviar @{ T = "leitura_ini"; SerieL = $SerieL; Total = $arquivos.Count }
         Avisar ("{0} arquivo(s) .mkv encontrados em {1}" -f $arquivos.Count, $PastaOrigem)
         if ($arquivos.Count -eq 0) {
             # Explicar o vazio: a busca e so no primeiro nivel e so .mkv.
@@ -1833,7 +2203,7 @@ $script:TrabalhoLeitura = {
                 $motivo = "Pasta sem videos no primeiro nivel ({0} subpasta(s) dentro)." -f $subs.Count
             }
             Avisar $motivo "AVISO"
-            Enviar @{ T = "vazio"; Motivo = $motivo }
+            Enviar @{ T = "vazio"; SerieL = $SerieL; Motivo = $motivo }
         }
 
         $cron = [System.Diagnostics.Stopwatch]::StartNew()
@@ -1844,7 +2214,7 @@ $script:TrabalhoLeitura = {
         for ($i = 0; $i -lt $arquivos.Count; $i++) {
             if ($Controle.Cancelar) { break }
             $a = $arquivos[$i]
-            Enviar @{ T = "leitura_pct"; Idx = $i; Total = $arquivos.Count; Nome = $a.Name }
+            Enviar @{ T = "leitura_pct"; SerieL = $SerieL; Idx = $i; Total = $arquivos.Count; Nome = $a.Name }
 
             # os caches internos do motor sao por arquivo
             $script:CacheMkvJsonPath = $null; $script:CacheMkvJson = $null
@@ -1885,7 +2255,7 @@ $script:TrabalhoLeitura = {
                     # censo completo (item A) reaproveita os dois: uma leitura,
                     # um lugar - e o "x vezes mais caro" precisa do de-antes.
                     ELmastermax = 0.0; ELsegundos = 0.0
-                    CensoFeito = $false; CensoResumo = ""
+                    CensoFeito = $false; CensoResumo = ""; CensoCenas = 0; CensoAcima = 0; CensoPico = 0.0
                     L5bordas = ""; L5formato = ""; L5area = ""
                     # 16.79: o pico do master e a UNICA referencia que da
                     # sentido ao L1. Sem ele, "153 nits" nao decide nada.
@@ -2069,20 +2439,29 @@ $script:TrabalhoLeitura = {
                         # casos nao ha camada nenhuma para classificar, e a
                         # fase B nem toca no arquivo.
                         if ($dv.Perfil -eq 7 -and $dv.Camadas -match "EL") {
-                            $d.ELtipo = "MEDINDO"; $d.ELselo = "-"
-                            $d.ELmotivo = "medindo a camada de melhoria"
-                            $d.ColDV = "$($dv.Perfil).$($dv.Level) ⋯ → 8.1"
-                            $d.DiagDVres = "→ [SERÁ CONVERTIDO] Profile 8.1 [dvhe.08.06] [BL+RPU] — medindo a camada de melhoria (MEL x FEL)…"
-                            <#  16.78: E CINZA ENQUANTO MEDE, NAO VERDE.
-                                Verde neste programa quer dizer "vai acontecer
-                                e o resultado e o melhor possivel". Enquanto a
-                                fase B nao respondeu, isso nao esta provado -
-                                pintar de verde e afirmar antes de saber, que
-                                e a mesma omissao que a 2.0 veio fechar. Cinza
-                                e a cor de "ainda nao ha veredicto"; a linha
-                                troca para verde (MEL) ou ambar (FEL) quando a
-                                medida chega. #>
-                            $d.DiagDVcor = "cinza"
+                            <#  18.00 - A LEITURA NAO DECIDE MAIS QUE ESTA "MEDINDO".
+
+                                Ate a 17.24 ela marcava MEDINDO em todo P7 com
+                                EL, sempre - mesmo com a chave desligada, porque
+                                a decisao de medir vivia la na frente, dentro do
+                                mesmo trabalho. Dai saia, em TODA leitura com a
+                                chave desligada, a linha "Medicao interrompida em
+                                3 arquivo(s)" no log, falando de uma medicao que
+                                nunca tinha comecado.
+
+                                A leitura nao sabe se vai haver medicao - quem
+                                sabe e a janela, depois que a fila estiver na
+                                tela. Entao a leitura diz a verdade do que ela
+                                mesma apurou: este arquivo tem camada EL e ainda
+                                NAO TEM VEREDICTO. Quem for medido de fato vira
+                                MEDINDO em Start-Medicao, um por um.
+
+                                Os textos (coluna, rotulo, resposta) nao sao
+                                montados aqui: quem escreve e Update-TextosDV,
+                                no lugar unico da 16.84, quando a mensagem
+                                "video" chega na janela. #>
+                            $d.ELtipo = "NAO_MEDIDO"; $d.ELselo = "NAO MEDIDO"
+                            $d.ELmotivo = "ainda sem veredicto de camada"
                             # 17.10: o GB viaja junto - sem ele nao da para
                             # dizer "tantos segundos por GB", que e a unica
                             # forma de comparar pastas de tamanhos diferentes.
@@ -2511,11 +2890,37 @@ $script:TrabalhoLeitura = {
                 $ruins++
                 Avisar ("Erro lendo {0}: {1}" -f $a.Name, $_.Exception.Message) "ERRO"
             }
-            Enviar @{ T = "video"; Dados = $d }
+            Enviar @{ T = "video"; SerieL = $SerieL; Dados = $d }
         }
         $cron.Stop()
-        Enviar @{ T = "leitura_fim"; Ok = $bons; Erros = $ruins; Seg = ($cron.ElapsedMilliseconds / 1000.0)
+        Enviar @{ T = "leitura_fim"; SerieL = $SerieL; Ok = $bons; Erros = $ruins; Seg = ($cron.ElapsedMilliseconds / 1000.0)
                   MedirEL = $pendentesEL.Count }
+    } catch {
+        Enviar @{ T = "log"; Texto = ("ERRO na leitura: {0}" -f $_.Exception.Message); Tipo = "ERRO" }
+        Enviar @{ T = "leitura_fim"; SerieL = $SerieL; Ok = 0; Erros = 1; Seg = 0 }
+    }
+}
+
+<#  18.00 - A MEDICAO, AGORA SOZINHA.
+
+    Recebe PRONTA a lista de quem medir ($Pendentes, montada pela janela a
+    partir da fila que esta na tela) e nao varre pasta nenhuma. Nao existe mais
+    o ramo "chave desligada" aqui dentro: se a chave esta desligada, a janela
+    simplesmente NAO dispara este trabalho - decisao de quem tem a informacao,
+    que e a janela, e nao de um parametro viajando para dentro do runspace.
+
+    Cancelamento: $Controle.PararMedicao, o mesmo canal vivo da 17.24. O laco
+    confere a cada arquivo. Ninguem precisa matar runspace nenhum para parar
+    isto, e por isso a interface nao congela mais. #>
+$script:TrabalhoMedicao = {
+    function Enviar($m) { $Fila.Enqueue($m) }
+    function Avisar([string]$t, [string]$tipo = "LEITURA") { Enviar @{ T = "log"; Texto = $t; Tipo = $tipo } }
+    try {
+        . ([scriptblock]::Create($Preambulo))
+        if (-not $PreparoOk) {
+            Enviar @{ T = "el_fim"; Serie = $Serie; Medidos = 0; Total = 0; Seg = 0; Gb = 0.0; Falhou = $true }
+            return
+        }
 
         <#  ---------------- FASE B: MEDIR MEL x FEL (16.77) ----------------
             Roda com a fila JA na tela e o botao Iniciar JA liberado. Cada
@@ -2533,21 +2938,57 @@ $script:TrabalhoLeitura = {
             grava no log o que a leitura custou SEM a medicao. E esse par de
             numeros - com e sem - que responde a pergunta do Diego; um deles
             sozinho nao responde nada. #>
-        if ($pendentesEL.Count -gt 0 -and -not $MedirEL) {
-            $gbPend = 0.0
-            foreach ($pe in $pendentesEL) { $gbPend += [double]$pe.Gb }
-            Avisar ("MEDICAO MEL x FEL DESLIGADA: {0} arquivo(s) ({1:N2} GB) ficaram sem veredicto de camada - aparecem como 'EL nao medida'. A leitura da pasta custou {2:N2}s." -f `
-                $pendentesEL.Count, $gbPend, ($cron.ElapsedMilliseconds / 1000.0)) "LEITURA"
-            Avisar "   Com a medicao ligada, o custo dela vem somado na linha 'Camada de melhoria medida...' ao fim da leitura - e a comparacao entre as duas." "LEITURA"
-            Enviar @{ T = "el_fim"; Medidos = 0; Total = 0; Seg = 0; Desligada = $true
-                      Pendentes = $pendentesEL.Count; Gb = $gbPend }
-        }
-        elseif ($pendentesEL.Count -gt 0 -and -not $Controle.Cancelar) {
+        if ($Pendentes.Count -gt 0 -and -not $Controle.PararMedicao) {
             $cronEL = [System.Diagnostics.Stopwatch]::StartNew()
-            Avisar ("Medindo a camada de melhoria (MEL x FEL) de {0} arquivo(s) em segundo plano..." -f $pendentesEL.Count)
+            Avisar ("Medindo a camada de melhoria (MEL x FEL) de {0} arquivo(s) em segundo plano..." -f $Pendentes.Count)
             $medidos = 0
-            foreach ($pe in $pendentesEL) {
-                if ($Controle.Cancelar) { break }
+            $nEL = 0
+            foreach ($pe in $Pendentes) {
+                <#  18.02 - A MEDICAO NAO OLHA MAIS PARA "Cancelar". ELE NAO E DELA.
+
+                    Log do Diego, 16/09 19:53:27: a medicao comecava e MORRIA
+                    no mesmo instante - "Medindo ... 3 arquivo(s)" as 27,569 e
+                    "Medicao interrompida em 3" as 27,580. Zero medidos, 0,00s,
+                    em toda sessao. O ciano piscava e sumia, e era isso que ele
+                    via: "o FEL ele chama azul ciano e some rapidinho, nao
+                    importa o que eu faca".
+
+                    A causa e minha, e nasceu NA 18.00: quando a medicao morava
+                    dentro da leitura, ela terminava ANTES de Stop-Motor. Ao
+                    separar os trabalhos, a ordem virou leitura_fim ->
+                    Stop-Motor -> Start-Medicao - e Stop-Motor levanta
+                    $Controle.Cancelar para matar o runspace DA LEITURA.
+                    A medicao nascia com essa bandeira ja em pe e parava no
+                    primeiro arquivo.
+
+                    Separar trabalhos e separar TAMBEM as bandeiras: quem manda
+                    na medicao e PararMedicao, e so ele. Cancelar e da leitura e
+                    da conversao. Bandeira compartilhada entre dois donos e a
+                    mesma familia de defeito do runspace compartilhado. #>
+                <#  2.0.7 - A MEDICAO VELHA RESSUSCITAVA.
+                    Log de 22/09 23:05:58: a pasta foi trocada, Stop-Medicao
+                    levantou PararMedicao - e Start-Leitura, 40 ms depois,
+                    abaixou de novo. A medicao da pasta anterior seguiu
+                    lendo GoT, Ryan e Troy (ate 23:06:12) enquanto a pasta
+                    nova esperava "a anterior ainda esta encerrando".
+                    Bandeira que qualquer um abaixa nao para ninguem. A
+                    rodada viva nao volta atras: se ela nao e mais a minha,
+                    eu paro. #>
+                if ($Controle.PararMedicao -or ([int]$Controle.MedSerieViva -ne [int]$Serie)) { break }
+                $nEL++
+                <#  17.19 - QUEM ESTA SENDO MEDIDO E ANUNCIADO, NAO DEDUZIDO.
+
+                    Ate a 17.18 a janela DEDUZIA quem estava na vez ("o
+                    primeiro marcado que ainda esta em MEDINDO") e contava
+                    sozinha. Deduzir sobre uma lista que o usuario pode mexer
+                    no meio da medicao nao funciona: desmarcar e remarcar
+                    arquivos muda a conta debaixo da formula, e foi exatamente
+                    o que o Diego viu - a coluna dizendo um numero enquanto o
+                    botao dizia outro.
+
+                    Quem sabe qual arquivo esta sendo lido NESTE instante e
+                    este laco. Entao e ele que fala. #>
+                Enviar @{ T = "el_ini"; Serie = $Serie; Idx = $pe.Idx; Pos = $nEL; Total = $Pendentes.Count }
                 $c1 = [System.Diagnostics.Stopwatch]::StartNew()
                 $script:CacheTipoELPath = $null; $script:CacheTipoEL = $null
                 $script:CacheInfoDVPath = $null; $script:CacheInfoDV = $null
@@ -2616,7 +3057,7 @@ $script:TrabalhoLeitura = {
                         Avisar ("   Área ativa (L5): bordas {0}" -f "$($el.L5Bordas)")
                     }
                 }
-                Enviar @{ T = "el"; Idx = $pe.Idx
+                Enviar @{ T = "el"; Serie = $Serie; Idx = $pe.Idx; Caminho = "$($pe.Path)"
                           Tipo = "$($el.Tipo)"; Selo = "$($el.Selo)"; Motivo = "$($el.Motivo)"
                           MaxCLL = [double]$el.MaxCLL; MaxFALL = [double]$el.MaxFALL
                           Dm = "$($el.DmVersion)"
@@ -2644,16 +3085,16 @@ $script:TrabalhoLeitura = {
             }
             $cronEL.Stop()
             $gbMed = 0.0
-            foreach ($pe in $pendentesEL) { $gbMed += [double]$pe.Gb }
-            Enviar @{ T = "el_fim"; Medidos = $medidos; Total = $pendentesEL.Count
+            foreach ($pe in $Pendentes) { $gbMed += [double]$pe.Gb }
+            Enviar @{ T = "el_fim"; Serie = $Serie; Medidos = $medidos; Total = $Pendentes.Count
                       Seg = ($cronEL.ElapsedMilliseconds / 1000.0)
                       Gb = $gbMed; Desligada = $false }
         } else {
-            Enviar @{ T = "el_fim"; Medidos = 0; Total = 0; Seg = 0; Gb = 0.0; Desligada = $false }
+            Enviar @{ T = "el_fim"; Serie = $Serie; Medidos = 0; Total = 0; Seg = 0; Gb = 0.0 }
         }
     } catch {
-        Enviar @{ T = "log"; Texto = ("ERRO na leitura: {0}" -f $_.Exception.Message); Tipo = "ERRO" }
-        Enviar @{ T = "leitura_fim"; Ok = 0; Erros = 1; Seg = 0 }
+        Enviar @{ T = "log"; Texto = ("ERRO na medicao: {0}" -f $_.Exception.Message); Tipo = "ERRO" }
+        Enviar @{ T = "el_fim"; Serie = $Serie; Medidos = 0; Total = 0; Seg = 0; Gb = 0.0; Falhou = $true }
     }
 }
 
@@ -2667,6 +3108,184 @@ $script:CensoRodando  = $false
 $script:CensoRunspace = $null
 $script:CensoPS       = $null
 $script:CensoHandle   = $null
+$script:CensoSerie    = 0
+$script:CensoT0       = $null
+$script:CensoSegMostrado = -1
+<#  18.09 - "E ESSE CONTADOR E DO QUE? SE CADA FILME TEM SEU TEMPO, ELE TA
+    CONTANDO ATE QUE TEMPO?" (Diego, 17/09).
+
+    Pergunta certa, e a 18.07 respondeu pela metade: eu botei um cronometro
+    subindo, que prova que o programa nao travou mas nao diz QUANTO FALTA - e
+    quanto falta e a unica coisa que ele queria saber.
+
+    O censo nao tem barra de progresso porque quem le o RPU e o dovi_tool, num
+    processo so, sem contar quadros para fora. O que existe e uma relacao
+    MEDIDA: o censo do filme inteiro custa ~4,7x a amostra DAQUELE arquivo.
+    Tres medicoes no log dele, no Saving Private Ryan:
+
+       amostra 22,1s -> censo 104,5s   (4,73x)
+       amostra 22,2s -> censo 106,5s   (4,80x)
+       amostra 22,3s -> censo 104,1s   (4,67x)
+
+    Entao a previsao nasce do tempo que ESTE arquivo levou na amostra, nao de
+    um numero fixo para todos - era exatamente a ressalva dele ("cada filme tem
+    seu tempo"). E o fator se corrige sozinho: cada censo que termina grava a
+    relacao real daquela maquina.
+
+    Quando passa do previsto, a tela DIZ que passou em vez de continuar
+    fingindo - licao 2. E sem amostra medida nao ha previsao nenhuma: mostra so
+    o decorrido, sem inventar. #>
+$script:CensoPrev     = 0.0
+$script:CensoFator    = 4.7
+<#  18.21 - A PORCENTAGEM QUE FICAVA EM 0% O CENSO INTEIRO.
+
+    "a % nao conta do censo, fica 0%, como vou saber se chegou a 90%" e "vc
+    continua errando feio a contagem do CENSO, PQ E TAO DIFICIL ACERTAR +- O
+    CALCULO DA %?" (Diego, 17/09). Duas vezes a mesma cobranca, e ela e justa.
+
+    A previsao inteira pendurava num numero so:
+
+        CensoPrev = ELsegundos (o tempo da AMOSTRA daquele arquivo) x 4,7
+
+    ELsegundos so existe se a amostra tiver sido medida NESTA sessao. Quando o
+    veredicto vem do cache (arquivo ja medido ontem, ou pasta relida), ele volta
+    ZERO - e com CensoPrev = 0 o rotulo nao mostra porcentagem nenhuma. Nao era
+    uma conta errada: era uma conta que nao acontecia, e do lado de fora isso e
+    "fica 0%". A conta certa no lugar errado continua errada (licao 43).
+
+    Agora ha um segundo caminho, que nao depende de a amostra ter rodado: a
+    DURACAO DO FILME, que todo arquivo da fila tem desde a leitura. Os numeros
+    do proprio log dele, medidos tres vezes no mesmo arquivo:
+
+        Saving Private Ryan - 2h49m = 10.140s de filme
+        censo completo (RPU + contagem) = 106,1s
+        -> 0,0105 segundo de censo por segundo de filme
+
+    E o mesmo principio dos outros dois numeros desta tela: valor de partida
+    medido, e cada censo que termina corrige o da proxima vez. Limite de
+    sanidade de 0,003 a 0,05 s/s - fora disso o censo foi cortado no meio.
+
+    A ordem entre os dois: a amostra DAQUELE arquivo ganha quando existe (ela
+    ja viu este filme); a duracao entra quando ela nao existe. O que nao pode
+    mais acontecer e nao haver previsao nenhuma. #>
+$script:CensoSegPorSegFilme = 0.0105
+# 2.0b: a velocidade do disco de origem, medida uma vez e reaproveitada - e a
+# metade da previsao do censo que a amostra nunca soube descrever.
+$script:CensoDiscoMbs = 0.0
+
+<#  18.04 - O VEREDICTO MEDIDO PARA DE SER JOGADO FORA A CADA LEITURA.
+
+    Cobranca dele, 17/09: "eu cancelo a conversao e volta a estaca zero as
+    medicoes... esse modo seu de trabalhar nao guarda informacao".
+
+    O log mostra o desperdicio: 62,4s medindo os tres arquivos, e ai um
+    "Nova Conversao" (que rele a pasta) jogava os tres veredictos fora - com a
+    chave desligada eles voltavam todos para "EL nao medida". Na proxima vez,
+    mais 62,4s para chegar ao mesmo numero.
+
+    Medir e caro (14 a 26s por arquivo) e o resultado NAO muda enquanto o
+    arquivo nao muda. Entao o veredicto fica guardado por CAMINHO + TAMANHO +
+    DATA DE MODIFICACAO. Mudou qualquer um dos tres, o arquivo e outro e a
+    medida velha nao vale - reaproveitar por NOME seria inventar veredicto,
+    que e o pecado que este programa persegue desde a 1.8.
+
+    O cache vive na sessao e nao vai para disco: ele existe para a pasta que
+    se rele dez vezes em dez minutos, nao para afirmar amanha o que foi medido
+    hoje. #>
+$script:CacheEL = @{}
+
+<#  18.05 - QUEM ACHA A LINHA E O CAMINHO DO ARQUIVO, NAO O INDICE.
+
+    O indice e a posicao numa lista que muda debaixo do trabalho: relendo a
+    pasta, trocando de pasta, ou so tirando um arquivo, o "2" de vinte segundos
+    atras e outro filme. Foi assim que o veredicto do Ryan foi parar na linha do
+    House of the Dragon (18.03). O numero de serie resolveu descartando a sobra
+    - mas descartar joga fora resultado que as vezes AINDA VALE: o censo do Ryan
+    terminou depois de a pasta ser relida, e o Ryan continuava ali. 104 segundos
+    de trabalho no lixo, duas vezes no log dele.
+
+    O caminho do arquivo nao muda de dono. Entao: acha pelo caminho; o indice so
+    serve de atalho quando ja aponta o arquivo certo. Se o caminho nao esta mais
+    na lista, ai sim nao ha onde escrever, e a mensagem morre. #>
+function Achar-LinhaPorCaminho([string]$caminho, [int]$idxDica) {
+    if ("$caminho" -eq "") { return $idxDica }
+    if ($idxDica -ge 0 -and $idxDica -lt $script:Videos.Count) {
+        if ("$($script:Videos[$idxDica].Caminho)" -eq "$caminho") { return $idxDica }
+    }
+    for ($k = 0; $k -lt $script:Videos.Count; $k++) {
+        if ("$($script:Videos[$k].Caminho)" -eq "$caminho") { return $k }
+    }
+    return -1
+}
+
+function Chave-CacheEL($v) {
+    if (-not $v -or -not "$($v.Caminho)") { return "" }
+    $dt = ""
+    try { $dt = (Get-Item -LiteralPath "$($v.Caminho)" -ErrorAction Stop).LastWriteTimeUtc.Ticks }
+    catch { $dt = "sem-data" }
+    return ("{0}|{1}|{2}" -f "$($v.Caminho)".ToLower(), [long]$v.Bytes, $dt)
+}
+
+function Guardar-CacheEL($v) {
+    if ("$($v.ELtipo)" -eq "NAO_MEDIDO" -or "$($v.ELtipo)" -eq "MEDINDO" -or "$($v.ELtipo)" -eq "") { return }
+    $k = Chave-CacheEL $v
+    if ($k -eq "") { return }
+    $script:CacheEL[$k] = @{
+        ELtipo = "$($v.ELtipo)"; ELselo = "$($v.ELselo)"; ELmotivo = "$($v.ELmotivo)"
+        ELmaxcll = [double]$v.ELmaxcll; ELmaxfall = [double]$v.ELmaxfall
+        ELdm = "$($v.ELdm)"; ELpontos = "$($v.ELpontos)"; ELexpande = $v.ELexpande
+        ELcenas = [int]$v.ELcenas; ELcenasAcima = [int]$v.ELcenasAcima
+        ELpicoCena = [double]$v.ELpicoCena; L5bordas = "$($v.L5bordas)"
+        L5formato = "$($v.L5formato)"; L5area = "$($v.L5area)"
+        ELregua = "$($v.ELregua)"; ELctnMaxCLL = [int]$v.ELctnMaxCLL
+        ELctnMaxFALL = [int]$v.ELctnMaxFALL
+        ELreguaSuspeita = [bool]$v.ELreguaSuspeita
+        ELreguaSuspeitaMotivo = "$($v.ELreguaSuspeitaMotivo)"
+        ELpctAcima = [double]$v.ELpctAcima; ELmastermax = [double]$v.ELmastermax
+        ELsegundos = [double]$v.ELsegundos
+        CensoFeito = [bool]$v.CensoFeito; CensoResumo = "$($v.CensoResumo)"
+        CensoCenas = [int]$v.CensoCenas; CensoAcima = [int]$v.CensoAcima; CensoPico = [double]$v.CensoPico
+        <#  2.0.1: sem isto, reler a pasta trazia de volta o VERMELHO de um
+            arquivo cujo censo ja tinha provado que o pico e isolado - e o
+            usuario teria que rodar 10 minutos de censo de novo para ver a
+            mesma verdade. O cache guarda a medida; tem que guardar o que
+            se concluiu dela. #>
+        <#  18.05 - A CONTRADICAO DA FOTO 8, E ELA E MINHA.
+
+            Print dele, uma linha so, dizendo duas coisas opostas:
+              "Dolby VISION: Profile 7 [BL+EL+RPU] [EL: MEL] [DETECTADO]
+               -> [SERA CONVERTIDO] Profile 8.1 - EL NAO MEDIDA"
+            A ESQUERDA (o que foi detectado) dizia MEL; a DIREITA (o que sera
+            feito) dizia que nao mediu.
+
+            Causa: na 18.04 eu guardei no cache o veredicto (ELtipo e numeros)
+            e ESQUECI de guardar a RESPOSTA - DiagDVres/DiagDVcor. Ao reler a
+            pasta, a esquerda e a coluna voltavam do cache e a direita ficava a
+            frase que a leitura tinha acabado de escrever ("EL nao medida"),
+            porque Update-TextosDV so preenche a resposta quando ela esta
+            VAZIA - e ela nao estava.
+
+            A regra do projeto e a de sempre: a esquerda detecta, a direita diz
+            o que sera feito. As duas saem do MESMO fato. Guardar meia verdade
+            e pior que nao guardar nada. #>
+        DiagDVres = "$($v.DiagDVres)"; DiagDVcor = "$($v.DiagDVcor)"
+        DiagDVrot = "$($v.DiagDVrot)"; ColDV = "$($v.ColDV)"
+    }
+}
+
+function Restaurar-CacheEL($v) {
+    $k = Chave-CacheEL $v
+    if ($k -eq "" -or -not $script:CacheEL.ContainsKey($k)) { return $false }
+    $c = $script:CacheEL[$k]
+    foreach ($campo in @($c.Keys)) {
+        try { $v.$campo = $c[$campo] } catch { }
+    }
+    <#  18.05: Update-TextosDV reescreve rotulo e coluna a partir do ELtipo
+        (que agora e o medido) e NAO toca na resposta, que ja veio guardada.
+        Depois dele, a esquerda e a direita contam a mesma historia. #>
+    Update-TextosDV $v
+    return $true
+}
 
 function Start-Leitura {
     if ($script:Lendo) {
@@ -2677,8 +3296,41 @@ function Start-Leitura {
         return
     }
     Stop-Motor
+    <#  18.00: a fila que a medicao estava medindo vai ser apagada e remontada,
+        entao a medicao perde o sentido. Fechar-MedicaoPendente vira os MEDINDO
+        em "EL nao medida" antes de a lista sumir, e o numero de serie garante
+        que nenhuma sobra dela caia na fila nova. #>
+    Stop-Medicao
+    Fechar-MedicaoPendente
+    <#  18.08 - AQUI A MEDICAO MORRIA PARA SEMPRE. ESTA NO LOG DELE:
+
+          01:27:07,8  MEDICAO: encerrada - a conversao comecou
+          01:27:30,9  CLIQUE: Nova Conversao  (que chama esta funcao)
+          01:29:05,1  MEDICAO: a anterior ainda esta encerrando
+          01:29:46,5  MEDICAO: a anterior ainda esta encerrando
+          01:30:11,0  MEDICAO: a anterior ainda esta encerrando
+          ... ate o fim da sessao. Ligar, desligar, Atualizar, trocar de pasta:
+          nada mais media. "TROQUEI DE PASTA NAO LEU O FEL, TENTEI LIGAR
+          DESLIGAR LER A PASTA DE NOVO E NADA."
+
+        A causa: esta linha esvaziava a fila de mensagens SEM OLHAR o que
+        estava nela. La dentro estava o "el_fim" da medicao recem-cancelada - a
+        unica mensagem que fecha o handle do runspace. Ela ia para o lixo,
+        $script:MedPS ficava preenchido para sempre, e a trava da 18.05 ("nao
+        nasce outra enquanto a anterior nao sair") passou a barrar TODAS as
+        medicoes seguintes.
+
+        Esvaziar a fila era protecao da epoca em que nao havia numero de
+        rodada; hoje o portao ja descarta sobra velha sozinho. O que nunca pode
+        ser descartado e a NOTICIA DE MORTE de um trabalho - e o unico jeito de
+        saber que o runspace pode ser fechado. #>
     $descarte = $null
-    while ($script:FilaMsg.TryDequeue([ref]$descarte)) { }
+    while ($script:FilaMsg.TryDequeue([ref]$descarte)) {
+        switch ("$($descarte.T)") {
+            "el_fim"    { Fechar-Runspace-Medicao }
+            "censo_fim" { Fechar-Runspace-Censo   }
+        }
+    }
     <#  17.11: uma leitura NOVA cancela um Iniciar que estava esperando. Se
         o usuario trocou de pasta ou apertou Atualizar, a fila que ele mandou
         converter nao existe mais - comecar a conversao dela seria converter
@@ -2695,10 +3347,14 @@ function Start-Leitura {
         Escrever-Log "CENSO COMPLETO: encerrado - a pasta esta sendo lida de novo" "ACAO"
         Stop-Censo
     }
+    $script:LeituraSerie = $script:LeituraSerie + 1
     $script:Lendo = $true
+    $script:MotivoVazio = ""
     $script:Videos.Clear()
     $script:LinhasFila.Clear()
+    $script:AssinaturaFila = $null   # 18.12: quem limpa a tela por fora zera a assinatura
     $script:Controle.Cancelar = $false
+    $script:Controle.PararMedicao = $false
     $UI.btnIniciar.IsEnabled = $false
     # O botao NAO desabilita durante a leitura: vira "Parar" para o usuario
     # poder abortar um reescaneamento em curso (o clique cai no ramo de parada).
@@ -2716,7 +3372,7 @@ function Start-Leitura {
 
         Licao: rotulo que o codigo reescreve nao pode depender da varredura -
         ele tem que traduzir na hora em que e escrito. #>
-    $UI.lblReler.Text = Traduzir "Parar"
+    Update-BotaoReler
     $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Lendo a Pasta...")
 
     $rs = [runspacefactory]::CreateRunspace()
@@ -2727,14 +3383,312 @@ function Start-Leitura {
     $rs.SessionStateProxy.SetVariable("CaminhoMotor", $script:CaminhoMotor)
     $rs.SessionStateProxy.SetVariable("PastaOrigem", $Cfg.Origem)
     $rs.SessionStateProxy.SetVariable("PastaSaida", $Cfg.Saida)
-    # 17.10: a chave vai como DADO. A leitura nao pergunta nada a janela -
-    # ela recebe o valor, como as escolhas manuais ja fazem desde a 16.15.
-    $rs.SessionStateProxy.SetVariable("MedirEL", [bool]$script:MedirELLigado)
+    <#  18.00: a chave NAO viaja mais para dentro da leitura. Ela nao decide
+        mais nada aqui - quem decide se mede e a janela, depois que a fila
+        estiver na tela, disparando (ou nao) o trabalho da medicao. A leitura
+        voltou a fazer uma coisa so. #>
+    $rs.SessionStateProxy.SetVariable("Preambulo", $script:PreambuloTrabalho)
+    $rs.SessionStateProxy.SetVariable("SerieL", [int]$script:LeituraSerie)
     $ps = [powershell]::Create(); $ps.Runspace = $rs
     $null = $ps.AddScript($script:TrabalhoLeitura.ToString())
     $script:MotorRunspace = $rs; $script:MotorPS = $ps
     $script:MotorHandle = $ps.BeginInvoke()
     Escrever-Log "Leitura da pasta disparada no runspace" "LEITURA"
+}
+
+<#  ============================================================================
+    18.00 - O TRABALHO DA MEDICAO: COMECAR E PARAR
+
+    Start-Medicao monta a lista de quem medir a partir da fila QUE ESTA NA TELA
+    (Get-PendentesDeMedida) e dispara um runspace so dele. Nao varre pasta, nao
+    toca na leitura, nao toca no censo.
+
+    Stop-Medicao e a razao de a interface nao congelar mais: ele ERGUE UMA FLAG
+    e volta. Nao espera runspace morrer, nao chama WaitOne. O runspace ve a flag
+    no proximo arquivo do laco e se encerra sozinho, mandando "el_fim" - e e o
+    "el_fim" que faz a faxina, pelo mesmo caminho de sempre. #>
+$script:MedRunspace = $null
+$script:MedPS       = $null
+$script:MedHandle   = $null
+<#  18.00 - O NUMERO DE SERIE, E POR QUE ELE E OBRIGATORIO AQUI.
+
+    Stop-Medicao nao espera - e essa e a razao de a janela nao congelar mais.
+    Mas nao esperar tem um preco: o runspace cancelado ainda pode ter uma
+    mensagem no ar quando a proxima coisa comeca. Se nesse meio tempo a pasta
+    for relida, a fila e OUTRA - e um "el" atrasado, carregando o indice 2 da
+    fila velha, gravaria o veredicto de um arquivo no lugar de outro. Veredicto
+    certo no arquivo errado e pior que veredicto nenhum.
+
+    Entao toda medicao recebe um numero, toda mensagem dela carrega esse numero,
+    e a janela IGNORA o que vier de uma medicao que nao e a de agora. E o mesmo
+    princípio da 17.19 (quem sabe, anuncia) aplicado ao tempo: a mensagem diz de
+    qual rodada ela e, em vez de a janela supor que so existe uma. #>
+<#  18.12: a janela ja fechou? Quem mexe na tela confere isto antes.
+    Ver o add_Closed - o erro de 10/09 01:26:31 e o motivo. #>
+$script:Fechando = $false
+$script:MedSerie = 0
+<#  18.13: a prova de vida do censo - CPU do dovi_tool e o instante em que
+    ela cresceu pela ultima vez. CensoMudo e o estado que o botao mostra. #>
+$script:CensoCpu    = 0.0
+$script:CensoCaminho = ""
+$script:CensoMorto   = $false
+$script:CensoMortoEm = $null
+<#  18.17: o progresso do censo vive no arquivo de RPU que o motor escreve.
+    CensoBytesSeg e a medida que se corrige sozinha - bytes de RPU por segundo
+    de filme. O valor de partida saiu do log dele: 86,66 MB para 2h49m. #>
+$script:CensoBytesPrev = 0.0
+$script:CensoBytesSeg  = 8950.0
+$script:TiqueConta     = 0
+$script:CensoVivoEm = $null
+$script:CensoMudo   = $false
+<#  18.00: a leitura tem o mesmo problema e ganha a mesma solucao. Sem a espera
+    do WaitOne (ver Stop-Motor), uma leitura cancelada tambem pode ter mensagem
+    no ar - e um "video" atrasado entraria como linha na fila NOVA. #>
+$script:LeituraSerie = 0
+
+function Start-Medicao {
+    if ($script:MedindoEL) { return }
+    # 19.6: um el_fim atrasado de rodada velha chamava isto no meio da
+    # conversao - e a medicao voltava a disputar o disco com o motor.
+    if ($Estado.Atual -eq "rodando" -or $Estado.Atual -eq "pausado") { return }
+    <#  18.01 - A TRAVA MECANICA, agora que a TELA fecha antes do trabalho.
+
+        Stop-Medicao passou a zerar o estado visivel na hora (o rotulo parava
+        de mentir), e isso solta $script:MedindoEL antes do runspace morrer -
+        o que abriria a porta para uma segunda medicao nascer por cima da
+        primeira, duas lendo o mesmo disco. Quem responde por isso e o handle:
+        enquanto ele existe, nao nasce outra. O el_fim da anterior fecha o
+        handle e a proxima troca da chave comeca normalmente. #>
+    <#  18.11 - PRIMEIRO OLHAR SE HA TRABALHO, DEPOIS SE DA PARA FAZE-LO.
+
+        Log dele de 17/09, 11:54:22,8: a pasta voltou para 00_Arquivos_Base, os
+        tres veredictos vieram do cache da sessao (nenhum arquivo sem veredicto)
+        e mesmo assim a janela escreveu "a anterior ainda esta encerrando - a
+        nova comeca assim que ela sair". Nao havia "nova" nenhuma: a fila de
+        pendentes estava vazia. A mensagem prometia trabalho que nao existia
+        porque a trava do handle era conferida ANTES de olhar se havia o que
+        medir. Licao 2: mensagem que mente e defeito, mesmo quando o programa
+        se comporta certo por baixo. #>
+    $pend = @(Get-PendentesDeMedida)
+    if ($pend.Count -eq 0) { return }
+
+    <#  18.01 - A TRAVA MECANICA: enquanto o handle da anterior existe, nao
+        nasce outra medicao. Agora esta mensagem so aparece quando REALMENTE
+        ha arquivo esperando - e ai ela e verdade. #>
+    if ($script:MedPS) {
+        Escrever-Log "MEDICAO: a anterior ainda esta encerrando - a nova comeca assim que ela sair" "LEITURA"
+        return
+    }
+
+    $lista = @()
+    foreach ($v in $pend) {
+        $i = $script:Videos.IndexOf($v)
+        if ($i -lt 0) { continue }
+        $lista += ,@{ Idx = $i; Path = "$($v.Caminho)"; Dur = [double]$v.DurSeg
+                      Nome = "$($v.Nome)"; Gb = ([double]$v.Bytes / 1GB) }
+        <#  Quem entra na medicao volta para MEDINDO na hora, senao a linha
+            continua dizendo "EL nao medida" enquanto ja esta sendo medida. #>
+        $v.ELtipo = "MEDINDO"; $v.ELselo = "-"
+        $v.ELmotivo = "medindo a camada de melhoria"
+        Update-TextosDV $v
+    }
+    if ($lista.Count -eq 0) { return }
+
+    $script:Controle.PararMedicao = $false
+    $script:MedSerie    = $script:MedSerie + 1
+    $script:Controle.MedSerieViva = [int]$script:MedSerie
+    $script:MedindoEL   = $true
+    $script:ELtotal     = $lista.Count
+    $script:ELfeitos    = 0
+    $script:ELmedindoIdx = -1
+    $script:PintandoFila = $false
+    Update-BotaoMedirEL
+    Fill-Fila "el"
+
+    Escrever-Log ("MEDICAO: comecou em segundo plano - {0} arquivo(s) sem veredicto" -f $lista.Count) "LEITURA"
+    Disparar-RunspaceMedicao $lista
+}
+
+<#  18.00: o RUNSPACE mora numa funcao propria, separado da DECISAO acima.
+
+    Nao e enfeite: e o que torna a decisao testavel. A bancada de cliques roda
+    Start-Medicao de verdade, com as regras de verdade, e troca so esta funcao
+    por um dubles - entao o que o teste confere e o codigo que vai rodar na
+    maquina dele, e nao uma imitacao minha. Misturar "decidir" com "executar"
+    numa funcao so e o que deixa uma regra impossivel de conferir sem abrir o
+    programa inteiro. #>
+function Disparar-RunspaceMedicao($Lista) {
+    $rs = [runspacefactory]::CreateRunspace()
+    $rs.ApartmentState = "MTA"; $rs.ThreadOptions = "ReuseThread"; $rs.Open()
+    $rs.SessionStateProxy.SetVariable("Fila", $script:FilaMsg)
+    $rs.SessionStateProxy.SetVariable("Controle", $script:Controle)
+    $rs.SessionStateProxy.SetVariable("PastaScript", $script:PastaScript)
+    $rs.SessionStateProxy.SetVariable("CaminhoMotor", $script:CaminhoMotor)
+    $rs.SessionStateProxy.SetVariable("Preambulo", $script:PreambuloTrabalho)
+    $rs.SessionStateProxy.SetVariable("Pendentes", $Lista)
+    $rs.SessionStateProxy.SetVariable("Serie", [int]$script:MedSerie)
+    $ps = [powershell]::Create(); $ps.Runspace = $rs
+    $null = $ps.AddScript($script:TrabalhoMedicao.ToString())
+    $script:MedRunspace = $rs; $script:MedPS = $ps
+    $script:MedHandle = $ps.BeginInvoke()
+}
+
+function Stop-Medicao {
+    <#  NAO ESPERA. Erguer a flag e voltar e a diferenca entre a janela
+        responder na hora e a janela congelar por dois segundos. O
+        encerramento de verdade acontece no "el_fim", que chega sozinho. #>
+    if (-not $script:MedindoEL) { return }
+    $script:Controle.PararMedicao = $true
+    <#  18.03 - CANCELAR VIRA A RODADA. ERA ISSO QUE FALTAVA.
+
+        Log dele de 16/09 23:26, e e o defeito mais grave que este programa ja
+        teve na tela:
+
+          23:26:30,3  pasta trocada para House of the Dragon (2 arquivos)
+          23:26:53,3  "EL de 'Saving.Private.Ryan...': FEL | 1.608,29 nits"
+                      ... com a FILA JA MOSTRANDO 2 videos.
+
+        O veredicto do Ryan foi gravado na linha 2 da lista NOVA - o
+        House.of.the.Dragon.S03E08, que e Profile 8 e nem tem camada extra.
+        Dai o "P8 FEL" e o "o arquivo pede 1.608 nits" num arquivo que nunca
+        foi medido. Veredicto CERTO no arquivo ERRADO: a licao 25 inteira.
+
+        O numero de serie existia para impedir exatamente isso, e nao impediu
+        por um detalhe meu: eu so virava a serie quando uma medicao NOVA
+        comecava (Start-Medicao). Cancelar nao virava nada. Entao a mensagem
+        atrasada da rodada cancelada chegava com a MESMA serie que a janela
+        ainda tinha, passava pelo portao como se fosse de agora, e escrevia
+        pelo indice - que na lista nova aponta outro filme.
+
+        Agora quem cancela VIRA A RODADA. Depois deste ponto nao existe
+        mensagem "da rodada de agora" vinda do trabalho que esta morrendo:
+        tudo que ele ainda enviar e, por definicao, velho. #>
+    $script:MedSerie = $script:MedSerie + 1
+    # 2.0.7: a rodada viva muda junto - ver o laco do TrabalhoMedicao.
+    $script:Controle.MedSerieViva = [int]$script:MedSerie
+    <#  2.0: antes desta linha o log dizia "o trabalho encerra sozinho no
+        proximo arquivo" - e era verdade, e era o defeito. Agora ele encerra
+        AGORA, no arquivo que esta sendo medido. Ver o bloco de
+        Test-EhProcessoDaMedicao. #>
+    $alvoMed = ""
+    try {
+        $iM = [int]$script:ELmedindoIdx
+        if ($iM -ge 0 -and $iM -lt $script:Videos.Count) { $alvoMed = "$($script:Videos[$iM].Caminho)" }
+    } catch { $alvoMed = "" }
+    [void](Matar-ProcessosDaMedicao $alvoMed)
+    Escrever-Log "MEDICAO: cancelada" "LEITURA"
+    <#  18.01 - A TELA FECHA AGORA, O TRABALHO FECHA QUANDO PUDER.
+
+        Achado da bancada, cenario 8 (o roteiro do LEIA-ME rodado inteiro):
+        eu tinha separado as duas coisas certas - cancelar nao espera - e
+        deixado a TELA amarrada ao fim mecanico. Resultado: o rotulo continuava
+        em ciano dizendo "Medindo MEL x FEL: 2 de 3" ate o "el_fim" chegar, o
+        que pode levar os 26s do arquivo em curso. E era exatamente a queixa
+        do Diego: "quando desliga ele fica la medindo ainda por um tempo".
+
+        Trocar "congela 2s" por "mente por 26s" nao e conserto (licao 2). O
+        estado mecanico ($script:MedindoEL) segue de pe ate o el_fim - e e o
+        que impede uma segunda medicao nascer por cima da que ainda morre. #>
+    Fechar-MedicaoPendente
+    Update-BotaoMedirEL
+    Fill-Fila "el"
+}
+
+<#  ============================================================================
+    2.0 - CANCELAR A MEDICAO PASSOU A VALER NA HORA (item 1 da auditoria).
+
+    Confirmado em TRES logs dele. O mais claro, 17/09:
+
+      22:22:42,5  MEDIR EL: DESLIGADO
+      22:22:42,9  "a medicao em curso esta sendo encerrada"
+      22:22:47,4  EL de 'Troy...': MEL | 11 de 11 trecho(s) | 26,76s
+
+    Ele desligou e o Troy foi medido assim que terminou, 5 segundos depois. A
+    janela ate soltava o botao na hora (18.01), mas o TRABALHO continuava - e
+    foi isso que o fez perguntar se a troca de pasta tinha remedido o arquivo.
+
+    O censo aprendeu isso na 18.14 e a medicao ficou para tras. A diferenca
+    nao e de principio, e de assinatura: era preciso saber reconhecer os
+    processos DA MEDICAO sem tocar nos da conversao nem nos do censo.
+
+    As tres assinaturas, que nao se confundem:
+
+      conversao  dovi_tool ... convert ...              (nunca morre aqui)
+      censo      dovi_tool extract-rpu -i -             (entrada padrao)
+      medicao    dovi_tool extract-rpu -i "<trecho>"    (um ARQUIVO)
+
+    A medicao corta trechos curtos com ffmpeg -c copy e le cada um. Entao o
+    ffmpeg dela tambem tem assinatura propria: carrega o caminho do filme e
+    NAO tem o "-f hevc -" do censo.
+
+    Funcao PURA de proposito, como a do censo: a bancada roda isto com linhas
+    de comando de mentira - inclusive as das outras duas - e prova que so a
+    medicao morre. #>
+function Test-EhProcessoDaMedicao([string]$Nome, [string]$Linha, [string]$Caminho) {
+    if ([string]::IsNullOrWhiteSpace($Linha)) { return $false }
+    $n = "$Nome".ToLowerInvariant()
+    if ($n -eq "dovi_tool.exe") {
+        if ($Linha -match "\bconvert\b") { return $false }              # conversao
+        if ($Linha -match "extract-rpu\s+-i\s+-(\s|$)") { return $false } # censo
+        return [bool]($Linha -match "extract-rpu\s+-i\s+")
+    }
+    if ($n -eq "ffmpeg.exe") {
+        if ([string]::IsNullOrWhiteSpace($Caminho)) { return $false }
+        if ($Linha -match "-f\s+hevc\s+-(\s|$)") { return $false }      # censo
+        if ($Linha -notmatch "-c\s+copy") { return $false }
+        return $Linha.ToLowerInvariant().Contains("$Caminho".ToLowerInvariant())
+    }
+    return $false
+}
+
+function Get-ProcessosDaMedicao([string]$Caminho) {
+    $achados = @()
+    try {
+        $todos = @(Get-CimInstance Win32_Process -OperationTimeoutSec 3 -Filter "Name='dovi_tool.exe' OR Name='ffmpeg.exe'" -ErrorAction Stop)
+        foreach ($p in $todos) {
+            if (Test-EhProcessoDaMedicao "$($p.Name)" "$($p.CommandLine)" $Caminho) { $achados += $p }
+        }
+    } catch { }
+    return ,$achados
+}
+
+function Matar-ProcessosDaMedicao([string]$Caminho) {
+    $mortos = 0
+    try {
+        foreach ($pr in (Get-ProcessosDaMedicao $Caminho)) {
+            try {
+                Stop-Process -Id ([int]$pr.ProcessId) -Force -ErrorAction Stop
+                $mortos++
+                Escrever-Log ("MEDICAO: processo {0} (pid {1}) encerrado a pedido do cancelamento" -f $pr.Name, $pr.ProcessId) "LEITURA"
+            } catch {
+                # 2.0.10: entre listar e encerrar o processo pode ter acabado
+                # sozinho (log de 23/09 02:14:23, ffmpeg da medicao). Isso nao e
+                # falha - e o trabalho que terminou um instante antes do pedido.
+                if (-not (Get-Process -Id ([int]$pr.ProcessId) -ErrorAction SilentlyContinue)) {
+                    Escrever-Log ("MEDICAO: {0} (pid {1}) ja tinha terminado sozinho antes do pedido" -f $pr.Name, $pr.ProcessId) "LEITURA"
+                } else {
+                    Escrever-Log ("MEDICAO: nao consegui encerrar {0} (pid {1}) - {2}" -f $pr.Name, $pr.ProcessId, $_.Exception.Message) "AVISO"
+                }
+            }
+        }
+    } catch {
+        Escrever-Log ("MEDICAO: nao consegui olhar os processos para encerrar - {0}" -f $_.Exception.Message) "AVISO"
+    }
+    # Licao 2 tambem aqui: "nao havia o que matar" e "nao achei o que matar"
+    # sao coisas muito diferentes na hora de entender um log.
+    if ($mortos -eq 0) {
+        Escrever-Log "MEDICAO: nenhum processo da medicao foi encontrado - o trabalho ja tinha terminado sozinho" "LEITURA"
+    } else {
+        Escrever-Log ("MEDICAO: cancelada de verdade - {0} processo(s) encerrado(s), o disco fica livre na hora" -f $mortos) "LEITURA"
+    }
+    return $mortos
+}
+
+function Fechar-Runspace-Medicao {
+    # Chamado pelo "el_fim", quando o trabalho JA terminou - aqui nao ha espera.
+    try { if ($script:MedPS)       { $script:MedPS.Dispose() } } catch { }
+    try { if ($script:MedRunspace) { $script:MedRunspace.Close(); $script:MedRunspace.Dispose() } } catch { }
+    $script:MedPS = $null; $script:MedRunspace = $null; $script:MedHandle = $null
 }
 
 <#  17.08 - QUEM PODE PEDIR O CENSO COMPLETO (item A).
@@ -2779,10 +3733,37 @@ function Test-PodeCenso($v) {
     Uma regra, um lugar: o criterio continua sendo Test-PodeCenso; esta
     funcao so traduz para portugues o "nao" que ela deu. #>
 function Get-MotivoCenso($v) {
+    <#  17.21: a conversao em curso vem ANTES de tudo - e a resposta mais
+        forte, e era a que faltava. #>
+    if ($Estado.Atual -in @("rodando","pausado")) { return "A conversão está em curso - o censo lê o filme inteiro e disputaria o disco com ela. Espere a fila terminar." }
     if ($null -eq $v) { return "Selecione um vídeo na fila para poder contar as cenas." }
-    if ($script:CensoRodando)    { return "Já existe um censo em andamento - espere ele terminar." }
-    if ([bool]$v.CensoFeito)     { return "Este arquivo já foi contado - o número está no diagnóstico e no log." }
-    if (-not $script:MedirELLigado) { return "Ligue 'Medir MEL x FEL' e releia a pasta: sem a amostra não há veredicto para conferir." }
+    <#  18.09: a dica dizia "espere ele terminar" enquanto o botao ja mostrava
+        o cronometro - duas frases sobre o mesmo estado, e a de baixo sem
+        informacao. Agora ela diz o que o usuario quer saber: quanto falta. #>
+    if ($script:CensoRodando) {
+        <#  18.16: o tempo decorrido saiu do rotulo e passou a morar AQUI, com
+            o resto. E a dica termina dizendo o que o botao agora faz: clicar
+            de novo (ou F11) cancela. #>
+        $decorrido = ""
+        if ($script:CensoT0) { $decorrido = Format-MinSeg ([int]((Get-Date) - $script:CensoT0).TotalSeconds) }
+        if ($script:CensoPrev -gt 0) {
+            return (Traduzir-Frase ("O censo deste arquivo está rodando há {0} - leva cerca de {1} no total (a amostra dele levou {2}). Clique de novo (ou F11) para cancelar." -f `
+                $decorrido, (Format-MinSeg ([int]$script:CensoPrev)), (Format-MinSeg ([int]($script:CensoPrev / $script:CensoFator)))))
+        }
+        return (Traduzir-Frase ("O censo está rodando há {0} - ele lê o RPU do filme inteiro e a fila continua livre. Clique de novo (ou F11) para cancelar." -f $decorrido))
+    }
+    <#  18.05: e existe um terceiro estado, que antes mentia de cinza calado -
+        o censo anterior foi encerrado na tela e o trabalho dele ainda esta
+        morrendo la atras. O botao fica apagado por alguns segundos e agora
+        DIZ isso, em vez de o usuario achar que quebrou. #>
+    if ($script:CensoPS)         { return "O censo anterior ainda está encerrando - dá para pedir de novo em alguns segundos." }
+    <#  18.21: o botao deixou de apagar depois de contado (o F11 sempre deixou
+        recontar; o mouse, nao - ver Update-BotaoCenso). Entao a dica, que e
+        quem explica o botao, tem que dizer que dá para contar de novo. #>
+    if ([bool]$v.CensoFeito)     { return "Este arquivo já foi contado - o número está no diagnóstico e no log. Clique (ou F11) para contar de novo." }
+    # 19.6: com a chave desligada mas o arquivo JA medido como Complex FEL, o
+    # botao acendia (Test-PodeCenso) e a dica mandava ligar a chave.
+    if (-not $script:MedirELLigado -and -not (Test-PodeCenso $v)) { return "Ligue 'Medir MEL x FEL' e releia a pasta: sem a amostra não há veredicto para conferir." }
     switch ("$($v.ELtipo)") {
         "MEDINDO"    { return "A camada de melhoria deste arquivo ainda está sendo medida." }
         "NAO_MEDIDO" { return "A camada de melhoria deste arquivo não foi medida - meça a amostra antes, ela custa 5x menos." }
@@ -2792,23 +3773,323 @@ function Get-MotivoCenso($v) {
     return "Lê o filme inteiro e conta quantas cenas pedem mais brilho que o master. Demora cerca de 5x a amostra - a fila continua livre."
 }
 
-function Update-DicaCenso($v) {
-    try { $UI.btnCenso.ToolTip = Traduzir-Frase (Get-MotivoCenso $v) } catch { }
+<#  18.22: a dica virou parte do desenho do botao - ver Update-BotaoCenso. Esta
+    funcao continua existindo porque tres lugares a chamam pelo nome, mas ela
+    nao decide mais nada: encaminha. #>
+function Update-DicaCenso($v) { Update-BotaoCenso $v }
+
+<#  18.10 - O BOTAO DO CENSO ENTROU NO PADRAO DA CASA.
+
+    "botao do censo la em cima muito poluido... o censo depois de medido deve
+    ficar com o botao verde, ne? ou uma cor que significa que aquele arquivo
+    foi medido; e quando o arquivo nao pode ser lido pelo censo, que fique
+    cinza de inativo... toda nova ferramenta ou botao tem que ir refinando
+    igual as outras, sendo que ja existe um padrao" (Diego, 17/09).
+
+    Ele esta certo e a cobranca e justa: este programa JA tem um vocabulario de
+    cor, usado na fila, nos chips e nos selos, e o botao do censo era o unico
+    que nao falava essa lingua - ele so acendia e apagava, e desde a 18.07
+    ainda carregava uma frase comprida no rotulo.
+
+    O vocabulario, agora tambem aqui:
+
+      cinza  = nao se aplica a este arquivo (nao ha o que contar)
+      normal = da para contar, e vale a pena
+      ciano  = contando agora (a mesma cor que a medicao usa, pelo mesmo motivo)
+      verde  = ja contado - o numero esta no diagnostico
+
+    E o rotulo ficou curto. O tempo que falta continua existindo: no rotulo
+    enquanto conta ("Censo - 00m 45s") e, por extenso, na dica. Frase comprida
+    em botao de barra e poluicao; ela tem lugar, e o lugar e a dica. #>
+<#  18.21 - O BOTAO DO CENSO TINHA DOIS DONOS, COM REGRAS OPOSTAS.
+
+    "PQ O CENSO PODE RELER NOVAMENTE APERTA F11 E CLICANDO NAO? Q MERDA EH
+    ESSA?" (Diego, 17/09). A pergunta tem resposta exata, e ela e minha:
+
+      Start-Censo (18.20)      ->  $UI.btnCenso.IsEnabled = $true
+      Update-Diagnostico       ->  $UI.btnCenso.IsEnabled = (... -and
+                                     -not $script:CensoRodando -and
+                                     -not $v.CensoFeito -and ...)
+
+    Duas linhas, em dois arquivos de ideia diferentes, escrevendo na MESMA
+    propriedade. Quem repintasse por ultimo ganhava. E a segunda apagava o
+    botao em dois estados em que a acao existe:
+
+      - CENSO RODANDO   -> clicar cancelaria, mas o botao estava apagado;
+      - CENSO JA FEITO  -> contar de novo e legitimo (o F11 sempre deixou),
+                           mas o botao estava apagado.
+
+    Em ambos o F11 funcionava, porque TECLA NAO PASSA PELO IsEnabled. Dai a
+    assimetria que ele viu: a mesma acao com duas portas e duas regras - a
+    familia de defeito que este projeto persegue desde a 16.79 (licao 41).
+
+    A 18.20 consertou metade disso (o estado "rodando") no lugar errado: pos
+    mais um dono em vez de tirar um. Agora e um so, e a regra e uma frase:
+    O BOTAO ACENDE QUANDO Invoke-BotaoCenso VAI FAZER ALGUMA COISA. Nada mais.
+    E o F11 passou a conferir o MESMO botao (ver PreviewKeyDown), entao mouse
+    e teclado nao tem mais como discordar: e literalmente a mesma leitura. #>
+function Update-BotaoCenso($v) {
+    try {
+        <#  18.22 - O ROTULO E A DICA DO CENSO EM CURSO VOLTARAM PARA O DONO.
+
+            "AGORA O CENSO QUANDO TA RODANDO NAO APARECE [F11]. A DICA TAMBEM
+            NAO TA LEGAL ENQUANTO RODA, NADA A VER, ELA SEM SENTIDO NESSE
+            MOMENTO" (Diego, 17/09). As duas cobrancas, e as duas sao minhas.
+
+            O rotulo: a 18.21 varreu TODAS as escritas do rotulo da medicao e
+            exigiu a tecla em cada uma - e eu nao fiz a mesma varredura no
+            rotulo do CENSO, que tinha o mesmo buraco no mesmo lugar: o estado
+            "em curso". Tres lugares escreviam nele, e os dois de "em curso"
+            (o relogio da fila e o Start-Censo) nao punham [F11]. Exatamente o
+            defeito que eu tinha acabado de consertar do outro lado da barra.
+
+            A dica: ela so era recalculada quando ele TROCAVA DE LINHA na fila.
+            Comecar um censo nao troca linha nenhuma - entao a dica que estava
+            na tela quando o censo comecou ficava la, congelada, os dois
+            minutos inteiros. Foi por isso que ele viu "Ligue Medir MEL x FEL e
+            releia a pasta" com o censo rodando: a frase estava certa no
+            instante em que foi escrita, e ninguem a apagou.
+
+            Agora rotulo, cor, dica e IsEnabled saem TODOS daqui, e o relogio
+            da fila chama esta funcao uma vez por segundo em vez de escrever
+            por conta propria. Um dono, quatro coisas, nenhuma podendo
+            discordar das outras (licao 41). #>
+        if ($script:CensoRodando) {
+            $UI.btnCenso.IsEnabled  = $true
+            $txtCenso = "[F11] " + (Traduzir "Censo")
+            if ($script:CensoT0) {
+                $seg   = [int]((Get-Date) - $script:CensoT0).TotalSeconds
+                $giros = @("|", "/", "-", "\")
+                $txtCenso += " " + $giros[$seg % 4] + " "
+                if ($script:CensoPrev -gt 0) {
+                    if ($seg -gt [int]$script:CensoPrev) { $txtCenso += (Traduzir "(+)") }
+                    else { $txtCenso += ("{0}%" -f [math]::Min(99, [int](100.0 * $seg / [double]$script:CensoPrev))) }
+                }
+            }
+            $UI.lblCenso.Text       = $txtCenso
+            $UI.lblCenso.Foreground = Pincel $Cores.emCurso
+            $UI.icoCenso.Foreground = Pincel $Cores.emCurso
+            try { $UI.btnCenso.ToolTip = Traduzir-Frase (Get-MotivoCenso $v) } catch { }
+            return
+        }
+        try { $UI.btnCenso.ToolTip = Traduzir-Frase (Get-MotivoCenso $v) } catch { }
+        $UI.btnCenso.IsEnabled = ($null -ne $v) -and (Test-PodeCenso $v) -and `
+            ($Estado.Atual -eq "inicial") -and (-not $script:CensoPS)
+        if ($v -and [bool]$v.CensoFeito) {
+            $UI.lblCenso.Text       = "[F11] " + (Traduzir "Censo Feito")
+            $UI.lblCenso.Foreground = Pincel $Cores.okdim
+            $UI.icoCenso.Foreground = Pincel $Cores.okdim
+            return
+        }
+        $UI.lblCenso.Text = "[F11] " + (Traduzir "Censo Completo")
+        if ($v -and (Test-PodeCenso $v) -and ($Estado.Atual -eq "inicial") -and (-not $script:CensoPS)) {
+            $UI.lblCenso.Foreground = Pincel $Cores.txt
+            $UI.icoCenso.Foreground = Pincel $Cores.txt
+        } else {
+            $UI.lblCenso.Foreground = Pincel $Cores.dim2
+            $UI.icoCenso.Foreground = Pincel $Cores.dim2
+        }
+    } catch { }
 }
 
 function Start-Censo {
     if ($script:CensoRodando) { return }
+    <#  18.05: a trava mecanica, igual a da medicao. Depois que um censo e
+        encerrado na tela, o dovi_tool dele ainda esta rodando por ate 100s.
+        Disparar outro agora seriam dois lendo o mesmo disco. #>
+    if ($script:CensoPS) {
+        <#  18.15 - A REDE, PARA O CASO DE O ENCERRAMENTO NAO RESPONDER.
+
+            No log dele de 17/09 o botao repetiu esta frase em QUINZE cliques e
+            nunca mais voltou: o runspace tinha ficado preso e o "censo_fim",
+            que e quem solta o handle, nunca chegou. A causa foi consertada
+            acima (o cmd do pipe tambem morre), mas trava que so sai com o
+            programa fechado nao pode existir. Entao: se ja se passaram 20s
+            desde o encerramento e NENHUM processo do censo continua de pe, o
+            handle e orfao - ele e abandonado (sem Dispose, que esperaria) e o
+            censo novo comeca. Vazar um objeto e menos grave que perder o
+            recurso para o resto da sessao. #>
+        $orfao = $false
+        if ($script:CensoMorto -and $script:CensoMortoEm -and
+            ((Get-Date) - $script:CensoMortoEm).TotalSeconds -gt 20) {
+            if (@(Get-ProcessosDoCenso "$($script:CensoCaminho)").Count -eq 0) { $orfao = $true }
+        }
+        if ($orfao) {
+            Escrever-Log "CENSO COMPLETO: o anterior nao respondeu e nao ha processo dele de pe - handle abandonado, o censo novo comeca" "AVISO"
+            $script:CensoPS = $null; $script:CensoRunspace = $null; $script:CensoHandle = $null
+        } else {
+            Escrever-Log "CENSO COMPLETO: o anterior ainda esta encerrando - o novo comeca assim que ele sair" "LEITURA"
+            return
+        }
+    }
+    <#  17.21: o botao e a aparencia; esta linha e a regra. Tecla, foco e
+        qualquer outro caminho futuro batem aqui do mesmo jeito. #>
+    if ($Estado.Atual -in @("rodando","pausado")) {
+        Escrever-Log "CENSO COMPLETO bloqueado (conversao em curso - o censo le o filme inteiro e disputaria o disco)" "ACAO"
+        return
+    }
+    <#  18.18 - RECUSA MUDA E PIOR QUE RECUSA.
+
+        "os F quebrou... o censo pelo jeito quebrou, so mandar ele comecar
+        quebrou de qualquer jeito" (Diego, 17/09). E o log mostra o que ele viu:
+
+          17:18:29,4  TECLA: F11
+          17:18:29,4  CLIQUE: Censo Completo      <- e mais nada. Sete vezes.
+
+        O censo nao quebrou: ele RECUSOU, e recusou calado. Estas duas linhas
+        saiam com "return" seco - sem arquivo selecionado, ou com um arquivo que
+        nao e Complex FEL (no caso dele, no meio de uma releitura da pasta). Do
+        lado de fora e indistinguivel de defeito: a tecla nao faz nada e o
+        programa nao diz por que.
+
+        Licao 2, que este projeto persegue desde o comeco: toda recusa fala. E a
+        dica do botao ja sabia o motivo certo - agora o log usa a MESMA frase,
+        de um lugar so. #>
     $idx = $UI.lstFila.SelectedIndex
-    if ($idx -lt 0 -or $idx -ge $script:Videos.Count) { return }
+    if ($idx -lt 0 -or $idx -ge $script:Videos.Count) {
+        Escrever-Log "CENSO COMPLETO recusado: nenhum video selecionado na fila - clique num Complex FEL primeiro" "ACAO"
+        return
+    }
     $v = $script:Videos[$idx]
-    if (-not (Test-PodeCenso $v)) { return }
+    if (-not (Test-PodeCenso $v)) {
+        Escrever-Log ("CENSO COMPLETO recusado para '{0}': {1}" -f $v.Nome, (Get-MotivoCenso $v)) "ACAO"
+        return
+    }
 
     $script:CensoRodando = $true
-    $UI.btnCenso.IsEnabled = $false
+    <#  18.13: cada censo comeca com a prova de vida zerada - CPU de um censo
+        anterior nao pode responder pelo de agora. #>
+    $script:CensoCpu = 0.0; $script:CensoVivoEm = Get-Date; $script:CensoMudo = $false
+    <#  18.14: guarda O CAMINHO do arquivo que esta sendo contado. E ele que
+        identifica o ffmpeg deste censo na hora de encerrar - identidade e o
+        caminho, nunca o indice (licao 30). #>
+    $script:CensoCaminho = "$($v.Caminho)"; $script:CensoMorto = $false; $script:CensoMortoEm = $null
+    <#  18.20 - O BOTAO CONTINUA CLICAVEL ENQUANTO O CENSO RODA.
+
+        "click la nao funciona, so os F11" (Diego, 17/09). Ele esta certo e o
+        motivo e bobo: a 18.16 fez o botao virar liga/desliga, e esta linha -
+        que existe desde a 17.08, de quando o botao so comecava - continuava
+        APAGANDO o botao no instante em que o censo comecava. Com o botao
+        desabilitado, o clique nao chega em lugar nenhum; o F11 chegava, porque
+        tecla nao passa pelo IsEnabled.
+
+        Resultado: duas portas para a mesma acao, com regras diferentes - o
+        defeito que este projeto persegue desde a 16.79, agora entre o mouse e
+        o teclado.
+
+        18.21: o conserto estava no lugar errado - isto aqui era um TERCEIRO
+        dono do IsEnabled brigando com Update-Diagnostico a cada repintura, e
+        por isso o clique funcionava as vezes. Quem desenha o botao (rotulo,
+        cor E IsEnabled) e Update-BotaoCenso, um so. #>
     <#  17.13: "Contando..." sozinho nao diz o que esta contando - o Diego
         viu o botao cinza escrito "Contando..." e perguntou o que era. O
         rotulo passa a carregar o assunto, como todos os outros da barra. #>
-    $UI.lblCenso.Text = Traduzir "Censo: contando..."
+    <#  18.07 - O CENSO PASSOU A MOSTRAR QUE ESTA VIVO.
+
+        "o censo tem q so imaginar q ele ta fazendo algo ne? demora pra
+         kralho e so deixa o mouse em cima e DIZ q ta fazendo algo"
+        (Diego, 17/09). Ele esta certo, e e a licao 2 do projeto: trabalho de
+        100 segundos sem sinal na tela e indistinguivel de programa travado.
+
+        Agora o rotulo CONTA o tempo (o relogio da fila ja bate 10x por
+        segundo, nao custa nada) e o botao fica na cor de "em curso" - a mesma
+        que a medicao usa. Nao e enfeite: e a diferenca entre esperar e achar
+        que quebrou. #>
+    $script:CensoT0 = Get-Date
+    $script:CensoSegMostrado = -1
+    <#  ========================================================================
+        2.0b - A PREVISAO DO CENSO NAO PODE VIR DA AMOSTRA. MEDIDO, 18x DE ERRO.
+
+        "O CENSO LEVOU 2:30 MAS EM MENOS DE 30 SEGUNDOS JA TINHA DADO 100%"
+        (Diego). E a foto dele, com o mouse parado no botao:
+
+          "O censo deste arquivo esta rodando ha 10m 09s - leva cerca de
+           00m 35s no total (a amostra dele levou 00m 07s)."
+
+        O log do Transformers (21/09) fecha a conta:
+
+          10:54:17  CENSO: previsao de 00m 35s (a amostra levou 00m 07s, 4,7x)
+          11:07:07  RPU 638,4s + censo 0,9s = 639,3s
+                    "Custo: a amostra levou 7,5s; o censo levou 639,3s (85,5x)"
+
+        Previsto 35s, real 639s: erro de DEZOITO VEZES. E como a barra chega a
+        99% no previsto e vira "(+)", ela ficou dez minutos em "(+)".
+
+        POR QUE A AMOSTRA NAO SERVE DE REGUA
+
+        Sao dois trabalhos de natureza diferente:
+
+          amostra  - 11 trechos CURTOS, espalhados. O disco pula, le pouco, e
+                     boa parte vem de cache. Custo quase independente do filme.
+          censo    - le o arquivo INTEIRO, sequencialmente, uma vez.
+
+        Entao o fator amostra->censo nao e uma constante da maquina: ele muda
+        com o tamanho do filme E com o disco. Medido nos dois logs dele:
+
+          Saving Private Ryan   82 GB, 2h49  SSD   104,9s   ->  4,7x
+          Transformers          78 GB, 2h30  HD    639,3s   -> 85,5x
+
+        Filmes quase do mesmo tamanho, fator dezoito vezes diferente. O que
+        mudou foi o DISCO (a foto mostra o G: a 100 MB/s, 97% de uso).
+
+        O MODELO CERTO: O CENSO LE UM ARQUIVO INTEIRO, ENTAO ELE E O MAIOR
+        ENTRE DUAS COISAS - o tempo de PUXAR os bytes do disco e o tempo de a
+        CPU mastigar o RPU. Quem for mais lento manda:
+
+          disco = tamanho do arquivo / velocidade medida do disco de origem
+          cpu   = duracao do filme x s/s calibrado (medido em disco rapido,
+                  onde o disco nao era o gargalo)
+          previsao = o MAIOR dos dois
+
+        Conferindo com os numeros reais:
+
+          Ryan   disco 82 GB / 2745 MB/s = 30s | cpu 10140s x 0,0103 = 104s
+                 -> maior = 104s, real 104,9s          (1% de erro)
+          Trans. disco 78 GB /  100 MB/s = 780s | cpu 8993s x 0,0103 =  93s
+                 -> maior = 780s, real 639,3s         (22% de erro)
+
+        De 1.700% de erro para 22%. E o s/s continua se corrigindo sozinho.
+
+        A velocidade do disco ja era medida por Measure-VelocidadeOrigem desde
+        a 16.64 - ela so nunca tinha sido usada aqui. Licao 15 de novo: a regua
+        certa ja existia, so estava sendo usada para outra coisa.
+        ======================================================================== #>
+    $script:CensoPrev = 0.0
+    $gbCenso = 0.0
+    if ([double]$v.Bytes -gt 0) { $gbCenso = [double]$v.Bytes / 1GB }
+    $segDisco = 0.0
+    # 2.0.10: medida POR ARQUIVO (a funcao ja guarda em cache por arquivo).
+    # Antes o primeiro censo da sessao valia para todos - um censo no SSD e o
+    # seguinte num HD da rede saia com a previsao do SSD.
+    $mbsCenso = Measure-VelocidadeOrigem "$($v.Caminho)"
+    if ($mbsCenso -le 0) { $mbsCenso = [double]$script:CensoDiscoMbs }
+    if ($mbsCenso -gt 0) { $script:CensoDiscoMbs = $mbsCenso }
+    if ($gbCenso -gt 0 -and $mbsCenso -gt 0) { $segDisco = ($gbCenso * 1024.0) / $mbsCenso }
+    $segCpu = 0.0
+    if ([double]$v.DurSeg -gt 0) { $segCpu = [double]$v.DurSeg * $script:CensoSegPorSegFilme }
+
+    if ($segDisco -gt 0 -or $segCpu -gt 0) {
+        $script:CensoPrev = [math]::Max($segDisco, $segCpu)
+        $mandou = if ($segDisco -ge $segCpu) { "o DISCO" } else { "a CPU" }
+        Escrever-Log ("CENSO: previsao de {0} - quem manda aqui e {1} (puxar {2:N1} GB a {3:N0} MB/s = {4}; mastigar o RPU de {5} = {6})" -f `
+            (Format-MinSeg ([int]$script:CensoPrev)), $mandou, $gbCenso, $mbsCenso,
+            (Format-MinSeg ([int]$segDisco)), (Format-MinSeg ([int][double]$v.DurSeg)), (Format-MinSeg ([int]$segCpu))) "PROVA"
+    } else {
+        Escrever-Log "CENSO: sem previsao de tempo - nao sei o tamanho deste arquivo nem a velocidade do disco; o rotulo mostra so o tempo decorrido" "AVISO"
+    }
+    <#  18.17/18.20/18.21: os bytes de RPU esperados para este filme. A 18.17
+        pos a PORCENTAGEM neles e a 18.20 desfez isso - o dovi_tool grava o RPU
+        de uma vez no fim, entao tamanho nao e progresso (licao 43). O numero
+        continua servindo para o que ele sabe fazer: DESCONFIAR de um RPU muito
+        menor que o previsto, que e censo cortado no meio. A porcentagem e de
+        tempo, e vem de CensoPrev, logo acima. #>
+    $script:CensoBytesPrev = 0.0
+    if ([double]$v.DurSeg -gt 0) { $script:CensoBytesPrev = [double]$v.DurSeg * $script:CensoBytesSeg }
+    <#  18.22: era a terceira escrita no rotulo, e a unica que ainda dizia
+        "Censo: contando..." - sem [F11] e sem porcentagem. Quem desenha o
+        botao e Update-BotaoCenso; aqui so se avisa que ha o que desenhar. #>
+    $script:CensoSegMostrado = -1
+    try { Update-BotaoCenso $v } catch { }
     <#  Mesma licao da 17.01: rotulo que o CODIGO reescreve nao pode depender
         da varredura de traducao - ele traduz na hora em que e escrito. #>
     Escrever-Log ("CENSO COMPLETO pedido para '{0}' (Complex FEL). Isto le o filme inteiro e demora - a fila e a conversao continuam livres." -f $v.Nome) "ACAO"
@@ -2835,6 +4116,12 @@ function Start-Censo {
     $rs.SessionStateProxy.SetVariable("Caminho", "$($v.Caminho)")
     $rs.SessionStateProxy.SetVariable("Nome", "$($v.Nome)")
     $rs.SessionStateProxy.SetVariable("Idx", [int]$idx)
+    <#  18.04: o censo tambem ganhou numero de rodada. Mesmo motivo da medicao:
+        ele demora 105s, e nesse tempo a pasta pode ter sido trocada. Sem a
+        serie, o resultado cairia pelo INDICE na lista nova - o defeito do
+        "veredicto do Ryan na linha do Dragon", agora pelo censo. #>
+    $script:CensoSerie = $script:CensoSerie + 1
+    $rs.SessionStateProxy.SetVariable("Serie", [int]$script:CensoSerie)
     $rs.SessionStateProxy.SetVariable("MasterMax", [double]$v.ELmastermax)
     $rs.SessionStateProxy.SetVariable("AmostraSeg", [double]$v.ELsegundos)
     $ps = [powershell]::Create(); $ps.Runspace = $rs
@@ -2851,19 +4138,217 @@ function Reset-BotaoCenso {
         apagado - para sempre, sem nada acontecendo atras. Botao que mente
         sobre o proprio estado e a familia de bug que este projeto persegue
         desde a 15.1e. Agora quem zera o estado zera o rotulo junto. #>
+    <#  18.10: uma regra, um lugar. O rotulo e a cor saem de Update-BotaoCenso,
+        que olha o ESTADO daquele arquivo - inclusive o "ja contado". #>
     try {
-        $UI.lblCenso.Text = Traduzir "Censo Completo"
+        $UI.lblCenso.Text = "[F11] " + (Traduzir "Censo Completo")
+        $i = $UI.lstFila.SelectedIndex
+        Update-BotaoCenso $(if ($i -ge 0 -and $i -lt $script:Videos.Count) { $script:Videos[$i] } else { $null })
     } catch { }
 }
 
+<#  18.14 - CANCELAR O CENSO PASSOU A VALER NA HORA.
+
+    MEDIDO no log dele de 17/09:
+      14:28:20,4  CENSO COMPLETO: encerrado - a conversao comecou
+      14:30:01,5  CENSO: o arquivo contado nao esta mais na lista - descartado
+
+    101 segundos lendo o disco DEPOIS de cancelado, disputando o disco com a
+    conversao que acabara de comecar, para o resultado ir para o lixo no fim.
+    "Abandonar o trabalho" resolveu a TELA (18.04) e nao resolveu o DISCO.
+
+    O QUE MATA, E POR QUE ISSO E SEGURO
+
+    O censo e a UNICA coisa neste programa que roda 'dovi_tool extract-rpu'
+    lendo da ENTRADA PADRAO (-i -), num pipe montado pelo cmd:
+
+        ffmpeg ... -f hevc -  |  dovi_tool extract-rpu -i -  -o <tmp>\filme.bin
+
+    A conversao roda 'dovi_tool -m 2 convert --discard -i <arquivo>' e a
+    medicao por amostra roda 'extract-rpu -i "<trecho>"' - as duas com arquivo
+    no -i, nunca com o tracinho. Entao a assinatura separa os tres sem chance
+    de confusao, e ainda assim eu exijo TODAS as condicoes: a assinatura, o
+    caminho do filme que esta sendo contado (no lado do ffmpeg) e o censo em
+    curso. Qualquer duvida, nao mata.
+
+    O QUE ACONTECE DEPOIS, e por que nao sobra sujeira: o '& cmd.exe /c' do
+    motor desbloqueia, Get-CensoCompletoDV nao acha o RPU, devolve Ok=false e
+    o finally DELE apaga a pasta temporaria - caminho que ja existia e ja era
+    testado. O motor nao mudou uma linha. #>
+function Test-EhProcessoDoCenso([string]$Nome, [string]$Linha, [string]$Caminho) {
+    <#  Funcao PURA de proposito: a bancada roda isto com linhas de comando de
+        mentira - inclusive as da conversao - e prova que so o censo morre. #>
+    if ([string]::IsNullOrWhiteSpace($Linha)) { return $false }
+    $n = "$Nome".ToLowerInvariant()
+    if ($n -eq "dovi_tool.exe") {
+        if ($Linha -match "\bconvert\b") { return $false }   # isso e a conversao
+        return [bool]($Linha -match "extract-rpu\s+-i\s+-(\s|$)")
+    }
+    if ($n -eq "ffmpeg.exe") {
+        if ([string]::IsNullOrWhiteSpace($Caminho)) { return $false }
+        if ($Linha -notmatch "-f\s+hevc\s+-(\s|$)") { return $false }
+        return $Linha.ToLowerInvariant().Contains("$Caminho".ToLowerInvariant())
+    }
+    <#  18.15 - O CMD QUE SEGURA O PIPE TAMBEM TEM QUE MORRER.
+
+        MEDIDO no log dele de 17/09 15:24:43 -> 15:27:21: os dois processos
+        foram encerrados e mesmo assim o botao repetiu "o anterior ainda esta
+        encerrando" em QUINZE cliques, ate ele fechar o programa. As 15:12:44,
+        no mesmo log, o mesmo cancelamento funcionou - o que e pior que falhar
+        sempre, porque parece sorte.
+
+        Nao e sorte: quem monta o pipe e um cmd.exe (o PowerShell 5.1 estraga
+        pipe binario - ver Invoke-PipeExtractRpu no motor). Matando so os dois
+        filhos, o cmd PODE continuar de pe esperando a escrita fechar, e o
+        "& cmd.exe /c" do motor nunca volta - o runspace fica preso para
+        sempre e o censo nunca mais comeca.
+
+        O cmd do censo tambem tem assinatura propria e unica: e o unico cmd
+        que este programa executa, e ele carrega o nome do arquivo de linha
+        que o motor gravou. #>
+    if ($n -eq "cmd.exe") {
+        return [bool]($Linha -match "pipe_rpu\.cmd")
+    }
+    return $false
+}
+
+<#  18.15: quem ACHA os processos do censo virou um lugar so - o cancelamento
+    mata exatamente os mesmos que a prova de vida observa. Duas listas para a
+    mesma coisa e o defeito que este projeto persegue desde a 16.79. #>
+function Get-ProcessosDoCenso([string]$Caminho) {
+    $achados = @()
+    try {
+        $lista = @(Get-CimInstance Win32_Process -OperationTimeoutSec 3 -Filter "Name='dovi_tool.exe' OR Name='ffmpeg.exe' OR Name='cmd.exe'" -ErrorAction SilentlyContinue)
+        foreach ($pr in $lista) {
+            if (Test-EhProcessoDoCenso "$($pr.Name)" "$($pr.CommandLine)" $Caminho) { $achados += $pr }
+        }
+    } catch { }
+    return $achados
+}
+
+function Matar-ProcessosDoCenso([string]$Caminho) {
+    $mortos = 0
+    try {
+        foreach ($pr in (Get-ProcessosDoCenso $Caminho)) {
+            try {
+                Stop-Process -Id ([int]$pr.ProcessId) -Force -ErrorAction Stop
+                $mortos++
+                Escrever-Log ("CENSO: processo {0} (pid {1}) encerrado a pedido do cancelamento" -f $pr.Name, $pr.ProcessId) "LEITURA"
+            } catch {
+                # 2.0.10: entre listar e encerrar o processo pode ter acabado
+                # sozinho (log de 23/09 02:14:23, ffmpeg da medicao). Isso nao e
+                # falha - e o trabalho que terminou um instante antes do pedido.
+                if (-not (Get-Process -Id ([int]$pr.ProcessId) -ErrorAction SilentlyContinue)) {
+                    Escrever-Log ("CENSO: {0} (pid {1}) ja tinha terminado sozinho antes do pedido" -f $pr.Name, $pr.ProcessId) "LEITURA"
+                } else {
+                    Escrever-Log ("CENSO: nao consegui encerrar {0} (pid {1}) - {2}" -f $pr.Name, $pr.ProcessId, $_.Exception.Message) "AVISO"
+                }
+            }
+        }
+    } catch {
+        Escrever-Log ("CENSO: nao consegui olhar os processos para encerrar - {0}" -f $_.Exception.Message) "AVISO"
+    }
+    <#  18.20: no log dele de 17:56:37 o cancelamento nao encerrou processo
+        nenhum e NAO disse nada - e o runspace ficou preso, porque o cmd do pipe
+        seguiu vivo. Silencio aqui e a diferenca entre "nao havia o que matar" e
+        "eu nao achei o que matar", que sao coisas MUITO diferentes na hora de
+        entender um log. Licao 2. #>
+    if ($mortos -eq 0) {
+        Escrever-Log "CENSO: nenhum processo do censo foi encontrado para encerrar - ou ele ja tinha terminado, ou a busca falhou" "AVISO"
+    }
+    return $mortos
+}
+
 function Stop-Censo {
-    # Fecha o runspace do censo depois que a mensagem de fim chegou. O motor
-    # de mensagens continua o mesmo; so este runspace some.
-    $script:CensoRodando = $false
+    <#  18.04 - ESTA FUNCAO CONGELAVA A JANELA POR UM MINUTO E MEIO.
+
+        Log dele de 16/09, medido DUAS vezes, com o censo rodando:
+
+          23:55:13,5  CLIQUE: Iniciar  ->  ESTADO rodando so as 23:56:35,3
+                      = 81,8 SEGUNDOS de janela morta
+          23:58:38,4  Iniciar confirmado -> ESTADO rodando as 00:00:10,8
+                      = 92,4 SEGUNDOS
+
+        Os dois casam com o tempo que FALTAVA do censo (106,5s de dovi_tool
+        lendo o RPU inteiro). A causa: $CensoPS.Dispose() NA THREAD DA
+        INTERFACE. Dispose() em pipeline que esta rodando NAO retorna - ele
+        espera o pipeline parar, e o pipeline estava dentro do dovi_tool.
+
+        Mesma familia do WaitOne que saiu do Stop-Motor na 18.00. A regra que
+        eu escrevi la ("nenhuma espera sincrona no codigo da janela") listava
+        WaitOne, Start-Sleep, .Wait(, .Join( e .EndInvoke( - e NAO listava
+        Dispose/Stop/Close, que bloqueiam igual. Regra incompleta nao pega o
+        proximo caso; foi o que aconteceu.
+
+        Agora ninguem espera: a tela fecha o estado do censo na hora, o
+        trabalho e ABANDONADO e morre sozinho, e quem descarta o runspace e a
+        chegada do "censo_fim" - que a essa altura ja vem com serie velha e
+        nao encosta em veredicto nenhum. #>
+    if (-not $script:CensoRodando -and -not $script:CensoPS) { return }
+    $script:CensoRodando = $false; $script:CensoMudo = $false
+    <#  18.14: e agora o trabalho morre de verdade, nao so na tela. #>
+    $script:CensoMorto = $true; $script:CensoMortoEm = Get-Date
+    $mortos = Matar-ProcessosDoCenso "$($script:CensoCaminho)"
+    if ($mortos -gt 0) {
+        Escrever-Log ("CENSO COMPLETO: cancelado de verdade - {0} processo(s) encerrado(s), o disco fica livre na hora" -f $mortos) "LEITURA"
+    }
+    $script:CensoSerie   = $script:CensoSerie + 1   # o que estiver no ar fica velho
+    Reset-BotaoCenso
+    Escrever-Log "CENSO COMPLETO: encerrado na tela - o trabalho morre sozinho (nada espera por ele)" "LEITURA"
+}
+
+<#  18.22 - O F11 TRAVOU PARA SEMPRE, E A CULPA E DA MINHA REGRA DA 18.21.
+
+    MEDIDO no log dele de 17/09. Da linha 139 ate o fim da sessao, sem uma
+    unica excecao:
+
+      22:26:00,8  TECLA: F11 (ignorada - nao se aplica ao estado 'inicial')
+      22:26:01,2  TECLA: F11 (ignorada - nao se aplica ao estado 'inicial')
+      ... e assim por mais de trinta vezes, ate ele fechar o programa.
+
+    "APERTEI TANTO O F11 QUE TEVE UMA HORA QUE NAO FUNCIONOU NUNCA MAIS."
+
+    O que aconteceu: o botao fica apagado enquanto $script:CensoPS existe (o
+    censo anterior ainda encerrando). Ate a 18.20 isso nao prendia ninguem,
+    porque o F11 NAO passava pelo botao - ele chegava em Start-Censo, e la
+    dentro existe a saida de emergencia: passados 20s, se nenhum processo do
+    censo continua de pe, o handle e orfao e vai embora.
+
+    A 18.21 mandou o F11 conferir o botao. Certo para acabar com "clica nao
+    funciona, F11 funciona" - e errado de um jeito que eu nao vi: com o botao
+    apagado, o F11 nunca mais chega em Start-Censo, e a saida de emergencia
+    ficou atras de uma porta trancada. A trava que existia para durar segundos
+    passou a durar a sessao inteira.
+
+    Licao 47: ao unificar duas portas numa so, confira o que so a porta que
+    voce fechou sabia fazer. A saida de emergencia morava dentro de uma delas.
+
+    O conserto tem duas partes. Esta e a primeira: a liberacao do orfao saiu
+    de dentro de Start-Censo e virou funcao propria, chamada TAMBEM pelo
+    relogio da fila - entao o estado se desfaz sozinho, sem depender de
+    ninguem apertar nada.
+
+    E ela NAO usa WMI. O runspace, quando termina, marca o proprio handle como
+    completo; perguntar isso e de graca e e local. Consultar processos no
+    relogio da tela foi o que congelou a janela por 55 segundos na 18.17
+    (licao 40) - esse caminho continua existindo, mas so em Start-Censo, que
+    roda por clique e nao quatro vezes por segundo. #>
+function Liberar-CensoOrfao {
+    if (-not $script:CensoPS) { return $false }
+    if ($script:CensoRodando) { return $false }
+    if (-not $script:CensoHandle) { return $false }
+    try { if (-not $script:CensoHandle.IsCompleted) { return $false } } catch { return $false }
+    Escrever-Log "CENSO COMPLETO: o trabalho anterior ja terminou de verdade - o botao esta livre de novo" "LEITURA"
+    Fechar-Runspace-Censo
+    Reset-BotaoCenso
+    return $true
+}
+
+function Fechar-Runspace-Censo {
+    # So aqui, e so quando o "censo_fim" JA chegou: descartar agora nao espera.
     try { if ($script:CensoPS)       { $script:CensoPS.Dispose() } } catch { }
     try { if ($script:CensoRunspace) { $script:CensoRunspace.Close(); $script:CensoRunspace.Dispose() } } catch { }
     $script:CensoPS = $null; $script:CensoRunspace = $null; $script:CensoHandle = $null
-    Reset-BotaoCenso
 }
 
 <#
@@ -2927,36 +4412,10 @@ function Test-TemReocr {
     da barra sem que o resto do motor de progresso precise mudar.
     $Gb = 0 devolve 0: sem tamanho nao ha conversao possivel, e devolver
     zero e melhor que dividir por zero. #>
-function Get-PastaDados {
-    <#  17.02 - ONDE O PROGRAMA GUARDA O QUE E DELE.
-
-        O idioma escolhido e a calibragem do tempo eram gravados na pasta
-        do proprio programa. Funciona quando o LaFirma mora em C:\LaFirma,
-        e falha calada quando ele mora em Program Files - o Windows nega a
-        escrita e o catch engolia o erro. Era esse o defeito de "escolhi
-        ingles, fechei e voltou em portugues": a escolha nunca chegou ao
-        disco.
-
-        Agora: tenta a pasta do programa (que continua sendo o lugar certo
-        para quem instala em C:\LaFirma, e mantem o que ja esta gravado);
-        se ela nao aceita escrita, cai para %LOCALAPPDATA%\LaFirma, que e
-        do usuario e sempre aceita. O teste e uma escrita de verdade, nao
-        um palpite pelo caminho. #>
-    if ($script:PastaDados) { return $script:PastaDados }
-    $cand = $script:PastaScript
-    try {
-        $sonda = Join-Path $cand ".lafirma_escrita.tmp"
-        [System.IO.File]::WriteAllText($sonda, "x")
-        [System.IO.File]::Delete($sonda)
-    } catch {
-        $cand = Join-Path $env:LOCALAPPDATA "LaFirma"
-        try { if (-not (Test-Path -LiteralPath $cand)) { New-Item -ItemType Directory -Path $cand -Force | Out-Null } }
-        catch { $cand = $script:PastaScript }
-    }
-    $script:PastaDados = $cand
-    return $cand
-}
-
+<#  17.19: Get-PastaDados subiu para JUNTO do bloco do log (bem mais acima).
+    Ela precisa existir antes dele: o log e a primeira coisa que o programa
+    escreve, e era a unica escrita do programa que ainda nao perguntava se a
+    pasta aceita escrita. Nao foi copiada - foi MOVIDA. #>
 function Get-CaminhoIdioma {
     <#  17.02: le dos DOIS lugares. Quem ja tinha o IDIOMA.txt na pasta do
         programa nao perde a escolha ao atualizar. #>
@@ -3060,7 +4519,10 @@ function Update-BotaoMedirEL {
     <#  17.16: medindo e um TERCEIRO estado, e ele manda no rotulo enquanto
         dura - a chave continua ligada, mas o que interessa saber naquele
         momento nao e isso, e em que arquivo ela esta. #>
-    if ($script:MedirELLigado -and $script:MedindoEL -and $script:ELtotal -gt 0) {
+    <#  18.01: cancelada = a tela para de dizer "Medindo" na hora, mesmo com o
+        runspace ainda morrendo atras. Ver Stop-Medicao. #>
+    if ($script:MedirELLigado -and $script:MedindoEL -and $script:ELtotal -gt 0 -and
+        (-not $script:Controle.PararMedicao)) {
         $emCurso = [math]::Min($script:ELtotal, $script:ELfeitos + 1)
         $txtMed = Traduzir-Frase ("Medindo MEL x FEL: {0} de {1}" -f $emCurso, $script:ELtotal)
         $UI.txtMedirEL.Text = $txtMed
@@ -3068,7 +4530,12 @@ function Update-BotaoMedirEL {
         $UI.btnMedirEL.BorderBrush = Pincel $Cores.emCurso
         $UI.btnMedirEL.Background  = Pincel "#08161A"
         try {
-            $UI.lblMedirELTopo.Text = $txtMed
+            <#  18.21: "2/3 FOTOS MOSTRAM O FEL SEM O [F12]" (Diego, 17/09).
+                Ele contou certo. Os ramos Ligado e Desligado ganharam a tecla
+                na 18.18; ESTE, o "Medindo N de M", ficou de fora - e e
+                justamente o que fica na tela enquanto algo acontece. Rotulo
+                que perde a tecla no estado mais visto e a tecla nao existindo. #>
+            $UI.lblMedirELTopo.Text = "[F12] " + $txtMed
             $UI.lblMedirELTopo.Foreground = Pincel $Cores.emCurso
             $UI.icoMedirELTopo.Foreground = Pincel $Cores.emCurso
             $dicaMed = Traduzir "A camada de melhoria está sendo medida agora. A fila fica livre - isto roda em segundo plano."
@@ -3094,7 +4561,7 @@ function Update-BotaoMedirEL {
     # barra (icone em cima, rotulo embaixo).
     try {
         if ($script:MedirELLigado) {
-            $UI.lblMedirELTopo.Text = Traduzir "Medir MEL x FEL: Ligado"
+            $UI.lblMedirELTopo.Text = "[F12] " + (Traduzir "Medir MEL x FEL: Ligado")
             $UI.lblMedirELTopo.Foreground = Pincel $Cores.okdim
             $UI.icoMedirELTopo.Foreground = Pincel $Cores.okdim
             $dicaEL = Traduzir ("Mede a camada de melhoria (MEL x FEL) de cada Profile 7 ao ler a pasta. " +
@@ -3105,7 +4572,7 @@ function Update-BotaoMedirEL {
             $UI.btnMedirELTopo.ToolTip = $dicaEL
             $UI.btnMedirEL.ToolTip     = $dicaEL
         } else {
-            $UI.lblMedirELTopo.Text = Traduzir "Medir MEL x FEL: Desligado"
+            $UI.lblMedirELTopo.Text = "[F12] " + (Traduzir "Medir MEL x FEL: Desligado")
             $UI.lblMedirELTopo.Foreground = Pincel $Cores.err
             $UI.icoMedirELTopo.Foreground = Pincel $Cores.err
             $dicaEL = Traduzir ("A leitura da pasta não vai medir a camada de melhoria: nenhum Profile 7 " +
@@ -3170,7 +4637,12 @@ function Fechar-MedidaDoVideo {
     $idx = [int]$Motor.VideoIdx
     if ($idx -lt 0 -or $idx -ge @($script:LoteAtual).Count) { $Motor.T0Video = $null; return }
     $item = $script:LoteAtual[$idx]
-    $seg = ((Get-Date) - $Motor.T0Video).TotalSeconds
+    <#  2.0.7 - A PAUSA ENTRAVA NO TEMPO "REAL" DO ARQUIVO.
+        GoT 22/09 22:33: 2m43s pausado viraram "erro +44,6%" e foram
+        gravados como 0,0232 s/GB/peso - envenenando as proximas
+        estimativas. As etapas ja descontavam a pausa; o arquivo nao. #>
+    $seg = ((Get-Date) - $Motor.T0Video).TotalSeconds - [double]$Motor.PausadoVideo
+    if ($seg -lt 0) { $seg = 0 }
     <#  17.16 - PREVISTO x REAL, NO LOG, POR ARQUIVO.
 
         Pergunta do Diego, 13/09: "no inicio dizia 1:25 para terminar, achei
@@ -3191,6 +4663,14 @@ function Fechar-MedidaDoVideo {
         rodadas se espalham, mas espalhamento entre filmes DIFERENTES nao e
         erro, e erro por arquivo e. Este numero e o que separa os dois. #>
     $prev = [double]$item.SegEstimado
+    <#  2.0.12: arquivo que ja existia na saida e pulado em menos de 1 s. O log
+        de 23/09 13:33:45 dizia "real 0s | erro -100,0%" e a calibragem dava
+        AVISO - para um arquivo em que nada foi convertido. Nao ha o que medir. #>
+    if ($seg -lt 5) {
+        Escrever-Log ("PREVISAO: '{0}' nao comparada - nada foi convertido (arquivo pulado)" -f "$($item.Nome)") "PROVA"
+        $Motor.T0Video = $null
+        return
+    }
     if ($prev -gt 0) {
         $erro = 100.0 * ($seg - $prev) / $prev
         $sinal = if ($erro -ge 0) { "+" } else { "" }
@@ -3239,15 +4719,107 @@ function Registrar-Calibragem {
     }
 }
 
+<#  2.0 - A CALIBRAGEM POR ETAPA: GRAVAR E LER.
+
+    Uma linha por etapa concluida, com o previsto e o real daquela etapa. O
+    fator e real/previsto: 1,0 e "acertou", 1,3 e "esta maquina leva 30% a mais
+    neste trabalho". P75 das ultimas 5 de CADA etapa, pelo mesmo motivo que a
+    16.99 escolheu p75 no modelo antigo: subestimar e o erro pior. #>
+function Get-CaminhoCalibragemEtapas {
+    return (Join-Path (Get-PastaDados) $script:CalibEtapaArquivo)
+}
+
+function Registrar-FatorDaEtapa([int]$Idx, [double]$SegReais) {
+    if ($Idx -lt 0 -or $Idx -ge 5) { return }
+    if ($SegReais -le 0) { return }
+    $prev = 0.0
+    try {
+        $iv = [int]$Motor.VideoIdx
+        if ($iv -ge 0 -and $iv -lt @($script:LoteAtual).Count) {
+            $se = @($script:LoteAtual[$iv].SegEtapas)
+            if ($Idx -lt $se.Count) { $prev = [double]$se[$Idx] }
+        }
+    } catch { $prev = 0.0 }
+    if ($prev -le 0) { return }
+    <#  O previsto que viajou no lote JA esta multiplicado pelo fator que valia
+        no inicio da fila. Entao real/previsto e a correcao que falta APLICAR
+        POR CIMA do fator atual - e o que se grava e o fator final, ja composto.
+        Gravar a razao crua faria a correcao se aplicar duas vezes na proxima
+        conversao, e o numero divergiria um pouco mais a cada rodada. #>
+    $fAtual = 1.0
+    if ($Idx -lt @($script:FatorEtapa).Count) { $fAtual = [double]$script:FatorEtapa[$Idx] }
+    if ($fAtual -le 0) { $fAtual = 1.0 }
+    $fNovo = ($SegReais / $prev) * $fAtual
+    $nome = "etapa$($Idx + 1)"
+    if ($Idx -lt @($script:NomeEtapaCalib).Count) { $nome = $script:NomeEtapaCalib[$Idx] }
+    if ($fNovo -lt $script:FatorEtapaMin -or $fNovo -gt $script:FatorEtapaMax) {
+        Escrever-Log ("CALIBRAGEM {0}: previsto {1:N0}s, real {2:N0}s -> fator {3:N2} fora dos limites ({4:N2} a {5:N2}), NAO gravado" -f `
+                      $nome, $prev, $SegReais, $fNovo, $script:FatorEtapaMin, $script:FatorEtapaMax) "AVISO"
+        return
+    }
+    try {
+        $inv = [System.Globalization.CultureInfo]::InvariantCulture
+        $linha = ("{0}`t{1}`t{2}`t{3}`t{4}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $nome,
+                  $prev.ToString("0.0", $inv), $SegReais.ToString("0.0", $inv), $fNovo.ToString("0.0000", $inv))
+        [System.IO.File]::AppendAllText((Get-CaminhoCalibragemEtapas), ($linha + "`r`n"),
+                                        (New-Object System.Text.UTF8Encoding($true)))
+        Escrever-Log ("CALIBRAGEM {0}: previsto {1:N0}s, real {2:N0}s -> fator {3:N2} (gravado; a proxima estimativa desta etapa ja usa)" -f `
+                      $nome, $prev, $SegReais, $fNovo) "PROVA"
+    } catch {
+        Escrever-Log ("CALIBRAGEM {0}: nao consegui gravar - {1}" -f $nome, $_.Exception.Message) "AVISO"
+    }
+}
+
+function Carregar-CalibragemEtapas {
+    $arq = Get-CaminhoCalibragemEtapas
+    if (-not (Test-Path -LiteralPath $arq)) {
+        Escrever-Log "CALIBRAGEM por etapa: sem historico ainda - a primeira fila usa os tempos medidos de fabrica" "PROVA"
+        return
+    }
+    $porEtapa = @{}
+    try {
+        $inv = [System.Globalization.CultureInfo]::InvariantCulture
+        foreach ($l in [System.IO.File]::ReadAllLines($arq)) {
+            $c = "$l" -split "`t"
+            if ($c.Count -lt 5) { continue }
+            $nome = "$($c[1])"
+            $f = 0.0
+            if (-not [double]::TryParse($c[4], [System.Globalization.NumberStyles]::Float, $inv, [ref]$f)) { continue }
+            if ($f -lt $script:FatorEtapaMin -or $f -gt $script:FatorEtapaMax) { continue }
+            if (-not $porEtapa.ContainsKey($nome)) { $porEtapa[$nome] = @() }
+            $porEtapa[$nome] += $f
+        }
+    } catch {
+        Escrever-Log ("CALIBRAGEM por etapa: nao consegui ler o historico - {0}. Usando os tempos de fabrica." -f $_.Exception.Message) "AVISO"
+        return
+    }
+    $ditos = @()
+    for ($i = 0; $i -lt 5; $i++) {
+        $nome = $script:NomeEtapaCalib[$i]
+        if (-not $porEtapa.ContainsKey($nome)) { continue }
+        $ult = @($porEtapa[$nome] | Select-Object -Last 5)
+        if ($ult.Count -lt 1) { continue }
+        $f = Get-Percentil ([double[]]$ult) 0.75
+        if ($f -lt $script:FatorEtapaMin -or $f -gt $script:FatorEtapaMax) { continue }
+        $script:FatorEtapa[$i] = $f
+        $ditos += ("{0} {1:N2}x ({2} medida(s))" -f $nome, $f, $ult.Count)
+    }
+    if ($ditos.Count -gt 0) {
+        Escrever-Log ("CALIBRAGEM por etapa: {0}" -f ($ditos -join " | ")) "PROVA"
+    } else {
+        Escrever-Log "CALIBRAGEM por etapa: historico existe mas nenhuma medida passou nos limites - usando os tempos de fabrica" "AVISO"
+    }
+}
+
 function Carregar-Calibragem {
-    <#  16.99: le o historico e passa a estimativa a usar a MEDIANA das
-        ultimas cinco rodadas.
+    <#  16.99: le o historico e passa a estimativa a usar o P75 das ultimas
+        cinco rodadas.
 
         Cinco porque e o suficiente para o numero parar de pular a cada
         conversao e pouco o bastante para acompanhar uma mudanca real (disco
-        novo, maquina nova). Mediana e nao media porque uma rodada esquisita
-        - o computador ocupado com outra coisa - entra na lista, e a media
-        iria atras dela.
+        novo, maquina nova). P75 e nao media nem mediana: o porque esta
+        medido no bloco do Get-Percentil, logo abaixo. (Ate a 17.19 estas
+        linhas diziam "mediana", que e o que esta funcao NAO faz.)
 
         Arquivo ausente, ilegivel ou sem linha valida NAO e erro: e a
         primeira execucao, e o valor de partida vale. Ninguem fica sem
@@ -3325,7 +4897,13 @@ function Carregar-Calibragem {
         $mn = ($ult | Measure-Object -Minimum).Minimum
         $mx = ($ult | Measure-Object -Maximum).Maximum
         if ($mn -gt 0 -and (($mx - $mn) / $mn) -gt 0.30) {
-            Escrever-Log ("CALIBRAGEM: as rodadas se espalham {0:N0}% entre si ({1:N4} a {2:N4}). Isso nao e ruido da maquina - e o modelo de pesos descrevendo filmes diferentes com a mesma forma. A estimativa vai continuar errando por arquivo ate os pesos serem revistos." -f `
+            <#  2.0: o aviso continua, porque o espalhamento e real e e uma
+                informacao. O que mudou e o que ele promete: ate a 1.11 ele
+                dizia que a estimativa ia continuar errando "ate os pesos
+                serem revistos", sem dizer que a calibragem que ele estava
+                relatando nao tinha efeito nenhum (licao 49). Agora quem
+                corrige e o fator POR ETAPA, e este numero aqui e historico. #>
+            Escrever-Log ("CALIBRAGEM (historica, por arquivo): as rodadas se espalham {0:N0}% entre si ({1:N4} a {2:N4}) - filmes de formas diferentes descritos pelo mesmo escalar. Quem corrige isso agora e o fator por etapa, acima." -f `
                           ((($mx - $mn) / $mn) * 100.0), $mn, $mx) "AVISO"
         }
     }
@@ -3362,7 +4940,19 @@ $script:MbPorSegMedido = 0.0
     MAIOR. Disco lento e lento nos tres pontos; contencao momentanea nao pega
     os tres. E as tres vao para o log: se o numero sair estranho de novo, da
     pra ver qual amostra puxou, sem adivinhar. #>
+<#  19.6: a leitura de 72 MB roda na thread da tela. Ela nao sai de la
+    (o numero e usado na hora do clique), mas nao precisa ser repetida: o
+    mesmo arquivo na mesma sessao devolve a medida guardada. #>
+$script:CacheVelocidade = @{}
 function Measure-VelocidadeOrigem([string]$Arquivo) {
+    if ([string]::IsNullOrWhiteSpace($Arquivo)) { return 0.0 }
+    $chaveVel = $Arquivo.ToLowerInvariant()
+    if ($script:CacheVelocidade.ContainsKey($chaveVel)) { $script:AmostrasDisco = @([double]$script:CacheVelocidade[$chaveVel]); return [double]$script:CacheVelocidade[$chaveVel] }
+    $medida = Measure-VelocidadeOrigemReal $Arquivo
+    if ($medida -gt 0) { $script:CacheVelocidade[$chaveVel] = $medida }
+    return $medida
+}
+function Measure-VelocidadeOrigemReal([string]$Arquivo) {
     if ([string]::IsNullOrWhiteSpace($Arquivo)) { return 0.0 }
     $script:AmostrasDisco = @()
     try {
@@ -3559,9 +5149,23 @@ function Get-SegundosDasEtapas($v, [double]$Gb, [double]$Min) {
     # soltos e ainda apaga dezenas de GB de temporario; sem extracao, remuxa
     # direto do original e nao ha temporario nenhum.
     $porGb = if ($pl.Dovi) { $T.RemontagemSegPorGb } else { $T.RemontagemDiretoSegPorGb }
-    $s5 = ($T.RemontagemSegFixo + $Gb * $porGb) * (Get-FatorDaEtapa "Remontagem")
+    $fixo5 = if ($pl.Dovi) { $T.RemontagemExtraidoSegFixo } else { $T.RemontagemSegFixo }
+    $s5 = ($fixo5 + $Gb * $porGb) * (Get-FatorDaEtapa "Remontagem")
 
-    return ,@($s1, $s2, $s3, $s4, $s5)
+    <#  2.0: e aqui, no fim, entra a calibragem POR ETAPA - o que esta maquina
+        provou, medida contra medida, sobre cada um dos cinco trabalhos. Ela
+        multiplica os SEGUNDOS, que e o unico lugar onde ela nao se anula (ver
+        o bloco da licao 49). Tudo que vem depois - peso, regua, barra, tempo
+        restante - herda a correcao de graca, porque tudo depois deriva daqui. #>
+    $bruto = @($s1, $s2, $s3, $s4, $s5)
+    $saida = @()
+    for ($i = 0; $i -lt $bruto.Count; $i++) {
+        $f = 1.0
+        if ($i -lt @($script:FatorEtapa).Count) { $f = [double]$script:FatorEtapa[$i] }
+        if ($f -le 0) { $f = 1.0 }
+        $saida += ([double]$bruto[$i] * $f)
+    }
+    return ,$saida
 }
 
 function Get-PesosDoVideo($v, [double]$Gb = 0, [double]$Min = 0) {
@@ -3603,6 +5207,15 @@ function Set-LoteParaConverter {
         }
     }
     foreach ($v in $marcados) {
+        <#  2.0.10: arquivo que sumiu da pasta NAO entra no lote. O motor ja o
+            deixava de fora (Get-Item falha), mas o lote da tela ficava com ele
+            - e o "ARQUIVO n/N" do motor e uma POSICAO: com o primeiro sumido,
+            o segundo filme recebia a estimativa, os pesos e a calibragem do
+            primeiro. Tirando aqui, as duas listas tem o mesmo tamanho. #>
+        if (-not (Test-Path -LiteralPath "$($v.Caminho)")) {
+            Escrever-Log ("LOTE: '{0}' nao existe mais na pasta - fica fora desta fila (clique em Atualizar para reler)" -f $v.Nome) "AVISO"
+            continue
+        }
         $gb = [double]$v.Bytes / 1GB
         $min = 0.0
         if ($v.DurSeg) { $min = [double]$v.DurSeg / 60.0 }
@@ -3610,7 +5223,13 @@ function Set-LoteParaConverter {
         $pesos = Get-PesosDoVideo $v $gb $min
         $soma  = 0.0
         foreach ($p in $pesos) { $soma += [double]$p }
-        $est = $gb * $soma * $script:SegPorGbPorPeso
+        <#  2.0: a estimativa e a SOMA DOS SEGUNDOS previstos, que ja vem
+            calibrados por etapa. A conta antiga (Gb * soma-de-pesos * k) dava
+            exatamente este mesmo numero - com a diferenca de que ela passava
+            por uma constante que se anulava e fazia todo mundo, eu inclusive,
+            acreditar que havia auto-correcao. Ver a licao 49. #>
+        $est = 0.0
+        foreach ($sg in @($segs)) { $est += [double]$sg }
         if ($est -lt 30) { $est = 30 }
         <#  16.64: o tamanho da faixa PGS e a duracao vao para o log de
             proposito. Sao os dois numeros que faltam para trocar a
@@ -3659,7 +5278,16 @@ function Set-LoteParaConverter {
 function Start-Motor {
     Stop-Motor
     $descarte = $null
-    while ($script:FilaMsg.TryDequeue([ref]$descarte)) { }   # limpa sobras de rodada anterior
+    # 19.6: esvaziar sem olhar jogava fora o el_fim/censo_fim - a unica
+    # mensagem que fecha o runspace (mesmo defeito que a 18.08 tirou do
+    # Start-Leitura). Sobra do MOTOR velho sai; mensagem de medicao/censo
+    # volta para a fila - o portao do tick ja filtra rodada velha pelo numero
+    # de serie, e o censo_fim tardio ainda entrega o resultado (regra 18.05).
+    $guardar = New-Object System.Collections.ArrayList
+    while ($script:FilaMsg.TryDequeue([ref]$descarte)) {
+        if ("$($descarte.T)" -match '^(el|el_ini|el_fim|censo_fim)$') { [void]$guardar.Add($descarte) }
+    }
+    foreach ($g in $guardar) { $script:FilaMsg.Enqueue($g) }
     $script:Controle.Pausar = $false
     $script:Controle.Cancelar = $false
     $rs = [runspacefactory]::CreateRunspace()
@@ -3687,6 +5315,19 @@ function Start-Motor {
     # Liga o valor ao param($EscolhasDaJanela) do bloco. Se nao houver escolha
     # nenhuma, vai $null - que e exatamente o modo automatico.
     $null = $ps.AddArgument($script:EscolhasAtuais)
+    # 2.0.7: o censo feito na janela vai junto - quem escreve o veredicto do
+    # arquivo e o motor, e ele precisa do numero do filme inteiro.
+    $censos = @{}
+    # 2.0.7b: @() em cima da List[object] estoura "Os tipos de argumento nao
+    # correspondem" (PowerShell 5.1 e 7) - derrubou o Iniciar. Enumera direto.
+    foreach ($vc in $script:Videos) {
+        if ([bool]$vc.CensoFeito -and [int]$vc.CensoCenas -gt 0) {
+            $censos["$($vc.Caminho)"] = @{ Cenas = [int]$vc.CensoCenas; Acima = [int]$vc.CensoAcima
+                                          Pct = [double]$vc.ELpctAcima; Pico = [double]$vc.CensoPico }
+        }
+    }
+    $null = $ps.AddArgument($censos)
+    Escrever-Log ("CENSO enviado ao motor: {0} arquivo(s)" -f $censos.Count) "PROVA"
     $qtd = 0
     if ($script:EscolhasAtuais) { $qtd = @($script:EscolhasAtuais.Keys).Count }
     Escrever-Log ("ESCOLHAS enviadas ao runspace por parametro: {0} arquivo(s)" -f $qtd) "PROVA"
@@ -3710,6 +5351,33 @@ function Fechar-MedicaoPendente {
         fecha. Quem ficou sem medida NAO volta a ser verde: vira "EL nao
         medida", em ambar, que e o terceiro estado honesto - a mesma regra de
         sempre, nao medir nunca vira limpo. #>
+    <#  17.20: este e o ponto unico por onde toda saida da fase B passa
+        (Stop-Motor chama sempre). Se a medicao morreu no meio - Iniciar,
+        troca de pasta, chave desligada - ninguem esta sendo medido, e a
+        linha nao pode continuar acesa. #>
+    <#  17.21 - FECHAR A MEDICAO E FECHAR TUDO, NAO SO A LINHA.
+
+        BUG MEDIDO no log do Diego (15/09 20:33 e 20:36): ele apertou
+        Iniciar com a fase B rodando, escolheu "comecar agora", e a barra de
+        cima continuou escrita "Medindo MEL x FEL: 2 de 3" em CIANO durante a
+        conversao inteira - com a medicao morta ha minutos. Print dele:
+        "TA ROLANDO A CONVERSAO E TA FALANDO Q TA MEDINDO EM CIANO".
+
+        A causa e a mesma licao da 17.20 cobrada um nivel acima: eu apaguei o
+        estado de QUEM estava sendo medido ($ELmedindoIdx) e deixei de pe o
+        estado de QUE EXISTE UMA MEDICAO ($MedindoEL, $ELtotal, $ELfeitos) -
+        que e quem manda no rotulo, na cor e na barrinha da barra de cima.
+        Matar o runspace nao apaga variavel nenhuma: o "el_fim", que era quem
+        zerava isso, nunca chega quando a fase B morre no meio.
+
+        Aqui e o ponto unico por onde TODA saida da fase B passa. Entao aqui
+        o estado morre inteiro, e a tela e redesenhada - estado novo sem
+        redesenho e tela mentindo. #>
+    $script:ELmedindoIdx = -1
+    $script:MedindoEL    = $false
+    $script:ELtotal      = 0
+    $script:ELfeitos     = 0
+    Update-BotaoMedirEL
     if (-not $script:Videos) { return }
     $presos = 0
     foreach ($v in $script:Videos) {
@@ -3717,29 +5385,89 @@ function Fechar-MedicaoPendente {
         $presos++
         $v.ELtipo = "NAO_MEDIDO"; $v.ELselo = "NAO MEDIDO"
         $v.ELmotivo = "a medicao foi interrompida antes de terminar"
-        $v.DiagDVrot = "Dolby VISION: $($v.DVnome) [$($v.DVcodec)] [$($v.DVcamadas)] [EL: NÃO MEDIDA] [DETECTADO]"
-        $v.DiagDVres = "→ [SERÁ CONVERTIDO] Profile 8.1 [dvhe.08.06] [BL+RPU] — EL não medida"
-        $v.DiagDVcor = "ambar"
-        $v.ColDV = "$($v.DVperfil).$($v.DVlevel) → 8.1"
+        <#  17.21 - AQUI EU ESCREVIA OS TEXTOS A MAO, E ELES SAIAM DIFERENTES.
+
+            Print do Diego (15/09): duas linhas da coluna DOLBY VISION
+            mostravam "7.6 → 8.1" enquanto as vizinhas mostravam
+            "P7 FEL → P8.1". Eram exatamente as duas cuja medicao eu tinha
+            interrompido - e passavam por aqui, onde eu montava a coluna com
+            os campos crus em vez de chamar quem sabe formatar. O rotulo e a
+            resposta tambem eram copias congeladas, com "[dvhe.08.06]" fixo
+            no texto.
+
+            Update-TextosDV e o lugar unico que escreve as tres formas DO
+            REGISTRO (16.84). Basta trocar o ELtipo e mandar ele reescrever:
+            o "EL nao medida" sai da mesma regra que todos os outros casos. #>
+        Update-TextosDV $v
     }
     if ($presos -gt 0) {
         Escrever-Log ("Medicao interrompida em {0} arquivo(s) - marcados como EL nao medida (nunca como limpa)" -f $presos) "LEITURA"
-        Fill-Fila "el"
         Update-Diagnostico
     }
+    <#  17.21: o Fill-Fila sai de dentro do "if" e passa a valer sempre. Com
+        zero presos ainda pode haver uma linha pintada de ciano na tela - a
+        do arquivo que estava na vez - e ela so despinta se alguem
+        redesenhar. #>
+    Fill-Fila "el"
 }
 
 function Stop-Motor {
-    Fechar-MedicaoPendente
+    <#  18.00: Stop-Motor cuida do runspace da LEITURA e do MOTOR, e mais nada.
+        Ate a 17.24 ele tambem fechava a medicao, porque ela morava dentro da
+        leitura. Continuar fazendo isso agora seria pior que inutil: a medicao
+        roda no runspace DELA, e apagar o estado dela daqui mataria na tela uma
+        medicao que segue viva atras. Quem para a medicao e Stop-Medicao. #>
     if (-not $script:MotorPS) { return }
     $script:Controle.Cancelar = $true
     $script:Controle.Pausar = $false
-    try { if ($script:MotorHandle -and -not $script:MotorHandle.IsCompleted) { $null = $script:MotorHandle.AsyncWaitHandle.WaitOne(1500) } } catch { }
+    <#  18.00 - A ESPERA SAIU DAQUI, E ESSA E A LINHA QUE CONGELAVA A JANELA.
+
+        Ate a 17.24 esta funcao fazia AsyncWaitHandle.WaitOne(1500) NA THREAD DA
+        INTERFACE. Medido quatro vezes no log do Diego de 16/09: 1,52s / 1,93s /
+        2,01s / 1,91s de janela sem responder. Era o "travou tudo" dele, e nao
+        era figura de linguagem - a thread que desenha estava parada.
+
+        A espera existia para garantir que o runspace velho estivesse morto
+        antes de o novo nascer, senao uma mensagem atrasada dele cairia na fila
+        nova. Esse problema agora tem solucao melhor e de graca: o NUMERO DE
+        SERIE. Mensagem de rodada velha e ignorada no portao do laco, e o
+        runspace morre sozinho, no tempo dele, sem ninguem esperando por ele.
+
+        Stop() e Dispose() abaixo nao bloqueiam: pedem o encerramento e voltam. #>
     try { $script:MotorPS.Stop() } catch { }
     try { $script:MotorPS.Dispose() } catch { }
     try { $script:MotorRunspace.Close() } catch { }
     try { $script:MotorRunspace.Dispose() } catch { }
     $script:MotorPS = $null; $script:MotorRunspace = $null; $script:MotorHandle = $null
+    <#  17.24 - BUG QUE EU CRIEI NA 17.23, MEDIDO NO LOG DO DIEGO (16/09
+        18:06:41 -> 18:08:27).
+
+        $script:Lendo so voltava a $false num lugar: o handler "leitura_fim".
+        Matar o runspace no meio da fase A significa que essa mensagem NUNCA
+        chega - e a janela fica achando que esta lendo para sempre. O estrago
+        aparece em dois lugares, e ele viu os dois:
+
+          1. O botao Atualizar fica preso em "Parar leitura". Ele clicou 15
+             vezes (18:07:16 a 18:08:27) e nada acontecia: o clique so escreve
+             Cancelar num runspace que ja morreu.
+          2. Start-Leitura comeca com "if ($script:Lendo) { reagenda; return }"
+             - entao TROCAR DE PASTA parou de funcionar. Ele trocou tres vezes
+             (18:07:42, 18:07:55, 18:08:24) e a fila nunca recarregou, ate
+             ficar com 0 videos na tela.
+
+        A licao e a da 17.21, de novo e um nivel acima: matar o runspace nao
+        apaga variavel nenhuma. Quem derruba o runspace tem que desfazer o
+        estado que o nascimento dele criou - AQUI, e nao no chamador, porque
+        chamador novo esquece. Este e o ponto unico por onde todo encerramento
+        passa. #>
+    if ($script:Lendo) {
+        $script:Lendo = $false
+        try {
+            $UI.btnReler.IsEnabled = $true
+            Update-BotaoReler
+        } catch { }
+        Escrever-Log "LEITURA: encerrada junto com o runspace - a janela voltou ao estado de nao-lendo" "LEITURA"
+    }
     Escrever-Log "Runspace do motor encerrado e descartado" "MOTOR"
 }
 
@@ -4028,27 +5756,42 @@ $Xaml = @"
     <Border DockPanel.Dock="Top" Background="$($Cores.painel2)" BorderBrush="$($Cores.borda)" BorderThickness="0,0,0,1" Padding="9,7">
       <DockPanel LastChildFill="False">
         <Button x:Name="btnIniciar" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock x:Name="icoIniciar" Text="$($Sim.Atual)" FontSize="17.5" HorizontalAlignment="Center"/><TextBlock Text="Iniciar F1" Margin="0,2,0,0"/></StackPanel>
+          <StackPanel><TextBlock x:Name="icoIniciar" Text="$($Sim.Atual)" FontSize="17.5" HorizontalAlignment="Center"/><TextBlock Text="[F1] Iniciar" Margin="0,2,0,0"/></StackPanel>
         </Button>
         <Button x:Name="btnPausar" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock x:Name="icoPausar" Text="$($Sim.Pausa)" FontSize="15.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblPausar" Text="Pausar F2" Margin="0,3,0,0"/></StackPanel>
+          <StackPanel><TextBlock x:Name="icoPausar" Text="$($Sim.Pausa)" FontSize="15.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblPausar" Text="[F2] Pausar" Margin="0,3,0,0"/></StackPanel>
         </Button>
         <Button x:Name="btnCancelar" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock Text="$($Sim.Err)" FontSize="15.5" HorizontalAlignment="Center"/><TextBlock Text="Cancelar ESC" Margin="0,3,0,0"/></StackPanel>
+          <StackPanel><TextBlock Text="$($Sim.Err)" FontSize="15.5" HorizontalAlignment="Center"/><TextBlock Text="[ESC] Cancelar" Margin="0,3,0,0"/></StackPanel>
         </Button>
         <Border Width="1" Background="$($Cores.borda)" Margin="7,2"/>
         <!-- 16.45: era o botao que recolhia o bloco PASTAS - trabalho que o
              clique no proprio cabecalho ja fazia, e que some sozinho no F1.
              Um botao na barra principal para uma acao duplicada e opcional.
              Agora ele e o par do "Abrir Saída": abre a pasta de ORIGEM. -->
+        <!-- 18.23 - A ORDEM DA BARRA, E AS DUAS TECLAS QUE FALTAVAM.
+
+             "joga o botao Atualizar pra direita e traz o Abrir Saida pra
+             esquerda... e [F3] Abrir Origem, [F4] Abrir Saida, padrao"
+             (Diego, 17/09).
+
+             ORIGEM e SAIDA sao um par - o de onde vem e o para onde vai - e
+             tinham o Atualizar plantado no meio deles. Juntos, e na ordem em
+             que o trabalho acontece, a barra le de um jeito so:
+
+               [F1] [F2] [ESC] | [F3] Origem  [F4] Saida  [F5] Atualizar |
+               [F11] Censo  [F12] Medir
+
+             As teclas ficaram em ordem crescente da esquerda para a direita
+             sem ninguem ter que forcar - foi so por os dois no lugar certo. -->
         <Button x:Name="btnAbrirOrigem" Focusable="False" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock Text="$($Sim.Pasta)" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock Text="Abrir Origem" Margin="0,2,0,0"/></StackPanel>
-        </Button>
-        <Button x:Name="btnReler" Focusable="False" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock Text="&#8635;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblReler" Text="Atualizar" Margin="0,2,0,0"/></StackPanel>
+          <StackPanel><TextBlock Text="$($Sim.Pasta)" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblAbrirOrigem" Text="[F3] Abrir Origem" Margin="0,2,0,0"/></StackPanel>
         </Button>
         <Button x:Name="btnAbrirSaida" Focusable="False" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock Text="$($Sim.Disco)" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock Text="Abrir Saída" Margin="0,2,0,0"/></StackPanel>
+          <StackPanel><TextBlock Text="$($Sim.Disco)" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblAbrirSaida" Text="[F4] Abrir Saída" Margin="0,2,0,0"/></StackPanel>
+        </Button>
+        <Button x:Name="btnReler" Focusable="False" Style="{StaticResource BtnBarra}">
+          <StackPanel><TextBlock x:Name="icoReler" Text="&#8635;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblReler" Text="[F5] Atualizar" Margin="0,2,0,0"/></StackPanel>
         </Button>
         <!-- 17.08: CENSO COMPLETO (item A). A medicao normal le uma amostra;
              este botao le o filme INTEIRO. Nasce DESLIGADO e so acende na
@@ -4057,7 +5800,7 @@ $Xaml = @"
              botao e nao um automatico: numa fila de dez filmes seriam vinte
              minutos parado antes de comecar a converter. -->
         <Button x:Name="btnCenso" Focusable="False" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTipService.InitialShowDelay="250" Style="{StaticResource BtnBarra}">
-          <StackPanel><TextBlock Text="&#9673;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblCenso" Text="Censo Completo" Margin="0,2,0,0"/></StackPanel>
+          <StackPanel><TextBlock x:Name="icoCenso" Text="&#9673;" FontSize="16.5" HorizontalAlignment="Center"/><TextBlock x:Name="lblCenso" Text="[F11] Censo Completo" Margin="0,2,0,0"/></StackPanel>
         </Button>
         <!-- 17.15: a chave da medicao ganha um gemeo AQUI, do lado do Censo,
              a pedido do Diego. Os dois falam da mesma coisa (a camada de
@@ -4068,7 +5811,7 @@ $Xaml = @"
         <Button x:Name="btnMedirELTopo" Focusable="False" ToolTipService.ShowOnDisabled="True" ToolTipService.InitialShowDelay="250" Style="{StaticResource BtnBarra}">
           <StackPanel>
             <TextBlock x:Name="icoMedirELTopo" Text="&#9678;" FontSize="16.5" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="lblMedirELTopo" Text="Medir MEL x FEL" Margin="0,2,0,0"/>
+            <TextBlock x:Name="lblMedirELTopo" Text="[F12] Medir MEL x FEL" Margin="0,2,0,0"/>
             <!-- 17.16: a barrinha da medicao. Fica escondida (Collapsed)
                  quando nao ha medicao rodando - trilho vazio permanente
                  seria ruido, e a barra so existe para responder "esta indo
@@ -4242,7 +5985,7 @@ $Xaml = @"
               <TextBox x:Name="txtSaida" FontFamily="Consolas" FontSize="13" Background="Transparent"
                        Foreground="{StaticResource CorTxt}" BorderThickness="0" IsReadOnly="True"
                        Padding="0" VerticalContentAlignment="Center" Cursor="Hand" Focusable="False"
-                       ToolTip="Clique para escolher a pasta de SAIDA."/>
+                       ToolTip="Clique para escolher a pasta de SAÍDA."/>
             </Border>
           </DockPanel>
           </StackPanel>
@@ -4255,7 +5998,7 @@ $Xaml = @"
           <Border x:Name="cabecFerramentas" Cursor="Hand" Background="Transparent">
             <StackPanel Orientation="Horizontal">
               <TextBlock x:Name="setaFerramentas" Text="▼" FontSize="12" Foreground="{StaticResource CorMarca}" Margin="0,0,7,1" VerticalAlignment="Center"/>
-              <TextBlock Text="FERRAMENTAS DISPONIVEIS:" Style="{StaticResource Cabecalho}"/>
+              <TextBlock Text="FERRAMENTAS DISPONÍVEIS:" Style="{StaticResource Cabecalho}"/>
             </StackPanel>
           </Border>
           <StackPanel x:Name="corpoFerramentas">
@@ -4340,6 +6083,7 @@ $Xaml = @"
         </StackPanel>
 
       <ListView x:Name="lstFila" Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="4,4,4,6"
+                VirtualizingStackPanel.IsVirtualizing="False"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 VerticalAlignment="Stretch"
                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -4361,7 +6105,7 @@ $Xaml = @"
                      e quem centraliza e o proprio CheckBox. -->
                 <Border BorderBrush="#2A2A33" BorderThickness="0,0,1,0" Padding="0">
                 <CheckBox IsChecked="{Binding Marcado, Mode=OneWay}" IsEnabled="{Binding PodeMarcar}"
-                          Tag="{Binding Idx}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"
+                          Tag="{Binding Caminho}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"
                           Focusable="False" ToolTip="Converter este vídeo"/>
                 </Border>
               </DataTemplate></GridViewColumn.CellTemplate>
@@ -4784,6 +6528,7 @@ $Cfg = @{
 $script:Videos      = New-Object System.Collections.Generic.List[object]
 # A colecao que a tela observa. Criada uma vez; dai em diante so Clear/Add.
 $script:LinhasFila  = New-Object System.Collections.ObjectModel.ObservableCollection[object]
+$script:AssinaturaFila = $null   # 18.12: o que a fila mostrava da ultima vez
 $script:Ferramentas = @()     # o que foi achado em tools\
 $script:Lendo       = $false
 $script:CaminhoMotor = ""
@@ -4800,12 +6545,13 @@ function Descobrir-Pastas {
 }
 
 function New-LinhaFila($Nome,$Tam,$DV,$Audio,$Leg,$Sit,$CorNome,$CorDV,$CorAudio,$CorLeg,$CorSit,$Peso="Normal",$Idx=-1,$Marcado=$false,$PodeMarcar=$false,
+                       $Caminho="",
                        $FundoDV="Transparent",$BordaDV="Transparent",$FundoAudio="Transparent",$BordaAudio="Transparent",
                        $FundoLeg="Transparent",$BordaLeg="Transparent",$SeloManual="",$CorSelo="Transparent") {
     [PSCustomObject]@{ Nome=$Nome; Tamanho=$Tam; DV=$DV; Audio=$Audio; Legenda=$Leg
                        Situacao=$Sit; CorNome=$CorNome; CorDV=$CorDV; CorAudio=$CorAudio
                        CorLegenda=$CorLeg; CorSituacao=$CorSit; Peso=$Peso
-                       Idx=$Idx; Marcado=$Marcado; PodeMarcar=$PodeMarcar
+                       Idx=$Idx; Marcado=$Marcado; PodeMarcar=$PodeMarcar; Caminho=$Caminho
                        FundoDV=$FundoDV; BordaDV=$BordaDV
                        FundoAudio=$FundoAudio; BordaAudio=$BordaAudio
                        FundoLeg=$FundoLeg; BordaLeg=$BordaLeg
@@ -5087,7 +6833,23 @@ function Fill-Fila([string]$Fase) {
     # Guardar a selecao: Clear() zera o SelectedIndex e o painel de
     # diagnostico apagaria sem o usuario ter pedido nada.
     $selAntes = $UI.lstFila.SelectedIndex
-    $script:LinhasFila.Clear()
+    <#  18.06: a partir daqui e ate o WPF terminar de desenhar, qualquer evento
+        de caixinha e ECO DO DESENHO, nao clique de gente. A porta e fechada
+        agora e reaberta pelo proprio Dispatcher quando o desenho acabar - sem
+        esperar nada (BeginInvoke), que a regra da 18.00 continua valendo. #>
+    <#  18.12 - REPINTURA IDENTICA NAO E REPINTURA, E RUIDO.
+
+        MEDIDO nos logs dele de 15 a 17/09: 1.588 linhas "FILA: N video(s) ...",
+        e 133 delas sao repinturas IGUAIS a anterior, coladas - tres seguidas
+        para uma acao so (17/09 11:43:03,065/,072/,077). Cada repintura faz
+        Clear() na colecao inteira e monta tudo de novo, e e exatamente isso
+        que dispara evento de caixinha e de selecao sem ninguem ter clicado -
+        o defeito da 18.06 e o da 18.11 nasceram os dois dai.
+
+        Agora as linhas sao montadas numa lista a parte e COMPARADAS com o que
+        ja esta na tela. Se nada mudou, a tela nao e tocada: zero Clear(), zero
+        evento, zero pisca. O que sobra no log e repintura de verdade. #>
+    $novas = New-Object System.Collections.Generic.List[object]
     $primeiroAtivo = $true
     # 17.18: uma consulta por redesenho, nao uma por linha - a lista nao pode
     # dizer "2 de 3" numa linha e "3 de 3" na de baixo do mesmo desenho.
@@ -5118,11 +6880,11 @@ function Fill-Fila([string]$Fase) {
                 "Erro na Leitura"    { $Cores.err }
                 default              { $Cores.warn }
             }
-            [void]$script:LinhasFila.Add((New-LinhaFila $v.Nome $v.TamanhoTxt `
+            [void]$novas.Add((New-LinhaFila $v.Nome $v.TamanhoTxt `
                 $v.ColDV $v.ColAudio $v.ColLegenda `
                 $rotulo `
                 $Cores.dim2 $Cores.dim2 $Cores.dim2 $Cores.dim2 $corRotulo "Normal" `
-                $i $false $false))
+                $i $false $false "$($v.Caminho)"))
             continue
         }
 
@@ -5187,6 +6949,46 @@ function Fill-Fila([string]$Fase) {
             $sit = "$($Sim.Warn) Nada a Converter"; $corSit = $Cores.warn
         } elseif ($Estado.Atual -ne "inicial" -and $Motor.VideoTotal -gt 0 -and (Test-JaConvertido $v)) {
             $sit = "$($Sim.Ok) Convertido"; $corSit = $Cores.okdim
+            <#  17.20: ESTE RAMO SUBIU PARA CIMA DO "FORA DA FILA".
+
+                A fase B mede TODOS os arquivos pendentes, marcados ou nao.
+                Com o ramo do desmarcado vindo antes, um arquivo fora da fila
+                sendo medido mostrava "Fora da Fila" em cinza - e o botao la
+                em cima dizia "Medindo 2 de 3" sem nenhuma linha acesa. O
+                mesmo defeito que esta secao inteira veio consertar.
+
+                Medindo ganha de Fora da Fila porque uma coisa esta
+                ACONTECENDO e a outra so descreve: assim que a medicao daquele
+                arquivo acaba, a linha volta a dizer "Fora da Fila", e o
+                checkbox - que e quem decide de verdade - nunca mudou. #>
+        } elseif ($null -ne $medindoAgora -and $i -eq [int]$medindoAgora.Idx) {
+            <#  17.19: casa por INDICE. Casar por nome errava em dois arquivos
+                de mesmo nome, e o nome nem e necessario - o "el_ini" ja manda
+                o indice, que e como a mensagem "el" sempre encontrou a linha. #>
+            <#  17.18: ciano porque e a MESMA coisa que o "Convertendo" ciano -
+                esta acontecendo agora, neste arquivo. Verde nao serve (verde e
+                "ja e / vai ser"), cinza nao serve (cinza e ausencia). E a
+                linha fica em destaque pelo mesmo motivo da 16.38: o que esta
+                acontecendo agora nao pode ter o mesmo peso do que espera. #>
+            $est = $Destaque
+            $sit = "$($Sim.Atual) Medindo Camada · {0} de {1}" -f $medindoAgora.Posicao, $medindoAgora.Total
+            $corSit = $Cores.emCurso
+            <#  17.20 - O ARQUIVO QUE ESTA SENDO MEDIDO CONTINUA SENDO O
+                PROXIMO A CONVERTER.
+
+                Achado do Diego: com o arquivo 1 sendo medido, o rotulo verde
+                "Proximo a Converter" aparecia no arquivo 2. Falso - o proximo
+                a converter e o 1; ele so esta, tambem, sendo medido agora.
+
+                Esta linha ocupa a vaga do "proximo" sem escrever a frase: a
+                coluna so cabe um estado, e "esta acontecendo agora" ganha de
+                "vai acontecer depois". Quem nao pode e a linha DE BAIXO herdar
+                um rotulo que nao e dela.
+
+                So consome se a vaga ainda estava livre: medindo o arquivo 2
+                com o 1 ja medido, o verde fica no 1, que e o certo - e foi o
+                que a foto das 19:37 mostrou funcionando. #>
+            if ($primeiroAtivo -and $Estado.Atual -eq "inicial") { $primeiroAtivo = $false }
         } elseif (-not $v.Marcado) {
             <#  17.15 - "NA FILA" NUM ARQUIVO QUE NAO ESTA NA FILA.
 
@@ -5208,15 +7010,6 @@ function Fill-Fila([string]$Fase) {
                 nao disputa o "Proximo a Converter": quem nao entra na
                 conversao nao pode ser o proximo dela. #>
             $sit = "Fora da Fila - Não Será Convertido"; $corSit = $Cores.dim2
-        } elseif ($null -ne $medindoAgora -and "$($v.Nome)" -eq "$($medindoAgora.Nome)") {
-            <#  17.18: ciano porque e a MESMA coisa que o "Convertendo" ciano -
-                esta acontecendo agora, neste arquivo. Verde nao serve (verde e
-                "ja e / vai ser"), cinza nao serve (cinza e ausencia). E a
-                linha fica em destaque pelo mesmo motivo da 16.38: o que esta
-                acontecendo agora nao pode ter o mesmo peso do que espera. #>
-            $est = $Destaque
-            $sit = "$($Sim.Atual) Medindo Camada · {0} de {1}" -f $medindoAgora.Posicao, $medindoAgora.Total
-            $corSit = $Cores.emCurso
         } elseif ($primeiroAtivo -and $Estado.Atual -eq "inicial") {
             <#  17.18: a condicao era "$Fase -eq 'inicial'" - o Fase e o MOTIVO
                 do redesenho, nao o estado do programa. Redesenhar por causa da
@@ -5291,16 +7084,37 @@ function Fill-Fila([string]$Fase) {
         $corAudio   = if ($avisoAudio) { $Cores.warn } else { Get-CorColuna $colAudio $false }
         # Mesma regra do DV e do audio: chip so onde ha seta (conversao real).
         $chipLeg    = if ($colLeg -match "→") { Get-ChipVerde } else { Get-ChipVazio }
-        [void]$script:LinhasFila.Add((New-LinhaFila $v.Nome $v.TamanhoTxt $v.ColDV $colAudio $colLeg `
+        [void]$novas.Add((New-LinhaFila $v.Nome $v.TamanhoTxt $v.ColDV $colAudio $colLeg `
             $sit $est.Cor `
             $corDV `
             $corAudio `
             (Get-CorColuna $colLeg $false) `
             $corSit $est.Peso `
-            $i ([bool]$v.Marcado) $true `
+            $i ([bool]$v.Marcado) $true "$($v.Caminho)" `
             $chipDV.Fundo $chipDV.Borda $chipAudio.Fundo $chipAudio.Borda `
             $chipLeg.Fundo $chipLeg.Borda $seloManual $corSelo))
     }
+    # Prova no log: quantos videos existem e quantas linhas foram parar na
+    # tela. Se esses dois numeros divergirem, o defeito e aqui e nao no WPF.
+    $assinatura = ($novas | ForEach-Object { ($_.PSObject.Properties | ForEach-Object { "$($_.Name)=$($_.Value)" }) -join "|" }) -join "`n"
+    if ($assinatura -eq $script:AssinaturaFila -and $script:LinhasFila.Count -eq $novas.Count) {
+        Escrever-Log ("FILA: nada mudou na tela - repintura dispensada ({0} linha(s))" -f $novas.Count) "FILA"
+        return
+    }
+    $script:AssinaturaFila = $assinatura
+
+    <#  18.06: a partir daqui e ate o WPF terminar de desenhar, qualquer evento
+        de caixinha e ECO DO DESENHO, nao clique de gente. A porta e fechada
+        agora e reaberta pelo proprio Dispatcher quando o desenho acabar - sem
+        esperar nada (BeginInvoke), que a regra da 18.00 continua valendo. #>
+    $script:PintandoFila = $true
+    try {
+        $Janela.Dispatcher.BeginInvoke([System.Action]{ $script:PintandoFila = $false },
+            [System.Windows.Threading.DispatcherPriority]::Background) | Out-Null
+    } catch { $script:PintandoFila = $false }
+    $script:LinhasFila.Clear()
+    foreach ($ln in $novas) { [void]$script:LinhasFila.Add($ln) }
+
     # Prova no log: quantos videos existem e quantas linhas foram parar na
     # tela. Se esses dois numeros divergirem, o defeito e aqui e nao no WPF.
     if ($selAntes -ge 0 -and $selAntes -lt $script:LinhasFila.Count) {
@@ -5394,13 +7208,56 @@ function Format-DolbyVision {
     if ($cod -eq "") { $cod = "dvhe.{0:D2}.{1:D2}" -f $Perfil, ([int]$Level) }
     $cam = "$Camadas"; if ($cam -eq "") { $cam = "BL+RPU" }
     # A sigla so existe onde ela quer dizer alguma coisa: Profile 7 com EL.
+    <#  18.00 - "MEDINDO" SAIU DAQUI (achado do Diego, 16/09).
+
+        "P7 MEDINDO sempre impresso em todos, e pra estar assim so no que
+        estiver fazendo, ne? Se o proximo ta na lista... outra palavra, muito
+        ridiculo isso."
+
+        Ele esta certo em tres niveis, e os tres importam:
+
+        1. E MENTIRA para quem nao esta sendo medido. No print dele, Bloodsport
+           E Minions mostravam "P7 medindo" - mas so o Bloodsport estava sendo
+           medido; o Minions estava esperando a vez. A coluna SITUACAO dizia a
+           verdade ao lado ("Medindo Camada - 1 de 2" x "Na Fila") enquanto esta
+           dizia a mesma coisa para os dois.
+
+        2. E REPETICAO. Quem esta sendo medido AGORA ja e dito pela coluna
+           SITUACAO, em ciano, e pelo contador da barra de cima. Tres lugares
+           para um fato so - e dois deles errados.
+
+        3. E A PALAVRA ERRADA NO LUGAR ERRADO. Esta coluna carrega o VEREDICTO
+           da camada (MEL / FEL / EL nao medida). "Medindo" nao e veredicto, e
+           atividade: ele nao pertence a esta coluna em nenhum momento.
+
+        Entao: enquanto nao ha veredicto, a coluna mostra so o que foi
+        DETECTADO - "P7 -> P8.1" - e cala sobre a camada, porque ainda nao sabe.
+        Calar e honesto; inventar atividade em linha parada nao e. Quando o
+        veredicto chega, ele aparece: "P7 FEL -> P8.1".
+
+        "EL nao medida" CONTINUA, porque aquilo e um veredicto de verdade - o
+        terceiro estado honesto da 1.8: nao medir nunca vira "limpa". #>
     $sigla = ""
     switch ("$ELtipo") {
         "MEL"        { $sigla = "MEL" }
         "FEL"        { $sigla = "FEL" }
         "MISTO"      { $sigla = "MEL+FEL" }
-        "MEDINDO"    { $sigla = "medindo" }
         "NAO_MEDIDO" { $sigla = "EL não medida" }
+        <#  18.09 - QUEM ESTA SENDO MEDIDO CONTINUA SEM VEREDICTO, E A COLUNA
+            TEM QUE DIZER ISSO.
+
+            Print dele, 17/09: com a medicao rodando, a coluna do Troy mostrava
+            so "P7 -> P8.1" - sem uma palavra sobre a camada. A 18.00 tirou
+            "medindo" daqui com razao (era atividade na coluna de VEREDICTO, e
+            aparecia em quem nem tinha vez), mas eu deixei o buraco: sem sigla
+            nenhuma, a linha parece um Profile 7 comum, do lado de outros que
+            dizem "FEL" e "MEL".
+
+            A verdade e simples: quem esta sendo medido AINDA NAO TEM
+            VEREDICTO - entao mostra o mesmo que os outros sem veredicto. Quem
+            avisa que o trabalho esta acontecendo e a coluna SITUACAO
+            ("Medindo Camada - 1 de 1"), que e o lugar da atividade. #>
+        "MEDINDO"    { $sigla = "EL não medida" }
     }
     <#  17.03 - "PERFIL 7.6" NAO EXISTE (achado do Diego, 09/09).
 
@@ -5515,11 +7372,15 @@ function Test-PastasIguais {
             Aqui so se DESFAZ o travamento por pastas iguais; quem decide o
             botao continua sendo Update-Selecao. #>
         $marcadosOk = @(Get-Marcados).Count
-        $UI.btnIniciar.IsEnabled = ($marcadosOk -gt 0) -and ($Estado.Atual -eq "inicial")
+        Set-BotaoIniciar (($marcadosOk -gt 0) -and ($Estado.Atual -eq "inicial"))
         if ($Estado.Atual -eq "inicial") {
             # 17.01: este titulo tambem e montado - e era o que aparecia na
             # barra da janela do Diego, em portugues, com a tela em ingles.
-            $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Pronto para Converter - {0} Vídeo(s) na Fila" -f $ativos))
+            # 2.0.10: $ativos nao existia aqui - o titulo saia "Pronto para
+            # Converter -  Vídeo(s) na Fila", sem o numero (print de 23/09),
+            # por cima do titulo certo que o Update-Selecao tinha acabado de por.
+            # Agora e a mesma frase e o mesmo numero do Update-Selecao.
+            $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Pronto para Converter - {0} Vídeo(s) Selecionado(s)" -f $marcadosOk))
         }
     }
     return $mesma
@@ -5797,7 +7658,7 @@ function Fill-Faixas {
     $script:LinhasFaixas.Clear()
     $idx = $UI.lstFila.SelectedIndex
     if ($idx -lt 0 -or $idx -ge $script:Videos.Count) {
-        Set-AbaDica "Selecione um vídeo na aba Fila."
+        Set-DicaFaixas "Selecione um vídeo na aba Fila."
         $UI.btnModoVideo.Visibility = "Collapsed"
         $UI.txtRodapeTamanho.Text = ""
         return
@@ -5805,7 +7666,7 @@ function Fill-Faixas {
     $v = $script:Videos[$idx]
     $faixas = @($v.Faixas)
     if ($faixas.Count -eq 0) {
-        Set-AbaDica "Este vídeo não pôde ser lido."
+        Set-DicaFaixas "Este vídeo não pôde ser lido."
         $UI.btnModoVideo.Visibility = "Collapsed"
         $UI.txtRodapeTamanho.Text = ""
         return
@@ -5952,7 +7813,26 @@ function Fill-Faixas {
         $Cores.dim2 $Cores.txt $Cores.dim $Cores.dim2 $Cores.dim "SemiBold"))
 
     Update-BotaoModo
-    Set-AbaDica "$($v.Nome)"
+    <#  18.10 - O NOME QUE FICAVA PRESO NO CABECALHO DA FILA.
+
+        "veja que no circulo de cima as vezes vem o nome ali quando clico
+        automatico/manual e tem vezes que nao; eu selecionei o Se7en e la ainda
+        fica como Blood... eu ja tinha comentado de tirar isso dali na parte da
+        fila" (Diego, 17/09), com a sequencia de prints provando.
+
+        O que acontecia: esta linha escreve o nome do video cujas FAIXAS
+        acabaram de ser montadas - e Fill-Faixas tambem roda por outros
+        motivos, como trocar Automatico/Manual. No log dele, as 11:53:48, o
+        clique em MODO do Bloodsport remontou as faixas E escreveu o nome dele
+        no cabecalho, com a aba FILA na tela e o Se7en selecionado. Dai o nome
+        errado, "as vezes sim e as vezes nao", e o conserto de clicar em outra
+        coisa e voltar.
+
+        O cabecalho e da ABA FAIXAS: e ali que faz sentido dizer de quem sao as
+        faixas. Na aba FILA ele nao tem o que dizer - quem diz o nome e a
+        propria linha selecionada. Entao o nome so e escrito quando a aba das
+        faixas esta na tela. #>
+    Set-DicaFaixas "$($v.Nome)"
 
     $estimado = Get-TamanhoEstimadoVideo $v
     $delta = $estimado - [double]$v.Bytes
@@ -6004,7 +7884,7 @@ function Get-Marcados {
 function Update-Selecao {
     # Um lugar so decide tudo que depende da selecao.
     $marcados = @(Get-Marcados).Count
-    $UI.btnIniciar.IsEnabled = ($marcados -gt 0) -and ($Estado.Atual -eq "inicial")
+    Set-BotaoIniciar (($marcados -gt 0) -and ($Estado.Atual -eq "inicial"))
     Update-CabecalhoFila
     Update-Disco
     if ($Estado.Atual -eq "inicial") {
@@ -6080,9 +7960,16 @@ function Update-CabecalhoFila {
     portugues, inteiro. A traducao e uma camada por cima, nunca a fonte. #>
 
 $script:Lang     = "PT"
-$script:MapaEN   = @{}   # portugues -> ingles
+<#  19.6 - A TABELA IGNORAVA MAIUSCULA, E O IDIOMA TEM PARES QUE SO DIFEREM
+    NELA: "Fila"/"FILA" (Queue/QUEUE), "Lendo a pasta..."/"Lendo a Pasta...".
+    Com @{} a segunda linha sobrescrevia a primeira e a tela saia com a
+    caixa errada. Agora o mapa e exato (Ordinal) e o @{} antigo fica so como
+    reserva, para quem pedir com uma caixa que a tabela nao tem. #>
+$script:MapaEN   = (New-Object System.Collections.Hashtable ([System.StringComparer]::Ordinal))   # portugues -> ingles
+$script:MapaENi  = @{}
+$script:MapaPTi  = @{}
 $script:RegrasEN = New-Object System.Collections.ArrayList
-$script:MapaPT   = @{}   # ingles -> portugues (o caminho de volta)
+$script:MapaPT   = (New-Object System.Collections.Hashtable ([System.StringComparer]::Ordinal))   # ingles -> portugues (o caminho de volta)
 
 function Carregar-Idioma {
     $arq = Join-Path $script:PastaScript "IDIOMA_EN.txt"
@@ -6090,7 +7977,9 @@ function Carregar-Idioma {
     try {
         $linhas = [System.IO.File]::ReadAllLines($arq, [System.Text.Encoding]::UTF8)
     } catch { return $false }
-    $script:MapaEN = @{}; $script:MapaPT = @{}
+    $script:MapaEN = New-Object System.Collections.Hashtable ([System.StringComparer]::Ordinal)
+    $script:MapaPT = New-Object System.Collections.Hashtable ([System.StringComparer]::Ordinal)
+    $script:MapaENi = @{}; $script:MapaPTi = @{}
     $script:RegrasEN = New-Object System.Collections.ArrayList
     foreach ($l in $linhas) {
         if ($l -eq "" -or $l.StartsWith("#")) { continue }
@@ -6129,6 +8018,8 @@ function Carregar-Idioma {
             linha nova aqui. #>
         $script:MapaEN[$pt] = $en
         if (-not $script:MapaPT.ContainsKey($en)) { $script:MapaPT[$en] = $pt }
+        if (-not $script:MapaENi.ContainsKey($pt)) { $script:MapaENi[$pt] = $en }
+        if (-not $script:MapaPTi.ContainsKey($en)) { $script:MapaPTi[$en] = $pt }
     }
     return (($script:MapaEN.Count + $script:RegrasEN.Count) -gt 0)
 }
@@ -6142,6 +8033,7 @@ function Traduzir-Frase([string]$Pt) {
     if ($script:Lang -ne "EN") { return $Pt }
     if ($Pt -eq $null -or $Pt -eq "") { return $Pt }
     if ($script:MapaEN.ContainsKey($Pt)) { return $script:MapaEN[$Pt] }
+    if ($script:MapaENi -and $script:MapaENi.ContainsKey($Pt)) { return $script:MapaENi[$Pt] }
     $r = $Pt
     foreach ($re in $script:RegrasEN) {
         try { $r = [regex]::Replace($r, $re.De, $re.Para) } catch { }
@@ -6178,10 +8070,12 @@ function Traduzir([string]$Pt) {
         original, que e feio mas legivel; texto em branco seria pior. #>
     if ($script:Lang -ne "EN") { return $Pt }
     if ($script:MapaEN.ContainsKey($Pt)) { return $script:MapaEN[$Pt] }
+    if ($script:MapaENi -and $script:MapaENi.ContainsKey($Pt)) { return $script:MapaENi[$Pt] }
     return $Pt
 }
 
 function Traduzir-Arvore($Raiz, [hashtable]$Mapa) {
+    $reservaArv = if ([object]::ReferenceEquals($Mapa, $script:MapaEN)) { $script:MapaENi } elseif ([object]::ReferenceEquals($Mapa, $script:MapaPT)) { $script:MapaPTi } else { $null }
     <#  17.05 - A ARVORE VISUAL NAO E A TELA INTEIRA.
 
         Defeito achado em uso, 10/09, olhando as fotos: depois de trocar de
@@ -6222,20 +8116,20 @@ function Traduzir-Arvore($Raiz, [hashtable]$Mapa) {
 
         if ($o -is [System.Windows.Controls.TextBlock]) {
             $x = "$($o.Text)"
-            if ($x -ne "" -and $Mapa.ContainsKey($x)) { $o.Text = $Mapa[$x]; $trocados++ }
+            if ($x -ne "" -and (($Mapa.ContainsKey($x)) -or ($reservaArv -and $reservaArv.ContainsKey($x)))) { $o.Text = $(if ($Mapa.ContainsKey($x)) { $Mapa[$x] } else { $reservaArv[$x] }); $trocados++ }
         } elseif ($o -is [System.Windows.Controls.GridViewColumnHeader]) {
             $x = "$($o.Content)"
-            if ($x -ne "" -and $Mapa.ContainsKey($x)) { $o.Content = $Mapa[$x]; $trocados++ }
+            if ($x -ne "" -and (($Mapa.ContainsKey($x)) -or ($reservaArv -and $reservaArv.ContainsKey($x)))) { $o.Content = $(if ($Mapa.ContainsKey($x)) { $Mapa[$x] } else { $reservaArv[$x] }); $trocados++ }
         } elseif ($o -is [System.Windows.Controls.TabItem]) {
             $x = "$($o.Header)"
-            if ($x -ne "" -and $Mapa.ContainsKey($x)) { $o.Header = $Mapa[$x]; $trocados++ }
+            if ($x -ne "" -and (($Mapa.ContainsKey($x)) -or ($reservaArv -and $reservaArv.ContainsKey($x)))) { $o.Header = $(if ($Mapa.ContainsKey($x)) { $Mapa[$x] } else { $reservaArv[$x] }); $trocados++ }
         }
         <#  17.15: a DICA tambem e texto de tela, e nenhuma delas trocava de
             lingua - a varredura so olhava o texto do elemento. Vale para
             qualquer controle, entao fica fora da cadeia de tipos acima. #>
         if ($o -is [System.Windows.FrameworkElement]) {
             $d = $o.ToolTip
-            if ($d -is [string] -and $d -ne "" -and $Mapa.ContainsKey($d)) { $o.ToolTip = $Mapa[$d]; $trocados++ }
+            if ($d -is [string] -and $d -ne "" -and (($Mapa.ContainsKey($d)) -or ($reservaArv -and $reservaArv.ContainsKey($d)))) { $o.ToolTip = $(if ($Mapa.ContainsKey($d)) { $Mapa[$d] } else { $reservaArv[$d] }); $trocados++ }
         }
 
         # --- filhos VISUAIS (o que ja foi desenhado)
@@ -6326,6 +8220,10 @@ function Set-Idioma([string]$Novo) {
         leitura da pasta - a tela com duas linguas ao mesmo tempo que o
         Diego viu e descreveu como "fica horrivel quando volta". #>
     try { Update-Disco } catch { }
+    # 2.0.12: o "[F12] Medir MEL x FEL: Ligado" do topo ficava em portugues na
+    # tela em ingles (print de 23/09 13:35) - ele e montado por codigo, com o
+    # "[F12] " na frente, e a troca de idioma so relia os rotulos do XAML.
+    try { Update-BotaoMedirEL } catch { }
     try { Fill-Faixas } catch { }
     # 17.15: o cartao final e o quinto painel montado por codigo. Ficava de
     # fora e deixava a tela meio em cada lingua depois de uma conversao.
@@ -6402,6 +8300,7 @@ function Offer-ReinicioIdioma([string]$Novo) {
             if (-not $exe) { $exe = "powershell.exe" }
             Start-Process -FilePath $exe `
                 -ArgumentList @("-NoProfile","-ExecutionPolicy","Bypass","-STA","-File","`"$($script:CaminhoScript)`"")
+            $script:Fechando = $true   # 18.12: o Closed confirma, mas quem fecha avisa antes
             $Janela.Close()
         } catch {
             Escrever-Log ("IDIOMA: nao consegui reabrir o programa - {0}" -f $_.Exception.Message) "AVISO"
@@ -6450,6 +8349,33 @@ function Get-NomeCorEL($v) {
         Quem precisa de cor chama esta funcao. Ninguem mais decide sozinho. #>
     switch ("$($v.ELtipo)") {
         "MEL"        { return "verde" }
+        <#  2.0.1 - O VERMELHO PASSOU A TER UMA CONDICAO DE SAIDA, E SO UMA.
+
+            "Expande" e uma comparacao de UM numero: o pico da cena mais alta
+            contra o pico do master. Uma cena passou, o arquivo inteiro ficava
+            vermelho - e vermelho aqui quer dizer "este e o caso que estraga a
+            imagem".
+
+            O comentario da 16.85 ja dizia o que faltava: "um pico isolado
+            numa cena e outra coisa de metade do filme acima da regua". O que
+            nao existia era a contagem grande o bastante para separar os dois.
+            O CENSO COMPLETO e essa contagem - le o filme inteiro.
+
+            Medido, nos dois casos que temos:
+                Saving Private Ryan   216 de 1.124 cenas (19,22%), pico 3.468
+                                      contra master 1.000  -> 3,47x  VERMELHO
+                Transformers ROTF      15 de 2.225 cenas (0,67%), pico 1.555
+                                      contra master 1.000  -> 1,56x  isolado
+            A planilha da comunidade mede o Transformers por outro caminho
+            (madVR, imagem decodificada) e da 0,3% dos QUADROS acima de 1.000
+            nits, com a MESMA contagem de quadros do nosso censo (215.617).
+            As duas medicoes concordam que este filme mal encosta acima do
+            master - e ele levava a mesma cor de um que expande o tempo todo.
+
+            ISTO NAO RECLASSIFICA A CAMADA. FEL continua FEL, a EL continua
+            sendo descartada e o usuario continua perdendo o residual. O que
+            muda e a GRAVIDADE, que e o que a cor comunica. Por isso o destino
+            e laranja (a cor de "converte, com ressalva") e nunca verde. #>
         "FEL"        { if ($v.ELexpande -eq $true) { return "vermelho" } else { return "laranja" } }
         "MISTO"      { if ($v.ELexpande -eq $true) { return "vermelho" } else { return "laranja" } }
         "NAO_MEDIDO" { return "ambar" }
@@ -6503,7 +8429,7 @@ function Update-Diagnostico {
         $UI.lblDiagTitulo.Text = Traduzir "DIAGNÓSTICO:"
         foreach ($c in @("diagDV","diagAu","diagLg","diagDVr","diagAur","diagLgr")) { $UI.$c.Text = "" }
         # 17.08: sem linha selecionada nao ha o que contar (item A).
-        $UI.btnCenso.IsEnabled = $false
+        # 18.21: quem apaga o botao e Update-BotaoCenso, chamado aqui dentro.
         Update-DicaCenso $null
         return
     }
@@ -6512,7 +8438,22 @@ function Update-Diagnostico {
 
         Acende so em Complex FEL, e so uma vez por arquivo: contar o mesmo
         filme duas vezes gasta dois minutos para chegar ao mesmo numero. #>
-    $UI.btnCenso.IsEnabled = ((Test-PodeCenso $v) -and (-not $script:CensoRodando) -and (-not [bool]$v.CensoFeito))
+    <#  17.21 - O CENSO PODIA SER APERTADO DURANTE A CONVERSAO.
+
+        BUG MEDIDO no log do Diego (15/09 20:36:56): com a etapa 1/5 rodando
+        ele clicou em "Censo Completo". O censo le o RPU do FILME INTEIRO; a
+        conversao estava lendo outro arquivo de 82 GB no MESMO disco
+        mecanico. Os dois se estrangularam: a etapa 1/5 ficou em 1% por mais
+        de um minuto e o censo nunca voltou. Ele: "BOTAO CENSO FUNCIONANDO EM
+        CONVERSAO E NUNCA TERMINA".
+
+        A 17.08 escreveu no log que "a fila e a conversao continuam livres".
+        Continuam livres de TRAVA - nao de disco. Custo de I/O nao aparece em
+        nenhuma flag, e foi por isso que eu nao vi. Pergunta do Diego: "O
+        BOTAO CENSO PODE SER APERTADO DEPOIS DE UMA F1?". Nao pode. #>
+    <#  18.21: esta linha era o SEGUNDO dono do IsEnabled e a causa do
+        "clicando nao" dele. A regra inteira mora em Update-BotaoCenso, que
+        Update-DicaCenso chama logo abaixo - dono unico, uma leitura so. #>
     # 17.14: aceso ou apagado, ele diz por que.
     Update-DicaCenso $v
     # 15.1e: um video que NAO vai ser processado nao pode exibir "[SERÁ
@@ -6642,8 +8583,13 @@ function Update-Disco {
     $ativos = @(Get-Marcados)
     if ($ativos.Count -eq 0) {
         $UI.txtDisco.Text = if ($script:Lendo) { Traduzir "Lendo a pasta..." }
-                            elseif (@($script:Videos | Where-Object { -not $_.Ignorar }).Count -gt 0) { "Nenhum vídeo selecionado." }
-                            else { "Nenhum vídeo a converter nesta pasta." }
+                            <#  18.03: as duas linhas abaixo estavam SEM Traduzir - a
+                                primeira do "if" tinha, as duas do "else" nao. Apareceu
+                                no print dele: painel DISK SPACE em ingles com
+                                "Nenhum vídeo selecionado." em portugues. #>
+                            elseif (@($script:Videos | Where-Object { -not $_.Ignorar }).Count -gt 0) { Traduzir "Nenhum vídeo selecionado." }
+                            elseif ($script:MotivoVazio) { Traduzir-Frase $script:MotivoVazio }
+                            else { Traduzir "Nenhum vídeo a converter nesta pasta." }
         $UI.barraDisco.Width = 0
         $UI.lblDiscoMsg.Text = ""
         return
@@ -6817,7 +8763,7 @@ function Format-GB([double]$Bytes) {
 function Update-FerramentasTopo {
     if (-not $UI.lblFerrTopo) { return }
     $UI.lblFerrTopo.Inlines.Clear()
-    $ordem = @("dovi_tool", "DeeZy", "seconv", "PgsToSrt", "Tesseract", "mkvmerge")
+    $ordem = @("dovi_tool", "DeeZy", "PgsToSrt", "Tesseract", "mkvmerge")   # 2.0.7: sem seconv
     $primeiro = $true
     foreach ($chave in $ordem) {
         $f = @($script:Ferramentas | Where-Object { "$($_.Chip)" -eq $chave })
@@ -7003,10 +8949,11 @@ function Get-PrevistoAjustadoDaEtapa([int]$i, [double]$PctFerramenta, [double]$S
     $fr = [math]::Max(0.0, [math]::Min(1.0, $PctFerramenta / 100.0))
     if ($SegDecorrido -le 0) { return $prev }
     if ($fr -ge 0.20) { return ($SegDecorrido / $fr) }
-    if ($fr -gt 0.05) {
-        $porRitmo = $SegDecorrido / $fr
-        if ($porRitmo -gt $prev) { return $porRitmo }
-    }
+    <#  2.0.12: abaixo de 20% o ritmo NAO manda mais. No OCR do Ryan (23/09
+        12:16) a ferramenta ficou 90 s parada em 10-11% e a conta 95s/0,11
+        projetou 860 s de etapa: o restante subiu de 1.867 para 2.403 s e
+        depois despencou. A etapa real levou 336 s (previsto 233). Com pouca
+        amostra vale o catalogo; se o relogio passar dele, o relogio (abaixo). #>
     if ($SegDecorrido -gt $prev) { return $SegDecorrido }   # sem amostra, mas ja estourou
     return $prev
 }
@@ -7201,7 +9148,7 @@ function Set-Estado([string]$Novo) {
     $UI.caixaFila.Visibility         = if ($fim) { "Collapsed" } else { "Visible" }
 
     # Habilitacao dos botoes (mapa aprovado)
-    $UI.btnIniciar.IsEnabled  = $ini
+    Set-BotaoIniciar $ini
     $UI.btnPausar.IsEnabled   = $run -or $pau
     $UI.btnCancelar.IsEnabled = $run -or $pau
     # 16.45: "Abrir Origem" e "Abrir Saída" valem SEMPRE - inclusive com a
@@ -7211,12 +9158,12 @@ function Set-Estado([string]$Novo) {
 
     # Toggle Pausar/Retomar (F2 unico)
     if ($pau) {
-        $UI.lblPausar.Text = Traduzir "Retomar F2"; $UI.icoPausar.Text = $Sim.Atual
+        $UI.lblPausar.Text = "[F2] " + (Traduzir "Retomar"); $UI.icoPausar.Text = $Sim.Atual
         $UI.btnPausar.Foreground  = Pincel $Cores.warn
         $UI.btnPausar.Background  = Pincel $Cores.pausaFundo
         $UI.btnPausar.BorderBrush = Pincel $Cores.pausaBorda
     } else {
-        $UI.lblPausar.Text = Traduzir "Pausar F2"; $UI.icoPausar.Text = $Sim.Pausa
+        $UI.lblPausar.Text = "[F2] " + (Traduzir "Pausar"); $UI.icoPausar.Text = $Sim.Pausa
         $UI.btnPausar.Foreground  = Pincel $(if ($run) { $Cores.txt } else { $Cores.vazio })
         $UI.btnPausar.Background  = Pincel "#00000000"
         $UI.btnPausar.BorderBrush = Pincel "#00000000"
@@ -7269,7 +9216,13 @@ function Set-Estado([string]$Novo) {
         if ($Motor.PausaIni) {
             $dur = ((Get-Date) - $Motor.PausaIni).TotalSeconds
             $Motor.PausadoEtapa += $dur
+            $Motor.PausadoVideo = [double]$Motor.PausadoVideo + $dur   # 2.0.7: a pausa sai do tempo do arquivo
             $Motor.PausaIni = $null
+            # 2.0.10: o filtro do tempo restante desconta o relogio desde a
+            # ultima leitura - e a ultima leitura foi ANTES da pausa. Sem isto,
+            # a primeira conta depois de retomar tirava a pausa inteira do
+            # restante (40 min restantes + 60 de pausa = "Terminando Agora").
+            $script:SuaveEm = Get-Date
             Escrever-Log ("PAUSA de {0} encerrada (total pausado nesta etapa: {1})" -f `
                 (Format-MinSeg $dur), (Format-MinSeg $Motor.PausadoEtapa)) "PROVA"
         }
@@ -7293,7 +9246,7 @@ function Set-Estado([string]$Novo) {
         "pausado" { Fill-Fila "pausado"
                     $UI.btnPausar.Focus() | Out-Null
                     $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("PAUSADO - {0}% - Sem Consumir CPU/Disco" -f [int]$Motor.PctEtapa)) }
-        "fim"     { $script:LinhasFila.Clear(); $UI.btnNovaConversao.Focus() | Out-Null }
+        "fim"     { $script:LinhasFila.Clear(); $script:AssinaturaFila = $null; $UI.btnNovaConversao.Focus() | Out-Null }
     }
     # m3c8: sem isso, o dropdown da coluna ACAO so refletia o novo Estado na
     # PROXIMA vez que algo mais chamasse Fill-Faixas (trocar de aba/video) -
@@ -7309,7 +9262,7 @@ function Set-Estado([string]$Novo) {
 #  numeros na propria thread da janela.)
 $Motor = @{ EtapaIdx = 0; PctEtapa = 0.0; SegEtapa = 0; SegVideo = 0; RestVideo = 0
             FatorRegua = 1.0; PausadoFila = 0; T0Fase = $null
-            SegPausado = 0; LivreGB = 404.99; HoraFila = ""; HoraVideo = ""; HoraEtapa = ""
+            SegPausado = 0; LivreGB = 404.99; LivreGBSaida = -1.0; LivreDiscoO = ""; LivreDiscoS = ""; HoraFila = ""; HoraVideo = ""; HoraEtapa = ""
             VideoNome = ""; VideoIdx = 0; VideoTotal = 0; SegFila = 0
             # T0* sao relogios de PAREDE. O motor manda tempo LIQUIDO (sem as
             # pausas), que serve pra estimar o que falta; mas "Começou 13h54 /
@@ -7325,7 +9278,7 @@ $Motor = @{ EtapaIdx = 0; PctEtapa = 0.0; SegEtapa = 0; SegVideo = 0; RestVideo 
             # etapa/fase veio a ultima medicao; quando o dono muda, a leitura
             # velha e descartada em vez de vazar pra etapa seguinte.
             VidaChave = ""; VidaSemMedida = $true
-            LogPctUltimo = -100; LogPctEm = $null; PausadoEtapa = 0.0; PausaIni = $null
+            LogPctUltimo = -100; LogPctEm = $null; PausadoEtapa = 0.0; PausaIni = $null; PausadoVideo = 0.0
             # 16.37: Fase e o que roda FORA da numeracao - o diagnostico antes
             # da [1/5] e a limpeza depois da [5/5]. Vazio o resto do tempo.
             Nota = ""; Fase = ""
@@ -7391,7 +9344,10 @@ function Format-Espera([double]$Seg) {
 # dizer "esta vivo" sempre, inclusive quando nao esta. Pra essas duas o nome da
 # sub-etapa (motor 14.11, SaySub) e que responde "quem esta rodando".
 $script:ProcMotor = @("ffmpeg","ffprobe","dovi_tool","deezy","truehdd","dee",
-                      "mkvmerge","mkvextract","PgsToSrt","java",
+                      <#  2.0: o mkvextract saiu do instalador (provado na auditoria: nenhuma
+          referencia no motor - quem extrai o video puro e o ffmpeg). Procurar
+          um processo que nunca nasce e lista que envelheceu calada, licao 37. #>
+      "mkvmerge","PgsToSrt","java",
                       "seconv","tesseract")
 
 # PROVA DE VIDA: soma o tempo de CPU dos executaveis do motor e converte em %
@@ -7483,10 +9439,19 @@ function Update-LivreAgora([bool]$Forcar = $false) {
     if (-not $Forcar -and $Motor.LivreEm -and ((Get-Date) - $Motor.LivreEm).TotalSeconds -lt 5) { return }
     $Motor.LivreEm = Get-Date
     try {
-        $alvo = if ($Cfg.Saida) { $Cfg.Saida } else { $script:PastaScript }
-        $raiz = [System.IO.Path]::GetPathRoot($alvo)
-        $nome = $raiz.TrimEnd('\','/').TrimEnd(':')
-        $Motor.LivreGB = (Get-PSDrive -Name $nome -ErrorAction Stop).Free / 1GB
+        <#  2.0.10: o que enche durante a conversao e o disco da ORIGEM (os
+            temporarios nascem ao lado do arquivo); a saida so recebe o .mkv
+            final. Mesmo disco: um numero, como sempre. Discos diferentes: os
+            dois, cada um com o nome dele. #>
+        $alvoS = if ($Cfg.Saida) { $Cfg.Saida } else { $script:PastaScript }
+        $alvoO = if ($Cfg.Origem) { $Cfg.Origem } else { $alvoS }
+        $raizO = [System.IO.Path]::GetPathRoot($alvoO); $raizS = [System.IO.Path]::GetPathRoot($alvoS)
+        $Motor.LivreGB = (Get-PSDrive -Name ($raizO.TrimEnd('\','/').TrimEnd(':')) -ErrorAction Stop).Free / 1GB
+        $Motor.LivreGBSaida = -1.0
+        $Motor.LivreDiscoO = $raizO.TrimEnd('\'); $Motor.LivreDiscoS = $raizS.TrimEnd('\')
+        if ($raizS.TrimEnd('\').ToUpperInvariant() -ne $raizO.TrimEnd('\').ToUpperInvariant()) {
+            try { $Motor.LivreGBSaida = (Get-PSDrive -Name ($raizS.TrimEnd('\','/').TrimEnd(':')) -ErrorAction Stop).Free / 1GB } catch { $Motor.LivreGBSaida = -1.0 }
+        }
     } catch { }
 }
 
@@ -7600,6 +9565,17 @@ function Update-Progresso {
     # eu punha aqui: alem de o relogio de parede ja incluir a pausa, a palavra
     # lida na tela parecia ESTADO ("está pausado") quando era historico.
     $wallEtapa = if ($d.T0Etapa) { ((Get-Date) - $d.T0Etapa).TotalSeconds } else { $d.SegEtapa }
+    <#  2.0.10: O TEMPO DE TRABALHO DA ETAPA NAO INCLUI A PAUSA.
+        Log do Diego, 23/09 02:36: pausou 29s logo no comeco da etapa 4 (OCR).
+        As contas da barra e do tempo restante usavam o relogio de PAREDE da
+        etapa. Com a ferramenta em 4% e 36s de parede (29 deles parados), a
+        fracao pelo relogio deu 48% - o video foi a 86%. Quando o OCR chegou
+        a 20% de verdade, a conta virou 67s/0,20 = 335s de etapa: o video
+        VOLTOU para 84% e o restante SUBIU de 196s para 422s.
+        A calibragem ja descontava a pausa desde a 2.0.7; o rodape nao.
+        O "Decorrido" da tela continua de parede (fecha com o "Comecou"). #>
+    $pausaAgoraEt = if ($d.PausaIni) { ((Get-Date) - $d.PausaIni).TotalSeconds } else { 0.0 }
+    $trabEtapa = [math]::Max(0.0, $wallEtapa - [double]$d.PausadoEtapa - $pausaAgoraEt)
 
     # No lugar da hora de termino: quem esta rodando e quanto de CPU consome.
     Update-ProvaDeVida
@@ -7674,7 +9650,9 @@ function Update-Progresso {
             elseif ($proxIdx -ge 0) {
                 "[{0}/{1}] {2}" -f (Get-PosicaoNoPlano $proxIdx), $totA, (Traduzir "$($Cfg.Etapas[$proxIdx])")
             } else { "Conferência do Arquivo Final e Limpeza" }
-    $UI.lblASeguir.Text = Traduzir-Frase ("A Seguir: {0}" -f (Traduzir-Frase $prox))
+    # 19.6: cada pedaco traduzido UMA vez (antes o texto ja em ingles passava
+    # de novo pelas regras de padrao).
+    $UI.lblASeguir.Text = (Traduzir-Frase "A Seguir: ") + (Traduzir-Frase $prox)
     # Contadores calculados AQUI, antes de qualquer linha que os use - eu tinha
     # posto a conta depois e a linha da FILA sairia com o numero vazio.
     $nTotal = [math]::Max(1, $d.VideoTotal)
@@ -7692,7 +9670,11 @@ function Update-Progresso {
     # (os contadores foram calculados no inicio desta funcao)
     $UI.lblVideoNum.Text = "$nAtual/$nTotal"
     $UI.lblFilaNum.Text  = "$nAtual/$nTotal"
-    $UI.lblLivreAgora.Text = Traduzir-Frase ("Livre Agora {0:N2} GB" -f $d.LivreGB)
+    if ([double]$d.LivreGBSaida -ge 0) {
+        $UI.lblLivreAgora.Text = Traduzir-Frase ("Livre Agora {0} {1:N2} GB · {2} {3:N2} GB" -f $d.LivreDiscoO, $d.LivreGB, $d.LivreDiscoS, $d.LivreGBSaida)
+    } else {
+        $UI.lblLivreAgora.Text = Traduzir-Frase ("Livre Agora {0:N2} GB" -f $d.LivreGB)
+    }
     # 16.37: durante a LIMPEZA (que vem depois da [5/5]) todas as etapas ja
     # terminaram - a regua fica verde inteira. Passar $EtapaIdx ali deixaria a
     # ultima pintada como "em andamento" enquanto ela ja acabou.
@@ -7746,7 +9728,7 @@ function Update-Progresso {
         foreach ($ip in $plano) { if ($ip -lt $d.EtapaIdx) { $feitoPeso += (Get-PesoDaEtapa $ip) } }
         $pesoAgora = 0.0
         if ($plano -contains $d.EtapaIdx) { $pesoAgora = Get-PesoDaEtapa $d.EtapaIdx }
-        $fracAgora = Get-FracaoDaEtapa $d.EtapaIdx ([double]$pct) $wallEtapa
+        $fracAgora = Get-FracaoDaEtapa $d.EtapaIdx ([double]$pct) $trabEtapa
         $pctVideo = 100.0 * ($feitoPeso + $pesoAgora * $fracAgora) / $somaPlano
     }
     $pctVideo = [math]::Max(0.0, [math]::Min(100.0, $pctVideo))
@@ -7816,8 +9798,8 @@ function Update-Progresso {
         # conferencia ou limpeza rodando: o que falta e o resto do rabo.
         $restFila = [math]::Max(3.0, $rabo - $wallFase) + $restProximos
     } elseif ($d.VideoNome -and $somaPlano -gt 0) {
-        $prevAgora = Get-PrevistoAjustadoDaEtapa $d.EtapaIdx ([double]$pct) $wallEtapa
-        $restEtapa = [math]::Max(0.0, $prevAgora - $wallEtapa)
+        $prevAgora = Get-PrevistoAjustadoDaEtapa $d.EtapaIdx ([double]$pct) $trabEtapa
+        $restEtapa = [math]::Max(0.0, $prevAgora - $trabEtapa)
         $restDepois = 0.0
         foreach ($ip in $plano) { if ($ip -gt [int]$d.EtapaIdx) { $restDepois += (Get-SegPrevistoDaEtapa $ip) } }
         $restFila = $restEtapa + $restDepois + $rabo + $restProximos
@@ -7931,6 +9913,7 @@ function Update-Progresso {
 }
 
 $TimerPausa.add_Tick({
+    if ($script:Fechando) { return }
     $Motor.SegPausado += 1
     $Motor.PausadoFila += 1     # 16.68: este NAO zera a cada etapa
     Update-TemposPausa
@@ -7941,6 +9924,7 @@ $TimerPausa.add_Tick({
 $TimerFilaRelogio = New-Object System.Windows.Threading.DispatcherTimer
 $TimerFilaRelogio.Interval = [TimeSpan]::FromSeconds(1)
 $TimerFilaRelogio.add_Tick({
+    if ($script:Fechando) { return }
     $Motor.SegFila += 1
     # 16.10: PULSO DA TELA. Update-Progresso so era chamado quando CHEGAVA
     # mensagem do motor ("pct", "etapa", "arquivo"). Numa etapa que nao
@@ -7962,7 +9946,29 @@ $TimerFilaRelogio.add_Tick({
 # diagnostico do segundo, com o tempo errado. Agora quem fecha e esta funcao,
 # chamada nos TRES pontos em que uma etapa de verdade termina: troca de etapa,
 # troca de arquivo e fim do lote.
+<#  2.0.10: A PAUSA QUE ATRAVESSA UMA TROCA DE ETAPA.
+    O motor so para no proximo ponto de consulta - entao e comum o [F2] cair e,
+    logo atras, chegar a mensagem de etapa nova que ja estava na fila. As duas
+    trocas zeravam $Motor.PausaIni COM A TELA AINDA PAUSADA: ao retomar, a
+    pausa inteira nao ia nem para a etapa nem para o arquivo, e contava como
+    trabalho (barra, restante e calibragem). Agora o pedaco ja pausado vai para
+    as contas, e o relogio da pausa recomeca na etapa nova. #>
+function Dobrar-PausaEmCurso {
+    if (-not $Motor.PausaIni) { return }
+    $durP = ((Get-Date) - $Motor.PausaIni).TotalSeconds
+    if ($durP -gt 0) {
+        $Motor.PausadoEtapa = [double]$Motor.PausadoEtapa + $durP
+        $Motor.PausadoVideo = [double]$Motor.PausadoVideo + $durP
+    }
+    $Motor.PausaIni = Get-Date
+}
+function Get-PausaIniDaEtapaNova {
+    if ($Estado.Atual -eq "pausado") { return (Get-Date) }
+    return $null
+}
+
 function Fechar-EtapaNoLog {
+    Dobrar-PausaEmCurso
     if (-not $Motor.T0Etapa) { return }
     $parede  = ((Get-Date) - $Motor.T0Etapa).TotalSeconds
     $liquido = [math]::Max(0, $parede - $Motor.PausadoEtapa)
@@ -7983,15 +9989,262 @@ function Fechar-EtapaNoLog {
             ($Motor.EtapaIdx + 1), $Cfg.Etapas.Count, (Format-MinSeg $parede),
             (Format-MinSeg $Motor.PausadoEtapa), (Format-MinSeg $liquido)) "PROVA"
     }
+    <#  2.0: e aqui que a calibragem por etapa APRENDE. Este e o unico ponto
+        do programa em que se sabe, ao mesmo tempo, qual etapa terminou, quanto
+        ela tinha sido prevista e quanto ela realmente custou de trabalho -
+        parede menos pausa. Era o dado que faltava, e ele ja estava calculado
+        aqui desde a 16.39; so ninguem o guardava. #>
+    # 2.0.7: etapa interrompida pelo ESC nao e medida - no TROTF (00:45) a
+    # legenda cancelada gravou "fator 0,30" e baixou a proxima estimativa.
+    if ($pesoDaEtapa -gt 0 -and $liquido -ge 2 -and -not $script:Controle.Cancelar) {
+        Registrar-FatorDaEtapa $Motor.EtapaIdx $liquido
+    }
     $Motor.T0Etapa = $null
-    $Motor.PausadoEtapa = 0.0; $Motor.PausaIni = $null
+    $Motor.PausadoEtapa = 0.0; $Motor.PausaIni = Get-PausaIniDaEtapaNova
 }
 
 $TimerFila.add_Tick({
+    if ($script:Fechando) { return }
+
+    <#  ========================================================================
+        18.20 - A PORCENTAGEM VOLTOU A SER DE TEMPO, PORQUE A MEDIDA PROVOU QUE
+                O ARQUIVO NAO SERVE.
+
+        A 18.17 trocou a conta de tempo por bytes de RPU escritos, com um
+        argumento que parecia certo: o arquivo cresce com o trabalho. Os logs
+        dele desmentiram, tres vezes:
+
+          17:21:40  "o RPU parou de crescer (parado em 0,0 MB)"   <- 100s assim
+          17:22:43  "voltou a crescer"
+          17:23:23  "parou de crescer (parado em 86,7 MB)"
+
+        O dovi_tool NAO escreve o RPU aos poucos: ele junta tudo e grava no
+        fim. Por isso a barra dele ficava em 0% quase o censo inteiro e pulava
+        para 99% no final - "a % nao conta, fica 0%, como vou saber se chegou a
+        90%?" (Diego, 17/09). Ele esta certo: aquilo nao era progresso, era um
+        interruptor com dois estados.
+
+        Entao a conta volta a ser a que ele mesmo tinha proposto - o tempo
+        contra o previsto, e o previsto sai da amostra daquele arquivo vezes o
+        fator medido NESTA maquina, que se corrige a cada censo (4,7x no log
+        dele, cinco vezes seguidas). Passando do previsto vira "(+)" e continua
+        contando, que e honesto: a previsao e uma media, e disco ocupado atrasa.
+
+        O tamanho do RPU nao foi jogado fora - ele so mudou de funcao: nao
+        serve como PROGRESSO, mas e otimo como PROVA no fim (RPU muito menor do
+        que este filme deveria dar = censo truncado, a trava da 18.19).
+
+        LICAO 43: medida boa no lugar errado continua sendo medida errada.
+        ======================================================================== #>
+    <#  18.22: o relogio nao escreve mais o rotulo - ele so avisa o dono que
+        passou mais um segundo. Uma vez por SEGUNDO, nao por batida: repintar
+        um texto identico 4x por segundo foi o que gerou os defeitos da 18.06
+        e da 18.11. #>
+    if ($script:CensoRodando -and $script:CensoT0) {
+        $segCenso = [int]((Get-Date) - $script:CensoT0).TotalSeconds
+        if ($segCenso -ne $script:CensoSegMostrado) {
+            $script:CensoSegMostrado = $segCenso
+            try {
+                $iSel = $UI.lstFila.SelectedIndex
+                Update-BotaoCenso $(if ($iSel -ge 0 -and $iSel -lt $script:Videos.Count) { $script:Videos[$iSel] } else { $null })
+            } catch { }
+        }
+    }
+
+    <#  18.22: a cada batida, o handle preso do censo anterior e liberado se o
+        trabalho dele ja acabou. Barato e local (le uma propriedade, nao
+        consulta processo nenhum) - ver Liberar-CensoOrfao. #>
+    try { [void](Liberar-CensoOrfao) } catch { }
+
+    <#  18.17 - A MEDICAO VOLTA SOZINHA. A PROMESSA PASSOU A TER DONO.
+
+        MEDIDO no log dele de 17/09 (16:45:08 -> 16:45:27, e de novo 16:49:45 ->
+        16:49:59): ele desligou e religou a chave enquanto uma medicao encerrava,
+        e a janela respondeu "a nova comeca assim que ela sair" - TRES vezes. Ela
+        nao comecava: quem religava a medicao era a proxima troca de chave dele,
+        e nao o fim da anterior. A frase era uma promessa que ninguem cumpria.
+
+        E a licao 34 outra vez, agora na medicao: estado que espera por um evento
+        trava quando o evento nao chega. A decisao "posso comecar agora?" olha o
+        ESTADO, uma vez por segundo, e nao depende de mais nenhum clique. #>
+    $script:TiqueConta = ($script:TiqueConta + 1) % 10
+    if ($script:TiqueConta -eq 0 -and
+        $script:MedirELLigado -and (-not $script:MedindoEL) -and (-not $script:MedPS) -and
+        (-not $script:Lendo) -and $Estado.Atual -eq "inicial") {
+        if (@(Get-PendentesDeMedida).Count -gt 0) {
+            Escrever-Log "MEDICAO: a anterior saiu e a chave continua ligada - comecando a que ficou esperando" "LEITURA"
+            Start-Medicao
+        }
+    }
+
     $m = $null
     while ($script:FilaMsg.TryDequeue([ref]$m)) {
+        <#  18.00 - O PORTAO DO NUMERO DE SERIE, NUM LUGAR SO.
+
+            Stop-Medicao nao espera o runspace morrer (e por isso a janela nao
+            congela mais), entao uma medicao cancelada ainda pode ter mensagem
+            no ar. Se a pasta for relida nesse meio tempo, a fila e OUTRA - e um
+            "el" atrasado, carregando o indice da fila velha, gravaria veredicto
+            certo no ARQUIVO ERRADO. Isso e pior que veredicto nenhum.
+
+            O filtro fica aqui, antes do switch, e nao dentro de cada ramo: tres
+            guardas espalhados divergem, um guarda no portao nao tem como. E
+            "continue" aqui e num laco comum, sem a ambiguidade que ele tem
+            dentro de um switch do PowerShell. #>
+        if (@("el_ini","el","el_fim") -contains "$($m.T)") {
+            if ([int]$m.Serie -ne [int]$script:MedSerie) {
+                <#  18.03: o "el_fim" de uma rodada velha NAO traz veredicto
+                    nenhum - traz a noticia de que aquele trabalho morreu. Ela
+                    tem que ser ouvida, senao o handle do runspace nunca fecha
+                    e a proxima medicao fica presa em "a anterior ainda esta
+                    encerrando" para sempre (aconteceu no log dele as 23:26:38).
+                    Descartar a mensagem e diferente de ignorar o fim. #>
+                if ("$($m.T)" -eq "el_fim") {
+                    Escrever-Log ("MEDICAO: ignorada a sobra da rodada {0} (a de agora e a {1})" -f [int]$m.Serie, [int]$script:MedSerie) "LEITURA"
+                    Fechar-Runspace-Medicao
+                    Fechar-MedicaoPendente
+                    Update-BotaoMedirEL
+                    <#  E se a chave esta ligada e ficou gente sem veredicto na
+                        lista NOVA, agora da para comecar - o handle saiu. #>
+                    if ($script:MedirELLigado -and -not $script:Lendo) { Start-Medicao }
+                }
+                continue
+            }
+        }
+        <#  18.04: o censo tem o mesmo portao da medicao. Ele demora 105s e a
+            pasta pode ter sido trocada no meio - sem isto o resultado cairia
+            pelo indice na lista nova. Rodada velha nao escreve nada; so
+            descarta o runspace, que e o unico recado util que ela ainda tem. #>
+        <#  18.05 - O CENSO ABANDONADO NAO PERDE MAIS O RESULTADO.
+
+            "esse censo nunca acaba, sei la?" (Diego, 17/09). No log dele:
+            00:22:43 pediu o censo; depois apertou Iniciar e o censo foi
+            encerrado NA TELA; as 00:23:12 o resultado chegou - 104 segundos de
+            trabalho ja feito - e eu JOGAVA FORA porque a rodada tinha virado.
+            Ele viu o botao voltar e nunca viu numero nenhum. Duas vezes.
+
+            Descartar por rodada faz sentido para nao escrever na linha errada.
+            Mas quem garante a linha certa agora e o CAMINHO do arquivo: o
+            resultado foi medido NELE, nao na posicao dele. Se ele ainda esta na
+            lista, o numero vale. Se nao esta, nao ha onde escrever. #>
+        if ("$($m.T)" -eq "censo_fim") {
+            $iC = Achar-LinhaPorCaminho "$($m.Caminho)" ([int]$m.Idx)
+            if ($iC -lt 0) {
+                Escrever-Log ("CENSO: o arquivo contado nao esta mais na lista - resultado descartado ({0})" -f "$($m.Caminho)") "LEITURA"
+                $script:CensoRodando = $false; $script:CensoMudo = $false
+                Fechar-Runspace-Censo
+                Reset-BotaoCenso
+                continue
+            }
+            <#  18.19 - CENSO CANCELADO NAO TEM RESULTADO. NUNCA.
+
+                O DEFEITO MAIS GRAVE DESDE QUE O CENSO EXISTE, e ele e meu, de
+                duas versoes atras. Log dele de 17/09:
+
+                  17:39:23,6  CENSO COMPLETO pedido para o Saving Private Ryan
+                  17:39:26,1  F11 - cancelado, 3 processos encerrados
+                  17:39:26,4  "2953 quadro(s) no RPU, 11 cena(s), RPU 1,05 MB"
+                  17:39:26,4  "1 de 11 cena(s) do FILME INTEIRO (9,09%)"
+
+                O filme tem 243.760 quadros, 1.124 cenas e 19,22% acima do
+                master. O censo cancelado dois segundos depois de comecar
+                escreveu 11 cenas e 9% NA TELA, como verdade medida - por cima
+                do numero certo.
+
+                A causa: ate a 18.13 cancelar era ABANDONAR, e um resultado que
+                chegasse depois era legitimo (o trabalho tinha terminado
+                sozinho). Da 18.14 em diante cancelar MATA o dovi_tool no meio
+                da escrita - entao o que sobra no disco e um RPU PELA METADE, e
+                o motor, que so confere "o arquivo existe e nao esta vazio",
+                devolve Ok=true. Eu troquei o significado do cancelamento e nao
+                troquei esta regra junto.
+
+                Duas travas, porque uma so nao basta:
+
+                  1. se ESTE censo foi morto por nos, o resultado e descartado
+                     sem discussao - nao existe censo parcial valido;
+                  2. e mesmo sem ter sido morto, um RPU muito menor que o
+                     previsto para a duracao do filme e um censo truncado. E a
+                     mesma desconfianca que a bancada de 08/09 documentou: o
+                     dovi_tool devolve "Done." em arquivo cortado, e quem
+                     desconfia e o LaFirma. #>
+            if ([bool]$m.Ok -and $script:CensoMorto -and
+                "$($m.Caminho)" -eq "$($script:CensoCaminho)") {
+                Escrever-Log ("CENSO COMPLETO: resultado DESCARTADO - este censo foi cancelado por voce e o RPU ficou pela metade ({0:N2} MB, {1} cena(s)). O veredicto anterior continua valendo." -f `
+                    [double]$m.RpuMb, [int]$m.Cenas) "AVISO"
+                $script:CensoRodando = $false
+                Fechar-Runspace-Censo
+                Reset-BotaoCenso
+                continue
+            }
+            if ([bool]$m.Ok -and $script:CensoBytesPrev -gt 0 -and
+                ([double]$m.RpuMb * 1MB) -lt ($script:CensoBytesPrev * 0.5)) {
+                Escrever-Log ("CENSO COMPLETO: resultado DESCARTADO - o RPU saiu com {0:N2} MB e este filme deveria dar cerca de {1:N2} MB. Censo cortado no meio nao vira veredicto." -f `
+                    [double]$m.RpuMb, ($script:CensoBytesPrev / 1MB)) "AVISO"
+                $script:CensoRodando = $false
+                Fechar-Runspace-Censo
+                Reset-BotaoCenso
+                continue
+            }
+            <#  18.21 - A TERCEIRA PORTA DO CENSO CANCELADO, QUE EU NAO TINHA FECHADO.
+
+                "acho q o censo quebrou, aperte F11 duas vezes para cancelar e
+                deu q ele terminou de ler ja com resultado" (Diego). A 18.19
+                fechou a porta do Ok=true; o log dele de 21:55:33 mostra a que
+                ficou aberta - a do Ok=FALSE:
+
+                  21:55:33,913  cancelamento - 2 processo(s) encerrado(s)
+                  21:55:33,965  cancelado de verdade
+                  21:55:34,093  "encerrado a pedido - o dovi_tool foi parado"
+                  21:55:34,093  "terminou depois de o botao ter sido encerrado
+                                 - o RESULTADO VALE e esta na tela"
+
+                180 milissegundos de censo, e a ultima linha diz ao usuario que
+                o que esta na tela e o resultado DISSO. Isso aconteceu 14 vezes
+                nesse log. O veredicto na tela ate era o antigo e certo - mas a
+                frase afirma uma coisa que a janela nao conferiu, e frase que
+                afirma sem conferir e mentira mesmo quando acerta (licao 2).
+
+                A causa e a de sempre: esta linha nasceu na 18.04, quando
+                cancelar era ABANDONAR e o trabalho realmente terminava sozinho
+                - ali ela era verdade. Da 18.14 em diante cancelar MATA, e eu
+                atualizei as regras que olhavam Ok=true e nao esta (licao 42, de
+                novo, no mesmo lugar). Agora a pergunta vem antes do Serie: ESTE
+                CENSO FOI MORTO POR NOS? Se foi, nao ha resultado - de nenhum
+                jeito, com Ok nenhum. #>
+            if ($script:CensoMorto -and "$($m.Caminho)" -eq "$($script:CensoCaminho)") {
+                Escrever-Log "CENSO COMPLETO: cancelado por voce - nao ha numero novo. O veredicto que esta na tela e o anterior e continua valendo." "LEITURA"
+                $script:CensoRodando = $false; $script:CensoMudo = $false
+                Fechar-Runspace-Censo
+                Reset-BotaoCenso
+                continue
+            }
+            if ([int]$m.Serie -ne [int]$script:CensoSerie) {
+                Escrever-Log "CENSO COMPLETO: terminou depois de o botao ter sido encerrado - o resultado vale e esta na tela (o arquivo e o mesmo)" "LEITURA"
+            }
+            $m.Idx = $iC
+        }
+        if (@("leitura_ini","leitura_pct","vazio","video","leitura_fim") -contains "$($m.T)") {
+            if ([int]$m.SerieL -ne [int]$script:LeituraSerie) {
+                if ("$($m.T)" -eq "leitura_fim") {
+                    Escrever-Log ("LEITURA: ignorada a sobra da rodada {0} (a de agora e a {1})" -f [int]$m.SerieL, [int]$script:LeituraSerie) "LEITURA"
+                }
+                continue
+            }
+        }
         switch ($m.T) {
-            "log"   { Escrever-Log $m.Texto $m.Tipo }
+            "log"   {
+                <#  18.14: censo encerrado a pedido nao e falha. O motor nao
+                    sabe que foi de proposito - ele so ve que o RPU nao saiu -
+                    e escreveria "FALHOU" em vermelho por um cancelamento que
+                    foi o usuario quem pediu. Mensagem que mente e defeito
+                    mesmo quando mente para o lado do alarme (licao 2). #>
+                if ($script:CensoMorto -and "$($m.Texto)" -match "CENSO COMPLETO.*(FALHOU|nao produziu RPU)") {
+                    Escrever-Log "CENSO COMPLETO: encerrado a pedido - o dovi_tool foi parado, nao houve falha" "LEITURA"
+                } else {
+                    Escrever-Log $m.Texto $m.Tipo
+                }
+            }
             "etapa" {
                 # Fecha a conta da etapa anterior ANTES de trocar de etapa.
                 Fechar-EtapaNoLog
@@ -8003,7 +10256,7 @@ $TimerFila.add_Tick({
                         (Format-MinSeg ((Get-Date) - $Motor.T0Diag).TotalSeconds)) "PROVA"
                     $Motor.T0Diag = $null
                 }
-                $Motor.PausadoEtapa = 0.0; $Motor.PausaIni = $null
+                $Motor.PausadoEtapa = 0.0; $Motor.PausaIni = Get-PausaIniDaEtapaNova
                 $Motor.Nota = ""; $Motor.Fase = ""
                 $Motor.LogPctUltimo = -100; $Motor.LogPctEm = Get-Date
                 $Motor.EtapaIdx = $m.Idx; $Motor.PctEtapa = 0; $Motor.SegEtapa = 0
@@ -8081,6 +10334,15 @@ $TimerFila.add_Tick({
                     hoje a noite. #>
                 $Motor.EtapaIdx = 0
                 $Motor.Fase = ""
+                # 2.0.10: o % e a nota da ultima etapa do arquivo anterior nao
+                # passam para o novo ("100%" ao lado da etapa 1 do seguinte).
+                $Motor.PctEtapa = 0; $Motor.Nota = ""
+                # 2.0.12: e o relogio e o restante do arquivo anterior tambem. No
+                # log de 23/09 (11:22:45) o rodape do Ryan nasceu com "etapa 105s"
+                # (a remontagem do GoT) e o restante pulou 4.943 -> 5.048s.
+                $Motor.SegEtapa = 0
+                $idxNovoA = [int]$m.Idx
+                if ($idxNovoA -ge 0 -and $idxNovoA -lt @($script:LoteAtual).Count) { $Motor.RestVideo = [double]$script:LoteAtual[$idxNovoA].SegEstimado }
                 # 16.47: arquivo novo = plano novo. O rotulo da etapa nao pode
                 # herdar o "3/3" do arquivo anterior enquanto o novo diagnostica.
                 $script:UltimoRotuloEtapa = ""
@@ -8088,6 +10350,7 @@ $TimerFila.add_Tick({
                 # linha, e a anterior vira "Convertido".
                 Fill-Fila $Estado.Atual
                 $Motor.T0Video = Get-Date
+                $Motor.PausadoVideo = 0.0
                 # 17.00: a partir daqui existe um arquivo em andamento, e o
                 # relogio dele vale como medida quando ele terminar.
                 $Motor.MedidaAberta = $true
@@ -8139,7 +10402,10 @@ $TimerFila.add_Tick({
             "ack"   {
                 if ($script:TsAcao) {
                     $lat = ((Get-Date) - $script:TsAcao).TotalMilliseconds
-                    Escrever-Log ("Motor confirmou '{0}' {1:0} ms depois da tecla/clique" -f $m.V, $lat) "PROVA"
+                    # 2.0.7: pausa+retoma rapido - a confirmacao da pausa chegava depois
+                    # do clique de retomar e o log parecia dizer que pausou depois.
+                    $atraso = if ("$($m.V)" -eq "pausado" -and $Estado.Atual -ne "pausado") { " (confirmacao do pedido anterior - ja retomado)" } else { "" }
+                    Escrever-Log ("Motor confirmou '{0}' {1:0} ms depois da tecla/clique{2}" -f $m.V, $lat, $atraso) "PROVA"
                     $script:TsAcao = $null
                 }
             }
@@ -8148,7 +10414,12 @@ $TimerFila.add_Tick({
                 Update-Ferramentas
                 Update-FerramentasTopo
             }
-            "vazio" { $UI.txtDisco.Text = $m.Motivo }
+            "vazio" {
+                # 19.6: o motivo era escrito aqui e o Update-Disco seguinte
+                # apagava com "Nenhum vídeo a converter" - e em portugues.
+                $script:MotivoVazio = "$($m.Motivo)"
+                $UI.txtDisco.Text = Traduzir-Frase $script:MotivoVazio
+            }
             "leitura_ini" { Escrever-Log ("Lendo {0} arquivo(s)..." -f $m.Total) "LEITURA" }
             "leitura_pct" {
                 $Janela.Title = "$NOME_APP  ·  " + (Traduzir-Frase ("Lendo {0}/{1} - {2}" -f ($m.Idx + 1), $m.Total, $m.Nome))
@@ -8167,17 +10438,35 @@ $TimerFila.add_Tick({
                 # precisa ser checado aqui em separado pra nao nascer marcado
                 # sozinho so por nao estar "Ignorado".
                 $d.Marcado = (-not $d.Ignorar) -and ($d.DVprecisa -or $d.AUprecisa -or $d.LGprecisa)
+                <#  18.04: se este arquivo JA foi medido nesta sessao e continua
+                    igual (mesmo tamanho, mesma data), o veredicto volta com
+                    ele. Medir de novo custaria 14 a 26s para chegar ao MESMO
+                    numero - e era isso que se perdia a cada releitura. #>
+                if ("$($d.ELtipo)" -eq "NAO_MEDIDO" -and (Restaurar-CacheEL $d)) {
+                    Escrever-Log ("EL: veredicto reaproveitado da medicao desta sessao - {0} ({1})" -f $d.Nome, $d.ELtipo) "LEITURA"
+                }
                 [void]$script:Videos.Add($d)
                 Fill-Fila "inicial"
                 if ($UI.lstFila.SelectedIndex -lt 0) { $UI.lstFila.SelectedIndex = 0 }
                 Update-CabecalhoFila
                 Update-Disco
             }
+            "el_ini" {
+                <#  17.19: uma fonte so para "quem esta medindo agora" e para
+                    "quantos ja foram". Os tres lugares da tela que falam disso
+                    - a linha da fila, o rotulo do botao e a barrinha - passam
+                    a ler estes mesmos numeros, que vem do laco que mede. #>
+                $script:ELmedindoIdx = [int]$m.Idx
+                $script:ELtotal      = [int]$m.Total
+                $script:ELfeitos     = [int]$m.Pos - 1
+                Fill-Fila "el"
+                Update-BotaoMedirEL
+            }
             "el" {
                 <#  16.77: chega UM arquivo medido. Reescreve so o que a
                     medicao decide - rotulo, resposta, cor e coluna - e
                     redesenha. O resto da linha ja estava certo desde a fase A. #>
-                $i = [int]$m.Idx
+                $i = Achar-LinhaPorCaminho "$($m.Caminho)" ([int]$m.Idx)   # 18.05: a linha e do arquivo, nao da posicao
                 if ($i -ge 0 -and $i -lt $script:Videos.Count) {
                     $v = $script:Videos[$i]
                     $v.ELtipo = "$($m.Tipo)"; $v.ELselo = "$($m.Selo)"; $v.ELmotivo = "$($m.Motivo)"
@@ -8384,6 +10673,17 @@ $TimerFila.add_Tick({
                         if ($v.DiagDVcor -eq "verde") { $v.DiagDVcor = "ambar" }
                     }
                     $v.DiagDVres = "→ $selo $alvo$nota"
+                    <#  17.20: chegou o veredicto DESTE arquivo - entao ele nao
+                        esta mais sendo medido. Quem acende o proximo e o
+                        "el_ini" seguinte. Sem isto a linha ficava em ciano ate
+                        alguem redesenhar a lista por outro motivo, e no ultimo
+                        arquivo nao redesenhava nunca mais: o Diego viu
+                        "Medindo Camada - 3 de 3" parado com os tres ja
+                        medidos, e leu aquilo como o programa travado. #>
+                    if ([int]$m.Idx -eq [int]$script:ELmedindoIdx) { $script:ELmedindoIdx = -1 }
+                    <#  18.04: veredicto recem-chegado vai para o cache da sessao. Relendo a
+                        pasta, ele volta sem custar outros 14 a 26s. #>
+                    Guardar-CacheEL $v
                     Fill-Fila "el"
                     if ($UI.lstFila.SelectedIndex -eq $i) { Update-Diagnostico }
                 }
@@ -8406,65 +10706,315 @@ $TimerFila.add_Tick({
                     $UI.btnIniciar.IsEnabled = $true
                     Escrever-Log ("INICIAR: todos os arquivos DA FILA ja foram medidos - comecando agora ({0} arquivo(s) fora da fila ficaram sem medir)" -f $sobra) "ACAO"
                     Stop-Motor
-                    Invoke-Iniciar
+                    Invoke-IniciarAutomatico
                 }
             }
             "censo_fim" {
                 <#  17.08 - O CENSO COMPLETO VOLTOU (item A).
 
-                    O que ele muda na TELA: nada do veredicto. Ele nao
-                    reclassifica MEL/FEL nem repinta a linha - a classificacao
-                    quem faz e o dovi_tool, pelo el_type do RPU, e o censo nao
-                    toca nisso. O que ele faz e trocar uma amostra por um
-                    numero do filme inteiro, e isso vive no LOG, que e onde
-                    mora a justificativa. Na tela sobra so o rotulo do botao
-                    dizendo que aquele arquivo ja foi contado. #>
+                    Ele nao reclassifica MEL/FEL nem repinta por conta
+                    propria - a classificacao quem faz e o dovi_tool, pelo
+                    el_type do RPU, e o censo nao toca nisso.
+
+                    17.24 - MAS O RESULTADO PRECISAVA CHEGAR NA TELA.
+
+                    "esse censo nao serve pra nada eu acho. nem sei onde ele
+                    vai" (Diego, 16/09). Ele estava certo do lugar dele: o
+                    numero ia SO para o log, o campo CensoResumo era escrito e
+                    nunca lido por ninguem, e na tela o unico sinal era o botao
+                    apagando. Ele esperou 105 segundos e nao viu nada mudar.
+
+                    E o numero importava. No teste dele, no Saving Private
+                    Ryan, a AMOSTRA dizia 1 de 11 cenas e pico de 1.608 nits;
+                    o censo do FILME INTEIRO deu 216 de 1.124 cenas (19,22%) e
+                    pico de 3.468 nits. A amostra subestimou o pico em mais de
+                    duas vezes.
+
+                    Isto NAO quebra a regra da 16.87, que tirou a contagem da
+                    amostra da tela. Ela foi tirada por ser pequena demais para
+                    virar estatistica ("3 a 4 cenas por filme"), e o comentario
+                    dela mesma diz: volta "ate a amostra ser grande o bastante
+                    para a conta significar alguma coisa". O censo E essa
+                    condicao cumprida - ele le o filme inteiro. #>
                 $i = [int]$m.Idx
                 if ($i -ge 0 -and $i -lt $script:Videos.Count -and [bool]$m.Ok) {
                     $v = $script:Videos[$i]
                     $v.CensoFeito = $true
+                    $v.CensoCenas = [int]$m.Cenas
+                    $v.CensoAcima = [int]$m.CenasAcima
+                    $v.CensoPico  = [double]$m.PicoCena
                     $v.ELreguaSuspeita = [bool]$m.ReguaSuspeita
                     $v.ELreguaSuspeitaMotivo = "$($m.ReguaSuspeitaMotivo)"
                     $v.ELpctAcima = [double]$m.Pct
                     $v.CensoResumo = ("{0} de {1} cena(s) do filme inteiro acima do master ({2}%) - {3:N1}s" -f `
                         [int]$m.CenasAcima, [int]$m.Cenas, [double]$m.Pct, [double]$m.Seg)
+
+                    <#  A frase do censo SUBSTITUI a anterior, nunca se soma a
+                        ela: rodar o censo duas vezes nao pode empilhar duas
+                        contagens na mesma linha. O marcador ' · censo:' e o
+                        ponto de corte. #>
+                    $resBase = "$($v.DiagDVres)"
+                    $corte = $resBase.IndexOf(" · censo:")
+                    if ($corte -gt 0) { $resBase = $resBase.Substring(0, $corte) }
+                    $frase = (" · censo: {0:N0} de {1:N0} cenas do filme ({2:N0}%) passam do master" -f `
+                        [int]$m.CenasAcima, [int]$m.Cenas, [double]$m.Pct)
+                    if ([double]$m.PicoCena -gt 0) {
+                        $frase += (", pico {0:N0} nits" -f [double]$m.PicoCena)
+                    }
+                    # 2.0.9: o rotulo "[PERDA EM ...]" da 2.0.7 foi desfeito a pedido do
+                    # Diego. O cabecalho de sempre fica; o censo so ACRESCENTA o numero.
+                    $resBase = [regex]::Replace($resBase, '\[PERDA EM [^\]]*\]', '[CONVERSÃO NÃO RECOMENDADA]')
+                    $v.DiagDVres = $resBase + (Traduzir-Frase $frase)
+
+                    <#  E se o censo CONTRADIZ a amostra, a cor segue o censo -
+                        ele e a prova mais forte das duas. O caminho contrario
+                        (censo achou menos) NAO reabilita o verde: quem ja foi
+                        marcado como expansao de brilho pelo dovi_tool continua
+                        marcado; o censo conta cenas, nao reclassifica camada. #>
+                    if ([int]$m.CenasAcima -gt 0 -and "$($v.DiagDVcor)" -eq "verde") {
+                        $v.DiagDVcor = "ambar"
+                        Escrever-Log ("CENSO: a cor subiu para ambar - a amostra nao tinha visto cena acima do master, o filme inteiro tem {0}" -f [int]$m.CenasAcima) "LEITURA"
+                    }
+
+                    <#  2.0.1 - E AGORA O CENSO TAMBEM PODE DESCER A GRAVIDADE.
+                        ===================================================
+
+                        O paragrafo acima dizia que o caminho contrario "NAO
+                        reabilita o verde", e isso continua valendo ao pe da
+                        letra: nada aqui vira verde, e a camada NAO e
+                        reclassificada - FEL continua FEL.
+
+                        O que passa a existir e o meio do caminho. O veredicto
+                        "expande" nasce de UMA comparacao - o pico da cena mais
+                        alta contra o pico do master - e uma cena bastava para
+                        o arquivo inteiro ficar vermelho. A 16.85 ja tinha
+                        escrito o que faltava ("um pico isolado numa cena e
+                        outra coisa de metade do filme acima da regua") e a
+                        16.87 explicou por que nao dava para usar a amostra:
+                        3 a 4 cenas nao viram estatistica. O censo le o filme
+                        INTEIRO - e essa condicao cumprida.
+
+                        AS DUAS TRAVAS, E POR QUE SAO DUAS:
+
+                        1. FREQUENCIA - menos de 1% das cenas. Sozinha nao
+                           basta: meia dezena de cenas pedindo 4.000 nits num
+                           master de 1.000 e rara E grave.
+                        2. TAMANHO DO ESTOURO - o pico nao passa do DOBRO do
+                           master. E o que separa "o colorista encostou no
+                           teto" de "a camada extra levantava o brilho".
+
+                        OS NUMEROS SAO CONVENCAO ANCORADA EM DOIS CASOS
+                        MEDIDOS, e esta escrito aqui de proposito para poder
+                        ser discutido em vez de virar folclore:
+                            Ryan          19,22% e 3,47x -> continua VERMELHO
+                            Transformers   0,67% e 1,56x -> pico isolado
+                        Dois pontos nao sao uma curva. Se um terceiro caso cair
+                        no meio, o lugar de rever e aqui.
+
+                        E o piso de 20 cenas e o mesmo que a regua suspeita ja
+                        usa no motor: porcentagem de 5 cenas nao e porcentagem.
+                        ==================================================== #>
+                    <#  2.0.5 - A COR SEGUE A CLASSIFICACAO, E SO ELA.
+                        A 2.0.2 fazia o censo descer um Complex FEL "isolado" de
+                        vermelho para laranja. Laranja e a cor do Simple FEL - o
+                        Diego leu, com toda razao, que o programa tinha
+                        reclassificado o filme ("na primeira analise acha que e
+                        FEL completo e depois analisa como FEL medio?"). E o
+                        cartao final continuava dizendo "Complex FEL - CONVERSAO
+                        NAO RECOMENDADA". Tres partes da tela, tres respostas.
+                        Uma cor, um significado: verde MEL, laranja Simple FEL,
+                        vermelho Complex FEL. O censo acrescenta NUMEROS a linha
+                        (quantas cenas, quanto %), nunca troca a cor. Volta a
+                        valer a regra que ja estava escrita acima: "o censo conta
+                        cenas, nao reclassifica camada". #>
                 }
-                Stop-Censo
+                if ($i -ge 0 -and $i -lt $script:Videos.Count -and [bool]$m.Ok) {
+                    Guardar-CacheEL $script:Videos[$i]   # 18.04: o censo tambem e caro (106s)
+                    <#  18.09 - O FATOR DA PREVISAO SE CORRIGE COM A MAQUINA DELE.
+
+                        O 4,7x inicial saiu de tres medicoes no log do Diego, no
+                        mesmo arquivo. Isso e amostra pequena e de UM filme -
+                        exatamente o tipo de numero que a licao 1 manda nao
+                        tratar como verdade eterna. Entao cada censo que termina
+                        grava a relacao real medida ali, e a proxima previsao ja
+                        sai dessa maquina.
+
+                        Limite de sanidade: so aceita fator entre 2x e 12x. Fora
+                        disso o que houve foi outra coisa (cache de disco, censo
+                        cancelado no meio), e um numero solto nao pode envenenar
+                        a previsao de todos os proximos. #>
+                    <#  18.17: e a medida que a PORCENTAGEM usa - bytes de RPU
+                        por segundo de filme - se corrige pelo mesmo principio.
+                        Limite de sanidade de 2 a 40 KB/s: fora disso o censo
+                        foi cortado no meio e o numero nao vale. #>
+                    $durFilme = [double]$script:Videos[$i].DurSeg
+                    if ($durFilme -gt 0 -and [double]$m.RpuMb -gt 0) {
+                        $bytesSeg = ([double]$m.RpuMb * 1MB) / $durFilme
+                        if ($bytesSeg -ge 2000 -and $bytesSeg -le 40000) {
+                            $script:CensoBytesSeg = $bytesSeg
+                            Escrever-Log ("CENSO: o RPU real deu {0:N2} KB por segundo de filme - a porcentagem do proximo ja usa este numero" -f ($bytesSeg / 1KB)) "PROVA"
+                        } else {
+                            Escrever-Log ("CENSO: {0:N2} KB/s de RPU esta fora dos limites (2 a 40) - a medida NAO foi ajustada" -f ($bytesSeg / 1KB)) "AVISO"
+                        }
+                    }
+                    <#  2.0: AQUI FICAVA UMA SEGUNDA APRENDIZAGEM DO s/s, E ELA
+                        ENVENENAVA A PRIMEIRA.
+                        A 18.21 aprendia "segundos por segundo de filme" de
+                        QUALQUER censo, inclusive de um censo que passou 10
+                        minutos preso no disco. Era assim que o Transformers
+                        (HD mecanico) ensinava 0,0711 s/s ao proximo filme, que
+                        podia estar num SSD. A aprendizagem certa - a que so
+                        aprende quando quem mandou no relogio foi a CPU - esta
+                        logo abaixo, junto do fator. Duas donas do mesmo numero
+                        discordando e a licao 41 de novo: um numero, um dono. #>
+                    <#  ====================================================
+                        2.0 - "VC BATE NA TECLA QUE EH 1:46 E SEMPRE E UNS 2:20
+                        OU MAIS" (Diego, 18/09). Ele esta certo, e a causa sao
+                        DOIS RELOGIOS DIFERENTES contando a mesma coisa.
+
+                        MEDIDO no log dele de 17/09 (22:21), o unico censo que
+                        chegou ao fim:
+
+                          22:22:53,295  CENSO COMPLETO: lendo o RPU
+                          22:25:32,049  243760 quadros | RPU 103,8s + censo
+                                        1,1s = 104,9s
+
+                          parede (o que ele ve)  : 158,8s = 2m38s
+                          motor (o que reportou) : 104,9s = 1m44s
+                          diferenca              :  53,9s
+
+                        A previsao usava o numero do MOTOR (104,9s / 22,5s de
+                        amostra = 4,7x) e o cronometro da tela conta do CLIQUE.
+                        Os 53,9s que faltam sao o que o motor nao cronometra:
+                        abrir cmd, ffmpeg e dovi_tool, e a disputa de disco com
+                        a medicao, que naquele log estava rodando junto.
+
+                        Licao 15, que este projeto ja aprendeu com o MaxCLL:
+                        COMPARAR SEMPRE REGUA COM A MESMA REGUA. A previsao tem
+                        que ser feita no relogio em que ela vai ser conferida -
+                        o da tela. Pelo relogio de parede o fator daquele
+                        arquivo e 7,06x, e a previsao teria dado 2m38s, que e
+                        exatamente o que ele viu.
+
+                        O teto subiu de 12x para 20x pelo mesmo motivo: o fator
+                        de parede e naturalmente maior que o de motor, e o
+                        limite antigo recusaria medidas boas.
+                        ==================================================== #>
+                    $amostraSeg = [double]$script:Videos[$i].ELsegundos
+                    $segParede = 0.0
+                    if ($script:CensoT0) { $segParede = ((Get-Date) - $script:CensoT0).TotalSeconds }
+                    <#  2.0b - E ELE SO APRENDE O QUE ELE PODE TER APRENDIDO.
+
+                        O s/s descreve a CPU mastigando o RPU. Quando quem
+                        mandou no relogio foi o DISCO, o tempo real nao diz
+                        NADA sobre a CPU - gravar esse numero como se fosse
+                        s/s de CPU envenenaria a previsao de todo arquivo que
+                        vier depois num disco rapido.
+
+                        E a mesma armadilha da licao 15 (regua com regua) e da
+                        49 (numero que descreve outra coisa). Entao: so
+                        aprende quando a CPU foi o gargalo de verdade. #>
+                    if ([double]$v.DurSeg -gt 0 -and $segParede -gt 0) {
+                        $gbAp = 0.0
+                        if ([double]$v.Bytes -gt 0) { $gbAp = [double]$v.Bytes / 1GB }
+                        $discoAp = 0.0
+                        if ($gbAp -gt 0 -and [double]$script:CensoDiscoMbs -gt 0) {
+                            $discoAp = ($gbAp * 1024.0) / [double]$script:CensoDiscoMbs
+                        }
+                        $cpuAp = [double]$v.DurSeg * $script:CensoSegPorSegFilme
+                        if ($discoAp -gt 0 -and $discoAp -gt ($cpuAp * 1.2)) {
+                            Escrever-Log ("CENSO: quem mandou no relogio foi o DISCO ({0} contra {1} de CPU) - o s/s NAO foi ajustado, porque este tempo nao mede a CPU" -f `
+                                (Format-MinSeg ([int]$discoAp)), (Format-MinSeg ([int]$cpuAp))) "PROVA"
+                        } else {
+                            $novoSS = $segParede / [double]$v.DurSeg
+                            if ($novoSS -ge 0.003 -and $novoSS -le 0.20) {
+                                $script:CensoSegPorSegFilme = $novoSS
+                                Escrever-Log ("CENSO: a CPU levou {0:N4}s por segundo de filme - a previsao do proximo ja usa este numero" -f $novoSS) "PROVA"
+                            } else {
+                                Escrever-Log ("CENSO: {0:N4} s/s fora dos limites (0,003 a 0,20) - o s/s NAO foi ajustado" -f $novoSS) "AVISO"
+                            }
+                        }
+                    }
+                    if ($amostraSeg -gt 0 -and $segParede -gt 0) {
+                        $fatorReal = $segParede / $amostraSeg
+                        if ($fatorReal -ge 2.0 -and $fatorReal -le 200.0) {
+                            $script:CensoFator = $fatorReal
+                            Escrever-Log ("CENSO: do clique ao resultado foram {0:N1}s ({1:N1}x a amostra); o motor contou {2:N1}s de trabalho. A previsao do proximo usa o relogio da TELA, que e o que voce ve." -f `
+                                          $segParede, $fatorReal, [double]$m.Seg) "PROVA"
+                        } else {
+                            Escrever-Log ("CENSO: relacao de {0:N1}x fora dos limites (2x a 200x) - previsao NAO ajustada" -f $fatorReal) "AVISO"
+                        }
+                    }
+                }
+                $script:CensoRodando = $false; $script:CensoMudo = $false
+                Fechar-Runspace-Censo
                 Reset-BotaoCenso
                 Update-Diagnostico
+                <#  2.0.4 - O DIAGNOSTICO ERA REDESENHADO E A FILA NAO.
+                    =========================================================
+                    DEFEITO MEDIDO (Diego, 22/09, fotos das 17h55 e 17h56).
+                    No Transformers, depois do censo:
+                        a LINHA de baixo virou laranja ("cenas isoladas")
+                        a COLUNA de cima continuou VERMELHA
+                    A mesma tela dizendo duas coisas sobre o mesmo arquivo -
+                    e no log, entre o fim do censo (17:56:43) e a proxima
+                    acao dele (17:57:57), NAO existe uma linha "FILA:". A
+                    fila nunca foi repintada.
+
+                    A 2.0.2 pos coluna e diagnostico para perguntarem a cor a
+                    MESMA funcao (Get-NomeCorEL), e eu tratei isso como
+                    resolvido. Nao era: as duas perguntam igual, mas so uma
+                    era perguntada DE NOVO. Um dono da regra nao adianta se
+                    metade da tela nao volta a consultar.
+
+                    E a licao ja estava escrita neste arquivo, no ramo logo
+                    abaixo (17.20): "Estado novo sem redesenho e tela
+                    mentindo." O ramo do censo nao a obedecia.
+                    ========================================================= #>
+                Fill-Fila "el"
             }
             "el_fim" {
                 $script:MedindoEL = $false
+                # 18.00: o runspace da medicao ja terminou - fechar aqui nao espera nada.
+                Fechar-Runspace-Medicao
+                $script:ELmedindoIdx = -1   # 17.19: ninguem mais esta na vez
                 Update-BotaoMedirEL   # 17.16: apaga a barrinha e devolve o rotulo
-                # quem sobrou em MEDINDO aqui e arquivo que a fase B nao
-                # conseguiu ler - Fechar-MedicaoPendente resolve no Stop-Motor
-                # logo abaixo, no mesmo caminho de todos os outros.
+                <#  17.20: e a FILA tambem. Apagar a variavel sem redesenhar
+                    deixa a linha pintada do jeito que estava - foi assim que
+                    "Medindo Camada - 3 de 3" ficou na tela depois de a medicao
+                    acabar. Estado novo sem redesenho e tela mentindo. #>
+                Fill-Fila "el"
+                <#  18.00: quem sobrou em MEDINDO aqui e arquivo que a medicao
+                    nao alcancou - porque foi cancelada no meio, ou porque o
+                    trabalho falhou. Fechar-MedicaoPendente vira todos em "EL
+                    nao medida", que e o terceiro estado honesto de sempre:
+                    nao medir NUNCA vira "limpa". #>
+                Fechar-MedicaoPendente
                 <#  17.10 - A LINHA QUE PERMITE O A/B.
 
-                    Ela sai NOS DOIS ESTADOS, com os mesmos campos, para
-                    poder ser comparada lado a lado no log: quantos arquivos,
-                    quantos GB, quantos segundos, e quantos segundos por GB.
-                    Sem o "por GB" duas pastas diferentes nao se comparam. #>
-                if ([bool]$m.Desligada) {
-                    Escrever-Log ("MEDICAO MEL x FEL: DESLIGADA | {0} arquivo(s) | {1:N2} GB | 0,00s | 0,00 s/GB" -f `
-                        [int]$m.Pendentes, [double]$m.Gb) "PROVA"
+                    Ela sai com os mesmos campos sempre, para poder ser
+                    comparada lado a lado no log: quantos arquivos, quantos GB,
+                    quantos segundos, e quantos segundos por GB. Sem o "por GB"
+                    duas pastas de tamanhos diferentes nao se comparam. #>
+                if ([bool]$m.Falhou) {
+                    Escrever-Log "MEDICAO MEL x FEL: o trabalho nao conseguiu preparar o ambiente - ninguem foi medido" "ERRO"
                 } elseif ([int]$m.Total -gt 0) {
                     $sgb = if ([double]$m.Gb -gt 0) { [double]$m.Seg / [double]$m.Gb } else { 0 }
                     Escrever-Log ("Camada de melhoria medida em {0} de {1} arquivo(s) - {2:N2}s no total" -f $m.Medidos, $m.Total, $m.Seg) "LEITURA"
                     Escrever-Log ("MEDICAO MEL x FEL: LIGADA | {0} arquivo(s) | {1:N2} GB | {2:N2}s | {3:N2} s/GB" -f `
                         [int]$m.Total, [double]$m.Gb, [double]$m.Seg, $sgb) "PROVA"
                 }
-                Stop-Motor
-                <#  17.11: o Iniciar represado sai AQUI, depois de Stop-Motor
-                    - o runspace da leitura tem que estar fechado antes de o
-                    do motor nascer, senao sao dois no mesmo lugar. Ordem
-                    igual a da releitura pendente, logo abaixo. #>
+                <#  18.00: o Iniciar represado sai AQUI. Nao ha mais Stop-Motor
+                    antes dele: o runspace da medicao e OUTRO, ja foi fechado
+                    acima, e o da leitura nem esta de pe. Isto era a ordem que
+                    a 17.11 teve que inventar quando os dois dividiam o mesmo
+                    runspace - deixou de ser necessaria. #>
                 if ($script:IniciarAposMedir) {
                     $script:IniciarAposMedir = $false
                     Update-AvisoEspera
                     $UI.btnIniciar.IsEnabled = $true
                     Escrever-Log "INICIAR: medicao terminou - comecando a conversao que estava esperando" "ACAO"
-                    Invoke-Iniciar
+                    Invoke-IniciarAutomatico
                 }
                 if ($script:ReleituraPendente) {
                     $script:ReleituraPendente = $false
@@ -8474,7 +11024,7 @@ $TimerFila.add_Tick({
             "leitura_fim" {
                 $script:Lendo = $false
                 $UI.btnReler.IsEnabled = $true
-                $UI.lblReler.Text = Traduzir "Atualizar"
+                Update-BotaoReler
                 $ativos = @(Get-Marcados).Count
                 Escrever-Log ("Leitura concluida: {0} lido(s), {1} erro(s), {2:N2}s" -f $m.Ok, $m.Erros, $m.Seg) "LEITURA"
                 Escrever-Log ("SELECAO: {0} de {1} marcado(s) automaticamente (tem trabalho)" -f $ativos, $script:Videos.Count) "ACAO"
@@ -8506,20 +11056,38 @@ $TimerFila.add_Tick({
                 # os videos marcados, nao e barato).
                 Update-Selecao
                 if (Test-PastasIguais) { $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Origem e Saída São a Mesma Pasta") }
-                <#  16.77: o runspace NAO morre aqui quando ainda ha camada de
-                    melhoria a medir - a fase B roda dentro dele. Quem encerra
-                    nesse caso e o "el_fim". Matar o runspace aqui deixaria
-                    todo arquivo travado em "medindo" para sempre. #>
-                $script:MedindoEL = ([int]$m.MedirEL -gt 0)
-                $script:ELtotal = [int]$m.MedirEL
-                $script:ELfeitos = 0
-                Update-BotaoMedirEL   # 17.16: acende a barrinha da medicao
-                if (-not $script:MedindoEL) {
-                    Stop-Motor
-                    if ($script:ReleituraPendente) {
-                        $script:ReleituraPendente = $false
-                        Start-Leitura
-                    }
+                <#  18.00 - A LEITURA ACABA AQUI, SEMPRE. Ate a 17.24 ela
+                    continuava viva quando havia camada a medir, porque a
+                    medicao rodava dentro dela. Agora sao trabalhos separados:
+                    a leitura fecha o runspace dela, e a medicao nasce no seu
+                    proprio, logo abaixo. #>
+                Stop-Motor
+                <#  18.00: a prova do A/B (quanto custou a leitura COM e SEM a
+                    medicao) saiu de dentro do runspace e veio para ca, que e
+                    onde se sabe se a medicao vai acontecer. Os campos sao os
+                    mesmos de sempre, para as duas linhas poderem ser comparadas
+                    lado a lado no log - sem o "por GB" duas pastas de tamanhos
+                    diferentes nao se comparam. #>
+                $semVeredicto = @(Get-PendentesDeMedida)
+                if (-not $script:MedirELLigado -and $semVeredicto.Count -gt 0) {
+                    $gbSem = 0.0
+                    foreach ($v in $semVeredicto) { $gbSem += ([double]$v.Bytes / 1GB) }
+                    Escrever-Log ("MEDICAO MEL x FEL DESLIGADA: {0} arquivo(s) ({1:N2} GB) ficaram sem veredicto de camada - aparecem como 'EL nao medida'. A leitura da pasta custou {2:N2}s." -f `
+                        $semVeredicto.Count, $gbSem, [double]$m.Seg) "LEITURA"
+                    Escrever-Log ("MEDICAO MEL x FEL: DESLIGADA | {0} arquivo(s) | {1:N2} GB | 0,00s | 0,00 s/GB" -f `
+                        $semVeredicto.Count, $gbSem) "PROVA"
+                }
+                if ($script:ReleituraPendente) {
+                    $script:ReleituraPendente = $false
+                    Start-Leitura
+                }
+                elseif ($script:MedirELLigado) {
+                    <#  A chave decide AQUI, com a fila ja na tela e com a
+                        informacao completa - e nao la dentro do runspace, por
+                        um parametro congelado no instante da partida. Se nao
+                        ha ninguem sem veredicto, Start-Medicao volta na hora
+                        sem fazer nada. #>
+                    Start-Medicao
                 }
             }
             "fim"   {
@@ -8540,6 +11108,35 @@ $TimerFila.add_Tick({
                 Show-Resumo $m.Como
             }
         }
+    }
+
+    <#  18.08 - A ESPERA DO INICIAR DEIXOU DE DEPENDER DE UMA MENSAGEM.
+
+        Log dele: 01:24:08 clicou Iniciar e escolheu ESPERAR a medicao; 01:24:10
+        desligou a chave, e a medicao foi cancelada. O aviso "Esperando a
+        medicao terminar para comecar..." ficou na tela ate 01:27:04 - quase
+        TRES MINUTOS - e o botao Iniciar apagado junto. Ele so se livrou dele
+        deixando tudo medir de novo: "eu tive q deixar ver todo FEL pra sumir a
+        msg de esperando pra iniciar, estranho, e isso mesmo?". Nao e.
+
+        A espera era desarmada dentro do tratador do "el_fim". Quando essa
+        mensagem nao chega - rodada cancelada com serie ja virada, fila
+        esvaziada, trabalho abandonado - a espera fica pendurada para sempre.
+        Amarrar estado a um EVENTO que pode nao vir e a mesma familia do
+        defeito anterior.
+
+        Agora quem decide olha o ESTADO, uma vez por batida do relogio: se ha
+        espera armada e nao ha mais medicao rodando, a espera acabou - por bem
+        ou por mal - e a conversao comeca. Evento que chegar antes so adianta o
+        mesmo desfecho. #>
+    if ($script:IniciarAposMedir -and (-not $script:MedindoEL) -and $Estado.Atual -eq "inicial") {
+        $script:IniciarAposMedir = $false
+        Update-AvisoEspera
+        # 19.6: o ramo do el_fim reacendia o botao e este nao - se o Iniciar
+        # automatico desistisse (nada marcado), o botao ficava apagado.
+        Set-BotaoIniciar (@(Get-Marcados).Count -gt 0)
+        Escrever-Log "INICIAR: a medicao terminou (ou foi cancelada) - comecando a conversao que estava esperando" "ACAO"
+        Invoke-IniciarAutomatico
     }
 })
 
@@ -8568,6 +11165,9 @@ function Get-SelosResultado($R) {
     switch ("$($R.StatusDV)") {
         "OK"             { $selos += ,@("Dolby Vision → Profile 8.1 - CONVERTIDO", "ok") }
         "NAO_NECESSARIO" { $selos += ,@("Dolby Vision Já em Profile 8.1 - NÃO NECESSÁRIO", "cinza") }
+        # 19.6: o Profile 5 sai em .mp4 e nao passa por audio/OCR (motor 14.9
+        # manda StatusAudio/StatusLegenda = "P5", que nenhum switch abaixo pega).
+        "P5_MP4"         { $selos += ,@("Dolby Vision Profile 5 → MP4 - REMUXADO", "ok") }
     }
     <#  17.09 - O CARTAO FINAL REPETE A RESSALVA DA CAMADA.
 
@@ -8585,7 +11185,10 @@ function Get-SelosResultado($R) {
         O selo NAO diz que a conversao falhou: ela nao falhou. Ele diz o que
         o arquivo era. Por isso o verde do Profile 8.1 continua ao lado dele. #>
     switch ("$($R.SeloEL)") {
-        "EXPANDE"  { $selos += ,@("Complex FEL - CONVERSÃO NÃO RECOMENDADA", "err") }
+        "EXPANDE"  {
+            # 2.0.9: o selo de sempre (o "PERDA EM" da 2.0.7 foi desfeito).
+            $selos += ,@("Complex FEL - CONVERSÃO NÃO RECOMENDADA", "err")
+        }
         "RESSALVA" { $selos += ,@("Simple FEL - CONVERSÃO COM RESSALVA", "warn") }
     }
     switch ("$($R.StatusAudio)") {
@@ -8989,7 +11592,25 @@ function New-CartaoResultado($R) {
     switch ($status) {
         "OK"         { $fundo = "#0B1109"; $borda = $Cores.okBorda;    $ico = $Sim.Ok;   $corNome = $Cores.foco }
         "OK_PARCIAL" { $fundo = "#100E08"; $borda = $Cores.pausaBorda; $ico = $Sim.Warn; $corNome = $Cores.foco }
-        "PULADO"     { $fundo = "#100E08"; $borda = $Cores.pausaBorda; $ico = $Sim.Skip; $corNome = $Cores.txt }
+        <#  18.07 - A MESMA CONDICAO NAO PODE TER DUAS CORES.
+
+            "essa ultima imagem e igual sempre quando ta cheio o disco?
+             amarelo? to vendo inconsistencia" (Diego, 17/09). Ele esta certo:
+            o painel de ESPACO EM DISCO pinta "Espaco Insuficiente" de VERMELHO,
+            e o cartao do resumo pintava o MESMO fato de ambar, porque olhava so
+            o status "PULADO" - que cobre dois casos muito diferentes:
+
+              ja existia na saida   -> informacao, nada a fazer   (ambar)
+              nao coube no disco    -> IMPEDIMENTO, o arquivo nao saiu (vermelho)
+
+            Cor e vocabulario neste programa: ambar avisa, vermelho impede. #>
+        "PULADO"     {
+            if (Test-PuladoPorEspaco $R) {
+                $fundo = "#110809"; $borda = $Cores.errBorda; $ico = $Sim.Err; $corNome = $Cores.txt
+            } else {
+                $fundo = "#100E08"; $borda = $Cores.pausaBorda; $ico = $Sim.Skip; $corNome = $Cores.txt
+            }
+        }
         "CANCELADO"  { $fundo = "#110809"; $borda = $Cores.errBorda;   $ico = $Sim.Err;  $corNome = $Cores.txt }
         default      { $fundo = "#110809"; $borda = $Cores.errBorda;   $ico = $Sim.Err;  $corNome = $Cores.txt }
     }
@@ -9020,13 +11641,23 @@ function New-CartaoResultado($R) {
         # A leitura do arquivo final custa uma chamada de mkvmerge por video,
         # em um momento em que a conversao ja acabou - e o unico jeito de o
         # cartao falar do arquivo que existe, e nao do que se pretendia fazer.
-        $descFinal = Get-DescricaoDoFinal (Join-Path $Cfg.Saida ("{0}.mkv" -f $R.Episodio))
+        <#  2.0: o arquivo final agora sai com o selo [BL+RPU] no nome. O
+            cartao tem que ler o arquivo QUE EXISTE - com o nome do
+            episodio ele leria um caminho que nao existe mais e o cartao
+            voltaria a falar do que se pretendia, nao do que saiu. O motor
+            manda o nome real em NomeSaida; sem ele (Profile 5, resultado
+            antigo) vale o Episodio, como antes. #>
+        $nomeFinalCartao = "$($R.Episodio)"
+        if ("$($R.NomeSaida)" -ne "") { $nomeFinalCartao = "$($R.NomeSaida)" }
+        $descFinal = Get-DescricaoDoFinal (Join-Path $Cfg.Saida ("{0}.mkv" -f $nomeFinalCartao))
         $txtAudio = "-"
         if ($descFinal.Audio) { $txtAudio = $descFinal.Audio }
         elseif ($R.FaixasAudioMantidas) { $txtAudio = "$($R.FaixasAudioMantidas)" }
+        elseif ("$($R.StatusDV)" -eq "P5_MP4" -and $R.MotivoAudio) { $txtAudio = "$($R.MotivoAudio)" }
         $txtLegenda = "-"
         if ($descFinal.Legenda) { $txtLegenda = $descFinal.Legenda }
         elseif ($R.FaixasLegendaMantidas) { $txtLegenda = "$($R.FaixasLegendaMantidas)" }
+        elseif ("$($R.StatusDV)" -eq "P5_MP4" -and $R.MotivoLegenda) { $txtLegenda = "$($R.MotivoLegenda)" }
         # 16.36: o rotulo diz o que a estrela significa, e SO quando existe
         # uma estrela naquela linha. Marca sem legenda e enigma; legenda fixa
         # numa lista sem marca nenhuma e ruido.
@@ -9062,7 +11693,38 @@ function New-CartaoResultado($R) {
             $R.NotaLegendaVeredicto -and $R.NotaLegendaVeredicto -ne "") {
             $vq = [string]$R.NotaLegendaVeredicto
             switch ($vq) {
-                "EXCELENTE" { $acao = "Nenhuma falha encontrada. Pode assistir por esta legenda." }
+                <#  ============================================================
+                    2.0b - "ESSA FRASE TA CERTA? OU IMPRIMI ISSO EM TUDO?"
+                    (Diego, 21/09, sobre o Transformers.)
+
+                    A conta estava certa e a FRASE estava grande demais.
+
+                    MEDIDO na legenda que ele mandou: 1.832 blocos, e a tela
+                    disse "1 falha em 1832". O denominador confere - o .srt tem
+                    1.832 blocos mesmo. Mas varrendo o arquivo achei treze
+                    coisas que qualquer pessoa chamaria de erro e que o contador
+                    NAO conta, entre elas:
+
+                      "Ali Spark"  (5x)   deveria ser AllSpark
+                      "cal no mundo cruel"  -> "cai"
+                      "waiffle" -> "waffle"   "A.OA,," -> "A.O.A."
+                      "firmeca", "Blim-blom", "Sob o meu comando" (maiuscula)
+
+                    Nao e defeito do contador: ele mede o que o Reocr SABE
+                    detectar - a familia de defeito residual de OCR (a barra
+                    vertical, bloco cortado, linha vazia). Nome proprio trocado
+                    e letra trocada que forma outra palavra valida passam, e
+                    sempre passaram.
+
+                    O defeito e a frase. "Nenhuma falha encontrada" afirma o
+                    ABSOLUTO; o que o programa pode afirmar e o que ele CONFERIU.
+                    Licao 2, e licao 11 (nao afirmar em publico capacidade que
+                    o codigo nao tem) - desta vez a afirmacao era para o dono. #>
+                <#  2.0.2: a frase da 14.55 dizia a coisa certa e dizia mal - tres oracoes,
+                    primeira pessoa e um "vale passar o olho" que soava a desculpa.
+                    O conteudo continua identico: o que foi conferido, e o que o
+                    contador nao alcanca. Em duas oracoes e sem falar de si. #>
+                "EXCELENTE" { $acao = "Pode assistir por esta legenda." }   # 2.0.7: "nenhum defeito" ao lado de "(1 falha em 1832)" - Diego ja tinha reclamado da frase
                 "BOA"       { $acao = "Pode assistir por esta legenda." }
                 "RAZOAVEL"  { $acao = "Dá para assistir. Se tropeçar numa fala, troque no player para a legenda PGS original." }
                 default     { $acao = "Prefira a legenda PGS original - ela está neste mesmo arquivo." }
@@ -9116,7 +11778,7 @@ function New-CartaoResultado($R) {
                 ((Traduzir $vq) + "  -  " + (Traduzir $acao) + (Traduzir-Frase $det)), $corQ)
         }
         $grade = @(
-            @("Container Final", ("Matroska (.mkv)  |  {0}" -f $R.Tamanho)),
+            @("Container Final", ((&{ if ("$($R.StatusDV)" -eq "P5_MP4") { "MPEG-4 (.mp4)  |  {0}" } else { "Matroska (.mkv)  |  {0}" } }) -f $R.Tamanho)),
             @($rotAudio,   $txtAudio),
             @($rotLegenda, $txtLegenda))
         if ($null -ne $linhaQualidade) { $grade += ,$linhaQualidade }
@@ -9207,7 +11869,7 @@ function New-CartaoResultado($R) {
             "CANCELADO" { "Cancelado pelo Usuário" }
             default     { "Não Finalizado - Erro" }
         }
-        $corFrase = if ($status -eq "PULADO") { $Cores.warn } else { $Cores.err }
+        $corFrase = if ($status -eq "PULADO" -and -not (Test-PuladoPorEspaco $R)) { $Cores.warn } else { $Cores.err }   # 18.07
         Add-LinhaTxt $pilha ("{0}   {1}" -f (Traduzir "Situação"), (Traduzir-Frase $frase)) $corFrase 13.5 $true 2
         $motivoTela = Get-MotivoPulado $R
         if ($motivoTela -ne "") { Add-LinhaTxt $pilha ("{0}     {1}" -f (Traduzir "Motivo"), $motivoTela) $corFrase 13.5 }
@@ -9236,8 +11898,15 @@ function Get-MotivoPulado($R) {
     $m = "$($R.Motivo)"
     if ($m -eq "") { return "" }
     if (Test-PuladoPorEspaco $R) {
+        <#  2.0.10: o motor agora diz QUAL disco faltou ("espaco insuficiente
+            em C: - faltam ~X"): o da origem (temporarios) ou o da saida (o
+            arquivo final). A frase nomeia o disco em vez de chutar "saida". #>
+        $discoM = ""
+        if ($m -match '(?i)insuficiente em ([A-Z]:)') { $discoM = $Matches[1].ToUpper() }
         if ($m -match '~\s*([\d.,]+\s*[KMGT]B)') {
-            return (Traduzir-Frase ("Faltam ~{0} livres no disco de saída" -f $Matches[1]))
+            $qto = $Matches[1]
+            if ($discoM) { return (Traduzir-Frase ("Faltam ~{0} livres no disco {1}" -f $qto, $discoM)) }
+            return (Traduzir-Frase ("Faltam ~{0} livres no disco de saída" -f $qto))
         }
         return (Traduzir "Não há espaço livre suficiente no disco de saída")
     }
@@ -9286,6 +11955,10 @@ $script:ResumoSeg   = -1.0
 
 function Redesenhar-Resumo {
     if ("$($script:ResumoComo)" -eq "") { return }
+    # 2.0.10: so existe resumo para redesenhar na tela do fim. Depois de "Nova
+    # Conversao" o ResumoComo continuava cheio - trocar o idioma na tela
+    # inicial punha no titulo o resultado da fila anterior.
+    if ($Estado.Atual -ne "fim") { return }
     try { Show-Resumo $script:ResumoComo -Redesenho } catch { }
 }
 
@@ -9415,35 +12088,9 @@ function Show-Resumo([string]$Como, [switch]$Redesenho) {
 
         Falhar aqui nao custa nada: a fila terminou, o log da sessao esta
         gravado em _logs, e o pior caso e o arquivo ficar sem a copia. #>
-    try {
-        # 17.15: redesenho de lingua nao regrava nada em disco.
-        $convertidos = if ($Redesenho) { @() } else { @($res | Where-Object { "$($_.Status)" -eq "OK" -or "$($_.Status)" -eq "OK_PARCIAL" }) }
-        if ($convertidos.Count -gt 0 -and $script:LogArquivo -and (Test-Path -LiteralPath $script:LogArquivo)) {
-            # O log da sessao esta aberto para escrita agora. Ler com
-            # FileShare aberto evita disputar o arquivo com o proprio
-            # escritor - sem isto a copia falharia calada, que e o defeito
-            # que este bloco esta consertando.
-            $fs = New-Object System.IO.FileStream($script:LogArquivo, [System.IO.FileMode]::Open,
-                        [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-            try {
-                $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::UTF8)
-                try { $textoLog = $sr.ReadToEnd() } finally { $sr.Dispose() }
-            } finally { $fs.Dispose() }
-            $feitas = 0
-            foreach ($c in $convertidos) {
-                $nb = "$($c.Episodio)"
-                if ($nb -eq "") { continue }
-                $destino = Join-Path $Cfg.Saida ($nb + ".LaFirma.log.txt")
-                [System.IO.File]::WriteAllText($destino, $textoLog, (New-Object System.Text.UTF8Encoding($false)))
-                $feitas++
-            }
-            if ($feitas -gt 0) {
-                Escrever-Log ("COPIA DO LOG: gravada ao lado de {0} arquivo(s) convertido(s), em {1}" -f $feitas, $Cfg.Saida) "PROVA"
-            }
-        }
-    } catch {
-        Escrever-Log ("COPIA DO LOG: nao consegui gravar na pasta de saida - {0}" -f $_.Exception.Message) "AVISO"
-    }
+    # 19.14: a copia <nome>.LaFirma.log.txt na pasta de saida SAIU (pedido
+    # do Diego 23/09: "LOG e LOG, tem que sair em pasta de LOG"). A pasta
+    # final recebe so .mkv + .srt; o log da sessao ja esta em _logs.
 
     <#  17.16 - OS DOIS BOTOES DO FIM NASCEM DEPOIS DA TROCA DE IDIOMA.
 
@@ -9473,12 +12120,40 @@ function Show-Resumo([string]$Como, [switch]$Redesenho) {
     <#  17.16: a conta da FILA inteira, fechada. Por arquivo ja sai em
         PREVISAO; esta e a que responde a pergunta que o usuario faz de
         verdade - "disse 1h25, foi isso mesmo?". #>
-    if ($script:LoteSegEstimado -gt 0) {
-        $erroFila = 100.0 * ($totalSeg - $script:LoteSegEstimado) / $script:LoteSegEstimado
+    <#  17.20 - FILA CANCELADA NAO TEM "REAL" PARA COMPARAR.
+
+        Log do Diego, 19:43:13, depois de ele cancelar no segundo arquivo:
+
+          PREVISAO DA FILA: previsto 6.209s (1h43m) | real 21s | erro -99,7%
+
+        O -99,7% nao mede nada: a fila nao errou a previsao, ela nao aconteceu.
+        E numero desses polui exatamente o lugar onde a gente vai olhar depois
+        para saber se a estimativa esta boa - e a linha existe para responder
+        "disse 1h25, foi isso mesmo?", pergunta que nao cabe num cancelamento.
+
+        A calibragem nunca foi afetada (ela grava por arquivo concluido), mas o
+        log era lido por mim e por ele. #>
+    if (($ok.Count + $parcial.Count) -eq 0 -and $cancelado.Count -eq 0) {
+        # 2.0.12: fila sem nenhum arquivo convertido (todos ja existiam) - "erro -99,9%" nao e erro de previsao.
+        Escrever-Log "PREVISAO DA FILA: nao comparada - nenhum arquivo foi convertido nesta fila" "PROVA"
+    }
+    elseif ($cancelado.Count -gt 0) {
+        Escrever-Log ("PREVISAO DA FILA: nao comparada - a fila foi cancelada (previsto {0:N0}s para {1} arquivo(s))" -f `
+            $script:LoteSegEstimado, $Motor.VideoTotal) "PROVA"
+    }
+    elseif ($script:LoteSegEstimado -gt 0) {
+        <#  2.0.10: a previsao e de TRABALHO; o relogio do resumo inclui as
+            pausas. Uma fila de 1h com 30 min pausada dava "erro +50%" com a
+            previsao certa. A comparacao desconta a pausa (PausadoFila, que ja
+            existia e ninguem lia); o Tempo Total da tela continua de parede. #>
+        $pausaFila = [double]$Motor.PausadoFila
+        $trabFila = [math]::Max(1.0, [double]$totalSeg - $pausaFila)
+        $erroFila = 100.0 * ($trabFila - $script:LoteSegEstimado) / $script:LoteSegEstimado
         $sinalF = if ($erroFila -ge 0) { "+" } else { "" }
-        Escrever-Log ("PREVISAO DA FILA: previsto {0:N0}s ({1}) | real {2:N0}s ({3}) | erro {4}{5:N1}%" -f `
+        $txtPausaF = if ($pausaFila -ge 1) { " (fora {0} de pausa)" -f (Format-MinSeg $pausaFila) } else { "" }
+        Escrever-Log ("PREVISAO DA FILA: previsto {0:N0}s ({1}) | real {2:N0}s ({3}){6} | erro {4}{5:N1}%" -f `
                       $script:LoteSegEstimado, (Format-MinSeg $script:LoteSegEstimado),
-                      $totalSeg, (Format-MinSeg $totalSeg), $sinalF, $erroFila) "PROVA"
+                      $trabFila, (Format-MinSeg $trabFila), $sinalF, $erroFila, $txtPausaF) "PROVA"
     }
     Escrever-Log "===== RESUMO DA CONVERSAO =====" "PROVA"
     foreach ($l in $linhas) { Escrever-Log $l "PROVA" }
@@ -10033,39 +12708,82 @@ function Test-PodeIniciar {
             fila, arquivo por arquivo - nao mais a regra geral. "Vai converter
             o que couber" e verdade e nao ajuda ninguem a decidir; "1 de 2
             cabem, o Troy fica de fora por 65 GB" ajuda. #>
+        <#  17.19 - ESTA CAIXA ESTAVA MEIO TRADUZIDA, QUE E PIOR QUE NAO ESTAR.
+
+            Ela chamava Traduzir em UM pedaco ("nada agora - a conta aperta no
+            meio da fila") e deixava o resto - a abertura, os tres rotulos, a
+            explicacao do 3,15x e a pergunta - em portugues fixo. Com a tela em
+            ingles saia uma caixa em portugues com uma expressao em ingles no
+            meio.
+
+            Meio traduzido engana mais que nada traduzido: quem ve uma palavra
+            na sua lingua assume que o resto tambem esta - e esta caixa termina
+            numa pergunta de Sim/Nao que pode custar uma fila inteira. #>
+        $en = ($script:Lang -eq "EN")
         $linhaFila = ""
         if ($script:DiscoNaoCabem -gt 0) {
-            $linhaFila = ("Na ordem da fila, {0} de {1} arquivo(s) cabem.`n" -f `
-                          $script:DiscoCabem, ($script:DiscoCabem + $script:DiscoNaoCabem))
+            $linhaFila = if ($en) {
+                ("In queue order, {0} of {1} file(s) fit.`n" -f `
+                 $script:DiscoCabem, ($script:DiscoCabem + $script:DiscoNaoCabem))
+            } else {
+                ("Na ordem da fila, {0} de {1} arquivo(s) cabem.`n" -f `
+                 $script:DiscoCabem, ($script:DiscoCabem + $script:DiscoNaoCabem))
+            }
             if ($script:DiscoPrimeiroFora -ne "") {
                 $nomeCurto = "$($script:DiscoPrimeiroFora)"
                 if ($nomeCurto.Length -gt 60) { $nomeCurto = $nomeCurto.Substring(0, 57) + "..." }
-                $linhaFila += ("O primeiro que fica de fora é:`n  {0}`n  (faltariam {1} na vez dele)`n" -f `
-                               $nomeCurto, (Format-GB $script:DiscoFaltaNoPrimeiroFora))
+                $linhaFila += if ($en) {
+                    ("The first one left out is:`n  {0}`n  ({1} would be missing by its turn)`n" -f `
+                     $nomeCurto, (Format-GB $script:DiscoFaltaNoPrimeiroFora))
+                } else {
+                    ("O primeiro que fica de fora é:`n  {0}`n  (faltariam {1} na vez dele)`n" -f `
+                     $nomeCurto, (Format-GB $script:DiscoFaltaNoPrimeiroFora))
+                }
             }
             $linhaFila += "`n"
         }
-        <#  17.16: o titulo da pergunta diz QUAL dos dois casos e. "Nao cabe
-            no disco" numa fila que cabe agora seria mentira - e foi
-            justamente a mentira ao contrario que trouxe ate aqui. #>
         $cabeAgora = ($script:DiscoFalta -le 0)
-        $abertura = if ($cabeAgora) {
-            "A fila cabe agora, mas não até o fim.`n`n" +
-            "Cada arquivo convertido deixa o resultado ocupando o disco. Quando chegar a vez dos últimos, o espaço já terá diminuído - e eles não vão começar.`n`n"
+        $abertura = if ($en) {
+            if ($cabeAgora) {
+                "The queue fits now, but not to the end.`n`n" +
+                "Every converted file leaves its result taking up disk space. By the time the last ones come up, the free space will have shrunk - and they will not start.`n`n"
+            } else {
+                "The selected queue does not fit on the disk.`n`n"
+            }
         } else {
-            "A fila selecionada não cabe no disco.`n`n"
+            if ($cabeAgora) {
+                "A fila cabe agora, mas não até o fim.`n`n" +
+                "Cada arquivo convertido deixa o resultado ocupando o disco. Quando chegar a vez dos últimos, o espaço já terá diminuído - e eles não vão começar.`n`n"
+            } else {
+                "A fila selecionada não cabe no disco.`n`n"
+            }
         }
-        $txt = ($abertura +
-                "Necessário estimado : ~{0}`n" +
-                "Livre agora         : {1}`n" +
-                "Falta liberar       : {2}`n`n" +
-                "{3}" +
-                "A conta é a do pior caso: cada arquivo precisa de 3,15x o próprio tamanho enquanto converte (vídeo extraído, convertido e remontado ao mesmo tempo).`n`n" +
-                "Nada sai pela metade: o motor recusa o arquivo inteiro quando não cabe, e passa para o próximo.`n`n" +
-                "Começar mesmo assim?") -f `
+        $faltaTxt = if ($cabeAgora) {
+            if ($en) { "nothing right now - the squeeze happens mid-queue" }
+            else     { "nada agora - a conta aperta no meio da fila" }
+        } else { Format-GB $script:DiscoFalta }
+        $corpoTxt = if ($en) {
+            "Estimated needed : ~{0}`n" +
+            "Free right now   : {1}`n" +
+            "Must free up     : {2}`n`n" +
+            "{3}" +
+            "The estimate is the worst case: each file needs 3.15x its own size while converting (video extracted, converted and remuxed at the same time).`n`n" +
+            "Nothing comes out half done: the engine refuses the whole file when it does not fit, and moves on to the next.`n`n" +
+            "Start anyway?"
+        } else {
+            "Necessário estimado : ~{0}`n" +
+            "Livre agora         : {1}`n" +
+            "Falta liberar       : {2}`n`n" +
+            "{3}" +
+            "A conta é a do pior caso: cada arquivo precisa de 3,15x o próprio tamanho enquanto converte (vídeo extraído, convertido e remontado ao mesmo tempo).`n`n" +
+            "Nada sai pela metade: o motor recusa o arquivo inteiro quando não cabe, e passa para o próximo.`n`n" +
+            "Começar mesmo assim?"
+        }
+        $txt = ($abertura + $corpoTxt) -f `
                 (Format-GB $script:DiscoPreciso), (Format-GB $script:DiscoLivre),
-                $(if ($cabeAgora) { Traduzir "nada agora - a conta aperta no meio da fila" } else { Format-GB $script:DiscoFalta }), $linhaFila
-        $r = [System.Windows.MessageBox]::Show($txt, "LaFirma - falta espaço em disco",
+                $faltaTxt, $linhaFila
+        $tituloDisco = if ($en) { "LaFirma - not enough disk space" } else { "LaFirma - falta espaço em disco" }
+        $r = [System.Windows.MessageBox]::Show($txt, $tituloDisco,
                 [System.Windows.MessageBoxButton]::YesNo,
                 [System.Windows.MessageBoxImage]::Warning,
                 [System.Windows.MessageBoxResult]::No)
@@ -10118,20 +12836,32 @@ $script:DicaAntesDaEspera = ""
     quantos arquivos vao ser medidos e cada "el" e um a menos. #>
 $script:ELtotal = 0
 $script:ELfeitos = 0
-$script:ELtotalFila = 0
+<#  17.19: o indice (em $script:Videos) do arquivo que o runspace esta medindo
+    AGORA, dito por ele no "el_ini". -1 = ninguem. Indice e nao nome: dois
+    arquivos podem ter o mesmo nome, indice nao se repete. #>
+$script:ELmedindoIdx = -1
 
 function Get-TextoEspera {
     <#  17.15: a conta e dos arquivos QUE VAO CONVERTER, nao de todos os que
         a leitura resolveu medir. Contar os outros faz o aviso prometer uma
-        espera que nao existe. #>
+        espera que nao existe.
+
+        17.19 - E POR ISSO ELE NAO PODE DIZER "X DE Y".
+
+        O botao ja diz "Medindo MEL x FEL: 2 de 3", com a conta do runspace -
+        os arquivos que estao sendo medidos. Este aviso responde outra
+        pergunta: quantos arquivos DA SUA FILA ainda estao sem veredicto. Sao
+        numeros legitimamente diferentes (um arquivo desmarcado entra num e
+        nao no outro), e escritos no mesmo formato pareciam o mesmo contador
+        se contradizendo.
+        Agora cada um tem a forma da sua pergunta: o botao conta progresso
+        ("2 de 3"), o aviso conta o que falta para VOCE ("faltam 2"). #>
     $t = Traduzir "Esperando a medição terminar para começar..."
     $faltam = @(Get-MarcadosMedindo).Count
-    if ($script:ELtotalFila -gt 0 -and $faltam -gt 0) {
-        $emCurso = $script:ELtotalFila - $faltam + 1
-        if ($emCurso -lt 1) { $emCurso = 1 }
-        if ($emCurso -gt $script:ELtotalFila) { $emCurso = $script:ELtotalFila }
-        $de = if ($script:Lang -eq "EN") { "of" } else { "de" }
-        $t = "{0} ({1} {2} {3})" -f $t, $emCurso, $de, $script:ELtotalFila
+    if ($faltam -eq 1) {
+        $t = "{0} {1}" -f $t, (Traduzir "(falta 1 arquivo da sua fila)")
+    } elseif ($faltam -gt 1) {
+        $t = "{0} {1}" -f $t, ((Traduzir "(faltam {0} arquivos da sua fila)") -f $faltam)
     }
     return $t
 }
@@ -10151,6 +12881,29 @@ function Get-TextoEspera {
 
     O texto pedido continua guardado, entao quando a espera acaba a dica
     volta sem ninguem precisar recalcular nada. #>
+<#  18.13 - O CABECALHO DA ABA E DA ABA, E DE MAIS NINGUEM.
+
+    Print dele de 17/09: aba FILA aberta, video selecionado E marcado, e o
+    cabecalho dizendo "Selecione um vídeo na aba Fila." - depois sumindo
+    sozinho. "video selecionado e pedindo pra selecionar video, ai de repente
+    some" (Diego).
+
+    A 18.10 consertou METADE disto: eu impedi que o NOME do arquivo fosse
+    escrito ali com a FILA na frente, mas deixei os outros dois ramos do
+    Fill-Faixas escrevendo sem olhar aba nenhuma. E Fill-Faixas roda por muito
+    mais coisa que trocar de aba (MODO, clique em faixa, repintura). Pior: no
+    meio de um repinte da fila o SelectedIndex fica -1 por um instante, o que
+    cai justamente no ramo "Selecione um vídeo" - e era dai que vinha o texto
+    absurdo. Ele sumia depois porque a proxima escrita vinha certa.
+
+    Agora quem escreve no cabecalho passa por AQUI, e aqui a regra e uma so:
+    texto de arquivo so aparece com a aba das FAIXAS na frente. Na FILA, o
+    cabecalho fala da fila. #>
+function Set-DicaFaixas([string]$Texto) {
+    if ($script:AbaAtual -ne "faixas") { return }
+    Set-AbaDica $Texto
+}
+
 function Set-AbaDica([string]$Texto) {
     $script:DicaAntesDaEspera = $Texto
     if ($script:IniciarAposMedir) { return }
@@ -10160,6 +12913,26 @@ function Set-AbaDica([string]$Texto) {
 <#  17.13: quem liga e desliga o aviso e esta funcao, e nao tres linhas
     espalhadas - o aviso e a dica sao a MESMA linha da tela e tem que mudar
     juntos, senao um deles sempre fica para tras. #>
+<#  17.21 - O INICIAR VOLTAVA A ACENDER NO MEIO DA ESPERA.
+
+    BUG MEDIDO no log do Diego (15/09 20:32:29 -> 20:32:46): ele armou a
+    espera, marcou e desmarcou arquivos, e o Iniciar acendeu de novo - porque
+    Update-Selecao decide o botao por "tem marcado + estado inicial" e nao
+    sabia da espera. Ele clicou, e a MESMA pergunta apareceu pela segunda vez
+    sobre a MESMA medicao. Tres lugares escreviam no botao com regras
+    diferentes (Update-Selecao, Test-PastasIguais, Set-Estado) - e o quarto,
+    o F1, so lia o botao.
+
+    Uma regra, um lugar, igual ao Set-AbaDica logo acima: todo mundo passa
+    por aqui, e aqui a espera tem prioridade sobre qualquer outro criterio.
+    Enquanto ha um Iniciar represado nao existe um segundo Iniciar. #>
+function Set-BotaoIniciar([bool]$Pode) {
+    try {
+        if ($script:IniciarAposMedir) { $UI.btnIniciar.IsEnabled = $false; return }
+        $UI.btnIniciar.IsEnabled = $Pode
+    } catch { }
+}
+
 function Update-AvisoEspera {
     try {
         if ($script:IniciarAposMedir) {
@@ -10196,32 +12969,49 @@ function Get-MarcadosMedindo {
     return @(Get-Marcados | Where-Object { "$($_.ELtipo)" -eq "MEDINDO" })
 }
 
-<#  17.18 - QUAL DELES ESTA SENDO MEDIDO AGORA.
+<#  17.18/17.19 - QUAL DELES ESTA SENDO MEDIDO AGORA.
 
     O botao dizia "Medindo MEL x FEL: 2 de 3" e a fila nao dizia QUEM era o 2.
     Tres linhas escritas "Na Fila", e o unico jeito de descobrir qual estava
     na vez era olhar a coluna Dolby Vision procurando quem ainda tinha
     "P7 medindo" - adivinhacao, do mesmo tipo que a 16.38 ja tinha tirado da
-    conversao ("da pra ver qual video esta convertendo, olhando a lista").
+    conversao.
 
-    A medicao anda na ordem da fila: quem ja foi medido tem veredicto, e o
-    primeiro que ainda esta em MEDINDO e o que o runspace esta lendo neste
-    instante. Nao e heuristica - e a mesma conta que o Get-TextoEspera ja
-    fazia para escrever "(2 de 3)", so que agora ela tambem diz o nome.
+    NA 17.18 EU CONSERTEI ISSO COM UMA DEDUCAO, E A DEDUCAO ESTAVA ERRADA.
 
-    Uma conta, um lugar: se a ordem da medicao mudar um dia, muda aqui e as
-    duas frases da tela mudam juntas. #>
+    A regra era "o arquivo na vez e o primeiro MARCADO que ainda esta em
+    MEDINDO", e a conta saia de $ELtotalFila, tirado dos marcados. Dois furos:
+
+      1. o runspace mede TODOS os pendentes, marcados ou nao - entao com um
+         arquivo desmarcado sendo medido, a deducao apontava para a linha
+         errada;
+      2. $ELtotalFila era fotografado uma vez; marcar ou desmarcar no meio da
+         medicao mudava o total DEBAIXO da formula, e o numero pulava.
+
+    Foi o que o Diego viu em 15/09: a coluna dizendo um numero enquanto o
+    botao dizia outro, e a posicao andando para tras.
+
+    E o pior: a 17.18 criou a TERCEIRA contagem da mesma coisa na tela. O
+    botao contava pelo runspace (certo), o aviso de espera contava pelos
+    marcados, e eu somei uma deducao. A licao do projeto e velha - regra
+    escrita em dois lugares, e um dos dois desatualizado - e eu a repeti
+    exatamente na semana em que a bateria passou a reprovar funcao duplicada.
+
+    AGORA NAO SE DEDUZ NADA. O laco que mede manda um "el_ini" com o indice,
+    a posicao e o total antes de cada arquivo. A linha da fila, o rotulo do
+    botao e a barrinha leem os MESMOS numeros, vindos de quem esta fazendo o
+    trabalho. #>
 function Get-MedicaoEmCurso {
     if (-not $script:MedindoEL)     { return $null }
     if (-not $script:MedirELLigado) { return $null }
-    $fila = @(Get-MarcadosMedindo)
-    if ($fila.Count -eq 0) { return $null }
-    $total = [int]$script:ELtotalFila
-    if ($total -lt $fila.Count) { $total = $fila.Count }
-    $pos = $total - $fila.Count + 1
+    $i = [int]$script:ELmedindoIdx
+    if ($i -lt 0 -or $i -ge $script:Videos.Count) { return $null }
+    $total = [int]$script:ELtotal
+    if ($total -le 0) { return $null }
+    $pos = [int]$script:ELfeitos + 1
     if ($pos -lt 1)      { $pos = 1 }
     if ($pos -gt $total) { $pos = $total }
-    return [PSCustomObject]@{ Nome = "$($fila[0].Nome)"; Posicao = $pos; Total = $total }
+    return [PSCustomObject]@{ Idx = $i; Posicao = $pos; Total = $total }
 }
 
 function Test-EsperarMedicao {
@@ -10269,7 +13059,6 @@ function Test-EsperarMedicao {
         $script:IniciarAposMedir = $true
         # 17.15: o denominador e congelado aqui - quantos da FILA faltavam
         # medir quando a espera comecou.
-        $script:ELtotalFila = @(Get-MarcadosMedindo).Count
         $UI.btnIniciar.IsEnabled = $false
         <#  17.12: a dica com o NOME DO ARQUIVO some enquanto a espera dura.
             Ela e a vizinha do aviso na mesma linha, e nome de release tem 70
@@ -10285,10 +13074,39 @@ function Test-EsperarMedicao {
     return $false
 }
 
+<#  17.21 - A PARTIDA AUTOMATICA NAO E UM CLIQUE.
+
+    BUG MEDIDO no log do Diego (15/09 20:32:59 e 20:36:35). A medicao
+    terminou e a espera disparou sozinha. No log saiu isto, em sequencia:
+
+      INICIAR: todos os arquivos DA FILA ja foram medidos - comecando agora
+      CLIQUE: Iniciar
+      INICIAR: a medicao que sobrou e de arquivo(s) que nao estao na fila
+
+    Duas das tres linhas sao mentira. Nao houve clique - fui EU que chamei
+    Invoke-Iniciar. E nao sobrou medicao nenhuma: a segunda mensagem e o
+    Test-EsperarMedicao rodando PELA SEGUNDA VEZ sobre uma medicao que
+    acabou, caindo no ramo "nao ha marcados medindo". O Diego leu o log e
+    disse, com razao: "falando nao esperar e esperando tbm, comportamento
+    muito estranho".
+
+    A regra: quem ja decidiu esperar ja respondeu a pergunta da espera.
+    Reperguntar e reabrir uma decisao tomada. A partida automatica entra
+    DEPOIS da pergunta - so confere o disco, que e a unica coisa que pode ter
+    mudado enquanto a medicao rodava. #>
+function Invoke-IniciarAutomatico {
+    if (-not (Test-PodeIniciar)) { return }
+    Invoke-IniciarProtegido
+}
+
 function Invoke-Iniciar {
     Escrever-Log "CLIQUE: Iniciar" "ACAO"
     if (Test-EsperarMedicao) { return }
     if (-not (Test-PodeIniciar)) { return }
+    Invoke-IniciarProtegido
+}
+
+function Invoke-IniciarProtegido {
     # Um defeito no caminho da partida fechou o programa na sua cara na 16.4.
     # Erro aqui agora vira mensagem e log - a janela continua de pe.
     try { Invoke-IniciarInterno }
@@ -10298,13 +13116,33 @@ function Invoke-Iniciar {
         try { Stop-Motor } catch { }
         try { $TimerFilaRelogio.Stop() } catch { }
         Set-Estado "inicial"
-        [System.Windows.MessageBox]::Show(
-            ("Não consegui iniciar a conversão:`n`n{0}`n`nNada foi convertido e nenhum arquivo foi tocado. O log desta sessão tem o detalhe." -f $_.Exception.Message),
-            "LaFirma - falha ao iniciar", "OK", "Error") | Out-Null
+        # 17.19: a caixa de erro tambem fala a lingua da tela.
+        $msgFalha = if ($script:Lang -eq "EN") {
+            ("Could not start the conversion:`n`n{0}`n`nNothing was converted and no file was touched. This session's log has the detail." -f $_.Exception.Message)
+        } else {
+            ("Não consegui iniciar a conversão:`n`n{0}`n`nNada foi convertido e nenhum arquivo foi tocado. O log desta sessão tem o detalhe." -f $_.Exception.Message)
+        }
+        $titFalha = if ($script:Lang -eq "EN") { "LaFirma - could not start" } else { "LaFirma - falha ao iniciar" }
+        [System.Windows.MessageBox]::Show($msgFalha, $titFalha, "OK", "Error") | Out-Null
     }
 }
 
 function Invoke-IniciarInterno {
+    <#  17.21: o censo que estava rodando morre aqui. Ele le o filme inteiro
+        e a conversao vai disputar o mesmo disco com ele - e o mesmo motivo
+        que fechou o botao. Deixar rodando seria fechar a porta e esquecer
+        quem ja estava dentro. #>
+    if ($script:CensoRodando) {
+        Escrever-Log "CENSO COMPLETO: encerrado - a conversao comecou e os dois leriam o mesmo disco" "ACAO"
+        Stop-Censo
+    }
+    <#  18.00: e a medicao tambem. Pelo mesmo motivo do censo - ela le o RPU de
+        arquivos grandes e disputaria o disco com a conversao. Quem nao tiver
+        sido medido fica em "EL nao medida", que e honesto. #>
+    if ($script:MedindoEL) {
+        Escrever-Log "MEDICAO: encerrada - a conversao comecou e as duas leriam o mesmo disco" "ACAO"
+        Stop-Medicao
+    }
     $agora = (Get-Date).ToString("HH'h'mm")
     $script:UltimoRotuloEtapa = ""
     $Motor.EtapaIdx = 0; $Motor.PctEtapa = 0; $Motor.SegEtapa = 0
@@ -10377,15 +13215,38 @@ function Confirm-Parar([string]$Titulo, [string]$Texto) {
 }
 
 function Invoke-Cancelar {
-    $oQuePerde = "o vídeo que está sendo montado agora"
+    <#  17.19 - ESTA CAIXA SAIA EM PORTUGUES NA TELA EM INGLES.
+
+        Achado na varredura de 15/09. As quatro caixas de dialogo montadas no
+        codigo (cancelar, fechar durante a conversao, e os dois erros) nunca
+        passaram pela traducao - a varredura da 17.15 alcancou o texto da
+        JANELA, e estas nascem fora dela, no MessageBox.
+
+        E sao as piores para deixar em portugues: sao as unicas da tela em que
+        responder errado custa uma conversao inteira. Quem nao le portugues
+        estava sendo perguntado, em portugues, se queria jogar fora meia hora
+        de trabalho. #>
+    $en = ($script:Lang -eq "EN")
+    $oQuePerde = if ($en) { "the video being assembled right now" }
+                 else     { "o vídeo que está sendo montado agora" }
     if ($Motor.VideoTotal -gt 1) {
         # 16.44: VideoIdx e 0-based. Todo o resto da tela mostra +1; so esta
         # caixa dizia "o vídeo 0 de 3" enquanto o rodapé atrás dela dizia 1/3.
-        $oQuePerde = ("o vídeo {0} de {1} (o que está sendo montado agora)" -f ([int]$Motor.VideoIdx + 1), $Motor.VideoTotal)
+        $oQuePerde = if ($en) {
+            ("video {0} of {1} (the one being assembled right now)" -f ([int]$Motor.VideoIdx + 1), $Motor.VideoTotal)
+        } else {
+            ("o vídeo {0} de {1} (o que está sendo montado agora)" -f ([int]$Motor.VideoIdx + 1), $Motor.VideoTotal)
+        }
     }
-    $texto = ("Cancelar a conversão?`n`nVocê perde {0}, e o tempo já gasto nele - são {1} até aqui. O arquivo parcial é apagado.`n`nOs vídeos que já terminaram continuam na pasta de saída." -f `
-                $oQuePerde, (Format-MinSeg $Motor.SegVideo))
-    if (-not (Confirm-Parar "LaFirma - cancelar a conversão?" $texto)) {
+    $texto = if ($en) {
+        ("Cancel the conversion?`n`nYou lose {0}, and the time already spent on it - {1} so far. The partial file is deleted.`n`nVideos that already finished stay in the output folder." -f `
+            $oQuePerde, (Format-MinSeg $Motor.SegVideo))
+    } else {
+        ("Cancelar a conversão?`n`nVocê perde {0}, e o tempo já gasto nele - são {1} até aqui. O arquivo parcial é apagado.`n`nOs vídeos que já terminaram continuam na pasta de saída." -f `
+            $oQuePerde, (Format-MinSeg $Motor.SegVideo))
+    }
+    $tituloCanc = if ($en) { "LaFirma - cancel the conversion?" } else { "LaFirma - cancelar a conversão?" }
+    if (-not (Confirm-Parar $tituloCanc $texto)) {
         Escrever-Log "ACAO: cancelar RECUSADO na confirmacao - a conversao segue" "ACAO"
         return
     }
@@ -10409,6 +13270,12 @@ function Invoke-Cancelar {
     $script:TsCancel = Get-Date
     $script:Controle.Cancelar = $true
     $script:Controle.Pausar = $false
+    <#  2.0.10: CANCELAR COM A CONVERSAO PAUSADA. O motor retoma para poder
+        encerrar (Request-Cancelamento), mas a tela continuava no estado
+        "pausado": o relogio da pausa reescrevia o titulo e o rodape a cada
+        segundo com "PAUSADO - Sem Consumir CPU/Disco" enquanto o motor limpava,
+        e o "Cancelando..." nunca aparecia. A tela sai da pausa junto. #>
+    if ($Estado.Atual -eq "pausado") { Set-Estado "rodando" }
     $UI.btnPausar.IsEnabled = $false
     $UI.btnCancelar.IsEnabled = $false
     $Janela.Title = "$NOME_APP  ·  " + (Traduzir "Cancelando - Aguardando o Motor Encerrar...")
@@ -10419,7 +13286,7 @@ $UI.btnCancelar.add_Click({
     if ($Estado.Atual -in @("rodando","pausado")) { Invoke-Cancelar }
 })
 $UI.btnNovaConversao.add_Click({
-    Escrever-Log "CLIQUE: Nova Conversao (relendo a pasta - o que acabou de ser convertido ja esta na saida)" "ACAO"
+    Escrever-Log "CLIQUE: Nova Conversao (relendo a pasta)" "ACAO"   # 2.0.7: a frase afirmava saida mesmo depois de cancelar
     Set-Estado "inicial"
     Update-Disco
     Start-Leitura
@@ -10493,7 +13360,7 @@ function Aplicar-PastaSaida([string]$Novo) {
     Update-CabecalhoFila
     Update-Disco
     Update-Diagnostico
-    Test-PastasIguais
+    [void](Test-PastasIguais)   # 2.0.10: o booleano vazava no retorno
     return $true
 }
 <#  16.64b: CLICAR NA CAIXA ABRE O SELETOR.
@@ -10583,22 +13450,181 @@ $UI.btnTrocarSaida.add_Click({ Abrir-SeletorSaida })
 # 16.45: os dois botoes de pasta passaram a ser o MESMO codigo. Antes o de
 # saida tinha a mensagem de erro escrita na mao ali dentro; duplicar isso pro
 # de origem seria duplicar tambem o proximo conserto.
+<#  18.24: a hora da ultima abertura de CADA pasta (o freio e por pasta, nao
+    global - abrir a origem nao pode travar a saida). #>
+$script:AberturaPasta = @{}
+<#  18.24: trazer para a frente uma janela que ja existe. Se o tipo nao puder
+    ser criado, Trazer-JanelaParaFrente devolve $false e a funcao de cima abre
+    uma janela nova, como sempre fez - cosmetico nunca impede a acao. #>
+function Trazer-JanelaParaFrente([IntPtr]$Hwnd) {
+    if ($Hwnd -eq [IntPtr]::Zero) { return $false }
+    try {
+        if (-not ('LaFirma.Foco' -as [type])) {
+            Add-Type -Namespace LaFirma -Name Foco -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+public static extern bool SetForegroundWindow(System.IntPtr hWnd);
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+public static extern bool ShowWindowAsync(System.IntPtr hWnd, int nCmdShow);
+'@ -ErrorAction Stop
+        }
+        # 9 = SW_RESTORE: se a janela estiver minimizada, ela volta.
+        [void][LaFirma.Foco]::ShowWindowAsync($Hwnd, 9)
+        return [LaFirma.Foco]::SetForegroundWindow($Hwnd)
+    } catch { return $false }
+}
+
+<#  18.24: a busca da janela ja aberta mora numa funcao so dela. Assim a
+    bancada consegue testar a DECISAO de Abrir-PastaNoExplorer (abrir ou
+    reaproveitar) sem precisar de um Explorer de verdade do outro lado - que
+    era o que impedia este caminho de ser testado rodando (licao 45). #>
+function Focar-PastaJaAberta([string]$Caminho) {
+    try {
+        $alvo = (Get-Item -LiteralPath $Caminho -ErrorAction Stop).FullName.TrimEnd("\")
+        $shell = New-Object -ComObject Shell.Application -ErrorAction Stop
+        foreach ($jan in @($shell.Windows())) {
+            try {
+                if (-not $jan.Document) { continue }
+                $dessa = "$($jan.Document.Folder.Self.Path)".TrimEnd("\")
+                if ($dessa -and ($dessa -eq $alvo)) {
+                    if (Trazer-JanelaParaFrente ([IntPtr]$jan.HWND)) { return $true }
+                }
+            } catch { }
+        }
+    } catch { return $false }
+    return $false
+}
+
 function Abrir-PastaNoExplorer([string]$Caminho, [string]$Rotulo) {
+    <#  O LOG continua em portugues - ele e um so, e e nosso. A CAIXA fala a
+        lingua da tela (17.19). O rotulo chega em portugues porque e o que o
+        log quer; a traducao dele mora aqui, que e onde ele vira texto de
+        tela. #>
     Escrever-Log ("CLIQUE: Abrir {0}" -f $Rotulo) "ACAO"
     if ("$Caminho" -and (Test-Path -LiteralPath $Caminho)) {
-        Start-Process explorer.exe -ArgumentList "`"$Caminho`""
+        <#  18.24 - SESSENTA E CINCO JANELAS DO EXPLORER.
+
+            "quebrou foi tudo, esses F3 e F4, ficou muito sensivel, parecia que
+            nao tava abrindo nada e eu apertando e clicando" (Diego, 18/09).
+
+            A foto dele explica melhor que qualquer log: uma coluna com vinte
+            "00_Arquivos_Base - Explorador de Arquivos" e doze
+            "01_Arquivos_Finalizados", uma em cima da outra. E o log conta
+            certinho - 65 aberturas em 20 segundos:
+
+              00:14:32,2  CLIQUE: Abrir Origem
+              00:14:32,4  CLIQUE: Abrir Origem
+              00:14:32,6  CLIQUE: Abrir Origem   <- 200ms entre elas
+
+            E "parecia que nao estava abrindo nada" porque estava abrindo
+            DEMAIS: cada janela nova nasce exatamente sobre a anterior, no
+            mesmo lugar e com o mesmo conteudo. Sessenta e cinco janelas
+            identicas empilhadas sao visualmente indistinguiveis de nenhuma.
+
+            O defeito e meu e ele e de desenho, nao de sensibilidade: eu dei
+            tecla a uma acao que nao tinha freio nenhum. Todo o resto desta
+            barra tem regra para o toque repetido - o censo ganhou freio de 2s
+            na 18.21, a medicao tem a trava do runspace, o F1 e o F2 dependem
+            do estado. Estes dois eram os unicos sem nada, e sem tecla isso
+            nunca aparecia porque ninguem clica sessenta vezes no mesmo botao.
+            Dar a tecla foi o que revelou o buraco que ja existia.
+
+            Duas correcoes, e a primeira e a que resolve de verdade:
+
+              1. REAPROVEITAR A JANELA. Se o Explorer ja esta com esta pasta
+                 aberta, ele vem para a frente em vez de nascer outro. E o que
+                 a pessoa quer dizer com "abrir a pasta" - ver a pasta, nao
+                 colecionar janelas dela. Assim, apertar quarenta vezes traz a
+                 MESMA janela quarenta vezes, que e inofensivo;
+              2. FREIO de 1,2s por pasta, para a rajada que chega antes de a
+                 primeira janela existir (a checagem acima ainda nao teria o
+                 que achar). Igual ao do censo, e igual a ele: a recusa FALA. #>
+        $agora = Get-Date
+        if ($script:AberturaPasta.ContainsKey("$Caminho")) {
+            $desde = ($agora - $script:AberturaPasta["$Caminho"]).TotalSeconds
+            if ($desde -lt 1.2) {
+                Escrever-Log ("ABRIR {0}: pedido ignorado - a pasta foi aberta ha {1:N1}s (evita empilhar janelas iguais do Explorer)" -f $Rotulo, $desde) "ACAO"
+                return
+            }
+        }
+        $script:AberturaPasta["$Caminho"] = $agora
+        <#  A janela ja aberta e procurada pelo caminho que ela mostra. Se o
+            Shell nao responder (COM indisponivel, Explorer reiniciando), cai
+            no comportamento antigo - abrir. Falhar aqui nunca pode impedir a
+            pasta de abrir. #>
+        if (Focar-PastaJaAberta $Caminho) {
+            Escrever-Log ("ABRIR {0}: a janela do Explorer que ja estava com esta pasta veio para a frente (nenhuma janela nova)" -f $Rotulo) "ACAO"
+        } else {
+            Start-Process explorer.exe -ArgumentList "`"$Caminho`""
+        }
     } else {
-        [System.Windows.MessageBox]::Show(
-            ("A pasta de {0} não existe nesta máquina:{1}{1}{2}" -f $Rotulo, [Environment]::NewLine, $Caminho),
-            $NOME_APP) | Out-Null
+        $rotTela = if ($script:Lang -eq "EN") {
+            switch ("$Rotulo") { "Saída" { "output" } "Origem" { "source" } default { "$Rotulo" } }
+        } else { "$Rotulo" }
+        $msgPasta = if ($script:Lang -eq "EN") {
+            ("The {0} folder does not exist on this machine:{1}{1}{2}" -f $rotTela, [Environment]::NewLine, $Caminho)
+        } else {
+            ("A pasta de {0} não existe nesta máquina:{1}{1}{2}" -f $rotTela, [Environment]::NewLine, $Caminho)
+        }
+        [System.Windows.MessageBox]::Show($msgPasta, $NOME_APP) | Out-Null
     }
 }
-$UI.btnAbrirSaida.add_Click({ Abrir-PastaNoExplorer $UI.txtSaida.Text "Saída" })
-$UI.btnCenso.add_Click({
+<#  18.23: a regra da casa, aplicada aqui desde o primeiro dia destes dois
+    botoes: o corpo do clique e uma FUNCAO, e a tecla chama a funcao - nunca
+    uma copia da regra. Foi assim que o F5, o F11 e o F12 entraram, e e o que
+    impede a tecla e o mouse de divergirem depois (licao 41). #>
+function Invoke-AbrirSaida  { Abrir-PastaNoExplorer $UI.txtSaida.Text  "Saída"  }
+function Invoke-AbrirOrigem { Abrir-PastaNoExplorer $UI.txtOrigem.Text "Origem" }
+$UI.btnAbrirSaida.add_Click({ Invoke-AbrirSaida })
+<#  18.16 - O MESMO BOTAO COMECA E PARA.
+
+    "nunca vi um botao que comeca e nao pode parar sem ser fechando o sistema,
+    ou dando F1 para comecar, ou trocando de pasta" (Diego, 17/09). Ele esta
+    certo, e a falta ficou obvia depois de dita: desde a 18.14 o cancelamento do
+    censo funciona de verdade - so nao existia jeito de PEDIR o cancelamento sem
+    fazer outra coisa junto. Agora existe, e no lugar natural: o proprio botao
+    que comecou. #>
+<#  18.21 - O FREIO DO BOTAO, MEDIDO NO LOG DELE DE 17/09 (21:55:33 a 21:56:30).
+
+    "quando o censo se tiver rodando vc tem q travar teclas q podem travar ele
+    nao e mais facil" (Diego, 17/09). Ele esta certo, e o log mostra o tamanho
+    do buraco: em 57 segundos o censo foi COMECADO E CANCELADO 20 VEZES, varias
+    delas com 130ms entre uma e outra:
+
+      21:56:29,172  CENSO COMPLETO pedido
+      21:56:29,330  cancelamento - 2 processo(s) encerrado(s)
+      21:56:29,484  o anterior ainda esta encerrando
+      21:56:29,698  CENSO COMPLETO pedido        <- 366ms depois de matar
+
+    Cada um desses "pedido" abre ffmpeg + cmd + dovi_tool lendo um arquivo de
+    82 GB. Vinte pares num minuto e disco sendo aberto e morto sem nunca ler
+    nada - e a tela, atras, tentando desenhar vinte estados diferentes.
+
+    A janela nao pode confiar que ninguem vai bater no botao. O freio e simples
+    e nao engessa: depois de um cancelamento, o censo nao recomeca por 2
+    segundos. Quem apertar nesse intervalo e RESPONDIDO (licao 2) - o silencio
+    e que faz o usuario apertar de novo. #>
+$script:CensoParadoEm = $null
+function Invoke-BotaoCenso {
+    <#  18.18: quem clica (ou aperta F11) sempre recebe uma resposta - Start-Censo
+        explica cada recusa, e o cancelamento explica a dele. #>
+    if ($script:CensoRodando) {
+        Escrever-Log "CLIQUE: Censo Completo (pedido de cancelamento - o censo estava rodando)" "ACAO"
+        $script:CensoParadoEm = Get-Date
+        Stop-Censo
+        return
+    }
     Escrever-Log "CLIQUE: Censo Completo" "ACAO"
+    if ($script:CensoParadoEm) {
+        $desde = ((Get-Date) - $script:CensoParadoEm).TotalSeconds
+        if ($desde -lt 2.0) {
+            Escrever-Log ("CENSO COMPLETO recusado: o censo foi cancelado ha {0:N1}s - espere 2s antes de pedir de novo, senao sao dois lendo o mesmo disco" -f $desde) "ACAO"
+            return
+        }
+    }
     Start-Censo
-})
-$UI.btnAbrirOrigem.add_Click({ Abrir-PastaNoExplorer $UI.txtOrigem.Text "Origem" })
+}
+$UI.btnCenso.add_Click({ Invoke-BotaoCenso })
+$UI.btnAbrirOrigem.add_Click({ Invoke-AbrirOrigem })
 # m3c9: Pastas e Ferramentas colapsam do mesmo jeito - corpo some, cabecalho
 # (com a seta) continua visivel pra poder reabrir com um clique nele mesmo,
 # sem depender so do botao la em cima na barra. Uma funcao so pros dois:
@@ -10615,7 +13641,55 @@ $script:PastasVisivel = $true
 $script:FerramentasVisivel = $true
 $UI.cabecPastas.add_MouseLeftButtonUp({ Set-PainelRecolhivel "Pastas" ([ref]$script:PastasVisivel) $UI.corpoPastas $UI.setaPastas })
 $UI.cabecFerramentas.add_MouseLeftButtonUp({ Set-PainelRecolhivel "Ferramentas" ([ref]$script:FerramentasVisivel) $UI.corpoFerramentas $UI.setaFerramentas })
-$UI.btnReler.add_Click({
+<#  18.17 - O ATUALIZAR GANHOU F5, pedido dele. Mesmo desenho do censo e da
+    medicao: o corpo do clique vira funcao, e a tecla chama a FUNCAO - nunca
+    uma copia da regra. #>
+<#  18.18 - O ATUALIZAR TINHA TRES DONOS, E UM DELES NAO SABIA DO F5.
+
+    "o botao F5 la em cima so aparece quando voce da F5; antes nao" (Diego,
+    17/09). Achado na hora: TRES lugares escreviam o mesmo rotulo, com regras
+    diferentes - Start-Leitura escrevia "Parar F5", o leitura_fim escrevia
+    "Atualizar" (sem o F5, porque eu esqueci este) e a arvore do XAML escrevia
+    o terceiro. Como a pasta e lida ao abrir o programa, o leitura_fim apagava
+    o F5 em segundos - e so voltava quando outra coisa reescrevia.
+
+    E o defeito que este projeto persegue desde a 16.79, e ele volta sempre que
+    eu escrevo num rotulo direto em vez de deixar UMA funcao desenhar o botao.
+    Agora o Atualizar tem o mesmo dono unico que o Censo (Update-BotaoCenso) e a
+    medicao (Update-BotaoMedirEL) ja tinham:
+
+      lendo    -> "[F5] Parar" em AMBAR (a cor de aviso da casa: da para parar)
+      parado   -> "[F5] Atualizar" na cor normal
+
+    Pedido dele na mesma mensagem: a tecla vem ANTES do rotulo, entre colchetes,
+    igual em toda a barra. #>
+function Update-BotaoReler {
+    try {
+        if ($script:Lendo) {
+            $UI.lblReler.Text       = "[F5] " + (Traduzir "Parar")
+            $UI.lblReler.Foreground = Pincel $Cores.warn
+            $UI.icoReler.Foreground = Pincel $Cores.warn
+        } else {
+            $UI.lblReler.Text       = "[F5] " + (Traduzir "Atualizar")
+            $UI.lblReler.Foreground = Pincel $Cores.txt
+            $UI.icoReler.Foreground = Pincel $Cores.txt
+        }
+    } catch { }
+}
+
+function Invoke-Reler {
+    # 19.6: reler durante a conversao chamava Stop-Motor e matava o lote.
+    # O botao ja fica apagado; o F5 nao olhava o botao. Guarda aqui tambem.
+    if ($Estado.Atual -eq "rodando" -or $Estado.Atual -eq "pausado") {
+        Escrever-Log "ATUALIZAR bloqueado (conversao em curso)" "ACAO"
+        return
+    }
+    <#  18.21: reler a pasta durante o censo troca a lista embaixo dele e joga
+        dois minutos de leitura fora - ver o bloco do Invoke-TrocarMedirEL. #>
+    if ($script:CensoRodando) {
+        Escrever-Log "ATUALIZAR bloqueado (censo completo em curso - reler a pasta trocaria a lista e o resultado do censo seria descartado). Cancele o censo (F11) se quiser reler agora." "ACAO"
+        return
+    }
     if ($script:Lendo) {
         # Botao esta como "Parar": aborta o reescaneamento em curso SEM reagendar
         # (o mesmo Cancelar que a troca de pasta usa; aqui sem ReleituraPendente).
@@ -10626,7 +13700,8 @@ $UI.btnReler.add_Click({
         Escrever-Log "CLIQUE: Atualizar (reler pasta)" "ACAO"
         Start-Leitura
     }
-})
+}
+$UI.btnReler.add_Click({ Invoke-Reler })
 $UI.lstFila.add_SelectionChanged({
     Update-Diagnostico
     Update-CabecalhoFila
@@ -10635,7 +13710,19 @@ $UI.lstFila.add_SelectionChanged({
     # tambem aparece. Sem isso, sair de um video desmarcado pra um marcado
     # deixava o botao travado (mais um caminho do mesmo bug).
     Update-BotaoModo
-    if ($script:AbaAtual -eq "faixas") { Fill-Faixas }
+    <#  18.11 - A TABELA DE FAIXAS ERA REFEITA DUAS VEZES POR CLIQUE.
+
+        Medido no log dele (17/09, 11:53:48,842 -> ,850 -> ,865): um clique em
+        MODO com a aba FAIXAS aparecendo gerou DOIS "FAIXAS: 5 faixa(s)". O
+        primeiro e o do proprio clique; o segundo nasce do Fill-Fila que vem
+        logo depois - repintar a lista dispara SelectionChanged, e o
+        SelectionChanged refazia a tabela inteira.
+
+        E a mesma familia do defeito da 18.06 (o programa desmarcando arquivo
+        sozinho): evento disparado pela REPINTURA, nao pelo usuario. Enquanto
+        a fila esta sendo pintada, ninguem trocou de video - e a tabela ja foi
+        refeita por quem mandou pintar. #>
+    if ($script:AbaAtual -eq "faixas" -and (-not $script:PintandoFila)) { Fill-Faixas }
 })
 $UI.abaFila.add_MouseLeftButtonUp({ Escrever-Log "ABA: Fila" "ACAO"; Set-Aba "fila" })
 $UI.btnMarcarTodos.add_MouseLeftButtonUp({ Set-TodosMarcados $true })
@@ -10645,10 +13732,35 @@ $UI.btnDesmarcarTodos.add_MouseLeftButtonUp({ Set-TodosMarcados $false })
 # nao dependemos de o WPF escrever de volta num PSCustomObject.
 $script:TrocaMarca = [System.Windows.RoutedEventHandler]{
     param($remetente, $evento)
+    <#  18.06 - O PROGRAMA DESMARCAVA ARQUIVO SOZINHO. ESTA NO LOG DELE:
+
+          00:56:25,482  EL: veredicto reaproveitado - Game.of.Thrones (FEL)
+          00:56:26,436  SELECAO: Game.of.Thrones -> desmarcado
+          00:56:29,573  EL: veredicto reaproveitado - Saving.Private.Ryan
+          00:56:30,250  SELECAO: Saving.Private.Ryan -> desmarcado
+
+        Ninguem clicou. Um segundo depois de cada linha ser desenhada, o
+        proprio programa desmarcava o arquivo. Dai os prints impossiveis: o
+        Ryan com a caixinha MARCADA dizendo "Fora da Fila", e o Troy DESMARCADO
+        dizendo "Proximo a Converter" - a caixinha mostrando uma coisa e o
+        estado sendo outro.
+
+        A CAUSA, e o comentario que estava aqui era a minha suposicao errada:
+        eu escrevi que o disparo sintetico do WPF "SEMPRE bate com o modelo".
+        Nao bate. A lista reciclava os containers das linhas, e o WPF aplica o
+        Tag (que era o INDICE) e o IsChecked em momentos diferentes: chegava
+        evento com o indice de UMA linha e o estado de OUTRA. Como os dois
+        diferiam, isto aqui achava que era clique de gente e GRAVAVA.
+
+        Licao 30 de novo, agora no clique: indice e endereco temporario. A
+        caixinha passou a se identificar pelo CAMINHO DO ARQUIVO, que nao muda
+        de dono, e a lista parou de reciclar linha (sao dezenas, nao milhares).
+        E enquanto a fila esta sendo repintada, evento de caixinha nao e
+        clique: e eco do desenho. #>
+    if ($script:PintandoFila) { return }
     $cx = $evento.OriginalSource
     if (-not ($cx -is [System.Windows.Controls.CheckBox])) { return }
-    $i = -1
-    if ($null -ne $cx.Tag) { $i = [int]$cx.Tag }
+    $i = Achar-LinhaPorCaminho "$($cx.Tag)" -1
     if ($i -lt 0 -or $i -ge $script:Videos.Count) { return }
     $novo = [bool]$cx.IsChecked
     # Fill-Fila reconstroi a lista a cada video lido; todo checkbox que nasce
@@ -10705,19 +13817,159 @@ $UI.btnModoVideo.add_MouseLeftButtonUp({
 <#  17.15: dois botoes, UMA acao. Duplicar o corpo do clique seria criar
     duas versoes da mesma regra para elas divergirem depois - e o defeito que
     este projeto persegue desde a 16.79. #>
+<#  17.21 - A CHAVE DISPARAVA UMA LEITURA POR CLIQUE.
+
+    MEDIDO no log do Diego (15/09 20:31:26 -> 20:31:35): oito trocas em nove
+    segundos, e OITO releituras da pasta. Cada uma cancela a anterior no meio,
+    e entre uma e outra a fila fica vazia - por isso o log alterna
+    "SELECAO: 1 de 1" e "SELECAO: 0 de 0" e a tela pisca. Ele: "as cores e os
+    botoes demoram para voltar ao normal".
+
+    A chave em si e instantanea: o que custa e a leitura. Entao a chave
+    responde na hora (rotulo, cor, preferencia guardada) e a leitura espera
+    400ms de silencio - quem clicou seis vezes le a pasta UMA. Mesmo freio do
+    TimerRedim, pelo mesmo motivo. #>
+<#  17.23 - "PQ TEM Q RELER A PASTA QUANDO DESLIGA?" (Diego, 16/09)
+
+    Ele estava certo, e o log dele prova com numero. Na sessao de 15/09 a
+    CHAVE sozinha disparou 28 RELEITURAS, num total de 254,5s de leitura -
+    mais de quatro minutos esperando. E o comentario que eu mesmo escrevi na
+    17.10 dizia "releitura e barata (a fase A e instantanea)". Nunca foi
+    medido: a fase A custa ~4s POR ARQUIVO (12,93s para tres, no log de
+    hoje). Afirmacao minha sem medida, exatamente o que este projeto persegue.
+
+    E o pior: RELER COM A CHAVE DESLIGADA NAO PRODUZ NADA. A fase A marca
+    todo P7+EL como MEDINDO de qualquer jeito; quem decide e a linha 2658,
+    que com a chave desligada pula a fase B e manda "el_fim Desligada". Dai
+    Fechar-MedicaoPendente vira todos em "EL nao medida" - que e exatamente o
+    estado em que eles JA estariam se ninguem tivesse lido nada. Quatro
+    minutos para chegar na mesma tela.
+
+    Pior ainda: a releitura JOGA FORA veredicto ja pago. Start-Leitura faz
+    $script:Videos.Clear(), entao o FEL do GOT, que custou 14,8s para medir,
+    morria porque ele desligou a chave. Ligar de novo cobrava os 14,8s outra
+    vez.
+
+    A REGRA NOVA, em uma frase: a chave decide se MEDE DAQUI PRA FRENTE, nao
+    manda esquecer o que ja foi medido.
+
+      DESLIGAR -> nao le nada. Encerra a medicao em curso (quem estava no
+        meio vira "EL nao medida", como sempre) e mantem na tela o veredicto
+        de quem JA foi medido - medida e fato, nao preferencia.
+      LIGAR    -> se todo mundo da fila ja tem veredicto, nao ha o que medir
+        e nao se le nada. So le quando existe arquivo sem veredicto - porque
+        hoje a fase B mora dentro da leitura (linha 2658) e nao sabe nascer
+        sozinha. Essa parte fica para quando valer a pena separar. #>
+function Get-PendentesDeMedida {
+    # P7 com camada EL e sem veredicto - os unicos que a fase B tocaria.
+    if (-not $script:Videos) { return @() }
+    return @($script:Videos | Where-Object {
+        [int]$_.DVperfil -eq 7 -and "$($_.DVcamadas)" -match "EL" -and
+        ("$($_.ELtipo)" -eq "NAO_MEDIDO" -or "$($_.ELtipo)" -eq "MEDINDO")
+    })
+}
+
+<#  ============================================================================
+    18.00 - A CHAVE VOLTOU A SER UMA CHAVE
+
+    Ate a 17.24 este botao tinha SEIS saidas diferentes, cada uma um "if" que eu
+    somei quando um caso quebrou:
+
+        ligada - N sem veredicto, relendo a pasta para medir
+        ligada - a leitura em curso ja vai medir
+        ligada - todos ja tem veredicto, nada a medir
+        desligada - a medicao em curso foi encerrada
+        desligada durante a leitura - a leitura TERMINA, so a medicao foi cancelada
+        desligada - o veredicto ja medido continua valendo
+
+    Seis mensagens para um clique nao e modelo, e casuistica. Do lado de fora
+    vira comportamento imprevisivel, e foi exatamente o que o Diego relatou.
+
+    Com os tres trabalhos separados sobram DUAS regras, e elas cabem numa frase:
+
+        LIGADA   -> se ha arquivo sem veredicto na fila, mede. Senao, nada.
+        DESLIGADA-> para a medicao, se houver uma rodando. O que ja foi medido
+                    continua valendo: medida e fato, nao preferencia.
+
+    A leitura da pasta NAO aparece em lugar nenhum desta regra - e essa e a
+    diferenca. Ligar ou desligar a chave nunca mais le pasta, nunca mais mata
+    censo, e nunca mais congela a janela.
+
+    O freio de 400ms continua, pelo motivo de sempre: o rotulo responde no
+    clique, a acao espera o usuario parar de clicar. Oito cliques seguidos
+    fazem UMA coisa so, no fim. #>
+$TimerChaveEL = New-Object System.Windows.Threading.DispatcherTimer
+$TimerChaveEL.Interval = [TimeSpan]::FromMilliseconds(400)
+$TimerChaveEL.add_Tick({
+    if ($script:Fechando) { return }
+    $TimerChaveEL.Stop()
+    if ($Estado.Atual -ne "inicial") { return }
+
+    if (-not $script:MedirELLigado) {
+        if ($script:MedindoEL) {
+            Stop-Medicao
+            Escrever-Log "MEDIR EL: desligada - a medicao em curso esta sendo encerrada" "ACAO"
+        } else {
+            Escrever-Log "MEDIR EL: desligada - nada estava sendo medido; o veredicto ja obtido continua valendo" "ACAO"
+        }
+        return
+    }
+
+    <#  Ligada: se a leitura ainda esta rodando, nao ha o que medir AGORA - a
+        fila nem existe inteira. Quem dispara a medicao nesse caso e o
+        "leitura_fim", que confere a chave no momento certo. #>
+    if ($script:Lendo) {
+        Escrever-Log "MEDIR EL: ligada - a medicao comeca assim que a leitura terminar" "ACAO"
+        return
+    }
+    $faltam = @(Get-PendentesDeMedida).Count
+    if ($faltam -eq 0) {
+        Escrever-Log "MEDIR EL: ligada - todos os arquivos da fila ja tem veredicto" "ACAO"
+        return
+    }
+    Start-Medicao
+})
+
+<#  18.21 - O QUE PODE QUEBRAR O CENSO AGORA FICA TRAVADO ENQUANTO ELE RODA.
+
+    "tipo ligar e desligar fel nao eh uma logica melhor? sem engessar o
+    programa vc pode seguir essa logistica" (Diego, 17/09). E a logistica certa,
+    e o log dele de 21:56:32 mostra por que - com o censo rodando ele alternou
+    F12 seis vezes em dois segundos:
+
+      21:56:32,390  MEDIR EL: DESLIGADO
+      21:56:32,438  CENSO COMPLETO: lendo o RPU do filme inteiro
+      21:56:32,551  MEDIR EL: LIGADO        <- a medicao quer abrir dovi_tool
+                                               no mesmo disco que o censo esta
+                                               lendo de ponta a ponta
+
+    Sao DUAS acoes, e as duas mexem no chao onde o censo pisa:
+
+      F12  liga a medicao, que dispara dovi_tool por arquivo pendente - disco
+           disputado com o censo, que e justamente o que a 17.21 proibiu para
+           a conversao e esqueceu de proibir aqui;
+      F5   rele a pasta e REFAZ a lista - o arquivo que esta sendo contado pode
+           sair dela, e o resultado do censo cai no "nao esta mais na lista,
+           resultado descartado". Dois minutos de leitura no lixo.
+
+    Travar nao e engessar: o censo dura cerca de dois minutos, ele mesmo pode
+    ser cancelado a qualquer momento pelo proprio botao, e a recusa DIZ como
+    sair ("cancele o censo primeiro"). #>
 function Invoke-TrocarMedirEL {
     if ($Estado.Atual -in @("rodando","pausado")) {
         Escrever-Log "MEDIR EL bloqueado (conversao em curso)" "ACAO"
+        return
+    }
+    if ($script:CensoRodando) {
+        Escrever-Log "MEDIR EL bloqueado (censo completo em curso - ele le o filme inteiro e a medicao disputaria o mesmo disco). Cancele o censo (F11) se quiser trocar agora." "ACAO"
         return
     }
     $script:MedirELLigado = -not $script:MedirELLigado
     Salvar-MedirEL
     Update-BotaoMedirEL
     Escrever-Log ("MEDIR EL: {0}" -f $(if ($script:MedirELLigado) { "LIGADO" } else { "DESLIGADO" })) "ACAO"
-    if ($script:Videos.Count -gt 0 -or $script:Lendo) {
-        Escrever-Log "MEDIR EL: relendo a pasta para a fila refletir a chave" "ACAO"
-        Start-Leitura
-    }
+    $TimerChaveEL.Stop()
+    $TimerChaveEL.Start()
 }
 
 $UI.btnMedirEL.add_MouseLeftButtonUp({ Invoke-TrocarMedirEL })
@@ -10865,22 +14117,129 @@ $UI.btnFerramentas.add_Click({
     Show-JanelaTexto "LaFirma - Ferramentas" $sb.ToString()
 })
 
+<#  17.20 - O ESC NAO DESISTIA DA ESPERA PELA MEDICAO.
+
+    Visto no log do Diego, 19:42:32: ele clicou Iniciar com a medicao rodando,
+    escolheu ESPERAR, mudou de ideia e apertou ESC - e o log respondeu
+    "ignorada - nao se aplica ao estado 'inicial'". Ele so conseguiu sair
+    desligando a chave de medicao, que e um caminho que ninguem adivinha.
+
+    O estado E "inicial", entao o botao Cancelar esta apagado com razao: nao
+    ha conversao para cancelar. Mas existe UMA COISA PENDENTE - o Iniciar
+    represado - e ESC e a tecla de "desisto". Quando a unica coisa em curso e
+    a espera, ESC desiste dela.
+
+    Nao mexe na medicao: ela continua rodando em segundo plano e os arquivos
+    seguem ganhando veredicto. O que se cancela e a PROMESSA de comecar
+    sozinho quando ela acabar. #>
+function Invoke-DesistirDaEspera {
+    if (-not $script:IniciarAposMedir) { return $false }
+    $script:IniciarAposMedir = $false
+    Set-BotaoIniciar (($Estado.Atual -eq "inicial") -and (@(Get-Marcados).Count -gt 0))
+    Update-AvisoEspera
+    Escrever-Log "INICIAR: a espera pela medicao foi cancelada pelo usuario (ESC) - a medicao continua" "ACAO"
+    return $true
+}
 # Teclado global: F1 inicia; F2 alterna Pausar/Retomar; ESC cancela.
 $Janela.add_PreviewKeyDown({
     param($s,$e)
-    if ($e.Key -in @("F1","F2","Escape")) {
+    <#  18.17 - A TECLA PAROU DE DIZER "IGNORADA" E AGIR ASSIM MESMO.
+
+        MEDIDO no log dele de 17/09, 16:47:11,7 (e mais 40 vezes seguidas):
+
+          TECLA: F11 (ignorada - nao se aplica ao estado 'rodando')
+          CENSO COMPLETO: o anterior ainda esta encerrando - o novo comeca...
+
+        Ou seja: a janela escrevia que tinha ignorado a tecla e chamava a acao
+        logo em seguida - duas linhas contraditorias por tecla, e uma delas
+        mentira (licao 2). A causa e simples: esse "vale" servia para F1/F2/ESC,
+        onde quem manda e o IsEnabled do botao, e eu o estendi para F11/F12, onde
+        quem manda e a REGRA DENTRO da funcao.
+
+        Agora cada tecla registra so o que e verdade: as que dependem do botao
+        continuam conferindo o botao; as que tem regra propria apenas dizem que
+        foram apertadas e deixam a funcao explicar o que fez - que e o que ela
+        ja fazia bem ("MEDIR EL bloqueado (conversao em curso)"). #>
+    <#  18.18: tecla SEGURADA repete sozinha (auto-repeat do Windows). No log
+        dele isso virou 20 "MEDIR EL: LIGADO/DESLIGADO" em dois segundos, que e
+        ruido e nao intencao. A primeira batida vale; as repeticoes, nao. #>
+    if ($e.IsRepeat) { $e.Handled = $true; return }
+    <#  18.21: o F11 entrou para o grupo que confere o BOTAO. Ele ficou de fora
+        na 18.17 com um motivo que era verdade na epoca ("quem manda e a regra
+        dentro da funcao") e deixou de ser na 18.16, quando o botao virou
+        liga/desliga: a partir dali o IsEnabled do censo passou a valer para as
+        duas portas, e so a do mouse obedecia. Conferir o mesmo botao e a
+        unica forma de mouse e teclado NAO poderem discordar - ler a mesma
+        propriedade e mais forte que repetir a mesma regra em dois lugares. #>
+    <#  18.23: F3 e F4 abrem as pastas. Sao os unicos botoes da barra que nunca
+        ficam apagados (abrir uma pasta nao depende de estado nenhum), entao
+        nao ha recusa a explicar - mas eles conferem o botao do mesmo jeito que
+        os outros, porque a regra tem que ser a mesma para todos e nao a que
+        cada caso permitiria. #>
+    if ($e.Key -in @("F1","F2","F3","F4","F11","Escape")) {
         $vale = switch ($e.Key) {
             "F1"     { $UI.btnIniciar.IsEnabled }
             "F2"     { $UI.btnPausar.IsEnabled }
-            "Escape" { $UI.btnCancelar.IsEnabled }
+            "F3"     { $UI.btnAbrirOrigem.IsEnabled }
+            "F4"     { $UI.btnAbrirSaida.IsEnabled }
+            "F11"    { $UI.btnCenso.IsEnabled }
+            "Escape" { $UI.btnCancelar.IsEnabled -or $script:IniciarAposMedir }
         }
         if ($vale) { Escrever-Log ("TECLA: {0}" -f $e.Key) "ACAO" }
+        elseif ($e.Key -eq "F11") {
+            <#  18.22 - A SEGUNDA PARTE: A RECUSA TEM QUE DIZER A VERDADE.
+
+                "(ignorada - nao se aplica ao estado 'inicial')" trinta vezes
+                no log dele. O estado ERA inicial, e era a coisa certa - a
+                frase apontava para onde o problema nao estava, e por isso ele
+                ficou batendo na tecla. O motivo real ("o censo anterior ainda
+                esta encerrando") ja existia, escrito, na dica do botao; era so
+                usar a mesma frase, de um lugar so, como o resto do programa
+                ja faz desde a 18.18. #>
+            $iSel = $UI.lstFila.SelectedIndex
+            $vSel = $(if ($iSel -ge 0 -and $iSel -lt $script:Videos.Count) { $script:Videos[$iSel] } else { $null })
+            Escrever-Log ("TECLA: F11 recusada - {0}" -f (Get-MotivoCenso $vSel)) "ACAO"
+        }
+        elseif ($e.Key -eq "Escape") {
+            <#  2.0.2 - O MESMO DEFEITO DO F11, PELA OUTRA TECLA (licao 46).
+
+                Log do Diego, 22/09: ele apertou [ESC], o motor ficou minutos
+                em "cancelando", ele apertou [ESC] de novo e o log respondeu
+                "(ignorada - nao se aplica ao estado 'rodando')". O estado ERA
+                rodando, e era a verdade - e era inutil. A frase apontava para
+                onde o problema nao estava, exatamente como a do F11 fazia
+                antes da 18.22, e ele fez a unica coisa que sobrava: fechou a
+                janela na mao.
+
+                O motivo real existe e e outro em cada caso: ou o cancelamento
+                JA foi pedido e esta em curso, ou nao ha o que cancelar. #>
+            if ($script:TsCancel) {
+                $hCancel = [int]((Get-Date) - $script:TsCancel).TotalSeconds
+                Escrever-Log ("TECLA: Escape recusada - o cancelamento ja foi pedido ha {0}s e esta em curso; estou esperando a etapa atual soltar os programas dela. Apertar de novo nao acelera." -f $hCancel) "ACAO"
+            } else {
+                Escrever-Log "TECLA: Escape recusada - nao ha conversao em curso para cancelar." "ACAO"
+            }
+        }
         else { Escrever-Log ("TECLA: {0} (ignorada - nao se aplica ao estado '{1}')" -f $e.Key, $Estado.Atual) "ACAO" }
+    }
+    elseif ($e.Key -in @("F5","F12")) {
+        Escrever-Log ("TECLA: {0}" -f $e.Key) "ACAO"
     }
     switch ($e.Key) {
         "F1"     { if ($UI.btnIniciar.IsEnabled) { Invoke-Iniciar }; $e.Handled = $true }
         "F2"     { if ($UI.btnPausar.IsEnabled)  { Invoke-TogglePausa }; $e.Handled = $true }
-        "Escape" { if ($UI.btnCancelar.IsEnabled) { Invoke-Cancelar; $e.Handled = $true } }
+        "F3"     { if ($UI.btnAbrirOrigem.IsEnabled) { Invoke-AbrirOrigem }; $e.Handled = $true }
+        "F4"     { if ($UI.btnAbrirSaida.IsEnabled)  { Invoke-AbrirSaida  }; $e.Handled = $true }
+        "F5"     { Invoke-Reler; $e.Handled = $true }   # 19.6: a guarda de estado mora DENTRO de Invoke-Reler (um dono)
+        "F11"    { if ($UI.btnCenso.IsEnabled) { Invoke-BotaoCenso }; $e.Handled = $true }
+        "F12"    { Invoke-TrocarMedirEL; $e.Handled = $true }
+        "Escape" {
+            <#  17.20: a espera vem PRIMEIRO. Com ela pendente o estado e
+                "inicial" e o Cancelar esta apagado, entao os dois nunca
+                disputam - mas a ordem deixa a regra escrita. #>
+            if (Invoke-DesistirDaEspera) { $e.Handled = $true }
+            elseif ($UI.btnCancelar.IsEnabled) { Invoke-Cancelar; $e.Handled = $true }
+        }
     }
 })
 
@@ -10892,6 +14251,7 @@ $Janela.add_PreviewKeyDown({
 $TimerRedim = New-Object System.Windows.Threading.DispatcherTimer
 $TimerRedim.Interval = [TimeSpan]::FromMilliseconds(400)
 $TimerRedim.add_Tick({
+    if ($script:Fechando) { return }
     $TimerRedim.Stop()
     if ($Estado.Atual -eq "inicial") { Update-Disco }
     $tam = "{0}x{1}" -f [int]$Janela.ActualWidth, [int]$Janela.ActualHeight
@@ -10934,6 +14294,7 @@ $Janela.add_ContentRendered({
         seria escrita no vazio, e o numero que manda na estimativa inteira
         ficaria sem rastro. #>
     Carregar-Calibragem
+    Carregar-CalibragemEtapas
     Escrever-Log ("Interface renderizada. Iniciar chama o motor{0} DE VERDADE - a conversao escreve na pasta de saida." -f $verMotor)
 })
 # 16.12: fechar a janela no meio de uma conversao e cancelar por outro nome -
@@ -10941,8 +14302,15 @@ $Janela.add_ContentRendered({
 $Janela.add_Closing({
     param($remetente, $ev)
     if ($Estado.Atual -notin @("rodando","pausado")) { return }
-    $texto = ("Fechar o programa agora?`n`nA conversão está em andamento. Fechar cancela o vídeo que está sendo montado - o arquivo parcial é apagado e o tempo gasto nele se perde.`n`nOs vídeos que já terminaram continuam na pasta de saída.")
-    if (-not (Confirm-Parar "LaFirma - fechar com conversão em andamento?" $texto)) {
+    # 17.19: tambem saia so em portugues - ver o bloco do Invoke-Cancelar.
+    $texto = if ($script:Lang -eq "EN") {
+        ("Close the program now?`n`nA conversion is running. Closing cancels the video being assembled - the partial file is deleted and the time spent on it is lost.`n`nVideos that already finished stay in the output folder.")
+    } else {
+        ("Fechar o programa agora?`n`nA conversão está em andamento. Fechar cancela o vídeo que está sendo montado - o arquivo parcial é apagado e o tempo gasto nele se perde.`n`nOs vídeos que já terminaram continuam na pasta de saída.")
+    }
+    $tituloFechar = if ($script:Lang -eq "EN") { "LaFirma - close with a conversion running?" }
+                    else { "LaFirma - fechar com conversão em andamento?" }
+    if (-not (Confirm-Parar $tituloFechar $texto)) {
         # 16.23: mesma armadilha do Invoke-Cancelar. Se a conversao terminou
         # enquanto a pergunta estava aberta, NAO faz sentido segurar a janela
         # aberta por causa de um trabalho que ja acabou - o "Nao" respondia a
@@ -10958,8 +14326,36 @@ $Janela.add_Closing({
     Escrever-Log "FECHAR a janela CONFIRMADO com a conversao em andamento" "ACAO"
 })
 $Janela.add_Closed({
+    <#  18.12 - FECHAR TEM QUE PARAR TODOS OS RELOGIOS, NAO UM SO.
+
+        Log dele de 10/09, 01:26:31,8 - trocar o idioma e mandar reiniciar:
+
+          01:26:31,7  IDIOMA: reinicio pedido pelo usuario
+          01:26:31,8  ERRO: Nao sera possivel definir Visibility nem chamar
+                      Show, ShowDialog ou WindowInteropHelper.EnsureHandle
+                      depois que uma Janela for fechada.
+
+        A janela fechava e so o TimerFila era parado. Os outros quatro
+        DispatcherTimer continuavam batendo no dispatcher que ainda estava
+        vivo, e o primeiro que encostou na janela morta estourou. Nao e
+        cosmetico: um erro desses no fechamento pode deixar o processo velho
+        pendurado enquanto o novo ja esta subindo.
+
+        A flag existe para o que NAO e relogio: BeginInvoke ja agendado,
+        mensagem em voo, callback que chega depois. Quem mexe na tela pergunta
+        antes se a janela ainda existe. #>
+    $script:Fechando = $true
     Escrever-Log "Janela fechada pelo usuario"
-    $TimerFila.Stop()
+    foreach ($t in @($TimerFila, $TimerPausa, $TimerFilaRelogio, $TimerChaveEL, $TimerRedim)) {
+        try { if ($t) { $t.Stop() } } catch { }
+    }
+    <#  2.0.10: o censo e a medicao tambem. Stop-Motor so cuida da leitura e do
+        motor - fechar a janela com o [F11] rodando deixava o dovi_tool lendo o
+        filme inteiro sem janela nenhuma (e, no "reiniciar para trocar o
+        idioma", disputando o disco com a instancia nova). Mesma guarda do
+        Iniciar (Invoke-IniciarInterno). #>
+    try { if ($script:CensoRodando) { Escrever-Log "CENSO COMPLETO: encerrado - a janela foi fechada" "ACAO"; Stop-Censo } } catch { }
+    try { if ($script:MedindoEL) { Escrever-Log "MEDICAO: encerrada - a janela foi fechada" "ACAO"; Stop-Medicao } } catch { }
     Stop-Motor
     Escrever-Log ("===== fim da sessao - {0} linhas registradas =====" -f $script:LogLinhas.Count)
     if ($script:LogEscritor) { try { $script:LogEscritor.Dispose() } catch { } }

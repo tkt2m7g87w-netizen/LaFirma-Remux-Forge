@@ -17,6 +17,1969 @@
 
 
 ==============================================================================
+ INSTALLER 2.0  -  23/09/2026      *** PUBLIC RELEASE ***
+==============================================================================
+ Components: ENGINE 14.14 | WINDOW 19.15 | CORRECTOR 2.34 | REOCR 1.30 | TESTAR_LAFIRMA 4.7 (1,334 tests)
+
+ EVERYTHING THAT CHANGED SINCE 1.9.3 (last public release, 15/09/2026).
+ 9 days, 28 test builds (1.9.4 to 1.11.8 and 2.0 to 2.0.18), each listed below.
+
+ 1. Time forecast now really corrects itself: the old calibration cancelled
+    out in the math; it now scales SECONDS, one factor per stage. Pauses are
+    excluded. Final test: queue error between -8% and +2%.
+ 2. MEL x FEL: one colour, one meaning (green MEL, orange Simple FEL, red
+    Complex FEL). The census adds how many scenes are affected, never the colour.
+ 3. Full Census [F11]: whole-film RPU, result sent to the engine; estimate
+    takes the larger of disk and CPU; cancel kills its processes at once;
+    2.2x faster.
+ 4. Cancel / pause / close: [ESC] stops at the entry of every stage; cancel
+    while paused works; closing the window stops census, measurement and engine.
+ 5. Disk space checked before starting, per drive (source and output).
+ 6. Subtitles: seconv removed (OCR = PgsToSrt + Tesseract); Corrector 2.34
+    fixes many OCR misreads, verified on 7 films; no more invented proper
+    nouns; the grade says what it measures.
+ 7. Output: [BL+RPU] in the file name; output folder gets only .mkv + .srt.
+ 8. Window/installer: toolbar in work order, F3/F4 with a brake; reading,
+    measuring and census run as separate jobs; installer asks the language
+    and shows the EULA; PT/EN translation closed; installer runs in
+    64-bit mode; uninstall no longer leaves _logs and icone behind; blank
+    taskbar icon fixed (installer removes the old per-user Start Menu
+    shortcut that pointed to C:\LaFirma\icone).
+ 9. Tools: seconv, mkvextract and three DLLs removed. mkvmerge 102.0,
+    ffmpeg 9.0.1, MediaInfo 26.05, dovi_tool 2.3.3.
+
+ FINAL TEST: 3 of 3 films converted, video intact, subtitles EXCELLENT.
+
+
+==============================================================================
+ INSTALLER 2.0.18  -  23/09/2026      *** SHORT-FILM FORECAST ***
+==============================================================================
+ Components: ENGINE 14.14 | WINDOW 19.15 | CORRECTOR 2.34 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+
+ Remux stage with extracted video re-fitted on 6 measurements: 8s + 4.5 s/GB
+ (was 51s + 3.6). Short films were over-estimated by 20-27%.
+
+
+==============================================================================
+ INSTALLER 2.0.17  -  23/09/2026      *** OUTPUT FOLDER: MKV + SRT ONLY ***
+==============================================================================
+ Components: ENGINE 14.14 | WINDOW 19.14 | CORRECTOR 2.34 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+
+ The output folder no longer gets a <name>.LaFirma.log.txt copy next to
+ each film. Logs stay in _logs.
+
+
+==============================================================================
+ INSTALLER 2.0.16  -  23/09/2026      *** SEL AND PAL ***
+==============================================================================
+ Components: ENGINE 14.13 | WINDOW 19.13 | CORRECTOR 2.34 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+
+ CORRECTOR 2.34: "Sel." -> "Sei." (GoT) and "Pal..." -> "Pai..." (Troy, 3x),
+ only at the start of a line followed by punctuation.
+
+
+==============================================================================
+ INSTALLER 2.0.15  -  23/09/2026      *** OCR ERRORS THE GRADE DID NOT COUNT ***
+==============================================================================
+ Components: ENGINE 14.13 | WINDOW 19.13 | CORRECTOR 2.33 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+
+ CORRECTOR 2.33 fixes OCR misreads the grade (which counts unreadable
+ blocks) did not show: Sailam, SO/AI in caps, "F, Ae G", "2 Seus", magoel, "E Isso".
+ Checked against all 8 test subtitles: only those lines change.
+
+
+==============================================================================
+ INSTALLER 2.0.13  -  23/09/2026      *** THE BIG FINAL TEST ***
+==============================================================================
+ Components: ENGINE 14.13 | WINDOW 19.13 | CORRECTOR 2.31 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+
+ 3-film queue, 3 of 3 converted; per-film forecast -10.1% / +1.2% / -0.3%.
+ Fixed: top "[F12]" label now follows the language switch; the next file's
+ footer no longer inherits the previous stage clock; an OCR stuck at 10%
+ no longer inflates the remaining time.
+
+
+==============================================================================
+ INSTALLER 2.0.11  -  23/09/2026      *** EACH DRIVE, ITS OWN MATH ***
+==============================================================================
+ Components: ENGINE 14.13 | WINDOW 19.11 | CORRECTOR 2.31 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+
+ Disk space is checked per drive: same drive as before; with source and
+ output on different drives, source needs (factor - 1)x and output 1x. The
+ card names the short drive; "Free Now" shows both. The SRT track is named
+ "Português (Brasil) [OCR]".
+
+
+==============================================================================
+ INSTALLER 2.0.10  -  23/09/2026      *** ACCEPTANCE TEST AND AUDIT ***
+==============================================================================
+ Components: ENGINE 14.12 | WINDOW 19.10 | CORRECTOR 2.31 | REOCR 1.30 | TESTAR_LAFIRMA 4.7
+ Requires dovi_tool 2.3.3 (unchanged).
+
+ The 2.0.9 acceptance test passed all four items. This release only fixes
+ what those logs and a full re-read of the sources showed. No new features.
+ - Pause time no longer inflates the footer math (a 29 s pause in the OCR
+   pushed "remaining" from 196 s to 422 s and the video % backwards).
+ - TrueHD audio bar uses the measured DeeZy phase split (24/7/69 %, from
+   20 conversions) instead of 1/3 each.
+ - ESC now removes this episode's subtitle work files (_corretor/_reocr).
+ - Log: no more "[CANCELADO] [CANCELANDO]", no duplicated sub-step lines,
+   no warning when a process had already exited on its own.
+ - Title "Ready to Convert" shows the number of videos again.
+ - A pause spanning a stage change is no longer lost; cancelling while
+   paused leaves the paused screen; closing the window stops the Full
+   Census and the MEL/FEL measurement; resuming a long pause no longer
+   drops "remaining" at once; the queue forecast in the log excludes pauses.
+ - Engine: the HDR metadata catch no longer throws and kills the whole
+   pre-diagnosis; the .NET warning checked seconv before it was defined;
+   the Reocr 15-min cap now kills tesseract too; console summary separates
+   "not enough space" from "already existed".
+ - A file removed between reading and Start no longer shifts estimates and
+   calibration to the next file; the census measures disk speed per file.
+ - CORRECTOR 2.31: "Porque vou pegá-los" is no longer taken for Spanish.
+ Not in this release: no approved screen text changed, no new features.
+
+
+==============================================================================
+ INSTALLER 2.0.9  -  23/09/2026      *** THE HEADER IS BACK ***
+==============================================================================
+ Components: ENGINE 14.11 | WINDOW 19.9 | CORRECTOR 2.30 | REOCR 1.30 | TESTAR_LAFIRMA 4.6
+
+ The "[LOSS IN N OF M SCENES]" label from 2.0.7 was reverted at the user's
+ request: the usual "[CONVERSION NOT RECOMMENDED]" header is back; the
+ census only appends its numbers.
+
+
+==============================================================================
+ INSTALLER 2.0.8  -  23/09/2026      *** START WAS BROKEN ***
+==============================================================================
+ Components: ENGINE 14.10 | WINDOW 19.8 | CORRECTOR 2.30 | REOCR 1.30 | TESTAR_LAFIRMA 4.6
+
+ 2.0.7 could not start any conversion ("Argument types do not match"): the
+ new census block iterated @($script:Videos), and @() over a List[object]
+ throws. Fixed; the test suite now executes that block.
+
+
+==============================================================================
+ INSTALLER 2.0.7  -  23/09/2026      *** WHAT THE LOGS SHOWED ***
+==============================================================================
+ Components: ENGINE 14.10 | WINDOW 19.7 | CORRECTOR 2.30 | REOCR 1.30 | TESTAR_LAFIRMA 4.6
+
+ A re-read of 128 test logs (04/09 to 22/09). No new features.
+ - Census and verdict contradicted each other; with the census done the
+   label is the fact: "[LOSS IN 15 OF 2,225 SCENES (0.7%)]".
+ - "No defects" next to "1 failure" is gone; no more fixed Reocr example.
+ - seconv removed from the installer (~91 MB smaller); the update deletes
+   the old tools\SubtitleEdit folder.
+ - seconv only runs without PgsToSrt (rejected in 7 of 7 films measured).
+ - Corrector 2.30: "OnStar" and a Spanish "la" are no longer changed.
+ - Pause and cancelled stages no longer poison the time calibration.
+ - A cancelled measurement no longer resumes after a folder change.
+ - The title shows the real version.
+
+
+==============================================================================
+ INSTALLER 2.0.6  -  23/09/2026      *** FULL REVIEW ***
+==============================================================================
+ Components: ENGINE 14.9 | WINDOW 19.6 | CORRECTOR 2.29 | REOCR 1.30 | TESTAR_LAFIRMA 4.5
+
+ A review of the whole code base. Only confirmed defects went in, each with
+ a test (section 54), executed where possible.
+
+ ENGINE 14.9
+ - Profile 5 used the DURATION of the previous file in the queue.
+ - ESC during a Profile 5 remux did not stop the batch; now it cancels,
+   removes the partial .mp4 and stops like any other stage.
+ - A process started after ESC (between two stages) was waited on instead
+   of killed.
+ - A failed Profile 5 was recorded as "FALHA" and vanished from the summary.
+ - The Profile 5 card claimed TrueHD, OCR and Matroska; it now says what
+   was done (Profile 5 -> MP4, MPEG-4).
+ - On cancel or failure the copied .srt is removed with the .mkv.
+
+ WINDOW 19.6
+ - F5 (Refresh) during a conversion re-read the folder and killed the batch.
+ - Start threw away the end-of-measurement / end-of-census messages.
+ - A late end-of-measurement could restart the measurement mid-conversion.
+ - Profile 5 card has its own badge and container.
+
+ CORRECTOR 2.29 - four rules that damaged correct text
+ - A CamelCase name seen once ("OnStar") was lowercased.
+ - "OS rumores" became "os rumores"; now "Os rumores".
+ - Compound names ("Muhammad Ali") had the second name lowercased.
+ - A short dialogue line in a 3-line block ("- Sam!") was deleted.
+
+ TRANSLATION
+ - Missing card badges, the census refusal, the empty-folder reason, and a
+   rule-order bug in the "Kept on Request" badge. Dead and duplicate
+   entries removed.
+
+ NOTHING LEFT FOR LATER
+ - ENGINE: [F2] now pauses the whole process tree (tesseract under the
+   Corrector/Reocr kept running). An existing Profile 5 .mp4 is seen before
+   the diagnosis. ESC during OCR says "cancelled", not "OCR failed".
+ - WINDOW: process lookups capped at 3 s; disk speed cached per file; the
+   empty-folder reason no longer vanishes; census hint consistent with the
+   button; "Next:" translated once; Start re-enables after the wait.
+ - CORRECTOR: a loose dialogue dash opens a sentence; no l/i swap in
+   foreign blocks; two-letter names ("Al") survive block repair.
+ - REOCR 1.30: an orphan line no longer eats the next block's timing;
+   short names decided by the same list as the Corrector.
+ - DOCS: [BL+RPU], Profile 5 .mp4, F5/F11/F12 and the census ("informs,
+   never changes the colour") in both how-to files; English labels in
+   HOW_TO_USE; FAQ EN section 4 matches PT; census and EULA in both FAQs.
+
+
+==============================================================================
+ INSTALLER 2.0.5  -  22/09/2026      *** ONE COLOUR, ONE MEANING ***
+==============================================================================
+ Components: ENGINE 14.8 | WINDOW 19.5 | CORRECTOR 2.28 | TESTAR_LAFIRMA 4.4
+
+ 1. THE 2.0.2 GRADIENT WAS REVERTED
+ --------------------------------------------------------------------------
+ 2.0.2 made the Full Census step an "isolated" Complex FEL down from red to
+ orange. Orange is the Simple FEL colour, so it read as a reclassification -
+ while the end-of-conversion card still said Complex FEL. Two axes (what the
+ layer IS, and how much it weighs) had been put into one colour. The census
+ now adds the NUMBERS to the line and never changes the colour.
+
+ 2. THE CENSUS SPINNER SHOWED TWO BACKSLASHES - now one.
+
+
+==============================================================================
+ INSTALLER 2.0.4  -  22/09/2026    *** THE QUESTION COMES BEFORE THE WORK ***
+==============================================================================
+ Components: ENGINE 14.8 | WINDOW 19.4 | CORRECTOR 2.28 | TESTAR_LAFIRMA 4.4
+
+ 1. CANCEL DID NOT STOP THE HANDOVER BETWEEN STAGES
+ --------------------------------------------------------------------------
+ He pressed [ESC] and the engine went on to build the WHOLE final MKV - 19
+ GB, 1m42 - only to DELETE it immediately after. 104 seconds of work started
+ after the stop request.
+
+ And the guard existed. It sat at the END of the episode, with a comment
+ naming the exact problem: "if ESC is pressed between two stages, neither
+ fails - without this guard the episode would be recorded as finished". It
+ protected the RECORD, not the user's TIME. Asking "was it still worth it?"
+ after doing the work is bookkeeping, not cancelling.
+
+ 2.0.3 put the question in the three OCR fallbacks because that is what that
+ day's log showed. I did not go looking for the other doors, and the next
+ door was the biggest of all. A wrong pattern is fixed where it LIVES, not
+ only where it hurt.
+
+ Now EVERY stage asks on entry, and the test suite checks the question stage
+ by stage - and that it comes BEFORE each stage is announced.
+
+ 2. THE CENSUS CHANGED THE COLOUR BELOW AND LEFT THE ONE ABOVE
+ --------------------------------------------------------------------------
+ After the census the diagnosis line turned orange and the DOLBY VISION
+ column stayed RED - the same screen saying two things about one file. In
+ the log there is not a single queue-repaint line between the census
+ finishing and his next action.
+
+ 2.0.2 made the column and the diagnosis ask the SAME function for the
+ colour, and I treated that as solved. It was not: both ask the same way,
+ but only one was asked AGAIN. One owner of a rule is worthless if half the
+ screen never consults it again.
+
+ The lesson was already written one branch below in the same file: "new
+ state without a redraw is the screen lying."
+
+ 3. CHECKED AND CORRECT
+ --------------------------------------------------------------------------
+ * The GoT subtitle came out CLEAN - all 37 proper nouns intact. The 2.28
+   guards held, and the legitimate fixes still happened.
+ * No corrector report is produced when the subtitle scores EXCELLENT: the
+   engine deletes the working files on purpose. That is the cleanup, not a
+   failure.
+ * The census is 2.2x faster with 2.0.3: the same file went from 196.0s to
+   89.5s, and the estimate was off by 5%.
+
+
+==============================================================================
+ INSTALLER 2.0.3  -  22/09/2026    *** CANCEL IS A STATE, NOT AN EVENT ***
+==============================================================================
+ Components: ENGINE 14.7 | WINDOW 19.3 | CORRECTOR 2.28 | TESTAR_LAFIRMA 4.3
+
+ Everything in this version came out of ONE user test session. Nothing here
+ was hunted for by us: all four were in the log and the report he sent.
+
+ 1. [ESC] WAS NOT READ BY THE OCR FALLBACK CHAIN
+ --------------------------------------------------------------------------
+ Four lines of his log tell the whole story: the cancel killed seconv at
+ 11:57:31, the step read that death as "seconv failed", and the safety net
+ started PgsToSrt from scratch - 90 seconds - and then called the corrector,
+ which calls seconv again for its second opinion. THREE programs started
+ after the user said stop. He had to close the window by hand.
+
+ The cause is not the killing - it is the READING of the result. From below,
+ "I killed the tool" and "the tool failed" look identical: no file came out.
+ And the honest reaction to a failure is to try the backup. The question that
+ comes before that one was missing.
+
+ There is now ONE place that answers "is there still a point in starting?"
+ and all three fallbacks ask before starting. The question comes before the
+ sub-step is announced, too - announcing a step that will not run leaves a
+ phantom step on the bar, which is exactly what he sat watching.
+
+ > LESSON 50: CANCEL IS A STATE, NOT AN EVENT. Whoever has a plan B must ask
+ > whether there is still a POINT, before asking whether it worked.
+
+ 2. "seconv DID NOT PRODUCE A SUBTITLE" WHEN THE TRUTH WAS "I KILLED IT"
+ --------------------------------------------------------------------------
+ Same family, on the text side. When the shutdown was the cancel, the line
+ now says so. A third state needs a name.
+
+ 3. THE SECOND [ESC] WAS REFUSED WITH "DOES NOT APPLY TO STATE 'RUNNING'"
+ --------------------------------------------------------------------------
+ The state WAS running, and it was true - and it was useless. Same defect F11
+ had before 18.22, back through another key. The refusal now names the real
+ reason: either the cancel was already requested N seconds ago and is in
+ progress, or there is no conversion to cancel.
+
+ 4. THE CORRECTOR WAS INVENTING PROPER NOUNS
+ --------------------------------------------------------------------------
+ From the corrector report he sent: 'All Spark' became 'Ali Spark' five
+ times, 'Tut' became 'Tui', 'Autobotzinho' became 'Autoboizinho'. The OCR had
+ got all three RIGHT. We broke them - and much of the "13 OCR errors" 2.0.1
+ counted in that subtitle was our own work.
+
+ The letter-swap rule (l/t/| to i) was the ONLY rule in the corrector that
+ did not receive the proper-noun list. And the list would not have saved it
+ anyway, because the two ends asked with different functions: the harvester
+ asks one that finds "all" in the 1.3M dictionary and concludes "known word,
+ needs no protection", while the rule asks one that, under 4 letters, does
+ not consult that dictionary at all and concludes "never seen it" - then
+ swaps l for i, finds "ali", a legitimate Portuguese word, and rewrites.
+
+ Two functions answering the OPPOSITE about the same word, with the
+ protection depending on one and the damage on the other.
+
+ Three fixes: the rule receives the list; the harvester asks with the SAME
+ function the rules use; and two guards that depend on no dictionary at all -
+ a capitalized word next to another capitalized word is a name, and a
+ capitalized word in the MIDDLE of a sentence does not get letters swapped.
+
+ THE PRICE OF THE THIRD GUARD IS MEASURED AND WRITTEN IN THE CODE: in his
+ real report, this rule's changes to mid-sentence capitalized words were 1
+ correct fix against 7 corruptions. Losing the one fix is the right price:
+ not fixing is doing nothing; swapping a proper noun for another word is
+ handing back a file that is WORSE than it arrived, silently.
+
+ 5. THE CENSUS MINUTE THAT NO CLOCK WAS MEASURING
+ --------------------------------------------------------------------------
+ Both census clocks stopped before the L1_export.csv was read: 53s uncounted
+ on one file, 107s on another. The second had FEWER frames and took TWICE as
+ long - because the cost was Select-Object -Unique, which compares every row
+ against every unique row kept so far. It became a single HashSet pass, and
+ its time now counts: time no clock measures cannot feed the estimate, which
+ is why the estimate kept falling short no matter how it corrected itself.
+ The same pattern was replaced in the sample measurement, where the CSV is
+ small and the cost did not show.
+
+ 6. THE SUBTITLE VERDICT SENTENCE, AGAIN
+ --------------------------------------------------------------------------
+ The 2.0.1 one said the right thing badly. Same content, two clauses:
+     "No detectable defects. The counter does not catch a swapped proper name."
+
+
+==============================================================================
+ INSTALLER 2.0.2  -  22/09/2026      *** RED GAINED A STEP ***
+==============================================================================
+ Components: ENGINE 14.61 | WINDOW 19.2 | TESTAR_LAFIRMA 4.2 | CLICK BENCH 4.0
+
+ 1. COMPLEX FEL IS NO LONGER A SINGLE RED
+ --------------------------------------------------------------------------
+ The rule that painted a file red was one line: the peak of the brightest
+ scene against the peak of the mastering display. ONE scene above it turned
+ the whole file red - and red, in this program, means "this is the case that
+ ruins the picture".
+
+ The two cases we have MEASURED:
+
+     Saving Private Ryan   216 of 1,124 scenes (19.22%)  peak 3,468 / master 1,000
+     Transformers ROTF      15 of 2,225 scenes ( 0.67%)  peak 1,555 / master 1,000
+
+ The community spreadsheet measures the second one by a different route
+ (madVR, on the decoded image) and reports 0.3% of FRAMES above 1,000 nits -
+ with the SAME frame count as our census, 215,617. Both measurements agree
+ that this film barely touches above the master. It was getting the same
+ colour as a film that expands brightness all the way through.
+
+ A comment from 16.85 had already written what was missing - "an isolated
+ peak in one scene is a different thing from half the film above the ruler" -
+ and 16.87 explained why the sample could not answer it: 3 to 4 scenes are
+ not statistics. The FULL CENSUS is that condition met: it reads the whole
+ film.
+
+ NOW: with the census in hand, red steps down to ORANGE when BOTH guards pass
+ at once -
+
+     1. FREQUENCY   under 1% of the film's scenes
+     2. OVERSHOOT   the peak is no more than TWICE the master
+
+ Two on purpose. Half a dozen scenes asking for 4,000 nits on a 1,000-nit
+ master is rare AND severe - frequency alone does not describe that. The same
+ 20-scene floor the suspicious-ruler check already used applies: a percentage
+ of 5 scenes is not a percentage.
+
+ WHAT DOES NOT CHANGE, AND THE LOG SAYS SO: the layer is NOT reclassified.
+ FEL is still FEL, the EL is still discarded, the fine residual is still
+ lost. What changes is SEVERITY, which is what the colour communicates. That
+ is why the destination is orange - the colour of "converts, with a caveat" -
+ and NEVER green.
+
+ The numbers (1% and 2x) are a convention anchored on two measured cases, and
+ they are written in the code on purpose so they can be argued with instead of
+ becoming folklore. Two points are not a curve.
+
+ Column colour and diagnosis colour come from the same function - two parts
+ of the screen deciding the same colour by different rules was a defect here
+ before (16.84). The cache keeps the result, so re-reading the folder does
+ not resurrect the red of a file whose census already proved otherwise.
+
+ 2. THE ENGINE NOW SAYS ITS OWN MEASUREMENT IS A SAMPLE
+ --------------------------------------------------------------------------
+ The engine measures again at conversion time, by sample: it knows SOME scene
+ exceeds the master, not how many. So the window could say orange while the
+ engine log said "CONVERSION NOT RECOMMENDED" for the same file. They are not
+ fighting - they are measurements of different sizes - and the engine now
+ says so instead of letting the user discover the divergence alone.
+
+ 3. CHECKED BY SABOTAGE
+ --------------------------------------------------------------------------
+ Eleven sabotages, eleven caught. Test suite 1,187 tests, click bench 336
+ invariants.
+
+ 4. THE TEST SUITE NOW CHECKS ITS OWN ENCODING
+ --------------------------------------------------------------------------
+ It demanded CRLF from everything in fonte\ and never checked the one .ps1 it
+ cannot reach: itself. It had three stray LFs. No damage - but a file that
+ demands of others what it does not meet is the worst place for an exception.
+
+
+==============================================================================
+ INSTALLER 2.0.1  -  22/09/2026      *** THE NAME SAYS WHAT THE FILE IS ***
+==============================================================================
+ Components: ENGINE 14.6 | WINDOW 19.1 | TESTAR_LAFIRMA 4.1 | CLICK BENCH 4.0
+
+ 1. THE [BL+RPU] STAMP IN THE FINAL FILE NAME
+ --------------------------------------------------------------------------
+ Every .mkv this engine produces is single-layer BL+RPU video: either
+ dovi_tool converted Profile 7 (MEL/FEL) to 8.1, or the file already was
+ Profile 8.x with no Enhancement Layer. Files with no Dolby Vision are
+ skipped at diagnosis, and Profile 5 leaves through another door, as .mp4.
+ So the stamp holds for every .mkv the engine writes - and it is now in the
+ name:
+
+     Movie.2009.2160p.REMUX-GROUP [BL+RPU].mkv
+
+ THE "ALREADY EXISTS IN THE OUTPUT FOLDER" GUARD NOW CHECKS BOTH NAMES.
+ Everything converted before this version is stored under the OLD name, with
+ no stamp. Had the guard looked only at the new name, an entire library
+ would be reconverted from scratch on the first queue after updating - and
+ the good output overwritten at the end. The engine tests the new name AND
+ the old one, and the log says which of the two it found.
+ The stamp is never doubled: reconverting an already stamped file does not
+ produce "Movie [BL+RPU] [BL+RPU]".
+ The loose subtitle copy (.srt) and the log copy follow the new name, so the
+ player still matches the external subtitle to the movie.
+
+ 2. THE CENSUS ESTIMATE ONLY LOOKED AT THE CPU
+ --------------------------------------------------------------------------
+ Measured from the user's own logs:
+
+     Saving Private Ryan   82 GB / 2h49  on SSD  ->  sample x 4.7
+     Transformers ROTF     78 GB / 2h30  on HDD  ->  sample x 85.5
+
+ Same file size, factor 18 times apart. The CPU did not change - the DISK
+ did. The full census reads the WHOLE movie; on a mechanical drive the clock
+ is owned by reading, not by processing.
+ The estimate now computes both times - disk (file size over the measured
+ source speed) and CPU (movie duration times the learned seconds-per-second)
+ - and takes the LARGER. The log says which one won. Checked against the
+ real logs: 1% error on Ryan, 22% on Transformers, against 1,700% for the
+ old model.
+ Learning is guarded too: the seconds-per-second figure is only re-adjusted
+ when the CPU owned the clock. Learning "0.0711 s/s" from a read that was
+ held back by a slow disk taught the wrong lesson to the next movie, which
+ may sit on an SSD.
+
+ 3. THE SUBTITLE VERDICT PROMISED TOO MUCH  (from 14.55)
+ --------------------------------------------------------------------------
+ "No faults found. This subtitle is good to watch." The arithmetic was
+ right - 1 defect in 1,832 blocks is 0.055%, under the 0.1% that earns
+ EXCELLENT. The SENTENCE was wrong. Measuring a real OCR output on the
+ bench we found 13 human-visible errors the counter does NOT catch, because
+ they are valid words in the wrong place ("Ali Spark" for "AllSpark", and
+ others). The counter finds impossible characters and broken blocks; a
+ swapped proper noun it does not find and never will.
+ The sentence now says what the measurement covers:
+     "No faults of the kinds I can detect. A swapped proper name is
+      something I cannot catch - worth a quick look."
+
+ 4. TOOLS REMOVED FROM THE INSTALLER
+ --------------------------------------------------------------------------
+ mkvextract.exe, LIBCURL.DLL, nvcuda.dll and nvcuvid.dll were removed.
+ Checked file by file: no .ps1 in the project calls any of the four.
+ mkvextract stopped being used in 14.16, when video started being copied
+ inside the container instead of extracted; the three DLLs came along with
+ the mkvtoolnix package and were never called. Nothing breaks. All four were
+ removed from the file trees in the documentation.
+
+ Tools in this version:
+     mkvmerge          v102.0
+     ffmpeg / ffprobe  9.0.1-essentials
+     MediaInfo CLI     v26.05
+     dovi_tool         2.3.3  (minimum required since 1.8)
+
+
+==============================================================================
+ INSTALLER 2.0 (first test build)  -  18/09/2026        *** THE VERSION THAT MEASURES WHAT
+                                          IT PROMISES ***
+==============================================================================
+ Components: ENGINE 14.55 | WINDOW 19.0 | TESTAR_LAFIRMA 4.0 | CLICK BENCH 4.0
+
+ This is the first version in which the ENGINE changes since 1.9.2 - and it
+ changes little, on purpose. What really changes is the honesty of the numbers
+ on screen.
+
+ 1. THE CALIBRATION THAT CANCELLED ITSELF OUT
+ --------------------------------------------------------------------------
+ Every session since 16.99 the program printed this line:
+
+   CALIBRATION: runs spread 44% among themselves (0.0125 to 0.0180) ... the
+   estimate will keep being wrong per file until the weights are revised.
+
+ The diagnosis was right. The correction could never work, because since 16.64
+ the calibration constant HAD NO EFFECT AT ALL. The algebra, with
+ k = SegPorGbPorPeso:
+
+   weight_i = round( s_i / (Gb * k) )
+   est      = Gb * k * SUM(weight_i) = SUM( s_i )
+
+ k cancels. Measured with the real numbers from Saving Private Ryan (81.99 GB):
+ k = 0.0125 gives 3,665.0s; k = 0.0400 gives 3,666.6s. The constant varies by
+ 3.2x and the estimate moves 1.6 SECONDS out of 3,665 - which is the rounding
+ of the weight to an integer, nothing else.
+
+ So the program promised, every session, a self-correction it did not perform.
+
+ THE FIX, AND WHY IT IS PER STAGE
+
+ Calibration moved out of the weight calculation and now multiplies the
+ predicted SECONDS - outside the loop, it cannot cancel itself. And it stopped
+ being ONE number for the whole file: it is now ONE PER STAGE.
+
+ That was the real reason for the 44%. A long, small TrueHD film and a short,
+ large DTS film err in OPPOSITE directions, and a single scalar cannot describe
+ both shapes at once. With a per-stage factor, "this machine is 30% slower on
+ audio" stops fighting "this disk is 10% faster on remux".
+
+ Learning COMPOSES instead of re-applying: the prediction carried in the batch
+ already includes the current factor, so what gets stored is the composed
+ factor. Storing the raw ratio would apply the correction again on the next
+ batch, drifting further each run. The bench checks exactly that.
+
+   LESSON 49: A NUMBER THAT APPEARS ON BOTH SIDES OF THE SAME EQUATION IS NOT
+              AN ADJUSTMENT - IT IS A CHANGE OF UNIT. Before trusting a
+              calibration constant, vary it and watch the result move.
+
+ 2. THE INSTALLER ASKS FOR THE LANGUAGE, AND IT APPLIES TO EVERYTHING
+ --------------------------------------------------------------------------
+ Three things tied to one choice: the wizard speaks it, the LICENCE is shown in
+ it, and the PROGRAM opens in it - the installer writes IDIOMA.txt, the very
+ file the window has read at startup since 17.02. One path, one format, two
+ owners that agree.
+
+ A new sweep keeps the defect from coming back: every wizard message must exist
+ in BOTH languages.
+
+ 3. EULA WITH ACCEPT AND DECLINE
+ --------------------------------------------------------------------------
+ In Portuguese and English, in the chosen language. It states what the program
+ is (a remux: it does not re-encode, does not download anything, does not
+ circumvent disc protection and ships no film), and what the user declares by
+ accepting: that the files were legitimately acquired and the result is for
+ personal use.
+
+ What it does NOT do is claim that private copying is legal. The rules differ
+ from country to country and, in several places, circumventing a technical
+ protection measure is forbidden even when the copy itself would be allowed.
+ Promising otherwise would be a message that lies - the rule that governs the
+ screen governs the licence too.
+
+ 4. THE BAR, IN THE ORDER THE WORK HAPPENS
+ --------------------------------------------------------------------------
+   [F1] Start  [F2] Pause  [ESC] Cancel | [F3] Open Source  [F4] Open Output
+   [F5] Refresh | [F11] Full Census  [F12] Measure MEL x FEL
+
+ Source and Output are a pair and had Refresh between them. Adding F3/F4 also
+ revealed a hole that had existed since those buttons existed: they had no
+ brake at all - 65 stacked Explorer windows in 20 seconds in his screenshot.
+ Now an already-open folder window comes to the front instead of a new one.
+
+   LESSON 48: GIVING AN ACTION A SHORTCUT MULTIPLIES HOW OFTEN IT IS ASKED FOR.
+
+ 5. TRANSLATIONS CLOSED
+ --------------------------------------------------------------------------
+ The rule "^MAIN AUDIO: " came BEFORE "^MAIN AUDIO: NONE$", and rules apply in
+ file order, so the English screen showed "MAIN AUDIO: NENHUM", half
+ translated. Six screen texts had no entry; 25 dead entries were removed; the
+ "Understand" button said "Learn" while opening a document titled "UNDERSTAND
+ THE CONVERSION".
+
+ 6. ENGINE 14.55 - FOUR FIXES, ONE OF THEM SERIOUS
+ --------------------------------------------------------------------------
+ - SERIOUS: the guard that stops a file from starting without disk space sat
+   entirely inside an EMPTY catch. Any exception made the protection vanish
+   silently and the file entered conversion as if there were space.
+ - On a network path the space measurement cannot work, but nobody was told
+   the check had not run.
+ - The .NET Runtime link pinned patch 8.0.30 - a future 404.
+ - "Subtitle OCR will be disabled" was false when seconv is present; seconv is
+   the preferred path since 14.2 and does not need .NET.
+
+ 7. THE SUITES: 1,122 TESTS AND 325 INVARIANTS
+ --------------------------------------------------------------------------
+ Scenario 27 exists because this defect passed a THOUSAND green tests: the text
+ of the calibration was correct and the arithmetic cancelled. Only running it
+ shows.
+
+ During this round I also truncated the engine to zero bytes through an
+ encoding mistake of my own. The suite caught it, in the test that counts the
+ engine's 90 functions. Recorded here because it is the best proof of what the
+ suite is for.
+
+==============================================================================
+ INSTALLER 1.11.8  -  18/09/2026            *** 65 EXPLORER WINDOWS ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 18.24 | TESTAR_LAFIRMA 3.61 | CLICK BENCH 3.7
+
+ The ENGINE has not changed a line.
+
+ THE DEFECT
+ --------------------------------------------------------------------------
+ His screenshot tells it better than the log: a column of TWENTY
+ "00_Arquivos_Base" Explorer windows and TWELVE "01_Arquivos_Finalizados",
+ stacked. The log confirms - 65 opens in 20 seconds, some 200ms apart.
+
+ And "it looked like nothing was opening" because it was opening TOO MUCH:
+ every new window is born exactly on top of the last one, same place, same
+ contents. Sixty-five identical stacked windows are visually indistinguishable
+ from none.
+
+ THE CAUSE, WHICH IS NOT SENSITIVITY
+ --------------------------------------------------------------------------
+ The defect is one of design and it ALREADY EXISTED. Everything else on this
+ bar has a rule for repeated presses: the census got a 2-second brake in
+ 18.21, the measurement has its runspace lock, F1 and F2 depend on button
+ state. These two had nothing.
+
+ Without a key it never showed, because nobody clicks the same button sixty
+ times with a mouse. Adding the key did not create the hole - it REVEALED one
+ that had been there since the buttons existed.
+
+   LESSON 48: GIVING AN ACTION A SHORTCUT MULTIPLIES HOW OFTEN IT IS ASKED
+              FOR. Before adding the key, ask what happens if it is pressed
+              forty times in ten seconds.
+
+ THE FIX - AND THE ONE THAT ACTUALLY SOLVES IT IS THE FIRST
+ --------------------------------------------------------------------------
+   1. REUSE THE WINDOW. If Explorer already has that folder open, it comes to
+      the front instead of a new one being born. That is what "open the
+      folder" means: see the folder, not collect windows of it. Pressing forty
+      times then brings the SAME window forty times - harmless.
+   2. A 1.2-SECOND BRAKE PER FOLDER, for the burst that arrives before the
+      first window exists. Per folder, not global: a global brake would make
+      F4 right after F3 do nothing, which would be a new defect in place of
+      the old one. And the refusal speaks.
+
+ If the Shell does not answer, everything falls back to the old behaviour -
+ open the window. Cosmetic must never block the action.
+
+ The window search became its own function (Focar-PastaJaAberta) for a
+ testing reason: the bench can now RUN the open-or-reuse decision without a
+ real Explorer on the other side. Lesson 45 applied before the defect instead
+ of after it.
+
+ TESTAR_LAFIRMA 3.61: 1102 tests. CLICK BENCH 3.7: 311 invariants (was 302),
+ with scenario 26. Three sabotages, all caught.
+
+==============================================================================
+ INSTALLER 1.11.7  -  18/09/2026                *** THE BAR, HIS ORDER ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 18.23 | TESTAR_LAFIRMA 3.60 | CLICK BENCH 3.6
+
+ The ENGINE has not changed a line.
+
+ SOURCE and OUTPUT are a pair - where it comes from and where it goes - and
+ they had Refresh planted between them. Together, and in the order the work
+ happens:
+
+   [F1] [F2] [ESC] | [F3] Source  [F4] Output  [F5] Refresh | [F11] [F12]
+
+ The keys came out in ascending order left to right without anyone forcing it.
+
+ THE THREE MISTAKES HE NAMED
+ --------------------------------------------------------------------------
+ He did not list three possible mistakes; he listed three I have ALREADY made
+ on this bar. So each became a test, and each test was sabotaged.
+
+   "the F keys not showing"  -> a sweep, not a one-by-one check: every label
+                                on the bar must be born with its key. Same
+                                sweep that caught the measurement's [F12]
+                                (3.58) and the census's [F11] (3.59).
+   "clicking doing the wrong  -> one action, one function: Invoke-AbrirOrigem
+    thing"                      and Invoke-AbrirSaida. Click and key call the
+                                SAME function, and the suite counts the calls
+                                to Abrir-PastaNoExplorer: there must be
+                                exactly three in the file. A fourth is a
+                                second rule being born.
+   "getting the translation   -> a label with its key is a NEW entry, distinct
+    wrong"                      from the old one without it. That is exactly
+                                how [F5] slipped through in 18.17.
+
+ A MISTAKE OF MINE, IN THE TEST ITSELF
+ --------------------------------------------------------------------------
+ The translation test failed with both entries present and correct. Cause:
+ "[" is a wildcard in PowerShell's -like, so "[F3]" becomes a character
+ class. An exact comparison of the first field fixed it. Worth recording:
+ every label on this bar starts with "[".
+
+ HIS 23:45 LOG CONFIRMED 1.11.6
+ --------------------------------------------------------------------------
+ He went clicking, as he said he would. The brake refused restarts at 0.2s,
+ 0.4s, 0.6s, 0.9s and 1.4s after a cancel and released after 2s; the F12 and
+ F5 locks fired while the census ran; no "F11 ignored"; and no cancelled
+ census became a verdict. A whole session with no new defect.
+
+ TESTAR_LAFIRMA 3.60: 1102 tests (was 1088). CLICK BENCH 3.6: 302 invariants.
+
+==============================================================================
+ INSTALLER 1.11.6  -  18/09/2026            *** WHAT I BROKE IN 1.11.5 ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 18.22 | TESTAR_LAFIRMA 3.59 | CLICK BENCH 3.6
+
+ The ENGINE has not changed a line. Everything here is screen.
+
+ THREE OF THE FOUR DEFECTS IN THIS VERSION CAME FROM THE PREVIOUS ONE - MINE.
+
+ 1. F11 LOCKED UP FOR GOOD (the worst, and the most instructive)
+ --------------------------------------------------------------------------
+ From his log of 17/09, from line 139 to the end of the session, without a
+ single exception: "TECLA: F11 (ignored - does not apply to state 'inicial')",
+ more than thirty times, until he closed the program.
+
+ The button is dark while the previous census handle still exists. Up to
+ 18.20 that trapped nobody: F11 did NOT go through the button, it reached
+ Start-Censo, and the emergency exit lives in there - after 20s, if no census
+ process is still standing, the handle is abandoned.
+
+ 18.21 made F11 check the button. That ended "clicking does nothing, F11
+ works" - and, without my noticing, locked the emergency exit behind the very
+ door I had just closed. A lock meant to last seconds began lasting the whole
+ session.
+
+   LESSON 47: WHEN YOU MERGE TWO DOORS INTO ONE, CHECK WHAT ONLY THE DOOR YOU
+              CLOSED KNEW HOW TO DO.
+
+ The fix has two parts: the handle release moved out of Start-Censo into its
+ own function, now also called from the screen's timer, so the state undoes
+ itself without anyone pressing anything - and it does NOT query processes, it
+ asks the handle itself whether the work finished, which is free and local
+ (lesson 40 still stands). And the F11 refusal now states the REAL reason;
+ "does not apply to state 'inicial'" was true about the state and false about
+ the problem.
+
+ 2. THE [F11] DISAPPEARED WHILE THE CENSUS RAN
+ --------------------------------------------------------------------------
+ In 1.11.5 I swept EVERY write to the measurement label and required the key
+ on each - and did not run the same sweep on the CENSUS label, which had the
+ same hole, in the same state ("in progress"), on the other side of the same
+ bar.
+
+ 3. THE TOOLTIP FROZE WHILE THE CENSUS RAN
+ --------------------------------------------------------------------------
+ He saw "Turn on 'Measure MEL x FEL' and re-read the folder" with the census
+ running. The sentence was right the instant it was written - and nobody
+ erased it. The tooltip was only recalculated when he changed ROW in the
+ queue, and starting a census changes no row. It sat there for two minutes.
+
+ THE FIX FOR ALL THREE: ONE OWNER, FOUR THINGS
+ --------------------------------------------------------------------------
+ Label, colour, TOOLTIP and IsEnabled of the census button now all come from
+ Update-BotaoCenso, and the screen timer calls that function once per second
+ instead of writing on its own. The suite sweeps every write to the label
+ requiring [F11], exactly as it already did for the measurement one.
+
+ AND 1.11.5 GOT THESE RIGHT (measured in the same log)
+ --------------------------------------------------------------------------
+ The F12 and F5 locks fired while the census ran; the 2-second brake refused
+ a restart 0.5s after a cancel; the estimate said 1m46s and the census took
+ 104.9s - off by just over a second in 105, and the number corrected itself
+ afterwards; and a cancelled census wrote no verdict.
+
+ THE BENCH LEARNED MORE THAN THE WINDOW DID
+ --------------------------------------------------------------------------
+ Five sabotages were run for this version. TWO came back green on the first
+ try, both for the same reason: the test checked TEXT. Putting "return $false"
+ on the first line of the handle-release function left the suite green - the
+ text of the function was all still there. Deleting its call from the timer
+ did too: the COMMENT above the call names the function, and the comment was
+ what the test was finding.
+
+ So scenario 25 RUNS the function, with a fake handle, in the four states that
+ matter; and the timer check now looks for the CALL, not the name. Lesson 45,
+ which 1.11.5 wrote, charged to its own account.
+
+ TESTAR_LAFIRMA 3.59: 1088 tests (was 1076). CLICK BENCH 3.6: 302 invariants
+ (was 285), with scenario 25.
+
+==============================================================================
+ INSTALLER 1.11.5  -  18/09/2026            *** ONE DOOR, AND A BRAKE ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 18.21 | TESTAR_LAFIRMA 3.58 | CLICK BENCH 3.5
+
+ The ENGINE has not changed a line. Everything here is screen.
+
+ WHY THIS VERSION EXISTS
+ --------------------------------------------------------------------------
+ After 1.11.4, Diego cut in: we were in a loop - find a census bug, fix it,
+ forget the rest, and a new one shows up before the old one is finished. He
+ is right, and the answer is not "I will be more careful". Ten versions in the
+ same area, four of them fixing what the previous one broke, is a symptom with
+ one cause, and this time I went after the cause instead of the bug of the day.
+
+ THE CAUSE: THE CENSUS BUTTON HAD THREE OWNERS
+ --------------------------------------------------------------------------
+ Three places wrote to $UI.btnCenso.IsEnabled with different rules:
+
+   Start-Censo (18.20)  ->  IsEnabled = $true
+   Update-Diagnostico   ->  IsEnabled = (... -and -not running
+                                             -and -not alreadyCounted ...)
+   Update-Diagnostico   ->  IsEnabled = $false  (no row selected)
+
+ Whoever repainted last won. And F11 went through none of them, because a key
+ press does not go through IsEnabled. That single fault produced THREE of his
+ four complaints, seen from different angles: the census can be re-run with
+ F11 but not by clicking; clicking does nothing while it runs; the F-key
+ labels seem to come and go.
+
+ Version 1.11.4 tried to fix this by adding ANOTHER owner. That was wrong.
+ There is one now - Update-BotaoCenso - and the rule fits in a sentence: THE
+ BUTTON LIGHTS UP WHEN CLICKING IT WOULD DO SOMETHING. F11 now READS THAT SAME
+ BUTTON instead of repeating the rule on its own: two copies of one rule are
+ two rules, and one of them always falls behind.
+
+ The test suite stopped checking the rule and started COUNTING THE OWNERS:
+ outside Update-BotaoCenso, nobody writes to that property. If anyone does, it
+ fails - including me, in the next version.
+
+ THE BRAKE AND THE LOCKS (his request)
+ --------------------------------------------------------------------------
+ His log from 17/09 shows the size of the hole. Between 21:55:33 and 21:56:30
+ - 57 seconds - the census was STARTED AND KILLED TWENTY TIMES, some pairs
+ 366ms apart. Every "start" opens ffmpeg + cmd + dovi_tool on an 82 GB file.
+ In the middle of that, F12 six times while the census was reading the whole
+ film.
+
+ Three locks, none of which freeze the program:
+
+   BRAKE   after a cancel, the census will not restart for 2 seconds - and
+           anyone who presses within that window is ANSWERED, not ignored.
+   F12     while the census runs, toggling the measurement is refused: it
+           opens dovi_tool on the same disk the census is reading end to end.
+   F5      while the census runs, re-reading the folder is refused: it REBUILDS
+           the list, the counted file can drop out of it, and two minutes of
+           reading turn into "result discarded".
+
+ Both refusals say HOW to get out of them ("cancel the census (F11)"). The
+ census itself can still be cancelled at any moment.
+
+ THE PERCENTAGE
+ --------------------------------------------------------------------------
+ "the census % does not count, it stays at 0%". The arithmetic was right; what
+ was missing was the arithmetic HAPPENING. It hung on one number: the time the
+ SAMPLE took for that file, times 4.7. That number only exists if the sample
+ was measured in THIS session - with a cached verdict it comes back as zero,
+ and zero shows no percentage at all.
+
+ There is now a second path that does not depend on the sample: the FILM'S
+ DURATION, which every queued file has. The starting value came from his own
+ log - 2h49m of film, 106.1s of census, 0.0105 s per second of film - and, like
+ the other two numbers on this screen, it corrects itself after every census.
+
+ THE THIRD DOOR OF THE CANCELLED CENSUS
+ --------------------------------------------------------------------------
+ 18.19 closed the Ok=true door. His log shows the Ok=FALSE one going through
+ FOURTEEN times: 180 milliseconds of census, and a line telling him the result
+ on screen was the result of THAT. The number on screen was in fact the old,
+ correct one - but the sentence asserts without checking, and a sentence that
+ asserts without checking is a lie even when it happens to be right (lesson 2).
+ The question "did we kill this census?" now comes first, for any Ok value.
+
+ ALSO IN THIS VERSION
+ --------------------------------------------------------------------------
+ - The in-progress measurement label ("Measuring MEL x FEL: 1 of 2") was the
+   only one of the three states without its [F12] prefix - and the one that
+   stays on screen longest. The suite now sweeps EVERY write to that label and
+   requires the key on all of them.
+ - The tooltip for an already-counted file says it can be counted again.
+ - A comment from 18.17 still claimed the percentage came from RPU bytes; it
+   went back to time in 18.20 and the comment did not follow.
+
+ THE SUITES
+ --------------------------------------------------------------------------
+ TESTAR_LAFIRMA 3.58: 1076 tests (was 1051). CLICK BENCH 3.5: 285 invariants
+ (was 251), with scenario 23 (the brake and the locks, running the real
+ functions) and scenario 24 (the percentage CALCULATED, second by second,
+ against the numbers from his log).
+
+ Scenario 24 exists for a reason worth writing down: this defect passed
+ through green suites TWICE because they checked the SOURCE TEXT of the
+ calculation, and the text was correct. Sabotaging the duration-based estimate
+ broke no test at all. It only broke one once the bench started EXECUTING the
+ arithmetic.
+
+ LESSON 45 - CHECKING THE TEXT OF A CALCULATION IS NOT CHECKING THE
+             CALCULATION.
+ LESSON 46 - WHEN THE SAME DEFECT COMES BACK FROM DIFFERENT ANGLES, THE
+             DEFECT IS NOT THE ONE IN FRONT OF YOU: IT IS THE DUPLICATED
+             OWNER BEHIND IT. Fix it by counting the owners, not by repeating
+             the rule.
+
+==============================================================================
+ INSTALLER 1.11.4  -  17/09/2026          *** THREE JOBS, PULLED APART ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 18.20 | TESTAR_LAFIRMA 3.57 | CLICK BENCH 3.0
+
+ The ENGINE has not changed a line since 1.9.2. Nothing here changes the
+ converted file, the MEL x FEL verdict, the audio or the subtitles. This is all
+ SCREEN - and it is the first time in ten versions that the screen changes its
+ MODEL instead of getting one more patch.
+
+ WHY THIS VERSION EXISTS
+ --------------------------------------------------------------------------
+ Four builds shipped in 24 hours on the same area (1.9.6 to 1.9.9); two of them
+ fixed what the previous one broke. The user cut through it: "the decisions
+ about this still aren't good, you need to learn more and think of a better
+ way... you come with new builds too fast, you touch one little thing and bring
+ more testing."
+
+ He was right, and the symptom said where to look: when the same area needs
+ four fixes in one day, the defect is not in the four places - it is in the
+ MODEL that forces the four.
+
+ THE ROOT CAUSE, ONE ONLY
+ --------------------------------------------------------------------------
+ The MEASUREMENT (phase B) lived INSIDE the folder read (phase A). One runspace
+ doing two things with different lifetimes and different owners:
+
+   phase A - read tracks, audio, DV    ~4s per file     ALWAYS needed
+   phase B - measure MEL x FEL        14-26s per file   only with the switch on
+
+ Every defect he reported came from that, all measured in his 16/09 logs:
+
+   1. THE WINDOW REALLY FROZE, 1.5 TO 2 SECONDS. Stopping the measurement had
+      exactly one path: kill the runspace. And Stop-Motor waited for it to die
+      with AsyncWaitHandle.WaitOne(1500) ON THE UI THREAD. Measured four times:
+      1.52s / 1.93s / 2.01s / 1.91s of a window that would not respond.
+
+   2. TURNING THE SWITCH ON RE-READ THE WHOLE FOLDER, because the only way to
+      start measuring was to start a read. In one session the switch alone
+      fired 28 RE-READS, 254.5s. My own 17.10 comment claimed "re-reading is
+      cheap (phase A is instant)" - never measured: it costs ~4s PER FILE.
+
+   3. TURNING THE SWITCH ON KILLED A RUNNING CENSUS. He asked for a census
+      (105s of work) and 1.4 seconds later a switch flip killed it, because a
+      re-read kills the census. He waited for a job already cancelled.
+
+   4. ONE BUTTON, SIX MESSAGES. The switch had six different outcomes, each an
+      "if" added when a case broke. That is not a model, it is casuistry - and
+      from the outside it reads as unpredictable behaviour.
+
+ WHAT CHANGED: THREE JOBS, EACH WITH AN OWNER
+ --------------------------------------------------------------------------
+   READ FOLDER    starts: folder change, Refresh, program start
+                  stops:  Stop reading, folder change
+   MEASURE LAYER  starts: switch on + a file without a verdict exists
+                  stops:  switch off, conversion start, folder re-read
+   FULL CENSUS    starts: the Census button
+                  stops:  a new census, conversion start
+
+ None of them brings another down. And cancelling the measurement became
+ RAISING A FLAG AND RETURNING - there is no synchronous wait left anywhere in
+ the window's code.
+
+ THE SWITCH IS A SWITCH AGAIN - from six messages to two rules:
+   ON  -> if a verdict is missing, measure. Otherwise, nothing.
+   OFF -> stop the measurement if one is running. What was already measured
+          stays: a measurement is a fact, not a preference.
+ The folder read appears in neither rule, and that is the whole difference.
+
+ THE SERIAL NUMBER: paying the price of not waiting
+ --------------------------------------------------------------------------
+ Not waiting for the runspace is what unfroze the window, but it has a cost: a
+ cancelled measurement can still have a message in flight. If the folder is
+ re-read in the meantime the queue is a DIFFERENT one - and a late message
+ carrying the old queue's index would write a correct verdict onto the WRONG
+ FILE. That is worse than no verdict at all.
+
+ So every round (measurement AND read) gets a number, every message carries it,
+ and the window ignores anything from a round that is not the current one. The
+ filter lives in one place, at the gate of the message loop.
+
+ "P7 MEASURING" LEFT THE COLUMN
+ --------------------------------------------------------------------------
+ It was a lie for every file that was only waiting its turn (his screenshot had
+ two files reading "P7 measuring" while only one was being measured); it was a
+ repetition of what the STATUS column and the top counter already say; and it
+ was the wrong word in the wrong place, because that column carries the layer
+ VERDICT and "measuring" is activity. While there is no verdict the column now
+ shows only what was detected ("P7 -> P8.1") and stays quiet about the layer.
+ "EL not measured" REMAINS, because that one is a real verdict.
+
+ HOW THIS WAS VALIDATED
+ --------------------------------------------------------------------------
+ BATTERY: 941 tests (was 919), with a new hard family - NO CLICK MAY FREEZE THE
+ SCREEN: the four runspace blocks are separated from the rest and the window's
+ own code is checked against WaitOne, Start-Sleep, .Wait(), .Join() and
+ .EndInvoke().
+
+ CLICK BENCH: 113 invariants (was 79), including two new FUNCTIONAL proofs -
+ the measurement block and the read block are extracted from the source, put in
+ a real runspace and RUN against a stand-in engine. Measured there: cancelling
+ takes 0.13s from request to the job stopping.
+
+ I KILLED THE WHOLE CENSUS IN 18.19 - WITH A LINE THAT WAS NEVER WRITTEN (18.20)
+ --------------------------------------------------------------------------
+ 1) Every complete census was being discarded. The engine measured 86.66 MB of
+    RPU and the window read ZERO, because the 18.19 guard reads $m.RpuMb and I
+    never added RpuMb to the message the job sends - the edit failed silently
+    and I did not check. The guard that existed to protect the verdict started
+    destroying all of them. The fix that matters is not the line, it is the
+    test: the suite now discovers both sides of the conversation in the source
+    and cross-checks them - every field the window READS from a message must be
+    SENT by whoever builds it. No hand-written list.
+
+ 2) The percentage is time-based again, because the measurement killed my idea:
+    dovi_tool does not write the RPU progressively, it writes it all at the end
+    (three times in his logs: 0.0 MB for ~100s, then 86.7 MB). The bar sat at 0%
+    for the whole census and jumped to 99%. The RPU size is not progress - but
+    it is excellent proof at the end, and stays as the truncation guard.
+
+ 3) "Clicking does not work, only F11" - right: 18.16 made the button a toggle
+    but the line disabling it when the census starts was still there. A disabled
+    button gets no clicks; keys bypass IsEnabled. Two doors, two rules.
+
+ 4) A cancellation that found no process to kill said nothing at all.
+
+ 5) And "[F2]" was out of line because two places wrote that label.
+
+ LESSON 43: a good measurement in the wrong place is still a wrong measurement.
+ LESSON 44: a message between two sides is a contract, and a contract has to be
+ checked from both ends. A field one side reads and the other never sends raises
+ no error and fails no test - it just quietly evaluates to zero.
+
+ A CANCELLED CENSUS WAS WRITING A FALSE VERDICT ON SCREEN (window 18.19)
+ --------------------------------------------------------------------------
+ The worst defect the census has ever had, and it came from my own 18.14 change.
+ From his log: the census was asked for at 17:39:23.6, cancelled at 17:39:26.1,
+ and at 17:39:26.4 it reported "2953 frames, 11 scenes, RPU 1.05 MB - 1 of 11
+ scenes of the WHOLE FILM (9.09%)". That film has 243,760 frames, 1,124 scenes
+ and 19.22% above the master, measured five times today. A census cancelled two
+ seconds in overwrote the correct number with garbage, presented as measurement.
+
+ Until 18.13 cancelling meant ABANDONING - the job finished on its own, so a
+ late result was legitimate, and there was even a line saying so. From 18.14 on,
+ cancelling KILLS dovi_tool mid-write, leaving a half-written RPU that the
+ engine accepts because it only checks "the file exists and is not empty". I
+ changed what "cancel" means and left behind the rule that depended on the old
+ meaning.
+
+ Two guards, because one is not enough: a census we killed is discarded with no
+ discussion (cancelling at 95% yields a file that LOOKS complete, so size alone
+ would never catch it); and an RPU far smaller than the film's duration predicts
+ is a truncated census - the same distrust the 08/09 bench documented, since
+ dovi_tool prints "Done." on a cut file. Both log what was discarded and why,
+ and the previous verdict stands. The bench runs the real gate with the exact
+ message from his log, plus one nearly-complete kill and one genuine full census
+ that MUST pass - a guard that blocks everything is not a guard.
+
+ LESSON 42: when the meaning of an action changes, every rule that relied on the
+ old meaning becomes a silent bug.
+
+ ONE OWNER PER BUTTON, THE KEY BEFORE THE LABEL, AND NO SILENT REFUSALS (18.18)
+ --------------------------------------------------------------------------
+ 1) The F5 kept disappearing from the Refresh button, and the reason was three
+    owners writing the same label with different rules - the folder-read handler
+    wrote plain "Atualizar" because I missed it in 18.17, and the folder is read
+    when the program opens. The 16.79 defect, again. The button now has a single
+    owner like the census and the measurement buttons, and the suite counts the
+    writes: a third one anywhere else fails the build. While reading, the button
+    turns amber and reads "[F5] Stop".
+
+ 2) The key comes first, in brackets, on every button: [F1] Start, [F2] Pause,
+    [ESC] Cancel, [F5] Refresh, [F11] Full Census, [F12] Measure MEL x FEL.
+
+ 3) "The census broke" - it did not break, it refused in silence. Seven F11
+    presses in his log produced seven "CLIQUE: Censo Completo" lines and nothing
+    else: Start-Censo had two bare returns (no file selected, file is not Complex
+    FEL). From the outside, a silent refusal is indistinguishable from a defect.
+    Every refusal now says why, reusing the same sentence the tooltip already
+    had.
+
+ 4) The "no response" warning is gone for good. It raised a FALSE alarm in both
+    implementations - CPU in 18.15, file size in 18.17 - because the start and
+    the end of the work are exactly the moments when nothing grows. Lesson 6:
+    a false alarm is worse than no alarm. The suite now guards its absence.
+
+ 5) A held key is not twenty clicks: auto-repeat is discarded.
+
+ LESSON 41: one button, one owner. Label, colour and state come from ONE
+ function that reads the state. Every time a "just this one line" was written
+ straight into a label, that line became the next bug.
+
+ THE SCREEN WAS FREEZING BECAUSE OF ME, AND THE PERCENTAGE MEASURED THE WRONG
+ THING (window 18.17)
+ --------------------------------------------------------------------------
+ 1) Found in his log without him reporting it: the census started at 16:51:46
+    and its result appeared at 16:54:28 - 162 seconds of wall clock for 106.5
+    seconds of work measured by the engine's own stopwatch. The window was 55
+    seconds behind, and the cause was mine: a Get-CimInstance Win32_Process
+    every few seconds ON THE UI THREAD, added in 18.13/18.15. WMI is not cheap
+    with a busy disk; each call held the tick, the tick held the message queue,
+    and clicks waited on the same thread - which is also why he could not cancel
+    the census by clicking. Lesson 6 and the 18.00 invariant, both broken by my
+    own safety net. The suite now reads the tick's body and fails on any WMI
+    call inside it.
+
+ 2) "In what sense do you ever reach 100%?" The right question. The count was of
+    TIME, and time is not work: with the measurement running alongside, the same
+    census took 162s of clock for 106s of work, so the estimate overflowed
+    mid-way with nothing actually wrong. The count is now of SIZE - the census
+    writes the film's RPU to a file that GROWS, so percentage = bytes written /
+    bytes expected, where expected = film duration x RPU bytes per second of
+    film. The starting measure came from his log: 86.66 MB for 2h49m = 8.95 KB/s,
+    and it self-corrects after every census, clamped to 2-40 KB/s. The
+    percentage now follows the work: a busy disk makes it advance more slowly
+    instead of overflowing. The liveness check came free with it - if the file
+    stops growing for 40s, the work is stuck. No WMI, no CPU, no guess.
+
+ 3) The measurement promised to come back and did not. "The new one starts as
+    soon as it leaves" appeared three times, and what actually restarted it was
+    him toggling the key again. Lesson 34 again, now closed in the same place
+    the Start-after-measure wait was closed in 18.08: one decision per second,
+    looking at STATE.
+
+ 4) The key said "ignored" and acted anyway - two lines per press, one of them
+    false, forty times in the log. That check belongs to F1/F2/ESC, where the
+    button decides; F11/F12 have their rule inside the function.
+
+ 5) And the simple request: F5 on Refresh, and the key written on the button -
+    "Refresh F5", "Full Census F11", "Measure MEL x FEL F12".
+
+ LESSON 40: a safety net that costs too much stops being a net. Before measuring
+ something from OUTSIDE (a process, WMI, the disk), ask what the measurement
+ costs - and if it runs on the UI thread, the cost is the UI.
+
+ THE CENSUS BUTTON NOW STOPS, AND A TEST SCRIPT THAT COULD NOT BE RUN (18.16)
+ --------------------------------------------------------------------------
+ First, the mistake that was mine and was one of reasoning: the delivery asked
+ for a test the program itself forbids. With a conversion running, the census
+ button is disabled, the source folder cannot be changed and New Conversion does
+ not exist - all on purpose. The only way a census dies next to a conversion is
+ the one that already happens: pressing Start with a census running, which his
+ 15:24:43 log had already proven. A test script is a claim too: if it cannot be
+ executed mentally against the program, it does not go in the README.
+
+ "I have never seen a button that starts and cannot stop unless you close the
+ program, press F1 or change folders." Right. Cancelling has worked since 18.14;
+ what was missing was a way to ASK for it without doing something else as well.
+ The same button now stops what it started - one action, one place: the click
+ and the key hit the same function, and the bench runs that function in both
+ states.
+
+ F11 toggles the census (and cancels a running one); F12 toggles the MEL x FEL
+ measurement. Both go through the buttons' own functions, never a parallel path.
+
+ The label lost its clock: "Census / 47%" plus the spinner. The elapsed time
+ moved to the tooltip (which now also says the button cancels) and to the log.
+
+ And his question - "is it normal to pass 100% and keep going?" It is, and the
+ "(+)" exists for that. The estimate is a measured average, and every run varies
+ with the disk: the same film took 106.6s, 107.0s, 108.5s and 110.6s across four
+ censuses. Showing "101%", or freezing at 99% as if still on schedule, is what
+ would be a defect.
+
+ WHAT HIS TEST FOUND IN 18.14 - TWO DEFECTS OF MINE (window 18.15)
+ --------------------------------------------------------------------------
+ First what WORKED, because that is a measurement too: at 15:24:43 the census
+ was stopped by pressing Start (ffmpeg pid 19252, dovi_tool pid 35060) and the
+ conversion ran on intact - stage 1/5 in 38s, stage 2/5 with the CONVERSION's
+ dovi_tool going 0 to 100% in 49s. The safety test passed on his machine.
+
+ 1) The cmd.exe holding the pipe stayed up, and that pinned everything. After
+    killing both children, the button repeated "the previous one is still
+    closing" fifteen times and never recovered - while the same cancellation had
+    worked forty seconds earlier in the same log. Worse than always failing: it
+    looks like luck. The pipe is built by a cmd (PowerShell 5.1 corrupts binary
+    pipes), and with the children gone the cmd can still wait for the write to
+    close, so the engine's "& cmd.exe /c" never returns. The pipe's cmd now dies
+    too - it carries its own unique signature, "pipe_rpu.cmd". And since a lock
+    like that must not exist at all: 20s after the stop, with no census process
+    left standing, the handle is treated as orphaned and abandoned (no Dispose,
+    which would wait) so a new census can start.
+
+ 2) The liveness check raised a FALSE alarm - mine, from an hour earlier. At
+    15:02:58 it said dovi_tool had not used CPU for 20s; the census finished
+    normally at 15:03:34. 18.13 watched only dovi_tool, but the process reading
+    82 GB from disk is FFMPEG - dovi_tool just receives what comes down the pipe
+    and can go tens of seconds without CPU. A false alarm in a safety net is
+    worse than no net (lesson 6). The check now sums BOTH processes, the
+    threshold went from 20s to 40s, and finding those processes lives in one
+    place: cancelling kills exactly what the liveness check watches.
+
+ LESSON 39: killing the process is not killing the WORK - the whole tree has to
+ fall, and whatever stays up holding an invisible pipe pins the program without
+ showing up anywhere.
+
+ CANCELLING THE CENSUS NOW TAKES EFFECT IMMEDIATELY (window 18.14)
+ --------------------------------------------------------------------------
+ Measured: cancelled at 14:28:20, still reading the disk until 14:30:01 - 101
+ seconds fighting the conversion for the disk, for a result that was then
+ discarded. 18.04 fixed the SCREEN (abandon the job instead of waiting for it);
+ it did not fix the DISK.
+
+ It turns out this needs NO engine change - the previous answer here was wrong,
+ and checking the code instead of repeating it is what settled the question. The
+ census is the only place that runs dovi_tool reading from STANDARD INPUT:
+
+   ffmpeg ... -f hevc -  |  dovi_tool extract-rpu -i -  -o <tmp>\filme.bin
+
+ The conversion runs "-m 2 convert --discard -i <file>"; the sampled measurement
+ runs "extract-rpu -i "<clip>"". Both pass a FILE to -i, never the dash. Only a
+ process meeting every condition is stopped: the signature, the path of the film
+ being counted, and a census actually running. When in doubt, nothing is killed.
+ The engine's own finally then deletes the temporary folder.
+
+ Proof, since a test suite cannot kill real processes: the decision of WHAT dies
+ is a pure function, extracted from the source by the click bench and run against
+ the real command lines of all three dovi_tool uses. The negative invariants are
+ the ones that matter - the conversion's dovi_tool is never touched.
+
+ LESSON 38: "this requires touching X" deserves the same proof as any other
+ claim. It was asserted twice without reading how the census calls dovi_tool.
+
+ THE HEADER BELONGS TO THE TAB, AND THE CENSUS NOW PROVES IT IS ALIVE (18.13)
+ --------------------------------------------------------------------------
+ 1) "A video is selected and it asks me to select a video - then it vanishes."
+    18.10 fixed only HALF of this: the file NAME no longer reached the header
+    with the QUEUE tab in front, but the other two branches still wrote there
+    with no tab check. Worse, during a queue repaint the selected index is -1
+    for an instant - which is exactly the branch that writes "select a video".
+    There is now ONE gate: file text only appears with the TRACKS tab in front.
+
+ 2) "The census is back to just a clock - you cannot tell whether it is
+    working." Right twice over, in opposite directions: 18.07 cluttered the
+    button, 18.10 stripped it to a mute stopwatch. Three signals now:
+    a spinner (the SCREEN is alive), a percentage from the MEASURED relation
+    (how much is left; "(+)" past the estimate; no estimate, no percentage),
+    and "no response" - the only one that is not an estimate: dovi_tool's CPU
+    time, checked every three seconds. Stalled for 20s and the button turns
+    amber and says so. Until now a stalled census and a slow one looked
+    identical on screen.
+
+ THREE FINDINGS FROM A SWEEP OF THE OLD LOGS (window 18.12 / suite 3.49)
+ --------------------------------------------------------------------------
+ 1) A hole in the suite itself, and the worst of the three. The strongest test
+    here - no window function may be called inside a runspace - looked at TWO
+    blocks, engine and folder-read, found by hand-written line numbers. 18.00
+    created two more jobs, MEASUREMENT and CENSUS, and nobody added them. The
+    newest runspaces, where every defect of 15-17/09 lived, were not checked at
+    all. His logs carry the price: "The term 'Escrever-Log' is not recognized"
+    on three files, "Test-SaidaCompleta" on two. The block list is now
+    DISCOVERED in the source - a new job is covered the day it is written.
+
+ 2) Closing the window stopped one clock out of five. On 10/09 at 01:26:31,
+    switching language and restarting produced "Visibility cannot be set ...
+    after a Window is closed": four DispatcherTimers kept ticking on a dead
+    window. All of them stop now, each tick returns immediately once the window
+    is closing, and the test discovers the clocks in the source too.
+
+ 3) The queue repainted itself identically. Measured: 1,588 queue-repaint log
+    lines from 15-17/09, 133 of them identical to the one before, back to back -
+    three in a row for a single action. Each repaint cleared the whole
+    collection and rebuilt it, which is what fires checkbox and selection events
+    nobody raised: both the 18.06 and the 18.11 defects were born there. Rows
+    are now built aside and compared with what is on screen; identical means the
+    screen is not touched at all.
+
+ LESSON 37: a test that enumerates by hand goes stale in silence. Any list that
+ describes the PROGRAM must be discovered from the source.
+
+ TWO THINGS THE LOG SHOWED AND NOBODY HAD ASKED FOR (window 18.11)
+ --------------------------------------------------------------------------
+ 1) The window promised a measurement that did not exist. At 11:54:22.8 all
+    three verdicts came from the session cache - nothing was pending - and it
+    still wrote "the previous one is still closing - the new one starts as soon
+    as it leaves". The handle lock was checked BEFORE looking at whether there
+    was anything to measure. The order is now the natural one: first see if
+    there is work, then see if it can be started.
+
+ 2) The track table was rebuilt twice per click. Measured: MODO at 11:53:48.842
+    produced two FAIXAS rebuilds, .850 and .865. The second came from the queue
+    repaint firing SelectionChanged - the same family as the 18.06 defect, an
+    event raised by repainting rather than by the user.
+
+ THE CENSUS BUTTON NOW SPEAKS THE HOUSE LANGUAGE (window 18.10)
+ --------------------------------------------------------------------------
+ "The census button up there is very cluttered. After it is measured the button
+ should be green, right? And when the file cannot be read by the census, let it
+ be grey, inactive. A standard already exists."
+
+ He is right. This program HAS a colour vocabulary, used everywhere else: grey
+ does not apply, normal usable, cyan in progress, green done. The census button
+ was born outside it - one colour for every state, and 18.09 had made its label
+ longer still inside a toolbar-sized button.
+
+ It now follows the same rule as the rest:
+
+     cyan    - the census is running right now
+     green   - "Census Done" (this file has been counted)
+     normal  - the census can be asked for this file
+     grey    - does not apply (MEL, no RPU, or a census still closing)
+
+ And the label is short again: "Census - 00m 45s". The estimate and the overrun
+ warning did not disappear - they moved to the TOOLTIP, where long text harms
+ nobody; on the button, going past the estimate shows a "(+)".
+
+ THE STALE NAME IN THE QUEUE HEADER (window 18.10)
+ --------------------------------------------------------------------------
+ "I selected Se7en and it still says Blood up there. I had already mentioned
+ taking that out of the queue part." Measured in his log at 11:53:48: clicking
+ MODE on Bloodsport wrote "Bloodsport" into the header while the QUEUE tab was
+ showing and Se7en was the selected file.
+
+ Fill-Faixas writes the file name into the header, and it also runs when the
+ Automatic/Manual mode is toggled - even with the QUEUE tab in front. Now it
+ only writes a file name when the TRACKS tab is the visible one. On the QUEUE,
+ the header talks about the queue.
+
+ LESSON 36: a new tool is not born outside the standard. If the house already
+ has a vocabulary - of colour, of wording, of placement - the new button speaks
+ it from the start, instead of waiting for a complaint to be taught it later.
+
+ THE CENSUS COUNTER NOW SAYS HOW LONG IS LEFT (window 18.09)
+ --------------------------------------------------------------------------
+ "And this counter is of what? If each film has its own time, counting up to
+ what?" A stopwatch proves the program is alive but does not answer the only
+ question that matters. And the tooltip still said "a census is already running
+ - wait for it", next to a counter that was already showing the time.
+
+ There is no true progress bar because dovi_tool reads the RPU in one process
+ without reporting frames. What exists is a MEASURED relation - three times in
+ his log, on the same film: sample 22.1s -> census 104.5s (4.73x), 22.2 ->
+ 106.5 (4.80x), 22.3 -> 104.1 (4.67x).
+
+ So the estimate is born from the time THIS file took on its sample, times the
+ factor - not from one fixed number for every film, which was exactly his
+ objection. The label reads "Census: counting... 00m 33s of ~01m 44s"; past the
+ estimate it says so instead of showing a target already left behind; with no
+ sample measured there is no estimate at all; and the factor corrects itself
+ after every census, clamped to 2x-12x so one stray number cannot poison it.
+
+ THE COLUMN SAYS SOMETHING ABOUT THE LAYER AGAIN (window 18.09)
+ --------------------------------------------------------------------------
+ While measuring, the row showed only "P7 -> P8.1" - nothing about the layer.
+ 18.00 removed "measuring" from the verdict column for good reason, but left a
+ hole. A file being measured has NO VERDICT YET, so it shows what the others
+ without a verdict show: "EL not measured". Activity belongs to the STATUS
+ column.
+
+ And my own battery REJECTED that fix, because the test demanded a code shape
+ instead of the resulting text. Lesson 18, for the sixth time.
+
+ LESSON 35: a stopwatch is not progress.
+
+ TESTAR_LAFIRMA 3.44 (994 tests) | CLICK BENCH 2.8 (203 invariants).
+
+ MEASUREMENT DIED FOREVER (window 18.08)
+ --------------------------------------------------------------------------
+ After one "New Conversion", every later attempt fell into "the previous one is
+ still finishing" - until the end of his session. Start-Leitura drained the
+ message queue with a blind "while TryDequeue { }", swallowing the "el_fim" of
+ the just-cancelled measurement - the only message that closes the runspace
+ handle. The handle stayed set forever and the 18.05 guard blocked everything.
+
+ A stale round is discarded by its serial; the NEWS OF A JOB'S DEATH is always
+ heard - it is the only way to know a runspace can be closed.
+
+ THE START-AFTER-MEASURING WAIT HUNG (window 18.08)
+ --------------------------------------------------------------------------
+ He chose to wait for the measurement, then switched measuring off. The notice
+ stayed on screen for nearly three minutes because the wait was disarmed inside
+ the "el_fim" handler - a message that may never arrive. Now the decision looks
+ at STATE once per queue tick: wait armed and nothing measuring means the wait
+ is over, one way or the other.
+
+ LESSON 33: a message queue is never drained blind.
+ LESSON 34: state that depends on an event arriving hangs when it does not.
+
+ TESTAR_LAFIRMA 3.43 (986 tests) | CLICK BENCH 2.7 (193 invariants).
+
+ THE CENSUS NOW SHOWS IT IS ALIVE (window 18.07)
+ --------------------------------------------------------------------------
+ 104 seconds with no sign on screen is indistinguishable from a frozen program;
+ a tooltip does not count, because it only appears if you go looking for it.
+ The button label now counts - "Census: counting... 01m 12s" - and the button
+ takes the same "in progress" colour the measurement uses. The write happens
+ when the second turns, not on every tick of the queue clock.
+
+ THE SAME CONDITION MAY NOT HAVE TWO COLOURS (window 18.07)
+ --------------------------------------------------------------------------
+ The disk panel paints "Not Enough Space" RED while the summary card painted
+ the same fact amber, because it only looked at the "SKIPPED" status - which
+ covers two opposite cases: already in the output folder (information, amber)
+ and did not fit on disk (an impediment, RED). Amber warns, red blocks.
+
+ NUMBERING: the installer number goes up on every delivery from now on.
+
+ TESTAR_LAFIRMA 3.42 (982 tests) | CLICK BENCH 2.6 (187 invariants).
+
+ THE PROGRAM WAS UNTICKING FILES BY ITSELF (window 18.06)
+ --------------------------------------------------------------------------
+ In his log, with no click at all, one second after each row was drawn:
+   "SELECAO: Game.of.Thrones -> unticked", then Ryan, then Troy.
+
+ That explains the impossible screenshots: a TICKED file reading "Not in the
+ Queue", and an UNTICKED one reading "Next to Convert".
+
+ Cause: the list recycled row containers, and WPF applies the Tag (which was
+ the INDEX) and IsChecked at different moments - so an event arrived carrying
+ one row's index and another row's state. They differed, so the handler treated
+ it as a human click and wrote it. The comment I had left there claimed the
+ synthetic event "ALWAYS matches the model". It does not.
+
+ FIX: the checkbox identifies itself by the FILE PATH; the queue list stopped
+ recycling rows; and while the queue is being repainted a checkbox event is an
+ echo of the drawing, not a click - the gate closes at the start of the redraw
+ and reopens via the Dispatcher when it ends, without waiting.
+
+ LESSON 32: a comment claiming "this ALWAYS happens", with no measurement, is a
+ guess wearing the clothes of a proof.
+
+ TESTAR_LAFIRMA 3.41 (974 tests) | CLICK BENCH 2.6 (187 invariants).
+
+ ONE LINE SAYING TWO OPPOSITE THINGS (window 18.05)
+ --------------------------------------------------------------------------
+ His screenshot showed a single diagnosis line reading:
+   "Profile 7 [BL+EL+RPU] [EL: MEL] [DETECTED] -> [WILL BE CONVERTED] ... EL
+    NOT MEASURED". Left said MEL; right said not measured.
+
+ Cause: in 18.04 the cache stored the VERDICT and not the ANSWER
+ (DiagDVres/DiagDVcor). On a re-read the left and the column came back
+ measured while the right kept the sentence the read had just written. Storing
+ half a state creates a contradiction, not a saving.
+
+ THE CENSUS THAT "NEVER ENDS" (window 18.05)
+ --------------------------------------------------------------------------
+ 104 seconds of finished work were thrown away because the round had turned,
+ twice in his log. The fix is structural: the row is found by the FILE PATH,
+ not by the index. The index is a position in a list that changes under the
+ job - that is how Ryan's verdict reached House of the Dragon's row in 18.03.
+ Now "el" and "censo_fim" carry the path; the window looks the row up by it and
+ uses the index only as a shortcut; if the file is gone, the message dies
+ without writing anywhere; and an abandoned census result COUNTS when the file
+ is still listed. The census button also says when the previous one is still
+ finishing instead of sitting grey and silent.
+
+ LESSON 30: an index is a temporary address; identity is the file path.
+ LESSON 31: storing half a state creates a contradiction.
+
+ TESTAR_LAFIRMA 3.40 (967 tests) | CLICK BENCH 2.5 (179 invariants).
+
+ THE CENSUS FROZE THE WINDOW FOR 92 SECONDS (window 18.04)
+ --------------------------------------------------------------------------
+ Measured twice in his log, with the full census running:
+
+   23:55:13.5  Start clicked   ->  state "running" only at 23:56:35.3   81.8s
+   23:58:38.4  Start confirmed ->  state "running" at 00:00:10.8        92.4s
+
+ Both match the census time still outstanding (106.5s of dovi_tool). Cause:
+ Stop-Censo called $CensoPS.Dispose() ON THE UI THREAD, and Dispose() on a
+ running pipeline does not return - it waits for the pipeline to stop.
+
+ Same family as the WaitOne removed from Stop-Motor in 18.00 - and the rule I
+ wrote there ("no synchronous wait in window code") listed WaitOne, Start-Sleep,
+ .Wait(, .Join( and .EndInvoke( but NOT Dispose/Stop/Close. An incomplete rule
+ does not catch the next case.
+
+ FIX: whoever STOPS disposes nothing. Stop-Censo closes the on-screen state,
+ turns the census round and abandons the job; Fechar-Runspace-Censo disposes it
+ when censo_fim arrives, by which time the job is over and disposing does not
+ wait. The census also got a round serial, so a result from 106s ago cannot
+ land on another folder's list. New battery rule: the STOP functions, both
+ reachable by a click, may not contain Dispose(, .Stop() or .Close().
+
+ MEASUREMENTS NO LONGER GO BACK TO ZERO (window 18.04)
+ --------------------------------------------------------------------------
+ 62.4s of measuring were thrown away on every re-read of the same folder. The
+ verdict is now kept for the session, keyed by PATH + SIZE + LAST-WRITE TIME;
+ re-reading the same folder brings it back instantly and the log says where it
+ came from. If size or date changed, the file is a different file and the old
+ measurement does not apply - reusing by name would be inventing a verdict.
+
+ LESSON 28: a ban list only protects what is written in it.
+ LESSON 29: expensive work the user already paid for is not thrown away for the
+ convenience of the code.
+
+ TESTAR_LAFIRMA 3.39 (962 tests) | CLICK BENCH 2.4 (169 invariants).
+
+ THE WORST ON-SCREEN DEFECT THIS PROGRAM HAS HAD (window 18.03)
+ --------------------------------------------------------------------------
+ From his log, 16/09 23:26, with measurement finally working:
+
+   23:26:30.3  Source folder changed -> House of the Dragon (2 files)
+   23:26:53.3  EL of 'Saving.Private.Ryan...': FEL | 1,608.29 nits
+               ... with the queue ALREADY SHOWING THE TWO NEW VIDEOS.
+
+ Ryan's verdict was written onto row 2 of the NEW list - House of the Dragon
+ S03E08, a Profile 8 file with NO enhancement layer. Hence his screenshot:
+ "P8 FEL" and "[NOT RECOMMENDED] the file asks for 1,608 nits". Same thing on
+ Fallout: "P8 MEL" on S02E03 was Troy's verdict arriving late.
+
+ RIGHT VERDICT ON THE WRONG FILE - the exact thing lesson 25 said the round
+ serial existed to prevent.
+
+ WHY THE SERIAL DID NOT PREVENT IT: I only turned the serial when a NEW round
+ started. CANCELLING turned nothing. So the late message from the dying job
+ arrived carrying the serial the window still held, passed the gate as current,
+ and wrote by INDEX - which in the new list points at another film.
+
+ FIX: (1) Stop-Medicao turns the round, so anything the dying job still sends
+ is stale by definition; (2) a stale "el_fim" is still HEARD - it carries no
+ verdict, only the news that the job died, and it closes the runspace handle.
+ Without that the next measurement stayed stuck on "the previous one is still
+ finishing", which is also in his log.
+
+ THE BENCH MISSED IT BECAUSE I HAD NEVER RUN THE GATE - only checked that
+ Start-Medicao changes the number. The gate is now extracted from the source
+ and executed (scenario 9) against the exact sequence from his log.
+
+ TRANSLATION - THE SWEEP IS NOW A MACHINE (battery 3.38)
+ --------------------------------------------------------------------------
+ His screenshot, English UI, showed two Portuguese strings. The battery now
+ extracts every accented screen string from the source (.Text, column values,
+ diagnosis lines, final-card seals) and requires a rule in IDIOMA_EN.txt for
+ each. It found six more nobody had seen. All translated. The exception list
+ has 10 entries, each with a stated reason.
+
+ LESSON 27: a round serial only works if WHOEVER CANCELS turns the number.
+
+ TESTAR_LAFIRMA 3.38 (946 tests) | CLICK BENCH 2.3 (152 invariants).
+
+ THE DEFECT 18.00 CREATED, AND HIS LOG HANDED OVER (window 18.02)
+ --------------------------------------------------------------------------
+ From his log, 16/09, running 18.01:
+
+   19:53:27.569  Measuring the enhancement layer of 3 file(s) in background
+   19:53:27.580  Measurement interrupted on 3 file(s)
+   19:53:27.591  Layer measured on 0 of 3 file(s) - 0.00s
+
+ Eleven milliseconds. Every time, across two sessions: ZERO files measured. The
+ measurement never ran. The cyan label flashing and vanishing was it being born
+ and dying.
+
+ CAUSE, born in 18.00: the measurement loop read $Controle.Cancelar - the flag
+ of the READ and the CONVERSION, raised by Stop-Motor to kill the read runspace.
+ While measurement lived inside the read it finished before that. Once the jobs
+ were split, the order became leitura_fim -> Stop-Motor -> Start-Medicao, so the
+ measurement was always born with another owner's flag already up.
+
+ FIX: measurement obeys PararMedicao, and nothing else. Splitting jobs means
+ splitting the FLAGS too.
+
+ WHY NEITHER SUITE CAUGHT IT: the bench's functional proof built its world with
+ Cancelar=$false - a state that does not exist on his machine after a read. A
+ test's initial state is a claim about reality, and a wrong claim there hides
+ instead of failing. The proof now starts with Cancelar UP, and goes red on five
+ invariants if the defect returns (sabotage-checked). A structural rule closes
+ the family: the measurement block may not mention Controle.Cancelar.
+
+ LESSON 26: a test must build the world THAT EXISTS.
+
+ TESTAR_LAFIRMA 3.37 (944 tests) | CLICK BENCH 2.2.
+
+ FOUND BY THE BENCH ITSELF, AFTER 18.00 WAS DONE (window 18.01)
+ --------------------------------------------------------------------------
+ The bench gained SCENARIO 8: the whole LEIA-ME test script - all eight items,
+ in sequence, in a single session, without resetting the world between them,
+ which is where leftover state hides. It ran, and it failed two of my items:
+
+   ITEM 6 - with measurement running, START left the label in cyan saying
+   "Measuring MEL x FEL: 2 of 3" until el_fim arrived, up to 26s later. I had
+   split decision from mechanism and left the SCREEN tied to the mechanical
+   end - trading "freezes for 2s" for "lies for 26s", which was the original
+   complaint. Fix: Stop-Medicao now closes the visible state immediately;
+   the mechanical close still arrives on its own at el_fim. The guard this
+   required: while the runspace handle exists, Start-Medicao does not fire a
+   second measurement over the one still dying, and says so in the log.
+
+   ITEM 8 - my own test demanded translation of LOG lines. The log is a
+   technical record, in Portuguese by project decision. A test that demands a
+   decision the project never made fails correct code (lesson 18). Rewritten
+   to check what the user READS ON SCREEN.
+
+ CLICK BENCH 2.1: 145 invariants (was 113).
+
+ A HOLE CLOSED IN THE BATTERY ITSELF (3.36): the encoding rule checked pure
+ CRLF on every .ps1 EXCEPT LaFirma_JANELA.ps1 - the table said Crlf = $false
+ for it. A stray LF got into line 43 of the header in this very edition and the
+ suite stayed green. Caught in the final packaging check. Fixed on both sides:
+ the LF is gone and the window is now checked like every other file - 941 tests,
+ sabotage-validated. Lesson 10 again: a test that cannot fail is not a test, and
+ one exception in a table switches a test off silently.
+
+ SABOTAGE: each of the six fixes was undone one at a time and the suites were
+ checked to go red. Two did not on the first try, and both tests were rewritten
+ until they failed for real.
+
+ LESSON 24: when the same area needs four fixes in one day, the defect is not
+ in the four places - it is in the model that forces the four.
+ LESSON 25: not waiting has a price, and it is paid with round identity.
+
+==============================================================================
+ INSTALLER 1.9.9  -  16/09/2026          *** I BROKE THE WINDOW IN 17.23 ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.24 | TESTAR_LAFIRMA 3.34 | CLICK BENCH 1.2
+
+ 1. THE BAD BUG, AND IT IS MINE, FROM TODAY
+ Measured in the user's log (16/09 18:06:41 -> 18:08:27): he turned the switch
+ on (a read started), turned it off 67ms later, and 17.23 killed the runspace
+ mid-read. "leitura_fim" never arrived - and it is the ONLY place that sets
+ the reading flag back to false. The window believed it was reading forever:
+ the Refresh button stayed stuck on "Stop reading" (he clicked it FIFTEEN
+ times, nothing happened) and changing the source folder stopped working
+ entirely (three attempts, the queue never reloaded, ending at 0 videos).
+
+ Two fixes: (a) Stop-Motor now undoes the state the runspace's birth created -
+ in Stop-Motor itself, not in each caller, because a new caller forgets; and
+ (b) turning the switch off NEVER kills a read again. Phase A is needed either
+ way, so it finishes, and only the measurement is cancelled, through a new
+ live channel that does not bring the read down with it.
+
+ 2. THE FULL CENSUS NOW SHOWS UP ON SCREEN
+ "this census is useless I think, I don't even know where it goes." He was
+ right from where he sat: the number went only to the log, the summary field
+ was written and NEVER READ, and on screen the only sign was the button
+ greying out - after a 105-second wait.
+
+ And the number mattered: on Saving Private Ryan the SAMPLE said 1 of 11
+ scenes above the master with a 1.608 nits peak; the FULL FILM census said 216
+ of 1,124 scenes (19.22%) with a 3,468 nits peak. The sample understated the
+ peak by more than 2x. The diagnosis line now carries it, and if the census
+ contradicts the sample the colour follows the census - it is the stronger
+ evidence of the two.
+
+ CLICK BENCH: 94 invariants (was 79). BATTERY: 919 tests (was 913).
+
+==============================================================================
+ INSTALLER 1.9.8  -  16/09/2026    *** THE SWITCH RE-READ THE FOLDER 28x ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.23 | TESTAR_LAFIRMA 3.33 | CLICK BENCH 1.1
+
+ The user asked: "why does turning the FEL reading off have to re-read the
+ folder? everything I do re-reads."
+
+ HE WAS RIGHT, AND HIS OWN LOG PROVES IT WITH NUMBERS. In the 15/09 session
+ the SWITCH alone fired 28 RE-READS totalling 254.5s of reading. My own 17.10
+ comment claimed "re-reading is cheap (phase A is instant)". It was never
+ measured: phase A costs ~4s PER FILE (12.93s for three, in today's log).
+
+ WORSE: RE-READING WITH THE SWITCH OFF PRODUCED NOTHING. Phase A marks every
+ P7+EL file as MEASURING regardless; with the switch off phase B is skipped
+ and everyone ends as "EL not measured" - exactly the state they were already
+ in. And the re-read THREW AWAY verdicts already paid for: Start-Leitura
+ clears the video list, so a 14.8s FEL measurement died because the switch was
+ flipped off.
+
+ THE NEW RULE: the switch decides whether to MEASURE FROM NOW ON. It does not
+ order the program to forget what was already measured - a measurement is a
+ fact, not a preference.
+   OFF -> reads nothing. Ends any measurement in progress and keeps the
+     verdicts already obtained.
+   ON  -> if every file already has a verdict there is nothing to measure and
+     nothing is read. It only reads when a verdict is missing.
+
+ NOT DONE, AND WHY: turning it ON with a missing verdict still re-reads the
+ whole folder, because phase B currently lives INSIDE the read and cannot be
+ born on its own. Splitting them is the next step, on its own and measured.
+
+ CLICK BENCH: 79 invariants (was 67). BATTERY: 913 tests (was 909).
+
+==============================================================================
+ INSTALLER 1.9.7  -  16/09/2026            *** THE PAUSE BANNER IN PORTUGUESE ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.22 | TESTAR_LAFIRMA 3.32 | CLICK BENCH 1.0
+
+ Found by the user (screenshot, 16/09): the whole screen in English and the
+ yellow banner in the middle reading ">>> PAUSADO (sem consumir CPU/disco)...".
+
+ NOT A CODE BUG. The text is DECLARED in the XAML, so the translation sweep
+ reached it fine - what was missing was the LINE in IDIOMA_EN.txt, and text
+ with no entry comes out in the original, by design. A dictionary debt, not a
+ broken mechanism.
+
+ The battery checked that the sweep WORKS and never that the dictionary is
+ COMPLETE. There is now a family that scans every Text="..." literal in the
+ XAML and demands an entry for each one that looks Portuguese. The two
+ legitimate exceptions are declared in the test WITH their reason.
+
+ BATTERY: 909 tests (was 908).
+
+==============================================================================
+ INSTALLER 1.9.6  -  16/09/2026          *** THE BUTTONS STOPPED LYING ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.21 | TESTAR_LAFIRMA 3.31 | CLICK BENCH 1.0
+
+ Requires dovi_tool 2.3.3 (same as 1.9.2 onwards). The ENGINE has not changed
+ a line since 1.9.2: nothing here changes the converted output, the MEL x FEL
+ verdict, the audio or the subtitles. This is all SCREEN.
+
+   1. "THE CONVERSION IS RUNNING AND IT SAYS IT IS MEASURING, IN CYAN."
+      Start pressed while phase B was measuring, "start now" chosen - and the
+      top bar kept reading "Measuring MEL x FEL: 2 of 3" in cyan for the whole
+      conversion, with the measurement dead for minutes.
+      CAUSE: killing the runspace erases no variable. The "who is up next"
+      state was cleared and the "a measurement exists" state was not - and it
+      is the second one that drives the label, the colour and the little bar.
+      Its only eraser was the "el_fim" message, which never arrives when the
+      measurement dies mid-way. The emergency close now kills the whole state
+      and redraws.
+
+   2. START CAME BACK TO LIFE IN THE MIDDLE OF THE WAIT. With the wait armed,
+      ticking a file re-enabled Start - and the SAME question about the SAME
+      measurement appeared a second time. Three places wrote to that button
+      with different rules and none knew about the wait. There is one place
+      now, and in it the wait outranks every other criterion.
+
+   3. THE LOG INVENTED A CLICK THAT NEVER HAPPENED. When the wait fired on
+      its own, it logged "CLICK: Start" with nobody clicking, and then asked
+      the wait question a second time. The automatic start is its own path
+      now: no fake click, no re-asking a decision already made. It only
+      re-checks the disk, which is the one thing that can have changed while
+      the measurement ran.
+
+   4. THE FULL CENSUS COULD BE STARTED DURING A CONVERSION, AND NEVER ENDED.
+      It reads the RPU of the WHOLE film; the conversion was reading another
+      82 GB file on the same mechanical disk. They strangled each other -
+      step 1/5 sat at 1% for over a minute. 17.08 said "the queue and the
+      conversion stay free": free of LOCKS, never of disk. The button is off
+      outside the idle state now, the entry point refuses the same way, the
+      tooltip says why, and starting a conversion ends a census already
+      running.
+
+   5. THE SCREEN FLICKERED ON THE MEASURE SWITCH. Eight flips in nine seconds
+      became eight folder re-reads, each cancelling the last. The switch
+      answers instantly now and the re-read waits for 400ms of silence: six
+      clicks read the folder ONCE.
+
+   6. "7.6 -> 8.1" AMONG COLUMNS READING "P7 FEL -> P8.1". Those were the rows
+      whose measurement had been interrupted - the only ones going through a
+      block where the texts were written BY HAND from raw fields. They go
+      through the single formatting place now.
+
+ NEW: CLICK BENCH (_testes\Bancada_Cliques.bat)
+ --------------------------------------------------------------------------
+ It does not open the window. It extracts the real functions from
+ LaFirma_JANELA.ps1 through the AST, loads them against a stand-in screen and
+ REPLAYS the user's click sequences, checking after EVERY step the statements
+ that can never be false - "with a conversion running the census button is
+ off", "with no measurement nothing may read Measuring". 67 invariants,
+ including a 200-random-click run. The battery checks the code's SHAPE; the
+ bench checks BEHAVIOUR after a sequence. Undoing defect 1 turns it red in
+ two places, which is the proof that it is worth having.
+
+ BATTERY: 908 tests (was 876).
+
+==============================================================================
+ INSTALLER 1.9.5  -  15/09/2026    *** THREE 17.19 DEFECTS, IN 15 MINUTES ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.20 | TESTAR_LAFIRMA 3.30
+
+ THREE THINGS WERE FOUND RUNNING 17.19, AND THEY WERE ALL THE SAME THING
+ --------------------------------------------------------------------------
+   1. "IT FINISHED MEASURING AND KEPT SHOWING IT." The queue still read
+      "Measuring Layer - 3 of 3" after all three files had a verdict. That
+      reads as a HUNG program, and it is what the "at one point it froze" in
+      the same test was about. It had not frozen: the screen was saying
+      something that was no longer true.
+
+   2. "NEXT TO CONVERT" LANDED ON THE ROW BELOW. With file 1 being measured,
+      the green label appeared on file 2. The next to convert is file 1 - it
+      just happens to also be measured right now.
+
+   3. AN UNTICKED FILE BEING MEASURED DID NOT LIGHT UP. Phase B measures
+      ticked and unticked files alike, and the "Not in the Queue" branch came
+      first - so the button said "Measuring 2 of 3" with no row lit. Exactly
+      the defect 17.18 set out to fix, back through another door.
+
+ THE COMMON CAUSE, WHICH IS THE LESSON
+ --------------------------------------------------------------------------
+   17.18 INFERRED who was being measured. Inference has a side effect I had
+   not noticed: it corrects itself on every redraw, because it is recomputed
+   from scratch every time.
+
+   17.19 replaced inference with STATE - which is right, and fixed the real
+   defect. But state needs someone to CLEAR it, and I cleared the variable
+   without redrawing the list. The screen stayed painted the way it was.
+
+   > Replacing inference with state is not only storing the value: it is also
+   > taking on the duty to clear it, and to REDRAW whatever showed the old one.
+
+ THE FOUR FIXES
+ --------------------------------------------------------------------------
+   - A file's verdict clears its own cyan immediately, without waiting for the
+     end (otherwise the last file stays lit forever - nothing redraws after
+     it).
+   - The end of the measurement REDRAWS the queue, not just clears a variable.
+   - The single closing point of phase B clears the index too, so Start
+     mid-run, a folder change or the switch being turned off all behave.
+   - The MEASURING branch moved above "Not in the Queue", and takes the "Next
+     to Convert" slot while it is still free. Measuring wins because something
+     is HAPPENING and the others only describe - and the row goes back to what
+     it was as soon as that file is done.
+
+ TWO MORE, FROM THE 19:42 LOG  (17.20)
+ --------------------------------------------------------------------------
+   ESC DID NOT GIVE UP ON WAITING FOR THE MEASUREMENT. Start was clicked while
+   measuring, WAIT was chosen, then ESC - and the log said "ignored - does not
+   apply to state 'initial'". Right about Cancel (there is no conversion) and
+   wrong about the person: something WAS pending, and ESC is the give-up key.
+   The only way out was turning the measurement switch off, which nobody
+   guesses. ESC now drops the wait without stopping the measurement: files
+   keep getting their verdict, only the promise to start by itself is
+   cancelled, and Start lights up again.
+
+   A CANCELLED QUEUE BECAME A "-99.7% ERROR". After cancelling on the second
+   file the log wrote "predicted 6,209s | real 21s | error -99.7%". The queue
+   did not miss the estimate - it did not happen. And that number lives in the
+   very line that exists to answer "it said 1h25, was it?". Calibration was
+   never affected (it records per finished file), but the log is read by
+   people. Cancelled runs now say there is no comparison, and still record
+   what was predicted.
+
+ TESTS 3.29 -> 3.30
+ --------------------------------------------------------------------------
+   Five new tests; one of them executes the ORDER of the branches instead of
+   reading it, and fails if "Not in the Queue" ever comes first again.
+
+
+==============================================================================
+ INSTALLER 1.9.4  -  15/09/2026        *** 17.18 GUESSED, AND GUESSED WRONG ***
+==============================================================================
+ Components: ENGINE 14.54 | WINDOW 17.19 | TESTAR_LAFIRMA 3.29
+
+ WHAT WAS SEEN ON SCREEN  (17.19)
+ --------------------------------------------------------------------------
+   The STATUS column said one number while the button said another, and the
+   position walked backwards. The reproduction is in the log: the files were
+   unticked and re-ticked WHILE the measurement was running.
+
+ THE CAUSE: I INFERRED WHAT I COULD HAVE ASKED
+ --------------------------------------------------------------------------
+   17.18 answered "who is being measured" with an inferred rule - "the first
+   TICKED file still in MEASURING" - and the count came from a snapshot of the
+   ticked ones. Two holes:
+
+     1. The runspace measures ALL pending files, ticked or not. With an
+        unticked file being measured, the inference pointed at the next ticked
+        row - wrong row lit, wrong number.
+
+     2. The total was photographed once, when measurement started. Ticking or
+        unticking mid-run changed the total UNDER the formula, so the position
+        jumped.
+
+   And the part worth keeping: 17.18 created the THIRD count of the same thing
+   on the same screen. The button counted from the runspace (correct), the
+   wait notice counted the ticked files, and I added an inference. That is the
+   oldest lesson in this project - one rule written in two places, one of them
+   stale - repeated by me in the same week the suite started failing on
+   duplicate functions.
+
+ THE FIX: WHOEVER DOES THE WORK IS WHOEVER SPEAKS
+ --------------------------------------------------------------------------
+   The measuring loop now sends an "el_ini" carrying INDEX, POSITION and TOTAL
+   before each file. The queue row, the button label and the small progress bar
+   read the same numbers, from whoever is reading the RPU at that instant.
+
+   Ticking and unticking mid-measurement no longer changes anything: it is not
+   the business of whoever is measuring.
+
+   The row also matches by INDEX instead of by name - matching by name fails on
+   two files with the same name, and the index already travelled in the message.
+
+ THE WAIT NOTICE STOPPED COMPETING WITH THE BUTTON  (17.19)
+ --------------------------------------------------------------------------
+   The two numbers were legitimately different - the button counts files being
+   MEASURED, the notice counts files in YOUR queue. Written in the same "X of Y"
+   shape, they looked like one contradictory counter. Each now has the shape of
+   its own question: the button counts progress, the notice counts what is left
+   for you.
+
+ THE 15/09 SWEEP - WHAT ELSE IT FOUND  (17.19)
+ --------------------------------------------------------------------------
+   FIVE DIALOG BOXES WERE PORTUGUESE-ONLY ON AN ENGLISH SCREEN. The 17.15
+   sweep reached the text the WINDOW writes; dialog boxes are born outside it,
+   in MessageBox, and escaped whole: cancel the conversion, close with a
+   conversion running, could not start, folder not found - and the disk space
+   box. The first two are the only boxes in the program where answering wrong
+   costs an entire conversion.
+
+   THE DISK BOX WAS HALF TRANSLATED, WHICH IS WORSE THAN NOT AT ALL. It
+   translated ONE fragment and left the rest hardcoded, so an English screen
+   produced a Portuguese box with one English phrase inside it. Half
+   translated misleads more: seeing one word in your language implies the rest
+   is too - and that box ends in a Yes/No.
+
+   The suite now fails on any function that opens a MessageBox with an
+   accented phrase without deciding the language, checked through the AST
+   because the text is built many lines above the call.
+
+   TWO COMMENTS DESCRIBED WHAT THE CODE DOES NOT DO. They said the calibration
+   uses the MEDIAN of the last five runs; the code has called percentile 0.75
+   since 16.99 and the log says "p75". A comment that contradicts the code is
+   how the next person "fixes" correct code to match wrong text. The suite now
+   ties the computed percentile, the name the log gives it, and the ban on
+   claiming median.
+
+   A WHOLE SESSION WITH NO LOG, SILENTLY. The log tried _logs\ and then the
+   program root - both inside the install folder, so in Program Files both
+   fail, the StreamWriter throws into an empty catch, and the program runs
+   without writing a line. The person with the problem is left without the
+   proof of it. It now falls back to the user data folder, and says so in its
+   own first lines.
+
+   THE DISK SPACE FACTORS LIVE IN THREE PLACES (two in the engine, one in the
+   window). They cannot be merged - the engine also runs headless - but they
+   are now tied by test, along with the number written out in both languages
+   inside the dialog.
+
+
+ TESTS 3.28 -> 3.29
+ --------------------------------------------------------------------------
+   Section 47 was REBUILT, not patched: the old tests validated the wrong
+   inference. It now executes the new contract, reproduces the reported case
+   (unticking everything mid-measurement must not change who is being measured
+   nor the count), and proves an unticked file being measured lights its own
+   row. Two new guards hold the rule rather than the symptom, checked against
+   the function body via the AST and token by token.
+
+
+==============================================================================
  INSTALLER 1.9.3  -  15/09/2026     *** THE QUEUE DID NOT SAY WHO WAS BEING
                                         MEASURED ***
 ==============================================================================

@@ -4,7 +4,7 @@
 ==============================================================================
 
  Este texto existe porque conversão de Dolby Vision é cheia de detalhe que
- muda o resultado e quase nunca é explicado. Aqui esta o que sabemos, com a
+ muda o resultado e quase nunca é explicado. Aqui está o que sabemos, com a
  separação que importa: o que o programa MEDIU no seu arquivo, o que está na
  documentação das ferramentas, e o que é relato da comunidade que nós não
  testamos. Onde não sabemos, está escrito que não sabemos.
@@ -28,7 +28,7 @@
 
 
 ------------------------------------------------------------------------------
- 2. AS PECAS: BL, EL E RPU
+ 2. AS PEÇAS: BL, EL E RPU
 ------------------------------------------------------------------------------
 
  BL (Base Layer)
@@ -41,7 +41,7 @@
 
  RPU
    Os metadados dinâmicos. São instruções de brilho, cena a cena, que o
-   arquivo manda para a TV: "aqui o pico e 400 nits, aqui e 1.200". O RPU
+   arquivo manda para a TV: "aqui o pico é 400 nits, aqui é 1.200". O RPU
    NÃO some na conversão - ele vai inteiro para o Perfil 8.1.
 
  Guarde isto, porque é a chave de tudo que vem depois: a conversão joga fora
@@ -218,6 +218,19 @@
    permitir comparar este arquivo com outro. Para decidir se a camada extra
    levantava o brilho, só o pico do master serve - e quando ele não está lá, a
    resposta honesta é que não dá para saber.
+
+
+ O CENSO COMPLETO [F11] - A CONTA INTEIRA, SÓ QUANDO VALE
+
+   Num Complex FEL a amostra já diz o que a camada É. O censo lê o RPU do
+   filme inteiro (bem mais demorado que a amostra: no Ryan, 5 s contra
+   1m50) e diz QUANTO ela pesa:
+   quantas cenas pedem mais brilho que o master, e qual o pico.
+
+   O censo informa, nunca muda a cor. Um Complex FEL com poucas cenas
+   continua vermelho - a cor responde uma pergunta só ("o que é esta
+   camada?"), e trocar a cor pela frequência faria a tela dizer duas coisas
+   diferentes sobre o mesmo arquivo.
 
 
 ------------------------------------------------------------------------------
@@ -404,6 +417,12 @@
  oficiais de cada ferramenta, no guia de instalação.
 
 
+ E A LICENÇA DO LAFIRMA
+
+   O instalador mostra a licença (EULA) na língua escolhida antes de
+   instalar, e deixa uma cópia em "licenca\" dentro da pasta instalada.
+
+
 ------------------------------------------------------------------------------
  13. CRÉDITOS
 ------------------------------------------------------------------------------
@@ -434,11 +453,8 @@
    Conversão para E-AC-3 com o Atmos preservado. É o que permite sair de um
    TrueHD Atmos e continuar com Atmos do outro lado.
 
- seconv / BinaryOCR
-   OCR das legendas PGS, o caminho principal.
-
  PgsToSrt / Tesseract
-   OCR de reserva, para quando o caminho principal não dá conta.
+   OCR das legendas PGS.
 
  E dois agradecimentos que não são de código:
 

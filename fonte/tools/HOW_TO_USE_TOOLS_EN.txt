@@ -1,43 +1,57 @@
+﻿================================================================================
+          LaFirma Remux Forge - WHAT GOES IN THE 'tools' FOLDER
 ================================================================================
-                     REQUIRED CONTENTS OF THE 'tools' FOLDER
-================================================================================
 
-To ensure that LaFirma Remux Forge functions correctly, the "tools\" directory 
-must contain the following binaries, libraries, and subdirectories:
+The "tools\" folder sits next to LaFirma_JANELA.ps1 and must contain EXACTLY
+what is listed below. The installer already ships all of it. This text is for
+anyone who wants to build the folder by hand.
 
-1. ROOT DIRECTORY (tools\)
+Ready-made folder:
+  tools.rar    - MEGA  : https://mega.nz/file/OGB3Xb7I#9MsNg8kaJD4R0f0xnHdnPnEjaKwlqKJpDFss1KOaNCo
+  tools.rar    - Proton: https://drive.proton.me/urls/REAQGVN7D4#RXvf7kjVeJ1I
+  folder       - MEGA  : https://mega.nz/folder/HbwiFAab#4-tWrGlGfoEN0xRopn_8IQ
+  folder       - Proton: https://drive.proton.me/urls/5Y8AZ9QZ6C#YnOKpcuVRXUk
+
+1. FILES IN THE ROOT (tools\)
 --------------------------------------------------------------------------------
-   - ffmpeg.exe        : Core media processing tool
-   - ffprobe.exe       : Media stream analysis tool
-   - dovi_tool.exe     : Dolby Vision RPU manipulation utility
-   - mkvmerge.exe      : Matroska multiplexer
-   - mkvextract.exe    : Matroska track extractor
-   - MediaInfo.exe     : Detailed media inspector
-   - LIBCURL.DLL       : Networking/HTTP library
-   - nvcuda.dll        : NVIDIA CUDA acceleration library
-   - nvcuvid.dll       : NVIDIA Video Codec SDK library
+   - ffmpeg.exe      : extracts the video from the MKV and checks the output
+   - ffprobe.exe     : reads tracks, duration and FPS
+   - dovi_tool.exe   : converts Dolby Vision (Profile 7 -> 8.1) and measures
+                       the enhancement layer (MEL x FEL). Version 2.3.3.
+   - mkvmerge.exe    : reads tracks and builds the final MKV
+   - MediaInfo.exe   : detects Atmos/JOC in the audio tracks
 
-2. REQUIRED SUBDIRECTORIES (tools\)
+2. SUBFOLDERS
 --------------------------------------------------------------------------------
-   - SubtitleEdit\
-       |-- seconv.exe         : Preferred OCR processing binary
-       |-- Latin.db           : Optical character database
-       |-- libSkiaSharp.dll   : Graphics engine dependency
-
-   - PgsToSrt\
-       |-- PgsToSrt.exe       : Secondary fallback OCR utility
-       |-- x64\               : Architecture binaries
-       |-- tessdata\          : Tesseract language model data
+   - PgsToSrt\        PGS subtitle OCR -> .SRT
+       |-- PgsToSrt.exe
+       |-- x64\                   (Tesseract libraries it uses)
+       |-- tessdata\
              |-- por.traineddata
 
-   - Tesseract\
-       |-- tesseract.exe      : Standalone engine for short-line re-OCR
-       |-- tessdata\          : Language and layout models
+   - Tesseract\       re-OCR of short lines (fixes "INF TOL" -> "Não!")
+       |-- tesseract.exe          (+ the DLLs that ship with it)
+       |-- tessdata\
              |-- por.traineddata
-             |-- osd.traineddata
 
-   - DeeZy\
-       |-- deezy.exe          : Audio processing CLI wrapper
-       |-- apps\              : Internal engine dependencies (dee, truehdd)
-       |-- bundle\            : Supporting libraries/executables
+   - DeeZy\           TrueHD/Atmos -> E-AC-3 Atmos
+       |-- deezy.exe
+       |-- apps\dee\dee.exe
+       |-- apps\truehdd\truehdd.exe
+       |-- (the other files that ship with DeeZy)
+       DeeZy uses the ffmpeg.exe in the root of tools\ - the copy in
+       apps\ffmpeg\ is not needed.
+
+3. NO LONGER NEEDED
+--------------------------------------------------------------------------------
+   - SubtitleEdit\ (seconv, Latin.db, libSkiaSharp.dll): removed in 2.0.
+     OCR is now PgsToSrt + Tesseract only.
+   - mkvextract.exe, LIBCURL.DLL, nvcuda.dll, nvcuvid.dll: not used.
+   - PgsToSrt\x86\: only x64 is used.
+
+4. OUTSIDE THE tools FOLDER
+--------------------------------------------------------------------------------
+   - .NET Desktop Runtime 8 (x64): required by PgsToSrt. The installer adds it
+     if missing; when building by hand, install it yourself:
+     https://dotnet.microsoft.com/download/dotnet/8.0
 ================================================================================

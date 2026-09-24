@@ -4,7 +4,7 @@
 #  Este arquivo existe por um motivo medido: a pasta fonte\tools\ tem
 #  1,16 GB de binarios de OUTRAS PESSOAS. Sem esta lista, um "arrastar a
 #  pasta inteira" sobe tudo - e sete arquivos dela passam de 50 MB, que e
-#  onde o GitHub comeca a reclamar (seconv.exe sozinho tem 75 MB).
+#  onde o GitHub comeca a reclamar (ffmpeg.exe e ffprobe.exe tem ~100 MB cada).
 #
 #  Sem tools\, o repositorio inteiro fica em ~5 MB.
 #
@@ -92,13 +92,3 @@ ACHADO_*.md
 Thumbs.db
 desktop.ini
 .DS_Store
-
-# ---- Gerado pelo instalador na maquina do usuario - nunca versionar ----
-fonte/VERSAO.txt
-
-# ---- O .iss vive na raiz; copia em fonte/ e duplicata ----
-fonte/LaFirma_Setup.iss
-
-# ---- Ferramentas de bancada (desenvolvimento) ----
-fonte/Bancada_CensoCompleto.*
-Bancada_CensoCompleto.*

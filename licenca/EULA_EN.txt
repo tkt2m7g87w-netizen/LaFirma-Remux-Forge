@@ -1,0 +1,83 @@
+﻿LaFirma Remux Forge - Black Edition
+TERMS OF USE AND RESPONSIBILITY
+
+Read this before installing. By clicking "I accept" you agree to the terms
+below. If you do not agree, click "I do not accept" and the installation will
+not continue.
+
+
+1. WHAT THIS PROGRAM IS
+
+LaFirma Remux Forge is a REMUX tool. It repackages a video file that is
+already on your computer: it converts Dolby Vision metadata from Profile 7 to
+Profile 8.1, converts the audio track, and turns image-based subtitles into
+text. It does NOT re-encode the picture, does NOT download content from
+anywhere, does NOT remove or circumvent any disc copy protection, and does
+NOT come with any film.
+
+
+2. WHAT YOU DECLARE BY ACCEPTING
+
+By installing and using this program, you declare that:
+
+  a) the files you are going to process were legitimately acquired by you, or
+     you have permission from the rights holder to use them;
+
+  b) the result is for your own personal and private use - for example,
+     watching it on your TV, on your home media server, or on a device that
+     does not play the original format well;
+
+  c) you will NOT use this program to distribute, share, sell, publish,
+     broadcast or otherwise make copyrighted content available to third
+     parties;
+
+  d) you are responsible for knowing and respecting the law of your own
+     country regarding private copying and the use of protected works.
+
+
+3. ABOUT THE LAW
+
+Rules on personal-use copying differ from country to country, and they change
+over time. In some places a private copy of a work you bought is permitted;
+in others it is restricted or forbidden, and in several countries
+circumventing a technical protection measure is forbidden EVEN WHEN the copy
+itself would be allowed.
+
+This document is not legal advice and the authors of this program are not
+lawyers. Knowing what is permitted where you are, and staying within it, is
+entirely your responsibility.
+
+
+4. PIRACY
+
+This project does not support, does not encourage and does not exist to
+enable piracy. Using this tool to prepare, improve or redistribute copies of
+works you did not acquire is misuse, is contrary to the purpose of the
+program, and is the sole responsibility of whoever does it.
+
+
+5. WARRANTY AND LIABILITY
+
+The program is provided "AS IS", without warranty of any kind, express or
+implied. It works on large files and long operations: BACK UP your original
+files before using it.
+
+To the maximum extent permitted by applicable law, the authors are not liable
+for data loss, damaged files, lost time, hardware failure, or any direct or
+indirect damage arising from the use of or the inability to use this program.
+
+
+6. THIRD-PARTY TOOLS
+
+This installer ships third-party programs, each under its own licence - among
+them ffmpeg, dovi_tool, mkvmerge (MKVToolNix), MediaInfo, Tesseract OCR,
+PgsToSrt and DeeZy. Credits and licences for each are in the "Credits"
+section of the "Understand" button inside the program. Their use is also
+subject to the terms of their respective authors.
+
+
+7. ACCEPTANCE
+
+Clicking "I accept" means you have read, understood and agree with everything
+above, and that you declare yourself to be the legitimate owner of the files
+you intend to process.

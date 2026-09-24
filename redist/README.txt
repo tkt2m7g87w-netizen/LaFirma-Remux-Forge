@@ -64,7 +64,7 @@ PAY ATTENTION TO THE FILENAME
 
 WHAT IT IS USED FOR
 
-    PgsToSrt (the BACKUP subtitle OCR engine, used when seconv fails) requires 
+    PgsToSrt (the subtitle OCR engine - the ONLY one since 2.0, seconv was removed) requires 
     the .NET Desktop Runtime 8.0 installed on Windows.
 
     WITH the file here:     The installer embeds the runtime inside itself and installs 
@@ -75,9 +75,9 @@ WHAT IT IS USED FOR
                             from Microsoft during installation — requiring an internet 
                             connection at that moment.
 
-    In neither case does the program fail to convert videos: without .NET 8, OCR 
-    continues to function via seconv (the primary engine, which requires no 
-    installed dependencies). You only lose the secondary fallback path.
+    In neither case does the program fail to convert video. But without .NET 8
+    the PGS subtitle is NOT turned into .SRT (PgsToSrt is the only OCR since 2.0):
+    video and audio come out normally and the original PGS stays in the MKV.
 
 WHY THIS FILE EXISTS
 

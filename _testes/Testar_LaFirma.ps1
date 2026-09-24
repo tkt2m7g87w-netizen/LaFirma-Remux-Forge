@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "3.28"
+$Versao = "4.7"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -153,7 +153,7 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
 # 3.2: janela 135 -> 136 (Get-FatorEspacoDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 90; "LaFirma_JANELA.ps1" = 174
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 97; "LaFirma_JANELA.ps1" = 212
                "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
@@ -203,7 +203,7 @@ $regras = @{
     "Corretor_Legenda.ps1"      = @{ Bom = $true;  Crlf = $true;  Ascii = $false }
     "Reocr_Legenda.ps1"         = @{ Bom = $true;  Crlf = $true;  Ascii = $false }
     "Auditor_OCR.ps1"           = @{ Bom = $true;  Crlf = $true;  Ascii = $false }
-    "LaFirma_JANELA.ps1"        = @{ Bom = $true;  Crlf = $false; Ascii = $false }
+    "LaFirma_JANELA.ps1"        = @{ Bom = $true;  Crlf = $true;  Ascii = $false }
 }
 foreach ($arq in $regras.Keys) {
     $p = Join-Path $Fonte $arq
@@ -732,19 +732,45 @@ Checar "Janela: a fase B existe e enfileira o que precisa medir" `
 Checar "Janela: so Profile 7 COM EL entra na fila de medicao" `
     ([bool]($jan -match '\$dv\.Perfil -eq 7 -and \$dv\.Camadas -match "EL"'))
 
-Checar "Janela: o runspace NAO morre enquanto a fase B ainda mede" `
-    ([bool]($jan -match '\$script:MedindoEL = \(\[int\]\$m\.MedirEL -gt 0\)[\s\S]{0,250}if \(-not \$script:MedindoEL\)'))
+<#  3.35 - 18.00: A DECISAO SE INVERTEU, E COM MOTIVO.
 
-Checar "Janela: quem encerra o runspace depois de medir e o el_fim" `
-    ([bool]($jan -match '"el_fim"\s*\{[\s\S]{0,700}?Stop-Motor'))
+    Ate a 17.24 a leitura ficava VIVA depois do "leitura_fim" quando havia
+    camada a medir, porque a medicao rodava dentro dela. Isso era a causa raiz
+    de tudo o que quebrou em 16/09 (janela congelando 2s, releitura a toa, censo
+    morto por um clique na chave). Agora a leitura SEMPRE fecha no fim dela, e a
+    medicao nasce no runspace DELA.
 
-Checar "Janela: enquanto MEDE, a LINHA do diagnostico tambem nao e verde" `
-    ([bool]($jan -match 'medindo a camada de melhoria \(MEL x FEL\)[\s\S]{0,900}?\$d\.DiagDVcor = "cinza"'))
+    Os dois testes de baixo cobravam a regra velha - lição 18: teste que exige
+    decisao revertida reprova o codigo certo. Eles viraram o par oposto. #>
+Checar "Janela: a leitura SEMPRE fecha o runspace dela no leitura_fim" `
+    ([bool]($jan -match '(?s)"leitura_fim" \{.{0,4000}?Stop-Motor')) `
+    "a medicao nao mora mais dentro dela - nao ha motivo para ficar viva"
+Checar "Janela: e e o leitura_fim que dispara a medicao, se a chave estiver ligada" `
+    ([bool]($jan -match '(?s)"leitura_fim" \{.{0,5000}?elseif \(\$script:MedirELLigado\) \{.{0,900}?Start-Medicao'))
+Checar "Janela: o el_fim fecha o runspace da MEDICAO (nao o do motor)" `
+    ([bool]($jan -match '(?s)"el_fim" \{.{0,300}?Fechar-Runspace-Medicao'))
+
+<#  3.35 - 18.00: a leitura nao escreve mais texto de DV a mao. Ela diz o
+    FATO (tem camada EL, sem veredicto) e quem escreve e Update-TextosDV, o
+    lugar unico da 16.84. A regra "sem veredicto nao pode ser verde" continua
+    valendo - so que agora ela e conferida onde ela mora. #>
+Checar "Janela: sem veredicto, a linha do diagnostico NAO e verde" `
+    ([bool]($jan -match '(?s)function Update-TextosDV.{0,2500}"NAO_MEDIDO".{0,300}DiagDVcor = "ambar"')) `
+    "verde quer dizer 'provado'; sem medida nao ha o que provar"
 Checar "Janela: enquanto MEDE, o chip do DV nao pode ser verde (nada a afirmar)" `
     ([bool]($jan -match '"MEDINDO"    \{ return "cinza" \}'))
 
-Checar "Janela: arquivo por medir aparece como MEDINDO, nunca como limpo" `
-    ([bool]($jan -match '\$d\.ELtipo = "MEDINDO"'))
+<#  3.35 - 18.00: a LEITURA nao decide mais "MEDINDO" - ela nao sabe se vai
+    haver medicao. Ela marca "sem veredicto"; quem for medido de fato vira
+    MEDINDO em Start-Medicao, um por um. O que a regra sempre garantiu continua:
+    arquivo por medir NUNCA aparece como limpo. #>
+Checar "Janela: a leitura marca 'sem veredicto', nao 'MEDINDO'" `
+    ([bool]($jan -match '(?s)\$dv\.Perfil -eq 7 -and \$dv\.Camadas -match "EL".{0,2200}?\$d\.ELtipo = "NAO_MEDIDO"')) `
+    "dizia MEDINDO ate com a chave desligada, e o log inventava 'medicao interrompida'"
+Checar "Janela: e quem entra na medicao vira MEDINDO na hora (Start-Medicao)" `
+    ([bool]($jan -match '(?s)function Start-Medicao.{0,3200}?\$v\.ELtipo = "MEDINDO"'))
+Checar "Janela: arquivo por medir nunca aparece como limpo" `
+    (-not ($jan -match '(?s)\$dv\.Perfil -eq 7 -and \$dv\.Camadas -match "EL".{0,2200}?\$d\.ELtipo = "LIMPA"'))
 
 Checar "Janela: a fase B manda o L1 medido junto (o log guarda o numero)" `
     ([bool]($jan -match 'L1 MaxCLL \{2:N2\} nits'))
@@ -758,8 +784,36 @@ Checar "Motor: o contexto do brilho compara o L1 com o pico do MASTER" `
 Checar "Motor: o MaxCLL do container e marcado como regua diferente do L1" `
     ([bool]($mot -match 'histograma, nao se compara com o L1'))
 
-Checar "Motor: Get-BrilhoDoContainer falha em silencio (nunca derruba a conversao)" `
-    ([bool]($mot -match 'function Get-BrilhoDoContainer[\s\S]{0,4000}?\} catch \{ \}'))
+<#  2.0 (item 7 da auditoria): ESTE TESTE COBRAVA O DEFEITO.
+    Ele exigia que Get-BrilhoDoContainer terminasse em "catch { }" - catch
+    VAZIO. Isso protegia a conversao de cair, sim, mas fazia "o ffprobe
+    quebrou" e "o arquivo nao tem metadado HDR" sairem identicos la fora: o
+    cartao dizia "sem HDR" para um erro de leitura. Terceiro estado precisa
+    de nome (licao 19) e catch que engole vira misterio (licao 22).
+    O invariante de verdade e outro, e sao dois: a conversao NAO cai, e o
+    erro TEM NOME. E isso que este teste cobra agora. #>
+Checar "Motor: Get-BrilhoDoContainer nao derruba a conversao (o erro e capturado)" `
+    ([bool]($mot -match 'function Get-BrilhoDoContainer[\s\S]{0,4000}?\} catch \{'))
+<#  2.0 - O ITEM 7 DA AUDITORIA ERAM TRES FUNCOES, NAO UMA.
+    Get-BrilhoDoContainer era a mais visivel, mas quem CHAMA ela tambem
+    engolia a falha: Get-TipoCamadaDV (o veredicto MEL x FEL) e
+    Get-CensoCompletoDV (que le o filme inteiro) pegavam a regua dentro de
+    um "catch { }". Sem regua, o veredicto perde o unico numero com que se
+    compara o L1 - e "este arquivo nao declara mastering display" ficava
+    identico a "a leitura quebrou". Dois estados, um desenho (licao 19). #>
+Checar "Motor: o veredicto MEL x FEL DIZ quando a regua falhou (nao engole)" `
+    ([bool]($mot -match '(?s)function Get-TipoCamadaDV.{0,30000}\$res\.ReguaFalhou = "\$\(\$_\.Exception\.Message\)"'))
+Checar "Motor: e o censo completo tambem (ele le o filme INTEIRO para descobrir)" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,12000}\$res\.ReguaFalhou = "\$\(\$_\.Exception\.Message\)"'))
+Checar "Motor: os dois objetos declaram o campo ReguaFalhou" `
+    ((([regex]::Matches($mot, 'ReguaFalhou\s+= ""')).Count) -ge 2) `
+    "atribuir propriedade nao declarada em PSCustomObject derruba a etapa"
+Checar "Motor: a regua que falhou tem NOME, nao e so um estado" `
+    ([bool]($mot -match 'Nao consegui ler a regua de brilho'))
+
+Checar "Motor: e o erro de leitura do HDR ganha NOME (nao vira 'sem HDR')" `
+    ([bool]($mot -match '(?s)function Get-BrilhoDoContainer.{0,4000}\$res\.Erro = "\$\(\$_\.Exception\.Message\)"')) `
+    "sem isto, falha de ffprobe e ausencia de metadado ficam iguais na tela"
 
 
 Titulo "11. O QUE OS TESTES DE 04/09 A NOITE ACHARAM (16.79)"
@@ -818,10 +872,34 @@ Checar "Janela: no MEL a linha resolve em uma oracao" `
     travada numa frase que nao era mais verdade. #>
 Checar "Janela: existe Fechar-MedicaoPendente (medicao interrompida nao trava a tela)" `
     ([bool]($jan -match 'function Fechar-MedicaoPendente'))
-Checar "Janela: TODO fim de runspace fecha a medicao presa (Stop-Motor chama)" `
-    ([bool]($jan -match 'function Stop-Motor \{[\s\S]{0,40}?Fechar-MedicaoPendente'))
-Checar "Janela: medicao interrompida vira NAO MEDIDA em ambar, jamais limpa" `
-    ([bool]($jan -match 'function Fechar-MedicaoPendente[\s\S]{0,2500}?NAO_MEDIDO[\s\S]{0,700}?DiagDVcor = "ambar"'))
+<#  3.35 - 18.00: Stop-Motor cuida do runspace da LEITURA e do MOTOR, e nada
+    mais. A medicao tem dono proprio (Stop-Medicao) - mexer nela daqui mataria
+    NA TELA uma medicao que segue viva atras. Quem fecha o estado preso e o
+    "el_fim" e a Start-Leitura, cada um no seu momento. #>
+Checar "Janela: Stop-Motor NAO mexe mais na medicao" `
+    (-not ($jan -match '(?s)function Stop-Motor \{.{0,600}?Fechar-MedicaoPendente')) `
+    "a medicao roda em outro runspace - apagar o estado dela aqui e mentir na tela"
+Checar "Janela: uma leitura nova encerra a medicao antes de apagar a fila" `
+    ([bool]($jan -match '(?s)function Start-Leitura.{0,1200}?Stop-Medicao.{0,200}?Fechar-MedicaoPendente'))
+Checar "Janela: e o el_fim fecha quem sobrou em MEDINDO" `
+    ([bool]($jan -match '(?s)"el_fim" \{.{0,900}?Fechar-MedicaoPendente'))
+<#  3.31 - 17.21: o texto nao e mais escrito A MAO aqui.
+
+    O print do Diego mostrou a coluna com "7.6 → 8.1" enquanto as vizinhas
+    mostravam "P7 FEL → P8.1" - eram as linhas que passaram por este
+    fechamento, onde eu montava os textos com os campos crus. Agora o
+    fechamento so troca o ELtipo e manda Update-TextosDV reescrever, que e o
+    lugar unico da 16.84. O teste passa a cobrar ISSO, que e a regra, e nao a
+    palavra "ambar" (que agora mora dentro do Update-TextosDV). #>
+Checar "Janela: medicao interrompida vira NAO MEDIDA (nunca limpa)" `
+    ([bool]($jan -match '(?s)function Fechar-MedicaoPendente.{0,3000}\$v\.ELtipo = "NAO_MEDIDO"'))
+Checar "Janela: e o texto sai do lugar unico (Update-TextosDV), nao da mao" `
+    ([bool]($jan -match '(?s)function Fechar-MedicaoPendente.{0,3600}Update-TextosDV \$v'))
+Checar "Janela: o fechamento NAO monta a coluna DV com campo cru" `
+    (-not ($jan -match '(?s)function Fechar-MedicaoPendente.{0,3600}\$v\.ColDV = "\$\(\$v\.DVperfil\)')) `
+    "foi assim que saiu '7.6 → 8.1' no meio de colunas 'P7 FEL → P8.1'"
+Checar "Janela: e Update-TextosDV continua sendo quem pinta o NAO_MEDIDO de ambar" `
+    ([bool]($jan -match '(?s)function Update-TextosDV.{0,2500}"NAO_MEDIDO".{0,300}DiagDVcor = "ambar"'))
 
 <#  5) BUG RELATADO: o PC reiniciou no meio do mkvmerge; ao voltar, o .mkv
     truncado na pasta de saida foi lido como "Ja Existe na Saida" e travou o
@@ -905,11 +983,36 @@ $blocoL = Remove-Comentarios (Get-BlocoRunspace $iniLeit)
 Checar "os dois blocos de runspace foram localizados no fonte" `
     ($iniMotor -gt 0 -and $iniLeit -gt $iniMotor -and $blocoL.Length -gt 5000)
 
+<#  3.48 - O BURACO QUE ESTA BATERIA TINHA DESDE A 18.00.
+
+    Este teste (o mais forte que existe aqui: nenhuma funcao da janela pode ser
+    chamada dentro de um runspace) olhava DOIS blocos - motor e leitura - com o
+    numero da linha achado a mao. Acontece que a 18.00 criou mais DOIS
+    trabalhos, medicao e censo, e ninguem os acrescentou aqui. Ou seja: os
+    runspaces mais novos, justamente onde moraram todos os defeitos de 15 a
+    17/09, nao eram conferidos por ele.
+
+    O historico diz o que isso custa - "O termo 'Escrever-Log' nao e
+    reconhecido" e "O termo 'Test-SaidaCompleta' nao e reconhecido" aparecem
+    nos logs dele de setembro, cada um estourando a leitura de um arquivo.
+
+    Agora a lista de blocos e DESCOBERTA no fonte: todo "$script:Trabalho* = {"
+    entra sozinho. Trabalho novo ja nasce conferido - lista digitada a mao
+    envelhece calada (o mesmo corolario dos Excludes do instalador). #>
+$blocos = @()
+foreach ($m in [regex]::Matches($jan, '(?m)^\$script:(Trabalho[A-Za-z]+) = \{')) {
+    $nomeBl = $m.Groups[1].Value
+    $lnBl = ($linhas | Select-String -SimpleMatch ("`$script:" + $nomeBl + " = {") | Select-Object -First 1).LineNumber
+    if ($lnBl) { $blocos += ,@($nomeBl, (Remove-Comentarios (Get-BlocoRunspace $lnBl))) }
+}
+Checar "os blocos de runspace sao DESCOBERTOS no fonte, nao digitados a mao" `
+    ($blocos.Count -ge 4) ("achados: " + (($blocos | ForEach-Object { $_[0] }) -join ", "))
+
 # Funcoes da JANELA = as definidas fora dos dois blocos.
 $todas = [regex]::Matches($jan, '(?m)^function\s+([A-Za-z][A-Za-z0-9-]*)') | ForEach-Object { $_.Groups[1].Value }
 $dentro = @()
-foreach ($b in @($blocoM, $blocoL)) {
-    $dentro += [regex]::Matches($b, '(?m)^\s+function\s+([A-Za-z][A-Za-z0-9-]*)') | ForEach-Object { $_.Groups[1].Value }
+foreach ($par in $blocos) {
+    $dentro += [regex]::Matches($par[1], '(?m)^\s+function\s+([A-Za-z][A-Za-z0-9-]*)') | ForEach-Object { $_.Groups[1].Value }
 }
 $soDaJanela = @($todas | Where-Object { $dentro -notcontains $_ } | Sort-Object -Unique)
 Checar "a lista de funcoes exclusivas da janela foi extraida ($($soDaJanela.Count) nomes)" `
@@ -917,7 +1020,7 @@ Checar "a lista de funcoes exclusivas da janela foi extraida ($($soDaJanela.Coun
 
 $vazadas = @()
 foreach ($nome in $soDaJanela) {
-    foreach ($par in @(@("motor", $blocoM), @("leitura", $blocoL))) {
+    foreach ($par in $blocos) {
         # Chamada = o nome como comando (inicio de linha ou depois de = ( { |).
         if ($par[1] -match ("(?m)(^|[=({|;]\s*|\s)" + [regex]::Escape($nome) + "(\s|\)|$)")) {
             $vazadas += ("{0} (chamada no bloco {1})" -f $nome, $par[0])
@@ -991,8 +1094,13 @@ if ($fnSaida.Count -eq 1) {
     Iniciar, e quem barrou foi o motor la na frente. #>
 Checar "Janela: a leitura termina chamando Update-JaExiste" `
     ([bool]($jan -match '(?m)"leitura_fim" \{[\s\S]{0,3000}?^\s+Update-JaExiste\s*$'))
-Checar "Janela: a fase B nao anuncia medicao quando ja foi cancelada" `
-    ([bool]($jan -match '\$pendentesEL\.Count -gt 0 -and -not \$Controle\.Cancelar'))
+<#  3.35 - 18.00: a medicao virou trabalho proprio. Ela nem nasce cancelada,
+    porque quem decide se ela nasce e a janela - mas o laco continua conferindo
+    o cancelamento a cada arquivo, que e o que permite parar sem esperar. #>
+Checar "Medicao: o trabalho so anuncia se nao foi cancelado antes de comecar" `
+    ([bool]($jan -match '\$Pendentes\.Count -gt 0 -and -not \$Controle\.PararMedicao'))
+Checar "Medicao: e o laco confere o cancelamento a cada arquivo" `
+    ([bool]($jan -match 'if \(\$Controle\.PararMedicao -or \(\[int\]\$Controle\.MedSerieViva -ne \[int\]\$Serie\)\) \{ break \}'))
 
 
 Titulo "15. UMA COISA, UM TEXTO (16.84)"
@@ -1139,7 +1247,7 @@ Checar "Janela: FEL COM expansao e VERMELHO (o unico caso que estraga)" `
     verde). O que o teste guarda continua sendo o mesmo: a frase so aparece
     onde ha EXPANSAO de brilho, nunca no MEL nem no Simple FEL. #>
 Checar "Janela: so o caso que expande usa 'nao recomendado' (diagnostico + cartao)" `
-    (([regex]::Matches($jan, 'CONVERS\u00c3O N\u00c3O RECOMENDADA')).Count -eq 2)
+    (([regex]::Matches($jan, 'CONVERS\u00c3O N\u00c3O RECOMENDADA')).Count -eq 3)
 Checar "Janela: MEL continua verde (nao ha ressalva a fazer)" `
     ([bool]($jan -match 'MEL: EL vazia, descarte sem perda'))
 
@@ -1448,12 +1556,25 @@ Checar "Janela: Test-PodeIniciar pergunta quando o disco nao comporta a fila" `
      ($jan -match 'falta espa' + [char]0x00E7 + 'o em disco'))
 Checar "Janela: a pergunta vem com NAO pre-selecionado (regra da 16.12)" `
     ([bool]($jan -match '(?s)falta espa' + [char]0x00E7 + 'o em disco.{0,300}MessageBoxResult\]::No'))
+<#  17.19: estes dois olhavam o CORPO da Test-PodeIniciar por janela de regex
+    ({0,3000} e {0,5000}) e reprovaram quando ela cresceu para carregar as duas
+    linguas - codigo certo, teste frouxo (licao 18). Passaram a ler a funcao
+    pela AST: o tamanho dela deixa de ser assunto do teste. #>
+$corpoPode = ""
+try {
+    $fdPode = @(([System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)).FindAll(
+                  { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                    $args[0].Name -eq "Test-PodeIniciar" }, $true))
+    if ($fdPode.Count -eq 1) { $corpoPode = $fdPode[0].Extent.Text }
+} catch { }
+Checar "Janela: Test-PodeIniciar existe e pode ser lida" ($corpoPode -ne "")
 Checar "Janela: ela AVISA, nao bloqueia (o usuario ainda pode comecar)" `
-    ([bool]($jan -match '(?s)\$script:DiscoFalta -gt 0.{0,3000}MessageBoxResult\]::Yes'))
+    ([bool]($corpoPode -match '(?s)\$script:DiscoFalta -gt 0.*MessageBoxResult\]::Yes'))
 Checar "Janela: as duas respostas vao para o log (comecou ou desistiu)" `
     (($jan -match 'INICIO cancelado pelo usuario') -and ($jan -match 'INICIO mesmo faltando'))
 Checar "Janela: sem falta de espaco, o Iniciar nao pergunta nada" `
-    ([bool]($jan -match '(?s)function Test-PodeIniciar.{0,5000}\}\s*\r?\n\s*return \$true'))
+    ([bool]($corpoPode -match '(?s)\}\s*\r?\n\s*return \$true\s*\r?\n\}$')) `
+    "a pergunta tem que estar TODA dentro do if; fora dele, ela sairia sempre"
 
 foreach ($manual in @(@("COMO_USAR_PT.txt", "grande maioria"), @("HOW_TO_USE_EN.txt", "vast majority"))) {
     $pM = Join-Path $Fonte $manual[0]
@@ -1532,12 +1653,55 @@ if (-not (Test-Path -LiteralPath $pIdi)) {
             ($carregou -and ($script:MapaEN.Count -ge 30) -and ($script:MapaPT.Count -eq $script:MapaEN.Count)) `
             ("pares: $($script:MapaEN.Count)")
         $script:Lang = "PT"
+        <#  2.0: a cobaia deixou de ser "Iniciar F1". Esse era o padrao VELHO
+            de rotulo (tecla no fim), morto desde a 18.18, quando a tecla
+            passou para a frente entre colchetes. A entrada continuava na
+            tabela so porque estes dois testes a usavam - teste segurando
+            lixo vivo e a mesma familia do item de fila que envelhece
+            (licao 21). Agora a cobaia e o rotulo que a barra realmente usa. #>
         Checar "EXECUTANDO: em portugues, o texto sai como esta escrito" `
-            ((Traduzir "Iniciar F1") -eq "Iniciar F1")
+            ((Traduzir "[F1] Iniciar") -eq "[F1] Iniciar")
         $script:Lang = "EN"
         Checar "EXECUTANDO: em ingles, o texto e traduzido" `
-            ((Traduzir "Iniciar F1") -eq "Start F1")
-        Checar "EXECUTANDO: frase sem traducao sai no original, nunca em branco" `
+            ((Traduzir "[F1] Iniciar") -eq "[F1] Start")
+        <#  3.32 - 17.22: TODO TEXTO DECLARADO NO XAML PRECISA DE ENTRADA.
+
+    ACHADO DO DIEGO (16/09, print): tela inteira em ingles e a faixa amarela
+    do meio escrita ">>> PAUSADO (sem consumir CPU/disco) - [F2] Retomar
+    [ESC] Cancelar <<<". Nao era bug de codigo: o texto estava DECLARADO no
+    XAML (entao a Traduzir-Arvore alcancava ele), so que nunca teve linha no
+    IDIOMA_EN.txt - e o que nao tem entrada sai no original, por regra.
+
+    A bateria conferia que a varredura FUNCIONA, e nunca que o dicionario
+    esta COMPLETO. Este teste fecha a familia: varre os literais Text="..."
+    do XAML e cobra entrada para cada um que tenha cara de portugues.
+
+    As excecoes sao declaradas aqui com o motivo - nao por conveniencia:
+      lblIdioma      : mostra a lingua ATUAL, muda por codigo na troca
+      lblNovaConversao: reescrito na partida com Traduzir "Nova Conversao" #>
+$ExcecoesXaml = @("Português", "↻ Nova Conversão")
+$semTraducao = New-Object System.Collections.Generic.List[string]
+try {
+    $chavesIdioma = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($linha in (Get-Content -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt") -Encoding UTF8)) {
+        if ($linha -match "^\s*#") { continue }
+        if ($linha -notmatch "`t") { continue }
+        [void]$chavesIdioma.Add(($linha -split "`t")[0].Trim())
+    }
+    foreach ($m in [regex]::Matches($jan, 'Text="([^"]{4,})"')) {
+        $txt = [System.Net.WebUtility]::HtmlDecode($m.Groups[1].Value)
+        if ($txt -match '\$\(' -or $txt -match '[{}]') { continue }   # montado em runtime
+        if ($txt -notmatch '[À-ÿ]|\b(de|do|da|para|com|em|não|será|Convertido|Fila|Pasta|Medir|Censo|Retomar|Cancelar|Iniciar|Pausar)\b') { continue }
+        if ($ExcecoesXaml -contains $txt) { continue }
+        if ($chavesIdioma.Contains($txt)) { continue }
+        [void]$semTraducao.Add($txt)
+    }
+} catch { }
+Checar "Idioma: todo texto do XAML tem entrada no IDIOMA_EN.txt" `
+    ($semTraducao.Count -eq 0) `
+    $(if ($semTraducao.Count -gt 0) { "sem entrada: " + ($semTraducao -join " | ") } else { "" })
+
+Checar "EXECUTANDO: frase sem traducao sai no original, nunca em branco" `
             ((Traduzir "Frase que nao existe na tabela") -eq "Frase que nao existe na tabela")
         Checar "EXECUTANDO: os cabecalhos das tabelas estao traduzidos" `
             (((Traduzir "VÍDEOS NA FILA") -ne "VÍDEOS NA FILA") -and
@@ -1547,8 +1711,9 @@ if (-not (Test-Path -LiteralPath $pIdi)) {
             -notcontains ficava fora do parenteses do parametro, entao a
             funcao Checar recebia um Object[] onde espera um booleano. Quem
             pegou foi o teste 21 - a bateria olhando para si mesma. #>
-        $faltando = @(@("Iniciar F1","Pausar F2","Cancelar ESC","Abrir Origem","Abrir Saída",
-                        "Atualizar","Entenda","Ferramentas") |
+        $faltando = @(@("[F1] Iniciar","[F2] Pausar","[ESC] Cancelar",
+                        "[F3] Abrir Origem","[F4] Abrir Saída","[F5] Atualizar",
+                        "Entenda","Ferramentas") |
                       Where-Object { -not $script:MapaEN.ContainsKey($_) })
         Checar "EXECUTANDO: os botoes da barra estao traduzidos" ($faltando.Count -eq 0) `
             ($faltando -join "; ")
@@ -1907,7 +2072,7 @@ Checar "Janela: existem as quatro pecas da calibragem" `
     (($jan -match 'function Get-CaminhoCalibragem') -and ($jan -match 'function Get-Percentil') -and
      ($jan -match 'function Registrar-Calibragem') -and ($jan -match 'function Carregar-Calibragem'))
 Checar "Janela: o historico e lido no arranque, DEPOIS que o log existe" `
-    ([bool]($jan -match '(?s)Carregar-Calibragem\s*\r?\n\s*Escrever-Log \("Interface renderizada'))
+    ([bool]($jan -match '(?s)Carregar-Calibragem\s*\r?\n\s*Carregar-CalibragemEtapas\s*\r?\n\s*Escrever-Log \("Interface renderizada'))
 Checar "Janela: o lote carrega Gb e SomaPesos (o que a calibragem precisa)" `
     ([bool]($jan -match 'SegEtapas = @\(\$segs\); Gb = \$gb; SomaPesos = \$soma'))
 Checar "Janela: a medida fecha ao trocar de arquivo E no fim da fila" `
@@ -1923,7 +2088,13 @@ Checar "Janela: usa p75, e o comentario diz por que nao e a mediana" `
     (($jan -match 'Get-Percentil \(\[double\[\]\]\$ult\) 0\.75') -and
      ($jan -match 'subestimar') -and ($jan -match 'erro medio 11,6%'))
 Checar "Janela: avisa quando o espalhamento denuncia o modelo de pesos" `
-    ([bool]($jan -match 'e o modelo de pesos descrevendo filmes diferentes'))
+    ([bool]($jan -match 'filmes de formas diferentes descritos pelo mesmo escalar'))
+<#  2.0: e o aviso nao pode mais PROMETER que a calibragem por arquivo
+    corrige - ela nunca corrigiu (licao 49). Se a frase antiga voltar, isto
+    reprova. #>
+Checar "Janela: o aviso nao promete mais que os pesos revistos resolvem" `
+    (-not ($janCodigo -match 'vai continuar errando por arquivo ate os pesos serem revistos')) `
+    "a frase antiga so pode existir como CITACAO em comentario, nunca como mensagem viva"
 Checar "Janela: falha ao gravar a calibragem NAO derruba a conversao" `
     ([bool]($jan -match '(?s)AppendAllText.{0,400}\} catch \{'))
 <#  16.99b: o defeito que eu mesmo plantei e achei na revisao. O T0Video ja e
@@ -2092,6 +2263,9 @@ if ($pIss2 -eq "") {
     $bloqueados = @()
     foreach ($u in $usados) {
         $alvo = ("tools\" + $u).ToLower().Replace("/", "\")
+        # 2.0.7: o seconv saiu do pacote DE PROPOSITO. O codigo ainda o procura
+        # como reserva opcional (sem ele cai no PgsToSrt, que e o caminho normal).
+        if ($alvo.StartsWith("tools\subtitleedit\")) { continue }
         foreach ($e in $blocos) {
             $pref = $e.ToLower().Replace("/", "\").TrimEnd('*')
             if ($pref -eq "") { continue }
@@ -2128,6 +2302,68 @@ if ($pIss2 -eq "") {
         ([bool]($issTxt -match 'Source: "fonte\\\*"[^\r\n]*recursesubdirs'))
     Checar "Instalador: o FAQ_EN.txt entra pelo fonte\* (nao precisa de linha propria)" `
         (Test-Path -LiteralPath (Join-Path $Fonte "FAQ_EN.txt"))
+
+    <#  =======================================================================
+        2.0 - O INSTALADOR PERGUNTA A LINGUA, E A LINGUA VALE PARA TUDO.
+
+        "adiciona no instalador se a pessoa pode ja instalar em ingles ou em
+        portugues o programa" e "coloque um EULA de aceitar instalacao"
+        (Diego, 18/09).
+
+        Sao tres coisas amarradas numa escolha so, e o teste cobra as tres -
+        porque quem esquece uma delas nao percebe: o assistente sai em ingles
+        e o programa abre em portugues, ou a licenca aparece em portugues
+        para quem escolheu ingles.
+        ======================================================================= #>
+    Checar "Instalador: existem DUAS linguas (portugues e ingles)" `
+        (([bool]($issTxt -match 'Name: "brazilian";')) -and ([bool]($issTxt -match 'Name: "english";')))
+    Checar "Instalador: cada lingua tem a SUA licenca" `
+        (([bool]($issTxt -match '(?s)Name: "brazilian";.{0,200}LicenseFile: "licenca\\EULA_PT\.txt"')) -and
+         ([bool]($issTxt -match '(?s)Name: "english";.{0,200}LicenseFile: "licenca\\EULA_EN\.txt"'))) `
+        "licenca na lingua errada e pior do que licenca nenhuma - ninguem le o que nao entende"
+    foreach ($eula in @("EULA_PT.txt","EULA_EN.txt")) {
+        $pE = Join-Path (Split-Path $Fonte -Parent) (Join-Path "licenca" $eula)
+        Checar ("Instalador: $eula existe para ser compilado") (Test-Path -LiteralPath $pE)
+        if (Test-Path -LiteralPath $pE) {
+            $tE = [System.IO.File]::ReadAllText($pE)
+            Checar ("Instalador: $eula fala de aquisicao propria e de nao distribuir") `
+                ((($tE -match 'aquisicao propria|legitimately acquired')) -and
+                 (($tE -match 'distribuir|distribute')))
+            Checar ("Instalador: $eula NAO promete que a copia privada e legal em todo lugar") `
+                ([bool]($tE -match 'mudam de pais para pais|differ from country to country')) `
+                "afirmar o que a lei permite, sem saber onde a pessoa esta, seria mensagem que mente"
+        }
+    }
+    Checar "Instalador: a lingua escolhida vira a lingua do PROGRAMA (grava IDIOMA.txt)" `
+        ([bool]($issTxt -match "(?s)procedure GravarIdiomaEscolhido.{0,600}IDIOMA\.txt")) `
+        "sem isto, instalar em ingles e abrir em portugues - escolha que a tela seguinte ignora"
+    Checar "Instalador: e ela e chamada depois de instalar" `
+        ([bool]($issTxt -match '(?s)ssPostInstall.{0,300}GravarIdiomaEscolhido\(\)'))
+    Checar "Instalador: o valor gravado e o que a janela le ('EN')" `
+        ([bool]($issTxt -match "Valor := 'EN'")) `
+        "a janela liga o ingles com o conteudo EN - qualquer outra coisa abriria em portugues"
+
+    <#  A varredura que impede o defeito de voltar: toda CustomMessage tem que
+        existir NAS DUAS linguas. Mensagem sem par sai em portugues no meio de
+        um assistente em ingles - o mesmo defeito que a janela persegue desde
+        a 17.01, agora no instalador. #>
+    $msgBr = @([regex]::Matches($issTxt, '(?m)^brazilian\.([A-Za-z0-9_]+)=') | ForEach-Object { $_.Groups[1].Value })
+    $msgEn = @([regex]::Matches($issTxt, '(?m)^english\.([A-Za-z0-9_]+)=')   | ForEach-Object { $_.Groups[1].Value })
+    $semPar = @($msgBr | Where-Object { $msgEn -notcontains $_ })
+    $sobrando = @($msgEn | Where-Object { $msgBr -notcontains $_ })
+    Checar "Instalador: TODA mensagem do assistente existe nas duas linguas" `
+        (($msgBr.Count -gt 0) -and ($semPar.Count -eq 0) -and ($sobrando.Count -eq 0)) `
+        ("so em portugues: " + ($semPar -join ", ") + " | so em ingles: " + ($sobrando -join ", "))
+    Checar "Instalador: as caixas do runtime tambem falam ingles quando o assistente fala" `
+        ([bool]($issTxt -match "(?s)PrecisaDotNet\(\).{0,900}ActiveLanguage\(\) = 'english'")) `
+        "caixa em portugues no meio de um assistente em ingles e a mesma familia da 17.01"
+    <#  Comentario pode CITAR a numeracao antiga (o historico importa); o que
+        nao pode e uma mensagem viva mandar o usuario procurar uma etapa que
+        nao existe. Entao a varredura ignora as linhas de comentario do Inno. #>
+    $issVivo = (($issTxt -split "\r?\n") | Where-Object { $_ -notmatch '^\s*;' }) -join "`n"
+    Checar "Instalador: a etapa citada nas caixas e 4/5, nao a 5/7 que nao existe mais" `
+        ((-not ($issVivo -match 'etapa 5/7')) -and (-not ($issVivo -match 'stage 5/7'))) `
+        "o motor roda CINCO etapas - mandar procurar a 5/7 e mandar procurar o que nao existe"
 }
 
 Titulo "23b. O QUE AINDA SAIA EM PORTUGUES NA TELA EM INGLES (17.01)"
@@ -2152,9 +2388,28 @@ Titulo "23b. O QUE AINDA SAIA EM PORTUGUES NA TELA EM INGLES (17.01)"
     LICAO: rotulo que o codigo reescreve nao pode depender da varredura da
     arvore - tem que traduzir na hora em que e escrito. #>
 
-Checar "Janela: o rotulo Atualizar/Parar traduz na HORA em que e escrito" `
-    (($jan -match '\$UI\.lblReler\.Text = Traduzir "Parar"') -and
-     ($jan -match '\$UI\.lblReler\.Text = Traduzir "Atualizar"'))
+<#  3.54 - 18.17: a tecla agora aparece no rotulo (pedido dele), entao o
+    texto e (Traduzir "...") + " F5". A regra que importa continua a mesma e e
+    ela que o teste cobra: o rotulo TRADUZ na hora em que e escrito. #>
+<#  3.55 - 18.18: O ATUALIZAR GANHOU UM DONO SO.
+    Tres lugares escreviam esse rotulo, com regras diferentes - e um deles (o
+    leitura_fim) nao sabia do F5, entao o F5 sumia da tela segundos depois de
+    abrir o programa. O teste passou a cobrar o MODELO: ninguem escreve nesse
+    rotulo por fora da funcao que desenha o botao. #>
+Checar "Janela: o Atualizar/Parar tem UM dono (Update-BotaoReler)" `
+    ([bool]($jan -match '(?s)function Update-BotaoReler.{0,600}\$script:Lendo.{0,400}Traduzir "Atualizar"'))
+Checar "Janela: e ninguem escreve nesse rotulo por fora dele" `
+    ((([regex]::Matches($janCodigo, '\$UI\.lblReler\.Text')).Count -eq 2)) `
+    "as duas do proprio Update-BotaoReler - qualquer terceira e o bug de novo"
+Checar "Janela: lendo, o botao fica AMBAR (da para parar) - pedido dele" `
+    ([bool]($jan -match '(?s)function Update-BotaoReler.{0,300}\$UI\.lblReler\.Text       = "\[F5\] " \+ \(Traduzir "Parar"\)\s*\r?\n\s*\$UI\.lblReler\.Foreground = Pincel \$Cores\.warn'))
+Checar "Janela: e o rotulo traduz na HORA em que e escrito (licao 17.01)" `
+    ([bool]($jan -match '"\[F5\] " \+ \(Traduzir "Atualizar"\)'))
+Checar "Teclas: o Atualizar/Parar tem F5, e a tecla chama a MESMA funcao do botao" `
+    (($jan -match 'function Invoke-Reler') -and
+     ($jan -match '\$UI\.btnReler\.add_Click\(\{ Invoke-Reler \}\)') -and
+     ($jan -match '"F5"\s*\{ Invoke-Reler')) `
+    "pedido dele - e atalho que nao passa pela funcao do botao vira uma segunda regra"
 Checar "Janela: NENHUM titulo de janela escreve portugues direto" `
     ($(  $tit = @([regex]::Matches($janCodigo, '\$Janela\.Title = "\$NOME_APP[^"]*"'))
          $comPt = @($tit | Where-Object { $_.Value -match '(?i)convert|pausado|lendo|origem|cancelando|pronto' })
@@ -2337,7 +2592,23 @@ Checar "Motor: diz tambem que nenhuma pasta temporaria foi criada" `
 Checar "Motor: a trava ANTIGA continua viva, depois do diagnostico" `
     ($motor.IndexOf('para Converter Este Arquivo com Seguranca') -gt $motor.IndexOf('O QUE FOI ENCONTRADO NESTE ARQUIVO'))
 Checar "Motor: sem conseguir medir o disco, a trava previa nao chuta - ela passa" `
-    ([bool]($motor -match '(?s)\$livrePre = \$null.{0,400}if \(\$null -ne \$livrePre\)'))
+    ([bool]($motor -match '(?s)\$livrePre = \$null.{0,1200}if \(\$null -ne \$livrePre\)'))
+<#  2.0: e ela passa FALANDO. Em pasta de rede o GetPathRoot devolve o
+    compartilhamento, a medida falha e a protecao e pulada - o que esta certo,
+    mas ate aqui o usuario nao recebia nem a protecao nem a noticia. #>
+Checar "Motor: e AVISA que a conferencia previa nao rodou naquele caminho" `
+    ([bool]($motor -match 'Nao Consegui Medir o Espaco Livre em'))
+Checar "Motor: o catch da trava previa NAO e mais vazio (engolia a protecao inteira)" `
+    ([bool]($motor -match 'Nao Consegui Conferir o Espaco em Disco Antes de Comecar')) `
+    "catch vazio ali fazia o arquivo entrar na conversao como se houvesse espaco"
+Checar "Motor: o link do runtime nao fixa mais o numero de correcao (8.0.30 vira 404 um dia)" `
+    ([bool]($motor -match 'LinkDotNetRuntime = "https://dotnet\.microsoft\.com/download/dotnet/8\.0"')) `
+    "link com patch envelhece sozinho; a familia 8.0 e o que o PgsToSrt exige"
+Checar "Motor: a falta do runtime NAO afirma mais que o OCR inteiro morreu" `
+    (($motor -match 'A Legenda Sera Feita pelo seconv \(Reserva\), Que Esta Presente') -and ($motor -match '(?s)\$temSeconv = \(Test-Path -LiteralPath \$seconv\).{0,80}\r?\n\$temOcr = Test-Path -LiteralPath \$pgsToSrt')) `
+    "2.0.10: o seconv e a RESERVA (so sem PgsToSrt) e o \$temSeconv tem que existir ANTES do aviso que pergunta por ele"
+Checar "Motor: e quando os DOIS faltam, ai sim ele diz que nao havera OCR" `
+    ([bool]($motor -match 'NAO Havera OCR de Legenda Nesta Execucao'))
 
 <#  EXECUTANDO: a conta da trava previa, com os numeros reais do log de 08/09.
     Livre no C: no momento em que o Troy entrou = 276,66 GB menos o que o Ryan
@@ -2382,9 +2653,9 @@ Checar "Janela: a coluna DOLBY VISION usa a MESMA funcao" `
 Checar "Janela: o chip da coluna tambem" `
     ([bool]($jan -match 'else \{ Get-ChipEL \$v \}'))
 Checar "Janela: a escala tem as tres cores do vocabulario, e so elas" `
-    (($jan -match '(?s)function Get-NomeCorEL[\s\S]{0,2600}"MEL"\s+\{ return "verde" \}') -and
-     ($jan -match '(?s)function Get-NomeCorEL[\s\S]{0,2600}return "vermelho"') -and
-     ($jan -match '(?s)function Get-NomeCorEL[\s\S]{0,2600}return "laranja"'))
+    (($jan -match '(?s)function Get-NomeCorEL[\s\S]{0,6000}"MEL"\s+\{ return "verde" \}') -and
+     ($jan -match '(?s)function Get-NomeCorEL[\s\S]{0,6000}return "vermelho"') -and
+     ($jan -match '(?s)function Get-NomeCorEL[\s\S]{0,6000}return "laranja"'))
 Checar "Janela: NAO MEDIDO nao vira verde nem vermelho - vira ambar (duvida)" `
     ([bool]($jan -match '"NAO_MEDIDO" \{ return "ambar" \}'))
 
@@ -2393,18 +2664,35 @@ $fnCor = ([System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]
     { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq "Get-NomeCorEL" }, $true)
 if ($fnCor.Count -eq 1) {
     . ([scriptblock]::Create($fnCor[0].Extent.Text))
+    <#  2.0.1: a coluna I e o pico isolado, que SO o censo completo liga.
+        Os dois casos do fim sao os dois filmes medidos de verdade. #>
     $casosCor = @(
-        @{ T = "MEL";        E = $false; Cor = "verde";    Q = "Troy - MEL" },
-        @{ T = "FEL";        E = $false; Cor = "laranja";  Q = "GoT S08E01 - Simple FEL" },
-        @{ T = "FEL";        E = $true;  Cor = "vermelho"; Q = "Saving Private Ryan - Complex FEL" },
-        @{ T = "MISTO";      E = $true;  Cor = "vermelho"; Q = "amostra mista, com expansao" },
-        @{ T = "MISTO";      E = $false; Cor = "laranja";  Q = "amostra mista, sem expansao" },
-        @{ T = "NAO_MEDIDO"; E = $null;  Cor = "ambar";    Q = "medicao interrompida" },
-        @{ T = "MEDINDO";    E = $null;  Cor = "cinza";    Q = "ainda medindo" })
+        @{ T = "MEL";        E = $false; I = $false; Cor = "verde";    Q = "Troy - MEL" },
+        @{ T = "FEL";        E = $false; I = $false; Cor = "laranja";  Q = "GoT S08E01 - Simple FEL" },
+        @{ T = "FEL";        E = $true;  I = $false; Cor = "vermelho"; Q = "Saving Private Ryan - Complex FEL" },
+        @{ T = "MISTO";      E = $true;  I = $false; Cor = "vermelho"; Q = "amostra mista, com expansao" },
+        @{ T = "MISTO";      E = $false; I = $false; Cor = "laranja";  Q = "amostra mista, sem expansao" },
+        @{ T = "NAO_MEDIDO"; E = $null;  I = $false; Cor = "ambar";    Q = "medicao interrompida" },
+        @{ T = "MEDINDO";    E = $null;  I = $false; Cor = "cinza";    Q = "ainda medindo" },
+        @{ T = "MEL";        E = $false; I = $true;  Cor = "verde";    Q = "MEL nao muda de cor por causa do censo" })
     foreach ($c in $casosCor) {
-        $vv = [PSCustomObject]@{ ELtipo = $c.T; ELexpande = $c.E }
+        $vv = [PSCustomObject]@{ ELtipo = $c.T; ELexpande = $c.E; ELpicoIsolado = $c.I }
         Checar ("EXECUTANDO: {0} -> {1}" -f $c.Q, $c.Cor) ((Get-NomeCorEL $vv) -eq $c.Cor)
     }
+Titulo "49. A COR SEGUE A CLASSIFICACAO - O CENSO NUNCA A TROCA (2.0.5)"
+<#  A 2.0.2 fazia o censo descer um Complex FEL de vermelho para laranja.
+    Laranja e a cor do Simple FEL: o Diego leu que o filme tinha sido
+    reclassificado, e o cartao final dizia outra coisa. Uma cor, um
+    significado. O censo acrescenta numeros a linha, nunca muda a cor. #>
+Checar "Janela: nao existe mais o campo do 'pico isolado'" (-not ($jan -match 'ELpicoIsolado'))
+Checar "Janela: o censo nao troca a cor (nao existe mais 'a gravidade DESCEU')" (-not ($jan -match 'a gravidade DESCEU'))
+Checar "Janela: e a regra esta escrita no ramo do censo" ([bool]($jan -match 'A COR SEGUE A CLASSIFICACAO'))
+Checar "Janela: o giro do censo usa UMA barra invertida, nao duas" ([bool]($jan.Contains('$giros = @("|", "/", "-", "\")')))
+$vvRed = [PSCustomObject]@{ ELtipo = "FEL"; ELexpande = $true }
+Checar "EXECUTANDO: Complex FEL e vermelho, com ou sem censo" ((Get-NomeCorEL $vvRed) -eq "vermelho")
+Checar "Motor: o motor avisa que a medida dele e por AMOSTRA" `
+    ([bool]($mot -match 'Medida por AMOSTRA')) `
+    "sem isto a janela diz laranja, o log do motor diz NAO RECOMENDADA, e ninguem explica"
 } else {
     Checar "EXECUTANDO: Get-NomeCorEL pode ser isolada e executada" $false
 }
@@ -2790,8 +3078,26 @@ Checar "Motor: e o % e escapado (senao nome com % apaga meio caminho)" `
     ([bool]($mot -match '(?s)function Invoke-PipeExtractRpu.{0,3000}Replace\("%", "%%"\)'))
 Checar "Motor: o censo NAO monta mais a linha do pipe a mao" `
     (-not ($mot -match '(?s)function Get-CensoCompletoDV.{0,9000}cmd\.exe /c \$linha'))
-Checar "Motor: o censo conta CENAS distintas, como a amostra conta" `
-    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,9000}min_pq, max_pq, avg_pq -Unique'))
+<#  2.0.2 - ESTE TESTE COBRAVA O TRECHO LENTO PELO NOME.
+    Ele exigia "min_pq, max_pq, avg_pq -Unique", que era COMO a conta era
+    feita, nao O QUE ela tinha que responder. E o "como" era justamente o
+    defeito: Select-Object -Unique compara cada linha com todas as unicas ja
+    guardadas, e em 215 mil linhas isso custou 107 segundos que nenhum
+    relogio do censo media. O invariante de verdade e o resultado - cena e
+    trio min/max/avg distinto - e que a conta seja de UMA passada. #>
+Checar "Motor: o censo conta CENAS distintas (trio min/max/avg)" `
+    ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,12000}\$chave = "\$\(\$c\.min_pq\)\|\$\(\$c\.max_pq\)\|\$\(\$c\.avg_pq\)"'))
+Checar "Motor: e conta em UMA passada, com HashSet (nao Select-Object -Unique)" `
+    (-not ($mot -match 'min_pq, max_pq, avg_pq -Unique')) `
+    "quadratico em 215 mil linhas custou 107s escondidos de todo relogio"
+Checar "Motor: a AMOSTRA conta do mesmo jeito (o padrao nao sobrou em lugar nenhum)" `
+    ([bool]($mot -match '\$chaveAm = "\$\(\$cena\.min_pq\)\|\$\(\$cena\.max_pq\)\|\$\(\$cena\.avg_pq\)"')) `
+    "padrao errado se conserta onde ele mora, nao so onde doeu (licao 37)"
+Checar "Motor: a leitura do CSV ENTRA na conta do tempo do censo" `
+    ([bool]($mot -match '(?s)\$relogio\.Restart\(\).{0,400}Import-Csv -LiteralPath \$csvL1')) `
+    "tempo que nenhum relogio mede nao entra no aprendizado da previsao (licao 43)"
+Checar "Motor: e o total soma os dois pedacos, nao substitui um pelo outro" `
+    ([bool]($mot -match '\$res\.SegundosCenso = \[math\]::Round\(\[double\]\$res\.SegundosCenso \+ \$relogio\.Elapsed\.TotalSeconds, 1\)'))
 Checar "Motor: reaproveita a regua ja lida (nao le o master duas vezes)" `
     ([bool]($mot -match '(?s)function Get-CensoCompletoDV.{0,3000}MasterMaxConhecido'))
 Checar "Motor: a pasta temporaria do censo e apagada mesmo se der erro" `
@@ -2814,18 +3120,149 @@ Checar "Janela: e exige vermelho, ou seja, Complex FEL" `
     ([bool]($jan -match '(?s)function Test-PodeCenso.{0,1200}-eq "vermelho"'))
 Checar "Janela: MEL nao pode pedir censo (so FEL/MISTO passam)" `
     ([bool]($jan -match '(?s)function Test-PodeCenso.{0,900}ELtipo\)" -ne "FEL".{0,120}-ne "MISTO".{0,120}return \$false'))
-Checar "Janela: o botao segue a linha selecionada (Update-Diagnostico decide)" `
-    ([bool]($jan -match '(?s)function Update-Diagnostico.{0,4000}btnCenso\.IsEnabled = \(\(Test-PodeCenso'))
-Checar "Janela: sem linha selecionada o botao apaga" `
-    ([bool]($jan -match '(?s)function Update-Diagnostico.{0,1200}btnCenso\.IsEnabled = \$false'))
-Checar "Janela: nao conta o mesmo filme duas vezes (CensoFeito apaga o botao)" `
-    ([bool]($jan -match '(?s)function Update-Diagnostico.{0,4000}CensoFeito'))
-Checar "Janela: o clique chama Start-Censo" `
-    ([bool]($jan -match '(?s)btnCenso\.add_Click.{0,300}Start-Censo'))
+<#  3.58 - 18.21: O BOTAO DO CENSO TEM UM DONO SO, E O TESTE CONTA OS DONOS.
+
+    "PQ O CENSO PODE RELER NOVAMENTE APERTA F11 E CLICANDO NAO?" (Diego,
+    17/09). Tres lugares escreviam em $UI.btnCenso.IsEnabled com regras
+    diferentes; quem repintasse por ultimo ganhava, e o F11 nunca passava por
+    nenhum deles. Cobrar a REGRA em um lugar nao bastava - o defeito era a
+    existencia dos outros dois. Entao o teste conta: fora de Update-BotaoCenso,
+    ninguem escreve nessa propriedade. #>
+$donosCenso = @([regex]::Matches($janCodigo, '\$UI\.btnCenso\.IsEnabled\s*=')).Count
+$corpoUpdBotaoCenso = ""
+$mUBC = [regex]::Match($janCodigo, '(?s)function Update-BotaoCenso\(\$v\) \{.{0,2500}?\n\}')
+if ($mUBC.Success) { $corpoUpdBotaoCenso = $mUBC.Value }
+$donosDentro = @([regex]::Matches($corpoUpdBotaoCenso, '\$UI\.btnCenso\.IsEnabled\s*=')).Count
+Checar "Censo: o IsEnabled do botao tem UM dono so (Update-BotaoCenso)" `
+    (($donosCenso -gt 0) -and ($donosCenso -eq $donosDentro)) `
+    ("achei $donosCenso escrita(s) no total e $donosDentro dentro de Update-BotaoCenso - 18.21: fora dela, nenhuma")
+Checar "Censo: e o dono acende o botao enquanto o censo roda (para poder cancelar)" `
+    ([bool]($corpoUpdBotaoCenso -match '(?s)if \(\$script:CensoRodando\) \{.{0,200}btnCenso\.IsEnabled\s*=\s*\$true'))
+Checar "Censo: e um arquivo JA CONTADO continua podendo ser contado de novo pelo botao" `
+    (-not ($corpoUpdBotaoCenso -match 'IsEnabled[^\r\n]{0,200}CensoFeito')) `
+    "o F11 sempre deixou recontar; o botao nao deixava - duas portas, duas regras (licao 41)"
+Checar "Censo: o dono ainda exige Complex FEL e tela parada" `
+    ([bool]($corpoUpdBotaoCenso -match '(?s)btnCenso\.IsEnabled = .{0,200}Test-PodeCenso \$v.{0,200}\$Estado\.Atual -eq "inicial"'))
+Checar "Janela: o rotulo/cor do censo ainda olha o 'ja contado'" `
+    ([bool]($corpoUpdBotaoCenso -match 'CensoFeito'))
+<#  3.53 - 18.16: o botao do censo virou liga/desliga. "nunca vi um botao
+    que comeca e nao pode parar" (Diego). Uma acao, um lugar - o clique e a
+    tecla F11 batem na MESMA funcao. #>
+Checar "Janela: o clique do censo passa pela funcao unica do botao" `
+    ([bool]($jan -match '(?s)btnCenso\.add_Click.{0,120}Invoke-BotaoCenso'))
+Checar "Censo: o mesmo botao PARA o censo em curso" `
+    ([bool]($jan -match '(?s)function Invoke-BotaoCenso.{0,400}if \(\$script:CensoRodando\).{0,300}Stop-Censo')) `
+    "ate a 18.15 so dava para parar trocando de pasta, apertando F1 ou fechando o programa"
+Checar "Censo: e so comeca um novo quando nao ha um rodando" `
+    ([bool]($jan -match '(?s)function Invoke-BotaoCenso.{0,3000}return.{0,1500}Start-Censo'))
+Checar "Teclas: F11 e o censo e F12 e a medicao (as MESMAS funcoes dos botoes)" `
+    ([bool]($jan -match '(?s)"F11"\s*\{ .{0,80}Invoke-BotaoCenso.{0,160}"F12"\s*\{ Invoke-TrocarMedirEL')) `
+    "pedido dele - e atalho que nao passa pela regra do botao vira segunda regra"
+Checar "Teclas: as de regra propria sao registradas sem julgar o estado" `
+    ([bool]($jan -match '(?s)elseif \(\$e\.Key -in @\("F5","F12"\)\) \{.{0,120}TECLA')) `
+    "17/09 16:47:11: escrevia 'TECLA F11 (ignorada)' e chamava a acao na linha seguinte"
+Checar "Teclas: e as que dependem do botao continuam conferindo o botao" `
+    ([bool]($jan -match '(?s)if \(\$e\.Key -in @\("F1","F2","F3","F4","F11","Escape"\)\).{0,900}IsEnabled'))
+
+<#  ===========================================================================
+    3.60 - 18.23: A BARRA GANHOU F3 E F4, E MUDOU DE ORDEM.
+
+    "joga o botao Atualizar pra direita e traz o Abrir Saida pra esquerda, e
+    [F3] Abrir Origem [F4] Abrir Saida... padrao viu, nao comete os erros dos
+    outros botoes: errar traducao, errar se clicar, e nao aparecer os F"
+    (Diego, 17/09).
+
+    Ele listou os tres erros que eu ja cometi nesta barra, um por um. Entao o
+    teste cobra os tres, um por um.
+    =========================================================================== #>
+$iOrigem = $janCodigo.IndexOf('x:Name="btnAbrirOrigem"')
+$iSaida  = $janCodigo.IndexOf('x:Name="btnAbrirSaida"')
+$iReler  = $janCodigo.IndexOf('x:Name="btnReler"')
+$iCenso  = $janCodigo.IndexOf('x:Name="btnCenso"')
+Checar "Barra: os quatro botoes existem no XAML" `
+    (($iOrigem -gt 0) -and ($iSaida -gt 0) -and ($iReler -gt 0) -and ($iCenso -gt 0))
+Checar "Barra: a ordem e Origem, Saida, Atualizar, Censo (o par de pastas junto)" `
+    (($iOrigem -lt $iSaida) -and ($iSaida -lt $iReler) -and ($iReler -lt $iCenso)) `
+    "'joga o Atualizar pra direita e traz o Abrir Saida pra esquerda' - e as teclas ficam em ordem crescente"
+
+<#  ERRO 1 QUE ELE CITOU: nao aparecer os F. Varredura, nao conferencia um a
+    um - foi o que pegou o [F12] da medicao (3.58) e o [F11] do censo (3.59). #>
+$rotulosBarra = @{
+    "lblAbrirOrigem" = "F3" ; "lblAbrirSaida" = "F4" ; "lblReler" = "F5"
+}
+foreach ($nome in $rotulosBarra.Keys) {
+    $mR = [regex]::Match($janCodigo, ('x:Name="{0}"[^>]{{0,200}}Text="([^"]+)"' -f $nome))
+    Checar ("Barra: o rotulo {0} nasce com [{1}]" -f $nome, $rotulosBarra[$nome]) `
+        ($mR.Success -and $mR.Groups[1].Value -match ("\[{0}\]" -f $rotulosBarra[$nome])) `
+        ("achei: '" + $mR.Groups[1].Value + "'")
+}
+
+<#  ERRO 2: errar se clicar - ou seja, a tecla fazer uma coisa e o clique
+    outra. Uma acao, uma funcao, e as duas portas chamando ELA. #>
+Checar "Barra: abrir Origem e uma funcao (nao um corpo solto no clique)" `
+    ([bool]($jan -match 'function Invoke-AbrirOrigem'))
+Checar "Barra: abrir Saida tambem" `
+    ([bool]($jan -match 'function Invoke-AbrirSaida'))
+Checar "Barra: o CLIQUE do Origem chama a funcao" `
+    ([bool]($jan -match 'btnAbrirOrigem\.add_Click\(\{ Invoke-AbrirOrigem \}\)'))
+Checar "Barra: o CLIQUE do Saida chama a funcao" `
+    ([bool]($jan -match 'btnAbrirSaida\.add_Click\(\{ Invoke-AbrirSaida \}\)'))
+Checar "Teclas: e o F3 chama a MESMA funcao do clique" `
+    ([bool]($jan -match '"F3"\s*\{ if \(\$UI\.btnAbrirOrigem\.IsEnabled\) \{ Invoke-AbrirOrigem \}')) `
+    "atalho que nao passa pela funcao do botao vira segunda regra (licao 41)"
+Checar "Teclas: e o F4 tambem" `
+    ([bool]($jan -match '"F4"\s*\{ if \(\$UI\.btnAbrirSaida\.IsEnabled\)  \{ Invoke-AbrirSaida  \}'))
+Checar "Teclas: ninguem chama Abrir-PastaNoExplorer por fora das duas funcoes" `
+    (@([regex]::Matches($janCodigo, 'Abrir-PastaNoExplorer')).Count -eq 3) `
+    "a definicao e as duas funcoes - qualquer quarta chamada e uma segunda regra"
+
+<#  ERRO 3: errar traducao. A varredura geral ja cobra isso, mas estes dois
+    rotulos ganharam a tecla AGORA - e o texto com a tecla e uma entrada
+    NOVA, diferente da antiga sem ela. Foi exatamente assim que o [F5] passou
+    despercebido na 18.17. #>
+$linhasIdi = @()
+try { $linhasIdi = [System.IO.File]::ReadAllLines((Join-Path $Fonte "IDIOMA_EN.txt")) } catch { }
+foreach ($frase in @("[F3] Abrir Origem", "[F4] Abrir Saída")) {
+    <#  Cuidado: "[" e curinga no -like, e "[F3]" vira classe de caracteres -
+        o teste dava REPROVADO com a entrada presente e correta no arquivo.
+        Comparacao exata do primeiro campo, que e o que se quer mesmo. #>
+    $achou = @($linhasIdi | Where-Object { ($_ -split "`t")[0] -ceq $frase }).Count -gt 0
+    Checar ("Idioma: '{0}' tem traducao em ingles" -f $frase) $achou `
+        "rotulo novo e entrada NOVA - a linha sem a tecla nao serve mais (foi assim que o [F5] passou na 18.17)"
+}
+<#  3.58 - 18.21: O F11 CONFERE O MESMO BOTAO QUE O MOUSE.
+    A assimetria que ele viu ("clicando nao") vinha de a tecla nao passar pelo
+    IsEnabled. Repetir a regra dentro da funcao nao resolveria - duas copias
+    da mesma regra sao duas regras. Ler a MESMA propriedade resolve. #>
+Checar "Teclas: o F11 confere o botao do censo antes de agir (mouse e tecla, uma regra)" `
+    ([bool]($jan -match '"F11"\s*\{ if \(\$UI\.btnCenso\.IsEnabled\) \{ Invoke-BotaoCenso \}')) `
+    "'PQ O CENSO PODE RELER APERTA F11 E CLICANDO NAO?' - porque tecla nao passa por IsEnabled"
+Checar "Teclas: o F11 tambem entra na conta de quem diz 'ignorada' com verdade" `
+    ([bool]($jan -match '(?s)\$vale = switch \(\$e\.Key\).{0,400}"F11"\s*\{ \$UI\.btnCenso\.IsEnabled \}'))
+<#  3.51 - CANCELAR O CENSO MATA O TRABALHO, E SO ELE (18.14).
+    A assinatura do censo e unica no programa: extract-rpu lendo da entrada
+    padrao. A conversao e "convert"; a amostra e extract-rpu com ARQUIVO no -i.
+    O teste cobra as tres coisas, e a bancada roda a funcao de verdade contra
+    linhas de comando das tres. #>
+Checar "Censo: cancelar encerra os processos do censo" `
+    ([bool]($jan -match '(?s)function Stop-Censo.{0,2200}Matar-ProcessosDoCenso')) `
+    "17/09 14:28:20 -> 14:30:01: 101s lendo disco depois de cancelado"
+Checar "Censo: quem decide o que morre e uma funcao pura (testavel sem processo)" `
+    ([bool]($jan -match 'function Test-EhProcessoDoCenso'))
+Checar "Censo: a conversao NUNCA entra na conta (dovi_tool convert e poupado)" `
+    ([bool]($jan -match '(?s)function Test-EhProcessoDoCenso.{0,900}convert.{0,60}return \$false')) `
+    "matar o dovi_tool da conversao seria estragar o arquivo do usuario"
+Checar "Censo: o ffmpeg so morre se a linha carregar O caminho deste censo" `
+    ([bool]($jan -match '(?s)function Test-EhProcessoDoCenso.{0,1400}Contains\("\$Caminho"\.ToLowerInvariant\(\)\)')) `
+    "identidade e o caminho (licao 30), e na duvida nao mata"
+Checar "Censo: encerrado a pedido NAO e registrado como falha" `
+    ([bool]($jan -match '(?s)\$script:CensoMorto -and.{0,200}encerrado a pedido')) `
+    "o motor so ve que o RPU nao saiu - quem sabe que foi de proposito e a janela"
+
 Checar "Janela: o censo roda em RUNSPACE proprio (nao congela a tela)" `
-    ([bool]($jan -match '(?s)function Start-Censo.{0,3000}runspacefactory'))
+    ([bool]($jan -match '(?s)function Start-Censo.{0,12000}runspacefactory'))
 Checar "Janela: e o runspace recebe o caminho do motor para abrir pela AST" `
-    ([bool]($jan -match '(?s)function Start-Censo.{0,3000}SetVariable\("CaminhoMotor"'))
+    ([bool]($jan -match '(?s)function Start-Censo.{0,12600}SetVariable\("CaminhoMotor"'))
 Checar "Janela: Stop-Censo devolve o runspace (senao vaza a cada clique)" `
     ([bool]($jan -match '(?s)function Stop-Censo.{0,1200}Dispose'))
 
@@ -2915,15 +3352,7 @@ Checar "Janela: e NAO entra na linha do diagnostico (regra da 16.79)" `
 Checar "Janela: a suspeita chega na linha do video (sobrevive a redesenho)" `
     ([bool]($jan -match 'ELreguaSuspeita'))
 
-Checar "Motor: o log e copiado para o lado do arquivo convertido (item C)" `
-    ([bool]($mot -match '\.LaFirma\.log\.txt'))
-Checar "Motor: a copia so sai para quem converteu de verdade" `
-    ([bool]($mot -match '(?s)LaFirma\.log\.txt|Status -eq "OK"') -and
-     [bool]($mot -match '(?s)\$resultados \| Where-Object \{ \$_\.Status -eq "OK" -or \$_\.Status -eq "OK_PARCIAL" \}'))
-Checar "Motor: a copia vem DEPOIS da limpeza de ANSI (senao sai suja)" `
-    ([bool]($mot -match '(?s)PadraoAnsi.{0,2500}LaFirma\.log\.txt'))
-Checar "Motor: falhar ao copiar o log NAO derruba nada (a conversao acabou)" `
-    ([bool]($mot -match '(?s)LaFirma\.log\.txt.{0,1200}catch'))
+# 2.0.17: item C revogado - a pasta de saida recebe so .mkv + .srt (secao 37).
 Checar "Motor: a copia NAO substitui o relatorio final" `
     ([bool]($mot -match 'Log Completo Salvo em'))
 
@@ -2938,18 +3367,10 @@ Titulo "37. O QUE A 1.8.2 ENTREGOU E NAO FUNCIONOU (17.09 / 14.51)"
       3. o cartao final: o Ryan saiu todo verde depois de o proprio programa
          ter escrito [CONVERSAO NAO RECOMENDADA] no log.  #>
 
-Checar "Janela: quem copia o log para a pasta de saida e a JANELA" `
-    ([bool]($jan -match 'LaFirma\.log\.txt'))
-Checar "Janela: e a copia sai no FIM DA FILA (Show-Resumo), nao no motor" `
-    ([bool]($jan -match '(?s)function Show-Resumo.{0,12000}LaFirma\.log\.txt'))
-Checar "Janela: a copia sai do log DA SESSAO (o que o botao Log mostra)" `
-    ([bool]($jan -match '(?s)\$script:LogArquivo.{0,3000}LaFirma\.log\.txt'))
-Checar "Janela: le o log com FileShare (ele esta aberto para escrita agora)" `
-    ([bool]($jan -match 'FileShare\]::ReadWrite'))
-Checar "Janela: so copia para quem converteu de verdade" `
-    ([bool]($jan -match '(?s)Status\)" -eq "OK" -or "\$\(\$_\.Status\)" -eq "OK_PARCIAL".{0,3000}LaFirma\.log\.txt'))
-Checar "Janela: falhar a copia NAO derruba o fim da fila" `
-    ([bool]($jan -match '(?s)LaFirma\.log\.txt.{0,1500}catch.{0,400}COPIA DO LOG'))
+Checar "Janela 19.14: a pasta de saida NAO recebe copia do log (so .mkv + .srt)" `
+    (-not ($jan -match 'LaFirma\.log\.txt"\)')) "pedido do Diego 23/09: log fica em _logs"
+Checar "Motor 14.14: tambem nao grava copia do log na pasta de saida" `
+    (-not ($mot -match '\.LaFirma\.log\.txt"\)'))
 
 Checar "Motor: o veredicto da camada entra no OBJETO de resultado" `
     ([bool]($mot -match 'SeloEL\s*=')) 
@@ -3058,8 +3479,322 @@ Checar "Janela: o botao da chave existe no XAML" `
     Invoke-TrocarMedirEL, porque agora SAO DOIS botoes (o de baixo e o gemeo
     da barra). Os testes seguem a regra, nao o lugar: uma acao so, chamada
     pelos dois. #>
-Checar "Janela: o clique alterna, guarda e RELE a pasta" `
-    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,1800}Salvar-MedirEL.{0,900}Start-Leitura'))
+<#  3.31 - 17.21: a releitura saiu de dentro do clique e ganhou um FREIO.
+
+    Oito trocas em nove segundos no log de 15/09 viraram oito releituras, cada
+    uma cancelando a anterior - a fila piscava entre "1 de 1" e "0 de 0". A
+    regra testada continua a mesma (trocar a chave RELE a pasta), so que agora
+    ela mora no tique do temporizador. #>
+Checar "Janela: o clique alterna e guarda a preferencia" `
+    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,1800}Salvar-MedirEL'))
+Checar "Janela: e pede a releitura pelo freio, nao na hora" `
+    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,2200}\$TimerChaveEL\.Stop\(\).{0,120}\$TimerChaveEL\.Start\(\)')) `
+    "seis cliques seguidos tem que ler a pasta UMA vez"
+<#  3.33 - 17.23: O FREIO DEIXOU DE SER "QUEM RELE" E VIROU "QUEM DECIDE".
+
+    O log do Diego (15/09) mostrou a chave disparando 28 releituras, 254,5s.
+    Agora o tique decide: desligar nunca le; ligar so le se faltar veredicto.
+    O teste passa a cobrar a REGRA NOVA, nao a chamada. #>
+<#  ============================================================================
+    3.35 / 18.00 - A INVARIANTE MAIS DURA DESTA BATERIA:
+                   NENHUM CLIQUE PODE TRAVAR A TELA.
+
+    Esta familia nasce do defeito que custou o dia 16/09 inteiro. Stop-Motor
+    fazia AsyncWaitHandle.WaitOne(1500) NA THREAD DA INTERFACE, e todo caminho
+    de clique que passava por ele parava a janela. Medido no log do Diego:
+    1,52s / 1,93s / 2,01s / 1,91s de tela sem responder. Ele descreveu como
+    "travou tudo" - e nao era exagero nenhum, era exatamente isso.
+
+    O que torna isso uma FAMILIA e nao um conserto: a janela e WPF de uma
+    thread so. Qualquer espera sincrona no codigo dela congela o programa, hoje
+    ou daqui a tres versoes, com qualquer nome que a chamada tenha. Entao a
+    regra nao e "tire este WaitOne", e "nenhuma espera sincrona existe no codigo
+    da janela".
+
+    Os blocos de runspace ($script:Trabalho*) rodam em OUTRA thread - la esperar
+    e legitimo, e por isso eles sao removidos antes da conferencia. Comentario
+    tambem sai: este arquivo EXPLICA o bug citando o nome da chamada, e citar
+    nao e chamar (mesma armadilha da secao dos runspaces, linha 944). #>
+$janUI = $jan
+foreach ($nomeBloco in @("TrabalhoMotor","TrabalhoLeitura","TrabalhoMedicao","TrabalhoCenso")) {
+    $iB = $janUI.IndexOf(('$script:{0} = {{' -f $nomeBloco))
+    if ($iB -lt 0) { continue }
+    $abre = $janUI.IndexOf("{", $iB); $prof = 0; $fimB = -1
+    for ($k = $abre; $k -lt $janUI.Length; $k++) {
+        if ($janUI[$k] -eq "{") { $prof++ }
+        elseif ($janUI[$k] -eq "}") { $prof--; if ($prof -eq 0) { $fimB = $k; break } }
+    }
+    if ($fimB -gt $abre) { $janUI = $janUI.Substring(0, $iB) + $janUI.Substring($fimB + 1) }
+}
+$janUI = Remove-Comentarios $janUI
+Checar "Interface: os quatro blocos de runspace foram separados do codigo da janela" `
+    (($janUI.Length -gt 50000) -and ($janUI.Length -lt $jan.Length))
+
+foreach ($bloqueio in @(
+        @{ Nome = "AsyncWaitHandle.WaitOne"; Pat = 'AsyncWaitHandle\.WaitOne' },
+        @{ Nome = "Start-Sleep";             Pat = '\bStart-Sleep\b' },
+        @{ Nome = ".Wait()";                 Pat = '\.Wait\(' },
+        @{ Nome = ".Join()";                 Pat = '\.Join\(' },
+        @{ Nome = ".EndInvoke()";            Pat = '\.EndInvoke\(' })) {
+    Checar ("Interface: a janela nao chama {0} (espera sincrona congela a tela)" -f $bloqueio.Nome) `
+        (-not ($janUI -match $bloqueio.Pat)) `
+        "WPF e uma thread so: esperar aqui e parar o programa na cara do usuario"
+}
+
+<#  3.38 - A VARREDURA QUE EU DIZIA FAZER "LENDO CADA LINHA", AGORA FEITA POR
+    MAQUINA.
+
+    Print dele de 16/09, tela em ingles: o painel DISK SPACE dizia "Nenhum
+    vídeo selecionado." e a coluna PT-BR SUBTITLE dizia "Sem PT-BR (só pt-PT)".
+    Ele cobrou, com razao: "voce jura de pe junto q leu todas as linhas onde
+    deveria ter traducao e tem erros toda hora".
+
+    Ler na mao nao escala e eu ja errei nisso quatro vezes. Este teste EXTRAI do
+    fonte todo texto com acento portugues que vai para a tela - escrita em
+    .Text, valor de coluna ($d.Col*), linha de diagnostico ($d.Diag*) e selo do
+    cartao final - e exige que CADA UM tenha regra no IDIOMA_EN.txt (exata ou
+    por padrao "~"). Texto novo sem traducao reprova a bateria antes de sair
+    daqui.
+
+    A lista de excecoes abaixo e curta e cada linha tem motivo declarado. Frase
+    que ja nasce nas duas linguas (montada dentro de "if ($en)") nao passa pela
+    tabela; log e registro tecnico, em portugues por decisao do projeto. #>
+$excecoesTraducao = @(
+    "Português"                                     # lblIdioma: o nome do proprio idioma
+    "começando"                                     # so log
+    'A fila selecionada não cabe no disco.`n`n'     # dialogo com par em ingles no proprio codigo
+    'A fila cabe agora, mas não até o fim.`n`n'     # idem
+    "o vídeo que está sendo montado agora"          # idem
+    "LaFirma - cancelar a conversão?"               # titulo de dialogo com par em ingles
+    "LaFirma - fechar com conversão em andamento?"  # idem
+    "LaFirma - medição ainda rodando"               # idem
+    "LaFirma - falta espaço em disco"               # idem
+    "LaFirma - Entenda a Conversão"                 # idem
+)
+$mapaExato = @{}; $mapaRegra = @()
+foreach ($l in @(Get-Content -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt") -Encoding UTF8)) {
+    if ("$l" -match '^\s*#' -or "$l".Trim() -eq "") { continue }
+    $pp = "$l" -split "`t"
+    if ($pp.Count -lt 2) { continue }
+    if ($pp[0].StartsWith("~")) { $mapaRegra += $pp[0].Substring(1) }
+    else { $mapaExato[$pp[0].Trim()] = $pp[1] }
+}
+function Test-TemTraducao([string]$t) {
+    if ($mapaExato.ContainsKey($t.Trim())) { return $true }
+    foreach ($r in $mapaRegra) { try { if ($t -match $r) { return $true } } catch { } }
+    return $false
+}
+$acentoPt = '[' + [char]0x00E1 + [char]0x00E0 + [char]0x00E2 + [char]0x00E3 + [char]0x00E9 +
+            [char]0x00EA + [char]0x00ED + [char]0x00F3 + [char]0x00F4 + [char]0x00F5 +
+            [char]0x00FA + [char]0x00E7 + [char]0x00C1 + [char]0x00C9 + [char]0x00CD +
+            [char]0x00D3 + [char]0x00DA + [char]0x00C3 + [char]0x00D5 + [char]0x00C7 + ']'
+$semTraducao = @()
+$padroes = @(
+    '\$(?:d|v)\.(?:Col[A-Za-z]+|Diag[A-Za-z]+|Situacao)\s*=\s*"([^"]+)"',
+    '\.Text\s*=\s*"([^"]+)"',
+    <#  ARMADILHA DO PROJETO, DE NOVO: dentro de @( ) a virgula tem precedencia
+        maior que o "+". Sem estes parenteses a linha vira DOIS itens e o regex
+        sai partido ao meio - foi o que aconteceu na primeira versao deste
+        teste, e quem pegou foi a familia "a propria bateria nao pode ter erro
+        de execucao". #>
+    ('\{\s*"([^"\$]*' + $acentoPt + '[^"\$]*)"\s*\}'),
+    '\+?,\s*@\(\s*"([^"\$]+)"\s*,\s*"(?:cinza|verde|warn|err|ok|vermelho|ambar)"\s*\)'
+)
+foreach ($pad in $padroes) {
+    foreach ($mm in [regex]::Matches($jan, $pad)) {
+        $txt = $mm.Groups[1].Value
+        if ($txt -match '\$') { continue }
+        if ($txt -notmatch $acentoPt) { continue }
+        if ($excecoesTraducao -contains $txt) { continue }
+        if (-not (Test-TemTraducao $txt)) { $semTraducao += $txt }
+    }
+}
+$semTraducao = @($semTraducao | Sort-Object -Unique)
+Checar "Traducao: TODO texto de tela com acento portugues tem regra no IDIOMA_EN.txt" `
+    ($semTraducao.Count -eq 0) `
+    ("sem traducao: " + ($semTraducao -join " | "))
+Checar "Traducao: a lista de excecoes continua curta (cada linha tem motivo)" `
+    ($excecoesTraducao.Count -le 12) `
+    "excecao sem motivo e traducao perdida com carimbo de decisao"
+
+<#  3.37 - CADA TRABALHO OBEDECE A BANDEIRA DO SEU DONO.
+
+    Defeito de 16/09, achado no log do Diego: a medicao comecava e morria no
+    mesmo instante, ZERO arquivos medidos em toda sessao. Causa: o bloco da
+    medicao consultava $Controle.Cancelar - que e a bandeira da LEITURA e da
+    CONVERSAO, levantada por Stop-Motor. Depois da separacao da 18.00 a ordem
+    passou a ser leitura_fim -> Stop-Motor -> Start-Medicao, entao a medicao
+    SEMPRE nascia com essa bandeira em pe.
+
+    Separar trabalhos e separar TAMBEM as bandeiras. Bandeira compartilhada
+    entre dois donos e a mesma familia do runspace compartilhado - so que muda
+    em silencio, sem erro nenhum na tela. #>
+$blocoMed = ""
+try {
+    $iM = $jan.IndexOf('$script:TrabalhoMedicao = {')
+    if ($iM -ge 0) {
+        $aM = $jan.IndexOf("{", $iM); $pM = 0; $fM = -1
+        for ($k = $aM; $k -lt $jan.Length; $k++) {
+            if ($jan[$k] -eq "{") { $pM++ }
+            elseif ($jan[$k] -eq "}") { $pM--; if ($pM -eq 0) { $fM = $k; break } }
+        }
+        if ($fM -gt $aM) { $blocoMed = Remove-Comentarios ($jan.Substring($aM, $fM - $aM)) }
+    }
+} catch { }
+Checar "Interface: o bloco da medicao foi encontrado para conferencia" ($blocoMed.Length -gt 1000)
+Checar "Medicao: o trabalho da medicao NAO consulta Controle.Cancelar (bandeira de outro dono)" `
+    (-not ($blocoMed -match '\$Controle\.Cancelar')) `
+    "Stop-Motor levanta Cancelar; a medicao nasce depois dele e morreria sempre"
+Checar "Medicao: quem manda nela e PararMedicao" `
+    ([bool]($blocoMed -match '\$Controle\.PararMedicao'))
+
+<#  3.39 - A REGRA DE CIMA ESTAVA INCOMPLETA, E CUSTOU 92 SEGUNDOS.
+
+    Log dele de 16/09, com o censo rodando:
+      23:55:13,5 CLIQUE: Iniciar -> ESTADO rodando so as 23:56:35,3  (81,8s)
+      23:58:38,4 Iniciar confirmado -> ESTADO rodando as 00:00:10,8  (92,4s)
+    Causa: Stop-Censo chamava $CensoPS.Dispose() na thread da interface, e
+    Dispose() em pipeline RODANDO nao retorna - espera o pipeline parar, que
+    estava dentro do dovi_tool por 106s.
+
+    A lista de espera sincrona da familia acima tinha WaitOne, Start-Sleep,
+    .Wait(, .Join( e .EndInvoke( - e NAO tinha Dispose/Stop/Close. Regra
+    incompleta nao pega o proximo caso; nao pegou.
+
+    Nao da para proibir Dispose no arquivo inteiro: alguem PRECISA descartar o
+    runspace. A regra certa e sobre QUEM e QUANDO: as funcoes de PARAR
+    (Stop-Censo, Stop-Medicao), que sao chamadas por clique, nao descartam
+    nada; quem descarta e uma funcao Fechar-Runspace-*, chamada pelo motor de
+    mensagens depois que o trabalho JA terminou - ai descartar nao espera. #>
+foreach ($fnParar in @("Stop-Censo","Stop-Medicao")) {
+    $corpoParar = ""
+    try {
+        $corpoParar = "$((($astJan.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                                             $args[0].Name -eq $fnParar }, $true))[0]).Extent.Text)"
+    } catch { }
+    $corpoParar = Remove-Comentarios $corpoParar
+    Checar ("Interface: {0} foi encontrada" -f $fnParar) ($corpoParar.Length -gt 50)
+    foreach ($bloq in @(
+            @{ N = "Dispose(";  P = '\.Dispose\(' },
+            @{ N = ".Stop()";   P = '\.Stop\(\)' },
+            @{ N = ".Close()";  P = '\.Close\(\)' })) {
+        Checar ("Interface: {0} nao chama {1} (bloqueia ate o pipeline parar)" -f $fnParar, $bloq.N) `
+            (-not ($corpoParar -match $bloq.P)) `
+            "no log dele isso custou 81,8s e 92,4s de janela morta"
+    }
+}
+Checar "Interface: existe Fechar-Runspace-Censo (quem descarta e o fim, nao o clique)" `
+    ([bool]($jan -match 'function Fechar-Runspace-Censo'))
+Checar "Interface: e o censo_fim e quem chama ela" `
+    ([bool]($jan -match '(?s)"censo_fim" \{.{0,6000}?Fechar-Runspace-Censo'))
+Checar "Censo: o resultado carrega o numero da rodada" `
+    ([bool]($jan -match 'T = "censo_fim"; Serie = \$Serie'))
+<#  3.40 - O CENSO ABANDONADO NAO PERDE MAIS O RESULTADO (18.05).
+    Descartar por rodada jogava fora 104s de trabalho ja feito, com o arquivo
+    ainda na lista. Quem garante a linha certa agora e o CAMINHO. #>
+Checar "Censo: o resultado carrega o caminho do arquivo" `
+    ([bool]($jan -match 'T = "censo_fim"; Serie = \$Serie; Idx = \$Idx; Caminho'))
+Checar "Censo: e a linha e achada pelo caminho, nao pelo indice" `
+    ([bool]($jan -match '(?s)"\$\(\$m\.T\)" -eq "censo_fim".{0,900}Achar-LinhaPorCaminho'))
+Checar "Censo: arquivo que saiu da lista NAO escreve em ninguem" `
+    ([bool]($jan -match '(?s)Achar-LinhaPorCaminho.{0,600}\$iC -lt 0.{0,400}descartado'))
+Checar "Medicao: o veredicto tambem viaja com o caminho do arquivo" `
+    ([bool]($jan -match 'T = "el"; Serie = \$Serie; Idx = \$pe\.Idx; Caminho'))
+Checar "Medicao: e a linha do veredicto e achada pelo caminho" `
+    ([bool]($jan -match '(?sm)^            "el" \{.{0,2500}?Achar-LinhaPorCaminho'))
+Checar "Cache: a RESPOSTA (o que sera feito) tambem e guardada" `
+    ([bool]($jan -match '(?s)function Guardar-CacheEL.{0,3000}DiagDVres = "\$\(\$v\.DiagDVres\)"')) `
+    "print do Diego: esquerda dizia EL: MEL e direita dizia EL nao medida, na mesma linha"
+
+<#  3.39 - O VEREDICTO MEDIDO TEM QUE SOBREVIVER A RELEITURA.
+
+    "eu cancelo a conversao e volta a estaca zero as medicoes... nao guarda
+    informacao" (Diego, 17/09). Eram 62,4s de medicao no lixo a cada releitura
+    da mesma pasta. O cache existe - e estes testes garantem que ele esta
+    LIGADO nos dois pontos que importam, porque funcao certa desligada da no
+    mesmo que funcao errada. #>
+Checar "Cache: o veredicto recem-medido e guardado no tratador do 'el'" `
+    ([bool]($jan -match '(?sm)^            "el" \{.{0,16000}?Guardar-CacheEL'))
+Checar "Cache: a leitura tenta reaproveitar antes de adicionar o video na lista" `
+    ([bool]($jan -match '(?s)Restaurar-CacheEL \$d.{0,600}?\[void\]\$script:Videos\.Add\(\$d\)'))
+Checar "Cache: a chave e caminho + tamanho + data (reaproveitar por nome seria inventar)" `
+    ([bool]($jan -match '(?s)function Chave-CacheEL.{0,900}LastWriteTimeUtc.{0,400}\$v\.Bytes'))
+Checar "Cache: medicao em curso nunca vira veredicto guardado" `
+    ([bool]($jan -match '(?s)function Guardar-CacheEL.{0,400}MEDINDO.{0,80}return'))
+
+<#  E o outro lado da mesma moeda: se ninguem espera, alguem precisa garantir
+    que a sobra da rodada velha nao suje a rodada nova. E o numero de serie. Os
+    dois andam juntos - tirar um sem o outro troca "congela" por "veredicto no
+    arquivo errado", que e pior. #>
+<#  LICAO 18, PELA QUINTA VEZ: janela de regex nao respeita fronteira de
+    funcao. A primeira versao deste teste usava ".{0,900}" depois de
+    "function Stop-Medicao" e alcancava o Dispose da Fechar-Runspace-Medicao,
+    que vem logo abaixo - reprovando o codigo CERTO. O corpo sai da AST. #>
+$corpoStopMed = ""
+try {
+    $corpoStopMed = "$((($astJan.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                                           $args[0].Name -eq "Stop-Medicao" }, $true))[0]).Extent.Text)"
+} catch { }
+Checar "Interface: quem cancela a medicao so ergue a flag e volta" `
+    (($corpoStopMed.Length -gt 0) -and
+     ($corpoStopMed -match '\$script:Controle\.PararMedicao = \$true') -and
+     -not ($corpoStopMed -match '(WaitOne|Dispose|Stop\(\))')) `
+    "fechar o runspace e trabalho do el_fim, quando ele JA terminou"
+Checar "Interface: e o fechamento de verdade so acontece depois do fim" `
+    ([bool]($jan -match '(?s)function Fechar-Runspace-Medicao.{0,600}?Dispose'))
+
+<#  3.35 - 18.00: A CHAVE VOLTOU A SER UMA CHAVE.
+
+    Ate a 17.24 ela tinha SEIS saidas, podia reler a pasta, matar o censo e
+    congelar a janela por 2s. Agora sao duas regras, e a leitura da pasta nao
+    aparece em nenhuma delas:
+
+        LIGADA    -> se falta veredicto, MEDE. Senao, nada.
+        DESLIGADA -> para a medicao, se houver. O que foi medido continua.
+
+    Os testes abaixo cobram isso, e cobram tambem o que ela NAO pode mais fazer
+    - que e a parte que o log do Diego provou que estava errada. #>
+Checar "Chave: ligar ou desligar NUNCA le a pasta" `
+    (-not ($jan -match '(?s)\$TimerChaveEL\.add_Tick\(\{.{0,2500}?Start-Leitura')) `
+    "no log de 15/09 a chave sozinha disparou 28 releituras, 254,5s"
+Checar "Chave: desligada, ela para a medicao pelo dono dela (Stop-Medicao)" `
+    ([bool]($jan -match '(?s)\$TimerChaveEL\.add_Tick\(\{.{0,1800}?if \(-not \$script:MedirELLigado\).{0,300}?Stop-Medicao'))
+Checar "Chave: desligada, ela NAO chama Stop-Motor (nao e dona da leitura)" `
+    (-not ($jan -match '(?s)\$TimerChaveEL\.add_Tick\(\{.{0,2500}?Stop-Motor')) `
+    "matar o runspace da leitura daqui foi o bug de 16/09 18:06"
+Checar "Chave: ligada com a leitura em curso, ela espera o leitura_fim" `
+    ([bool]($jan -match '(?s)\$TimerChaveEL\.add_Tick\(\{.{0,2200}?if \(\$script:Lendo\).{0,300}?return'))
+Checar "Chave: ligada, ela so mede quando FALTA veredicto" `
+    ([bool]($jan -match '(?s)\$faltam = @\(Get-PendentesDeMedida\)\.Count.{0,400}if \(\$faltam -eq 0\).{0,300}return.{0,200}Start-Medicao'))
+<#  3.35 - 18.00: "medindo" nao pode voltar para a coluna do veredicto.
+    Achado do Diego: "P7 MEDINDO sempre impresso em todos, e pra estar assim so
+    no que estiver fazendo, ne?" - e ele estava certo: aparecia ate em quem so
+    esperava a vez. A coluna carrega VEREDICTO; atividade e assunto da coluna
+    SITUACAO e do contador da barra. #>
+<#  3.44 - ESTE TESTE COBRAVA A FORMA, NAO O EFEITO (licao 18, de novo).
+    A regra e "a palavra MEDINDO nao aparece na coluna do veredicto". Eu tinha
+    escrito "nao pode existir um ramo MEDINDO" - e com isso ele reprovou o
+    conserto da 18.09, que manda o MEDINDO cair em "EL nao medida" (que e a
+    verdade: quem esta sendo medido ainda nao tem veredicto). Agora o teste
+    confere o TEXTO QUE SAI. #>
+Checar "Coluna DV: a palavra 'medindo' nao sai na coluna do veredicto" `
+    (-not ($jan -match '(?im)\$sigla\s*=\s*"[^"]*medindo')) `
+    "a coluna dizia 'P7 medindo' ate em arquivo parado na fila"
+Checar "Coluna DV: quem esta sendo medido mostra 'EL nao medida' (ainda sem veredicto)" `
+    ([bool]($jan -match '"MEDINDO"\s*\{ \$sigla = "EL n' + [char]0x00E3 + 'o medida" \}')) `
+    "print dele: com a medicao rodando a linha mostrava so 'P7 -> P8.1', sem dizer nada da camada"
+Checar "Coluna DV: o veredicto 'EL nao medida' continua existindo" `
+    ([bool]($jan -match '"NAO_MEDIDO" \{ \$sigla = "EL não medida" \}')) `
+    "esse E veredicto de verdade - nao medir nunca vira 'limpa' (regra da 1.8)"
+Checar "Coluna DV: cinco ramos, e nenhum deles escreve atividade" `
+    ((([regex]::Matches($jan, '(?m)^\s*"(MEL|FEL|MISTO|MEDINDO|NAO_MEDIDO)"\s*\{\s*\$sigla')).Count) -eq 5) `
+    "MEL, FEL, MISTO, NAO_MEDIDO e MEDINDO - os dois ultimos dizem a mesma coisa: sem veredicto"
+Checar "Chave: existe Get-PendentesDeMedida (quem a medicao tocaria)" `
+    ([bool]($jan -match 'function Get-PendentesDeMedida'))
+Checar "Chave: e ela olha P7 COM camada EL sem veredicto" `
+    ([bool]($jan -match '(?s)function Get-PendentesDeMedida.{0,600}DVperfil -eq 7.{0,200}DVcamadas.{0,200}NAO_MEDIDO'))
+Checar "Janela: o freio nao dispara leitura com a fila rodando" `
+    ([bool]($jan -match '(?s)\$TimerChaveEL\.add_Tick\(\{.{0,300}\$Estado\.Atual -ne "inicial".{0,60}return'))
 Checar "Janela: a chave NAO pode ser trocada com a fila rodando" `
     ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,600}rodando","pausado"'))
 Checar "Janela: os DOIS botoes chamam a mesma acao (uma regra, um lugar)" `
@@ -3080,10 +3815,33 @@ Checar "Janela: e existe a barrinha da medicao" `
     ([bool]($jan -match 'function Update-BarraMedirEL') -and [bool]($jan -match 'x:Name="barraMedirEL"'))
 Checar "Janela: e o gemeo da barra le o MESMO estado (nao refaz a regra)" `
     ([bool]($jan -match '(?s)function Update-BotaoMedirEL.{0,2600}lblMedirELTopo'))
-Checar "Janela: a chave vai ao runspace como DADO (a leitura nao pergunta nada)" `
-    ([bool]($jan -match 'SetVariable\("MedirEL"'))
-Checar "Janela: e a fase B so mede quando ela esta ligada" `
-    ([bool]($jan -match '\$pendentesEL\.Count -gt 0 -and -not \$MedirEL'))
+<#  3.35 - 18.00: a chave NAO viaja mais para dentro da leitura. Ela nao
+    decide nada la - quem decide se mede e a janela, depois que a fila esta na
+    tela. O que viaja agora e a LISTA de quem medir, para o trabalho proprio. #>
+Checar "Medicao: a chave nao entra mais no runspace da leitura" `
+    (-not ($jan -match 'SetVariable\("MedirEL"')) `
+    "parametro congelado na partida foi o que obrigou a reler a pasta para mudar de ideia"
+Checar "Medicao: o que viaja e a LISTA de quem medir" `
+    ([bool]($jan -match 'SetVariable\("Pendentes", \$Lista\)'))
+Checar "Medicao: e o preambulo e UM so, injetado nos dois trabalhos" `
+    ((([regex]::Matches($jan, 'SetVariable\("Preambulo", \$script:PreambuloTrabalho\)')).Count -eq 2) -and
+     [bool]($jan -match '\$script:PreambuloTrabalho = @'))
+<#  3.34 - 17.24: a chave deixou de ser a unica voz. Agora existe tambem o
+    canal vivo $Controle.PararMedicao, para desligar a medicao SEM derrubar a
+    leitura que ja esta em curso. A regra testada e a mesma: sem a chave (ou
+    com o cancelamento vivo), a fase B nao mede. #>
+<#  3.35 - 18.00: nao existe mais ramo "chave desligada" dentro do trabalho.
+    Se a chave esta desligada, a janela simplesmente NAO dispara a medicao -
+    decisao de quem tem a informacao. A prova do A/B (custo com e sem) saiu do
+    runspace e passou a ser escrita pela janela, no leitura_fim. #>
+Checar "Medicao: o trabalho nao tem mais ramo de 'chave desligada'" `
+    (-not ($jan -match '\$Pendentes\.Count -gt 0 -and \(-not \$MedirEL'))
+Checar "Janela: a prova do A/B com a chave desligada sai no leitura_fim" `
+    ([bool]($jan -match '(?s)"leitura_fim" \{.{0,5000}?-not \$script:MedirELLigado.{0,600}?MEDICAO MEL x FEL: DESLIGADA'))
+Checar "Janela: e o laco da medicao para no meio se a chave desligar" `
+    ([bool]($jan -match 'if \(\$Controle\.PararMedicao -or \(\[int\]\$Controle\.MedSerieViva -ne \[int\]\$Serie\)\) \{ break \}'))
+Checar "Janela: PararMedicao e zerado a cada leitura nova" `
+    ([bool]($jan -match '(?s)\$script:Controle\.Cancelar = \$false\s*\n\s*\$script:Controle\.PararMedicao = \$false'))
 Checar "Janela: desligada, NAO pula em silencio - diz quantos ficaram sem veredicto" `
     ([bool]($jan -match 'MEDICAO MEL x FEL DESLIGADA'))
 Checar "Janela: a linha comparavel sai com a chave LIGADA" `
@@ -3147,11 +3905,11 @@ Checar "Janela: as duas respostas vao para o log" `
 Checar "Janela: quem esperou comeca sozinho quando a medicao termina" `
     ([bool]($jan -match '(?s)"el_fim".{0,2500}\$script:IniciarAposMedir.{0,700}Invoke-Iniciar'))
 Checar "Janela: e isso acontece DEPOIS do Stop-Motor (dois runspaces nao convivem)" `
-    ([bool]($jan -match '(?s)"el_fim".{0,2000}Stop-Motor.{0,900}IniciarAposMedir'))
+    ([bool]($jan -match '(?s)"el_fim".{0,3000}Stop-Motor.{0,1400}IniciarAposMedir'))
 Checar "Janela: enquanto espera, a TELA diz por que o Iniciar esta apagado" `
     ([bool]($jan -match 'x:Name="lblEsperandoMedida"'))
 Checar "Janela: uma leitura nova cancela a espera (a fila mandada nao existe mais)" `
-    ([bool]($jan -match '(?s)function Start-Leitura.{0,900}IniciarAposMedir'))
+    ([bool]($jan -match '(?s)function Start-Leitura.{0,3200}IniciarAposMedir'))
 Checar "Idioma: o aviso de espera e a frase do disco tem traducao" `
     ($(  $arqIW = Join-Path $Fonte "IDIOMA_EN.txt"
          if (Test-Path -LiteralPath $arqIW) {
@@ -3349,10 +4107,182 @@ foreach ($linha in ($jan -split "`r?`n")) {
     $cruas += $linha.Trim()
 }
 Checar "Janela: a varredura de idioma tambem troca as DICAS (ToolTip)" `
-    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,4000}\$d = \$o\.ToolTip.{0,200}\$o\.ToolTip = \$Mapa\[\$d\]'))
+    ([bool]($jan -match '(?s)function Traduzir-Arvore.{0,4000}\$d = \$o\.ToolTip.{0,300}\$o\.ToolTip = \$\(if \(\$Mapa\.ContainsKey\(\$d\)\) \{ \$Mapa\[\$d\]'))
 Checar "Janela: nenhum texto de tela com acento e escrito sem passar pela traducao" `
     ($cruas.Count -eq 0) `
     ($(if ($cruas.Count -eq 0) { "" } else { "cruas: " + (($cruas | Select-Object -First 3) -join " | ") }))
+
+<#  17.19 - A MESMA REGRA, PARA AS CAIXAS DE DIALOGO.
+
+    A varredura acima olha .Text - o que a JANELA escreve. As caixas de
+    dialogo (MessageBox) nascem fora da janela, e por isso escaparam dela:
+    na varredura de 15/09 estavam em portugues puro, com a tela em ingles,
+    QUATRO caixas - cancelar a conversao, fechar com conversao em andamento,
+    falha ao iniciar, e pasta que nao existe.
+
+    Sao as piores da tela para deixar em portugues: as duas primeiras
+    perguntam se voce quer jogar fora uma conversao inteira.
+
+    A regra: funcao que abre MessageBox e escreve frase com acento tem que
+    decidir a lingua - ou seja, tem que citar $script:Lang. Frase sem acento
+    (nome do programa, caminho de pasta) nao conta.
+
+    Pela AST e nao por linha: o texto e montado varias linhas acima da
+    chamada, e olhar linha a linha nao veria a ligacao. #>
+$caixasCruas = @()
+try {
+    $astCx = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    $fnsCx = @($astCx.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true))
+    foreach ($f in $fnsCx) {
+        $corpo = $f.Extent.Text
+        if ($corpo -notmatch 'MessageBox\]::Show') { continue }
+        if ($corpo -match '\$script:Lang') { continue }
+        <#  EXCECAO COM MOTIVO ESCRITO: Offer-ReinicioIdioma decide a lingua
+            por $Novo, e nao por $script:Lang, porque ela pergunta na lingua
+            para a qual voce ACABOU de trocar - nao na que estava valendo. E
+            a unica caixa do programa em que as duas coisas sao diferentes. #>
+        if ($f.Name -eq "Offer-ReinicioIdioma" -and $corpo -match '\$Novo -eq "EN"') { continue }
+        if ($corpo -notmatch '[ÁÂÃÀÉÊÍÓÔÕÚÇáâãàéêíóôõúç]') { continue }
+        $caixasCruas += $f.Name
+    }
+    <#  O Closing da janela nao e funcao nomeada - e um scriptblock no
+        add_Closing. Ele entra pelo mesmo criterio, olhado a parte. #>
+    $blocos = @($astCx.FindAll({ $args[0] -is [System.Management.Automation.Language.ScriptBlockExpressionAst] }, $true))
+    foreach ($b in $blocos) {
+        $corpo = $b.Extent.Text
+        if ($corpo -notmatch 'Confirm-Parar|MessageBox\]::Show') { continue }
+        if ($corpo -match '\$script:Lang') { continue }
+        if ($corpo -notmatch '[ÁÂÃÀÉÊÍÓÔÕÚÇáâãàéêíóôõúç]') { continue }
+        if ($corpo.Length -gt 3000) { continue }   # blocos gigantes sao o corpo da janela inteira
+        $caixasCruas += "(bloco na linha " + $b.Extent.StartLineNumber + ")"
+    }
+} catch { }
+Checar "Janela: nenhuma caixa de dialogo com acento escapa da escolha de idioma" `
+    ($caixasCruas.Count -eq 0) `
+    ("em portugues fixo: " + (($caixasCruas | Select-Object -Unique) -join ", "))
+
+<#  E as quatro, uma a uma, porque cada uma ja saiu errada uma vez. #>
+foreach ($par in @(
+    @{ Fn = "Invoke-Cancelar";        Ing = "Cancel the conversion?" },
+    @{ Fn = "Abrir-PastaNoExplorer";  Ing = "folder does not exist on this machine" },
+    @{ Fn = "Test-PodeIniciar";       Ing = "The selected queue does not fit on the disk" },
+    @{ Fn = "Test-PodeIniciar";       Ing = "The queue fits now, but not to the end" },
+    @{ Fn = "Test-PodeIniciar";       Ing = "Start anyway" })) {
+    $achou = $false
+    try {
+        $fd = @(([System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)).FindAll(
+                  { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                    $args[0].Name -eq $par.Fn }, $true))
+        if ($fd.Count -eq 1) { $achou = ($fd[0].Extent.Text -match [regex]::Escape($par.Ing)) }
+    } catch { }
+    Checar ("Idioma: " + $par.Fn + " tem o texto em ingles") $achou
+}
+Checar "Idioma: fechar com conversao em andamento pergunta em ingles tambem" `
+    ([bool]($jan -match 'Close the program now\?'))
+Checar "Idioma: a falha ao iniciar tambem fala ingles" `
+    ([bool]($jan -match 'Could not start the conversion'))
+
+<#  17.19 - O COMENTARIO TEM QUE DESCREVER O QUE O CODIGO FAZ.
+
+    Achado na varredura de 15/09: dois blocos de comentario diziam que a
+    calibragem usa a MEDIANA das ultimas cinco rodadas. O codigo chama
+    Get-Percentil 0.75 desde a 16.99, e o log escreve "p75" - ou seja, o
+    comentario descrevia o que o programa NAO faz, ha tres versoes.
+
+    Isso e a licao 2 ("mensagem que mente e defeito") virada para dentro: quem
+    ler o comentario primeiro vai "consertar" o codigo certo para bater com o
+    texto errado. Ja aconteceu neste projeto - a licao 18 e exatamente isso do
+    lado dos testes.
+
+    O teste amarra os tres: o percentil calculado, o nome que o log da a ele, e
+    a ausencia de "mediana" sendo afirmada como o que a funcao faz. #>
+$pctCod = ""
+if ($jan -match 'Get-Percentil \(\[double\[\]\]\$ult\)\s+([0-9.]+)') { $pctCod = $Matches[1] }
+Checar "Calibragem: o codigo diz qual percentil usa" ($pctCod -ne "") "nao achei a chamada de Get-Percentil"
+Checar "Calibragem: o log chama o percentil pelo nome certo (p75 x 0.75)" `
+    (($pctCod -eq "0.75") -and ($jan -match 'usando o p75 das ultimas')) `
+    ("codigo calcula " + $pctCod + " - o log tem que dizer o mesmo")
+<#  E nenhum comentario pode AFIRMAR que a estimativa usa mediana. Citar a
+    palavra para explicar por que NAO se usou continua valendo - por isso o
+    criterio e a frase, nao a palavra. #>
+$mentiras = @()
+foreach ($frase in @('usar a MEDIANA', 'usa a MEDIANA', 'a estimativa usa a mediana')) {
+    if ($jan -match [regex]::Escape($frase)) { $mentiras += $frase }
+}
+Checar "Calibragem: nenhum comentario afirma que a estimativa usa mediana" `
+    ($mentiras.Count -eq 0) (($mentiras -join " | "))
+
+<#  17.19 - OS FATORES DE ESPACO VIVEM EM TRES LUGARES E TEM QUE CONCORDAR.
+
+    O motor tem DOIS ($fatorPre, na conferencia antes de comecar, e
+    $fatorEspaco, na hora de converter) e a janela tem UM
+    (Get-FatorEspacoDisco, que pinta o painel e decide se o Iniciar pergunta).
+    Eles nao podem ser unificados numa funcao so - o motor roda tambem em modo
+    console, sem a janela - mas podem ser AMARRADOS por teste.
+
+    Se discordarem, o programa mente numa das duas pontas: ou a tela promete
+    que cabe e o motor recusa, ou a tela assusta com espaco que o motor nem ia
+    usar. O segundo ja aconteceu, com o P5 (16.95).
+
+    E o numero tambem esta escrito por extenso na caixa de dialogo, nas duas
+    linguas. Texto que cita um numero que o codigo calcula e a licao 2 de novo:
+    trocar o fator e esquecer a frase faz a caixa mentir. #>
+$fatMotor = @()
+foreach ($m2 in [regex]::Matches($mot, 'if \(\$(?:diretoPre|videoDireto)\) \{ ([0-9.]+) \} else \{ ([0-9.]+) \}')) {
+    $fatMotor += ("{0}/{1}" -f $m2.Groups[1].Value, $m2.Groups[2].Value)
+}
+Checar "Espaco: o motor declara os dois fatores nas duas passagens" `
+    ($fatMotor.Count -eq 2) ("achei " + $fatMotor.Count)
+Checar "Espaco: as duas passagens do motor usam o MESMO par de fatores" `
+    (($fatMotor.Count -eq 2) -and ($fatMotor[0] -eq $fatMotor[1])) `
+    (($fatMotor -join " x ") + " - uma conferencia antes e outra na hora, com contas diferentes")
+
+$fatJanela = ""
+try {
+    $fdFat = @(([System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)).FindAll(
+                 { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                   $args[0].Name -eq "Get-FatorEspacoDisco" }, $true))
+    if ($fdFat.Count -eq 1) {
+        $corpoFat = $fdFat[0].Extent.Text
+        $semC = ($corpoFat -replace '(?s)<#.*?#>','')
+        $nums = @([regex]::Matches($semC, 'return ([0-9.]+)') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
+        $fatJanela = (($nums | Sort-Object) -join "/")
+    }
+} catch { }
+Checar "Espaco: a janela declara os mesmos dois fatores do motor" `
+    ($fatJanela -eq "1.6/3.15") ("janela: " + $fatJanela)
+Checar "Espaco: e o motor usa exatamente esse par" `
+    (($fatMotor.Count -eq 2) -and ($fatMotor[0] -eq "1.6/3.15")) ("motor: " + ($fatMotor -join " x "))
+<#  17.19 - O LOG TAMBEM PRECISA DE UM LUGAR QUE ACEITE ESCRITA.
+
+    As duas tentativas de log (_logs\ e a raiz) ficam DENTRO da pasta de
+    instalacao. Numa instalacao em Program Files as duas falham, o
+    StreamWriter estoura num catch vazio e o programa roda a sessao inteira
+    sem gravar uma linha - sem avisar. Quem tem o problema fica sem a prova
+    dele.
+
+    A licao 23 ja existia (Get-PastaDados decide ESCREVENDO), e o log era a
+    unica escrita do programa que ainda nao a usava. #>
+Checar "Log: existe uma terceira tentativa, na pasta de dados do usuario" `
+    ([bool]($jan -match '(?s)catch \{.{0,700}Get-PastaDados.{0,400}StreamWriter'))
+Checar "Log: e ela avisa no proprio log quando o desvio aconteceu" `
+    (($jan -match '\$script:LogCaiuParaDados = \$true') -and
+     ($jan -match 'a pasta do programa nao aceita escrita'))
+Checar "Log: sem nenhum arquivo possivel, o painel Log diz isso" `
+    ([bool]($jan -match 'o painel Log desta sessao e tudo que existe'))
+<#  E a funcao tem que estar definida ANTES do bloco do log - codigo de topo
+    roda na ordem, e chamar funcao que ainda nao nasceu e erro em silencio. #>
+$posFn  = $jan.IndexOf("function Get-PastaDados {")
+$posLog = $jan.IndexOf('$script:PastaLogs = Join-Path $script:PastaScript "_logs"')
+Checar "Log: Get-PastaDados e definida ANTES do bloco do log" `
+    (($posFn -ge 0) -and ($posLog -ge 0) -and ($posFn -lt $posLog)) `
+    "codigo de topo roda na ordem: funcao chamada antes de nascer nao existe"
+Checar "Log: Get-PastaDados nao foi COPIADA para o topo (existe uma so)" `
+    (([regex]::Matches($jan, 'function Get-PastaDados \{')).Count -eq 1)
+
+Checar "Espaco: a caixa de dialogo cita o mesmo numero, nas duas linguas" `
+    (($jan -match 'precisa de 3,15x o próprio tamanho') -and ($jan -match 'needs 3\.15x its own size')) `
+    "o texto cita um numero que o codigo calcula - trocar um sem o outro faz a caixa mentir"
 
 <#  E o alinhamento: as duas colunas do resumo tem os dois-pontos na mesma
     coluna. Um rotulo em ingles mais curto nao pode puxar o ':' para tras. #>
@@ -3418,9 +4348,9 @@ Checar "Janela: o rotulo do censo diz o que esta contando" `
 Checar "Janela: existe Reset-BotaoCenso (o rotulo tinha como ficar preso)" `
     ([bool]($jan -match 'function Reset-BotaoCenso'))
 Checar "Janela: e Stop-Censo sempre zera o rotulo junto do estado" `
-    ([bool]($jan -match '(?s)function Stop-Censo.{0,900}Reset-BotaoCenso'))
+    ([bool]($jan -match '(?s)function Stop-Censo.{0,2400}Reset-BotaoCenso'))
 Checar "Janela: uma leitura nova tambem encerra um censo em curso" `
-    ([bool]($jan -match '(?s)function Start-Leitura.{0,2000}CensoRodando.{0,300}Stop-Censo'))
+    ([bool]($jan -match '(?s)function Start-Leitura.{0,3600}CensoRodando.{0,300}Stop-Censo'))
 Checar "Idioma: o rotulo do censo rodando tem traducao" `
     ($(  $arqIC2 = Join-Path $Fonte "IDIOMA_EN.txt"
          if (Test-Path -LiteralPath $arqIC2) {
@@ -3472,8 +4402,50 @@ Checar "Janela: e quem escreve o aviso passa por ela" `
     ([bool]($jan -match '(?s)function Update-AvisoEspera.{0,600}lblEsperandoMedida\.Text = Get-TextoEspera'))
 Checar "Janela: cada arquivo medido desconta um da espera" `
     ([bool]($jan -match '(?s)\$script:ELfeitos\+\+.{0,200}Update-AvisoEspera'))
-Checar "Janela: e a leitura zera a conta antes de comecar" `
-    ([bool]($jan -match '(?s)\$script:ELtotal = \[int\]\$m\.MedirEL.{0,120}\$script:ELfeitos = 0'))
+<#  3.35 - 18.00: quem zera a conta e quem COMECA a medicao - e agora isso e
+    Start-Medicao, nao a leitura. A regra e a mesma (a conta nasce zerada). #>
+$corpoSM = ""
+try {
+    $iSM = $jan.IndexOf("function Start-Medicao")
+    if ($iSM -ge 0) { $corpoSM = Remove-Comentarios $jan.Substring($iSM, [Math]::Min(3000, $jan.Length - $iSM)) }
+} catch { }
+$posPend = $corpoSM.IndexOf('$pend = @(Get-PendentesDeMedida)')
+$posTrava = $corpoSM.IndexOf('if ($script:MedPS)')
+<#  3.49 - FECHAR A JANELA TEM QUE PARAR TODOS OS RELOGIOS.
+
+    Log dele de 10/09 01:26:31,8 (trocar idioma -> reiniciar): "Nao sera
+    possivel definir Visibility ... depois que uma Janela for fechada". So o
+    TimerFila era parado no add_Closed; os outros continuavam batendo numa
+    janela morta. Este teste DESCOBRE os relogios no fonte - relogio novo ja
+    nasce conferido, lista digitada a mao envelhece calada. #>
+$relogios = @([regex]::Matches($jan, '(?m)^\$(Timer[A-Za-z]+) = New-Object System\.Windows\.Threading\.DispatcherTimer') |
+              ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+Checar "os DispatcherTimer sao descobertos no fonte (achei $($relogios.Count))" ($relogios.Count -ge 5)
+$blocoFechado = ""
+try {
+    $iF = $jan.IndexOf('$Janela.add_Closed({')
+    if ($iF -ge 0) { $blocoFechado = $jan.Substring($iF, [Math]::Min(2000, $jan.Length - $iF)) }
+} catch { }
+$semParar = @($relogios | Where-Object { $blocoFechado -notmatch ("\$" + $_ + "(\W|$)") })
+Checar "Fechar: TODOS os relogios param no add_Closed" `
+    ($semParar.Count -eq 0) ("ficaram batendo: " + ($semParar -join ", "))
+$semGuarda = @()
+foreach ($r in $relogios) {
+    $iT = $jan.IndexOf('$' + $r + '.add_Tick({')
+    if ($iT -lt 0) { continue }
+    if ($jan.Substring($iT, [Math]::Min(260, $jan.Length - $iT)) -notmatch '\$script:Fechando') { $semGuarda += $r }
+}
+Checar "Fechar: e cada tique sai na hora se a janela ja fechou" `
+    ($semGuarda.Count -eq 0) ("sem a guarda: " + ($semGuarda -join ", "))
+
+Checar "Medicao: so avisa 'a anterior esta encerrando' se HOUVER o que medir" `
+    ($posPend -ge 0 -and $posTrava -gt $posPend) `
+    "17/09 11:54:22,8: prometeu medicao com a fila de pendentes vazia (licao 2)"
+Checar "Fila: repintar a fila NAO refaz a tabela de faixas (evento de repintura)" `
+    ([bool]($jan -match 'if \(\$script:AbaAtual -eq "faixas" -and \(-not \$script:PintandoFila\)\) \{ Fill-Faixas \}')) `
+    "um clique em MODO gerava dois FAIXAS - mesma familia do defeito da 18.06"
+Checar "Medicao: Start-Medicao zera a conta antes de comecar" `
+    ([bool]($jan -match '(?s)function Start-Medicao.{0,3600}\$script:ELtotal\s*=\s*\$lista\.Count.{0,120}\$script:ELfeitos\s*=\s*0'))
 
 Checar "Janela: o botao do censo diz por que esta cinza (Get-MotivoCenso)" `
     ([bool]($jan -match 'function Get-MotivoCenso'))
@@ -3483,7 +4455,7 @@ Checar "Janela: a dica e escrita nos dois caminhos do diagnostico" `
 Checar "Janela: a dica aparece mesmo com o botao desabilitado" `
     ([bool]($jan -match 'ToolTipService\.ShowOnDisabled="True"'))
 Checar "Janela: o criterio continua num lugar so (a dica pergunta a Test-PodeCenso)" `
-    ([bool]($jan -match '(?s)function Get-MotivoCenso.{0,2500}Test-PodeCenso'))
+    ([bool]($jan -match '(?s)function Get-MotivoCenso.{0,3400}Test-PodeCenso'))
 
 <#  17.14: as regras de traducao rodam EM ORDEM. A regra da palavra "medindo"
     sozinha disparava antes da regra da frase inteira e desmanchava a frase
@@ -3514,10 +4486,15 @@ Checar "Janela: existe quem redesenhe o cartao final (Redesenhar-Resumo)" `
     ([bool]($jan -match 'function Redesenhar-Resumo'))
 Checar "Janela: e Set-Idioma chama esse redesenho" `
     ([bool]($jan -match '(?s)function Set-Idioma.{0,4000}Redesenhar-Resumo'))
+<#  17.20: era uma janela de {0,1400} e estourou quando o bloco entre as duas
+    linhas cresceu (o ramo da fila cancelada). O que o teste quer saber e a
+    ORDEM - o return do redesenho vem antes do log do resumo - e isso se le
+    por posicao, sem depender do que ha no meio. #>
+$iRet = $jan.IndexOf('if ($Redesenho) { return }')
+$iLog = $jan.IndexOf('Escrever-Log "===== RESUMO DA CONVERSAO ====="')
 Checar "Janela: o redesenho NAO regrava o log do resumo" `
-    ([bool]($jan -match '(?s)if \(\$Redesenho\) \{ return \}.{0,1400}Escrever-Log "===== RESUMO DA CONVERSAO ====="'))
-Checar "Janela: e NAO recopia o log para a pasta de saida" `
-    ([bool]($jan -match '(?s)if \(\$Redesenho\) \{ @\(\) \}'))
+    (($iRet -gt 0) -and ($iLog -gt $iRet)) `
+    "o return do redesenho tem que vir ANTES de qualquer Escrever-Log do resumo"
 Checar "Janela: a hora e o tempo do cartao ficam guardados (nao mentem depois)" `
     ([bool]($jan -match '\$script:ResumoHora') -and [bool]($jan -match '\$script:ResumoSeg'))
 Checar "Janela: o titulo do cartao passa pela traducao" `
@@ -3660,7 +4637,7 @@ Checar "Janela: o log fecha previsto x real por ARQUIVO" `
 Checar "Janela: e da FILA inteira, no resumo" `
     ([bool]($jan -match 'PREVISAO DA FILA: previsto'))
 Checar "Janela: a previsao da fila usa o mesmo total que o cartao mostra" `
-    ([bool]($jan -match '(?s)PREVISAO DA FILA.{0,300}\$totalSeg'))
+    ([bool]($jan -match '(?s)PREVISAO DA FILA.{0,1500}\$trabFila = \[math\]::Max\(1\.0, \[double\]\$totalSeg - \$pausaFila\)'))
 
 Checar "Janela: a dica da chave de medicao esta nos DOIS botoes" `
     ([bool]($jan -match '(?s)\$UI\.btnMedirELTopo\.ToolTip = \$dicaEL.{0,120}\$UI\.btnMedirEL\.ToolTip')) `
@@ -3934,18 +4911,21 @@ if ($pIss2 -eq "") {
 }
 
 
-Titulo "47. QUAL DELES ESTA SENDO MEDIDO AGORA (17.18)"
-<#  O botao dizia "Measuring MEL x FEL: 2 of 3" e as tres linhas da fila
-    diziam "Queued". Duas coisas quebradas no mesmo desenho:
+Titulo "47. QUAL DELES ESTA SENDO MEDIDO AGORA (17.18 / 17.19)"
+<#  A 17.18 resolveu isso DEDUZINDO - "o arquivo na vez e o primeiro marcado
+    que ainda esta em MEDINDO" - e a deducao estava errada por dois motivos:
+    o runspace mede todos os pendentes (marcados ou nao), e o total era
+    fotografado uma vez, entao marcar/desmarcar no meio da medicao mudava a
+    conta debaixo da formula. O Diego viu na tela: a coluna dizendo um numero
+    e o botao dizendo outro.
 
-      1. a fila nao dizia QUEM era o 2;
-      2. o "Proximo a Converter" sumia, porque a condicao olhava o MOTIVO do
-         redesenho ($Fase) em vez do estado do programa.
+    E ela criou a TERCEIRA contagem da mesma coisa: botao (runspace), aviso de
+    espera (marcados) e a deducao. Regra em tres lugares.
 
-    O ramo da coluna e desenho (WPF), mas a CONTA e a REGRA nao sao - e e
-    onde os dois defeitos moravam. Esta secao executa a conta e le a regra. #>
+    A 17.19 tirou a deducao: o laco que mede manda "el_ini" com indice,
+    posicao e total. Esta secao testa o contrato novo - e as duas travas que
+    impedem a deducao de voltar. #>
 
-# ---- a conta, executada de verdade --------------------------------------
 $fnMed = @("Get-Marcados","Get-MarcadosMedindo","Get-MedicaoEmCurso")
 $carregouMed = $true
 try {
@@ -3963,91 +4943,756 @@ if ($carregouMed) {
     function VidEL($nome, $eltipo, $marcado) {
         [pscustomobject]@{ Nome = $nome; ELtipo = $eltipo; Marcado = $marcado; Ignorar = $false }
     }
-    # Os tres arquivos reais do Diego, na ordem em que a fila os leu.
     $nomeA = "Game.of.Thrones.S08E01"; $nomeB = "Saving.Private.Ryan.1998"; $nomeC = "Troy.2004"
-
+    $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
     $script:MedirELLigado = $true
     $script:MedindoEL     = $true
-    $script:ELtotalFila   = 3
 
-    # nenhum medido ainda -> e o primeiro
-    $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    # ---- o que o "el_ini" mandar e o que a tela mostra, sem conta nenhuma ----
+    $script:ELmedindoIdx = 0; $script:ELtotal = 3; $script:ELfeitos = 0
     $m = Get-MedicaoEmCurso
-    Checar "Medicao: com ninguem medido ainda, quem esta na vez e o PRIMEIRO" `
-        ($null -ne $m -and $m.Nome -eq $nomeA -and $m.Posicao -eq 1 -and $m.Total -eq 3) `
-        ("saiu: " + $(if ($null -eq $m) { "null" } else { "$($m.Nome) $($m.Posicao)/$($m.Total)" }))
+    Checar "Medicao: a tela mostra o arquivo que o 'el_ini' anunciou (1 de 3)" `
+        ($null -ne $m -and $m.Idx -eq 0 -and $m.Posicao -eq 1 -and $m.Total -eq 3) `
+        ("saiu: " + $(if ($null -eq $m) { "null" } else { "idx $($m.Idx) $($m.Posicao)/$($m.Total)" }))
 
-    # o primeiro ja tem veredicto -> e o do meio, e a conta bate com o botao
+    $script:ELmedindoIdx = 1; $script:ELfeitos = 1
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: no segundo arquivo, diz '2 de 3' e aponta o indice 1" `
+        ($null -ne $m -and $m.Idx -eq 1 -and $m.Posicao -eq 2 -and $m.Total -eq 3)
+
+    $script:ELmedindoIdx = 2; $script:ELfeitos = 2
+    $m = Get-MedicaoEmCurso
+    Checar "Medicao: no ultimo, '3 de 3' - a conta nao estoura" `
+        ($null -ne $m -and $m.Idx -eq 2 -and $m.Posicao -eq 3 -and $m.Total -eq 3)
+
+    <#  O DEFEITO DO DIEGO, 15/09, REPRODUZIDO: ele desmarcou os tres e
+        remarcou DURANTE a medicao. Na 17.18 isso mudava o total e a posicao
+        pulava. Agora marcar/desmarcar nao toca em nada disso. #>
+    $script:ELmedindoIdx = 1; $script:ELfeitos = 1
+    $antes = Get-MedicaoEmCurso
+    $script:Videos = @((VidEL $nomeA "FEL" $false), (VidEL $nomeB "MEDINDO" $false), (VidEL $nomeC "MEDINDO" $false))
+    $depois = Get-MedicaoEmCurso
+    Checar "Medicao: DESMARCAR tudo no meio nao muda quem esta na vez nem a conta" `
+        ($null -ne $antes -and $null -ne $depois -and
+         $antes.Idx -eq $depois.Idx -and $antes.Posicao -eq $depois.Posicao -and $antes.Total -eq $depois.Total) `
+        "era isto que pulava na 17.18"
     $script:Videos = @((VidEL $nomeA "FEL" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+
+    <#  Arquivo DESMARCADO tambem e medido pelo runspace - e a linha dele tem
+        que acender, porque ela esta mesmo sendo lida. Era o outro furo da
+        deducao, que so olhava marcados. #>
+    $script:Videos = @((VidEL $nomeA "MEDINDO" $false), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+    $script:ELmedindoIdx = 0; $script:ELfeitos = 0
     $m = Get-MedicaoEmCurso
-    Checar "Medicao: com o primeiro medido, a vez e do segundo - e diz '2 de 3'" `
-        ($null -ne $m -and $m.Nome -eq $nomeB -and $m.Posicao -eq 2 -and $m.Total -eq 3) `
-        ("saiu: " + $(if ($null -eq $m) { "null" } else { "$($m.Nome) $($m.Posicao)/$($m.Total)" }))
-
-    # so o ultimo falta
-    $script:Videos = @((VidEL $nomeA "FEL" $true), (VidEL $nomeB "FEL" $true), (VidEL $nomeC "MEDINDO" $true))
-    $m = Get-MedicaoEmCurso
-    Checar "Medicao: no ultimo, a conta nao estoura o total ('3 de 3')" `
-        ($null -ne $m -and $m.Nome -eq $nomeC -and $m.Posicao -eq 3 -and $m.Total -eq 3)
-
-    # todos medidos -> nao ha ninguem na vez, e a fila volta ao normal
-    $script:Videos = @((VidEL $nomeA "FEL" $true), (VidEL $nomeB "FEL" $true), (VidEL $nomeC "MEL" $true))
-    Checar "Medicao: terminou tudo, nenhuma linha continua escrita 'Medindo'" `
-        ($null -eq (Get-MedicaoEmCurso))
-
-    # a chave desligada nao pode deixar linha nenhuma em ciano
+    Checar "Medicao: arquivo DESMARCADO sendo medido acende a linha DELE" `
+        ($null -ne $m -and $m.Idx -eq 0) `
+        "a deducao da 17.18 apontava para o proximo marcado - linha errada"
     $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
+
+    # ---- os estados em que ninguem pode aparecer medindo ----
+    $script:ELmedindoIdx = 1; $script:ELtotal = 3; $script:ELfeitos = 1
     $script:MedirELLigado = $false
     Checar "Medicao: com a chave DESLIGADA, ninguem aparece medindo" ($null -eq (Get-MedicaoEmCurso))
     $script:MedirELLigado = $true
     $script:MedindoEL = $false
     Checar "Medicao: sem medicao em curso, ninguem aparece medindo" ($null -eq (Get-MedicaoEmCurso))
     $script:MedindoEL = $true
-
-    <#  Desmarcado nao esta na fila desta conversao - a 17.15 ja tinha tirado
-        ele do "Na Fila", nao pode voltar pelo ciano. #>
-    $script:Videos = @((VidEL $nomeA "MEDINDO" $false), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
-    $script:ELtotalFila = 2
-    $m = Get-MedicaoEmCurso
-    Checar "Medicao: arquivo DESMARCADO nunca e o que esta medindo" `
-        ($null -ne $m -and $m.Nome -eq $nomeB)
-
-    # o total guardado nao pode ficar menor que a fila que ainda falta
-    $script:Videos = @((VidEL $nomeA "MEDINDO" $true), (VidEL $nomeB "MEDINDO" $true), (VidEL $nomeC "MEDINDO" $true))
-    $script:ELtotalFila = 0
-    $m = Get-MedicaoEmCurso
-    Checar "Medicao: sem total guardado, a conta se conserta ('1 de 3', nunca '1 de 0')" `
-        ($null -ne $m -and $m.Posicao -eq 1 -and $m.Total -eq 3) `
-        ("saiu: " + $(if ($null -eq $m) { "null" } else { "$($m.Posicao)/$($m.Total)" }))
+    $script:ELmedindoIdx = -1
+    Checar "Medicao: antes do primeiro 'el_ini' (-1), ninguem aparece medindo" ($null -eq (Get-MedicaoEmCurso))
+    $script:ELmedindoIdx = 99
+    Checar "Medicao: indice fora da lista nao derruba nem acende linha errada" ($null -eq (Get-MedicaoEmCurso))
+    $script:ELmedindoIdx = 1; $script:ELtotal = 0
+    Checar "Medicao: sem total anunciado, nao inventa '1 de 0'" ($null -eq (Get-MedicaoEmCurso))
 
     $script:Videos = @()
-    $script:MedindoEL = $false
+    $script:MedindoEL = $false; $script:ELmedindoIdx = -1
 }
 
-# ---- o ramo da coluna SITUACAO e a condicao que estava errada ------------
+<#  17.20 - TRES DEFEITOS DA 17.19, TODOS DA MESMA FAMILIA: ESTADO NOVO
+    SEM REDESENHO, OU REDESENHO SEM O ESTADO CERTO.
+
+    O Diego viu os tres em quinze minutos, na 17.19 rodando:
+
+      1. "Terminou de medir e ficou mostrando ainda" - a fila continuou com
+         "Medindo Camada - 3 de 3" depois de os tres terem veredicto. Ele leu
+         aquilo como o programa TRAVADO, e clicou em coisas para destravar.
+         (Esta e a classe de bug que a 16.79 ja tinha fechado uma vez, do
+         outro lado: "a tela travada numa frase que nao era mais verdade".)
+
+      2. O "Proximo a Converter" verde caia na linha DE BAIXO enquanto a de
+         cima era medida. O proximo a converter e o de cima; ele so esta,
+         tambem, sendo medido.
+
+    A causa comum: a 17.18 deduzia, e a deducao se corrigia sozinha a cada
+    redesenho. Ao trocar deducao por estado (17.19), o estado passou a precisar
+    de quem o apague - e eu apaguei a variavel sem redesenhar a lista. #>
+Checar "Medicao: o veredicto do arquivo apaga o ciano DELE (nao espera o fim)" `
+    ([bool]($jan -match '(?s)\$v\.DiagDVres = "→ \$selo \$alvo\$nota".{0,900}if \(\[int\]\$m\.Idx -eq \[int\]\$script:ELmedindoIdx\) \{ \$script:ELmedindoIdx = -1 \}.{0,600}Fill-Fila "el"')) `
+    "sem isto o ultimo arquivo fica em ciano para sempre - ninguem redesenha depois"
+Checar "Medicao: o fim da medicao REDESENHA a fila, nao so apaga a variavel" `
+    ([bool]($jan -match '(?s)"el_fim" \{.{0,900}\$script:ELmedindoIdx = -1.{0,900}Fill-Fila "el"'))
+Checar "Medicao: o fechamento de emergencia tambem apaga quem estava na vez" `
+    ([bool]($jan -match '(?s)function Fechar-MedicaoPendente.{0,2200}\$script:ELmedindoIdx = -1')) `
+    "Stop-Motor passa aqui em toda saida da fase B"
+<#  3.31 - 17.21: O CIANO DA BARRA DE CIMA SOBREVIVIA A MORTE DA MEDICAO.
+
+    Print do Diego: conversao rodando e a barra escrita "Medindo MEL x FEL:
+    2 de 3" em ciano. Eu apagava quem estava na vez ($ELmedindoIdx) e deixava
+    de pe QUE EXISTE UMA MEDICAO ($MedindoEL/$ELtotal/$ELfeitos) - que e quem
+    manda no rotulo, na cor e na barrinha. Estado novo sem redesenho e tela
+    mentindo (17.20), um nivel acima. #>
+Checar "Medicao: o fechamento apaga TAMBEM o estado de 'existe medicao'" `
+    ([bool]($jan -match '(?s)function Fechar-MedicaoPendente.{0,2400}\$script:MedindoEL\s*=\s*\$false')) `
+    "senao a barra de cima fica em ciano durante a conversao inteira"
+Checar "Medicao: e zera os contadores que desenham a barrinha" `
+    ([bool]($jan -match '(?s)function Fechar-MedicaoPendente.{0,2500}\$script:ELtotal\s*=\s*0.{0,120}\$script:ELfeitos\s*=\s*0'))
+Checar "Medicao: e REDESENHA o botao depois de apagar (estado sem redesenho mente)" `
+    ([bool]($jan -match '(?s)function Fechar-MedicaoPendente.{0,2600}Update-BotaoMedirEL'))
+<#  3.31 - LICAO 18 DE NOVO: janela de regex nao le ESTRUTURA.
+
+    O que este teste precisa saber e se o Fill-Fila esta DENTRO do "if
+    ($presos -gt 0)" ou no nivel de cima da funcao - e isso e a arvore, nao o
+    texto. A AST responde direto: o ultimo comando do corpo tem que ser o
+    redesenho. #>
+$fnFechar = $astJan.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                              $args[0].Name -eq "Fechar-MedicaoPendente" }, $true)
+$fillNoTopo = $false
+try {
+    $corpoF = $fnFechar[0].Body.EndBlock.Statements
+    $ultimo = "$($corpoF[$corpoF.Count - 1].Extent.Text)"
+    $fillNoTopo = ($ultimo -match 'Fill-Fila "el"')
+} catch { }
+Checar "Medicao: e redesenha a FILA mesmo com zero presos (AST: nivel de cima)" `
+    $fillNoTopo `
+    "dentro do if(presos) ele nao roda quando ninguem ficou preso - e a linha em ciano fica"
+
+
+<#  3.31 - 17.21: O CENSO NAO DISPUTA O DISCO COM A CONVERSAO.
+
+    Log de 15/09 20:36:56: censo pedido com a etapa 1/5 rodando. Os dois liam
+    o mesmo disco mecanico, a etapa ficou em 1% por mais de um minuto e o
+    censo nunca voltou. "a fila e a conversao continuam livres" valia para
+    TRAVA, nunca para I/O. #>
+Checar "Censo: o botao so acende com a tela parada (estado inicial)" `
+    ([bool]($jan -match '(?s)btnCenso\.IsEnabled = .{0,200}Test-PodeCenso \$v.{0,200}\$Estado\.Atual -eq "inicial"'))
+Checar "Censo: e a porta de entrada barra tambem (botao e aparencia, regra e regra)" `
+    ([bool]($jan -match '(?s)function Start-Censo.{0,2600}"rodando","pausado".{0,300}return'))
+Checar "Censo: comecar uma conversao encerra o censo em curso" `
+    ([bool]($jan -match '(?s)function Invoke-IniciarInterno.{0,700}if \(\$script:CensoRodando\).{0,300}Stop-Censo')) `
+    "fechar a porta e esquecer quem ja estava dentro nao resolve o disco"
+Checar "Censo: a dica responde primeiro pela conversao em curso" `
+    ([bool]($jan -match '(?s)function Get-MotivoCenso.{0,400}"rodando","pausado".{0,200}A conversão está em curso'))
+
+<#  3.31 - 17.21: A PARTIDA AUTOMATICA NAO E UM CLIQUE.
+
+    Log de 15/09 20:32:59: a espera disparou sozinha e o log escreveu
+    "CLIQUE: Iniciar" (nao houve clique) e, logo abaixo, "a medicao que sobrou
+    e de arquivo(s) que nao estao na fila" - o Test-EsperarMedicao rodando
+    PELA SEGUNDA VEZ sobre uma medicao que ja tinha acabado. Quem ja decidiu
+    esperar ja respondeu a pergunta da espera. #>
+Checar "Iniciar: existe uma partida automatica separada do clique" `
+    ([bool]($jan -match 'function Invoke-IniciarAutomatico'))
+<#  3.31 - LICAO 18: a janela de regex vazava para a funcao DE BAIXO.
+
+    "Invoke-IniciarAutomatico.{0,400}" alcancava o corpo de Invoke-Iniciar,
+    que POR PROJETO tem o CLIQUE e o Test-EsperarMedicao - o teste reprovava o
+    acerto. O corpo da funcao sai da AST, e ai o "nao contem" e sobre ela
+    mesma. #>
+$corpoAuto = ""
+try {
+    $corpoAuto = "$(($astJan.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                                       $args[0].Name -eq "Invoke-IniciarAutomatico" }, $true))[0].Extent.Text)"
+} catch { }
+Checar "Iniciar: a partida automatica NAO chama Test-EsperarMedicao" `
+    (($corpoAuto.Length -gt 0) -and -not ($corpoAuto -match 'Test-EsperarMedicao')) `
+    "reperguntar e reabrir uma decisao ja tomada"
+Checar "Iniciar: a partida automatica NAO escreve 'CLIQUE' no log" `
+    (($corpoAuto.Length -gt 0) -and -not ($corpoAuto -match 'CLIQUE: Iniciar')) `
+    "log que inventa clique do usuario e log mentindo"
+Checar "Iniciar: mas ela continua conferindo o disco" `
+    ([bool]($corpoAuto -match 'Test-PodeIniciar'))
+Checar "Iniciar: e as DUAS retomadas usam ela (nenhuma chama Invoke-Iniciar)" `
+    ([bool]($jan -match 'comecando agora \(\{0\} arquivo\(s\) fora da fila ficaram sem medir\)" -f \$sobra\) "ACAO"\s*\n\s*Stop-Motor\s*\n\s*Invoke-IniciarAutomatico') -and
+     [bool]($jan -match 'comecando a conversao que estava esperando" "ACAO"\s*\n\s*Invoke-IniciarAutomatico'))
+Checar "Iniciar: o clique de verdade continua perguntando" `
+    ([bool]($jan -match '(?s)function Invoke-Iniciar \{.{0,200}CLIQUE: Iniciar.{0,120}Test-EsperarMedicao'))
+Checar "Iniciar: os dois caminhos passam pelo MESMO corpo protegido" `
+    ([bool]($jan -match '(?s)function Invoke-IniciarProtegido.{0,300}try \{ Invoke-IniciarInterno \}'))
+
+<#  3.31 - 17.21: UM LUGAR SO DECIDE O BOTAO INICIAR.
+
+    Log de 15/09 20:32:29 -> 20:32:46: espera armada, ele mexeu nas marcacoes
+    e o Iniciar acendeu de novo - Update-Selecao decide por "tem marcado +
+    estado inicial" e nao sabia da espera. Clicou, e a MESMA pergunta apareceu
+    sobre a MESMA medicao. #>
+Checar "Iniciar: existe Set-BotaoIniciar (uma regra, um lugar)" `
+    ([bool]($jan -match 'function Set-BotaoIniciar'))
+Checar "Iniciar: e nele a espera tem prioridade sobre qualquer criterio" `
+    ([bool]($jan -match '(?s)function Set-BotaoIniciar.{0,300}if \(\$script:IniciarAposMedir\) \{ \$UI\.btnIniciar\.IsEnabled = \$false; return \}'))
+Checar "Iniciar: Update-Selecao nao escreve mais direto no botao" `
+    ([bool]($jan -match '(?s)function Update-Selecao.{0,300}Set-BotaoIniciar \(\(\$marcados -gt 0\)')) `
+    "era esta linha que reacendia o botao no meio da espera"
+<#  3.31: o unico que pode ACENDER o botao sem passar pelo lugar unico e o
+    proprio Set-BotaoIniciar, mais as duas retomadas - e elas desarmam a
+    espera na linha logo acima, entao nao ha conflito. Apagar ($false) segue
+    livre: apagar nunca mente. #>
+$corpoSet = ""
+try {
+    $corpoSet = "$(($astJan.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                                      $args[0].Name -eq "Set-BotaoIniciar" }, $true))[0].Extent.Text)"
+} catch { }
+$acendeForaDoLugar = @([regex]::Matches($jan, '\$UI\.btnIniciar\.IsEnabled = (?!\$false)')).Count -
+                     @([regex]::Matches($corpoSet, '\$UI\.btnIniciar\.IsEnabled = (?!\$false)')).Count
+Checar "Iniciar: so as duas retomadas acendem o botao por fora do lugar unico" `
+    ($acendeForaDoLugar -eq 2) `
+    "cada escritor a mais e uma regra paralela - foi assim que o botao reacendeu na espera"
+
+<#  17.20: a ORDEM dos ramos e a regra, e ela e testavel. A fase B mede
+    marcados e desmarcados; se "Fora da Fila" vier antes, um arquivo
+    desmarcado sendo medido aparece cinza e nenhuma linha acende - com o
+    botao dizendo "2 de 3". O teste executa a ordem, nao a le. #>
+$ordemOk = $false
+try {
+    $iMed  = $jan.IndexOf('$null -ne $medindoAgora -and $i -eq [int]$medindoAgora.Idx')
+    $iFora = $jan.IndexOf('} elseif (-not $v.Marcado) {')
+    $iProx = $jan.IndexOf('} elseif ($primeiroAtivo -and $Estado.Atual -eq "inicial") {')
+    $ordemOk = ($iMed -gt 0 -and $iFora -gt $iMed -and $iProx -gt $iFora)
+} catch { }
+Checar "Medicao: o ramo do MEDINDO vem antes de 'Fora da Fila' e do 'Proximo'" `
+    $ordemOk `
+    "desmarcado sendo medido tem que acender: e o que o botao esta contando"
+Checar "Medicao: a linha sendo medida OCUPA a vaga do 'Proximo a Converter'" `
+    ([bool]($jan -match '(?s)Medindo Camada .{0,1600}if \(\$primeiroAtivo -and \$Estado\.Atual -eq "inicial"\) \{ \$primeiroAtivo = \$false \}')) `
+    "senao a linha de baixo herda um rotulo que nao e dela"
+
+<#  17.20 - DOIS ACHADOS DO LOG DE 15/09 19:42.
+
+    ESC IGNORADO NA ESPERA. Ele clicou Iniciar com a medicao rodando, escolheu
+    ESPERAR, mudou de ideia e apertou ESC: "ignorada - nao se aplica ao estado
+    'inicial'". Certo sobre o Cancelar (nao ha conversao), errado sobre o
+    usuario: existe uma coisa pendente, e ESC e a tecla de desistir dela. Ele
+    so saiu desligando a chave de medicao - caminho que ninguem adivinha.
+
+    FILA CANCELADA COMPARADA COM A PREVISAO. Depois de cancelar no segundo
+    arquivo, o log escreveu "previsto 6.209s | real 21s | erro -99,7%". A fila
+    nao errou a previsao: ela nao aconteceu. E esse numero mora justamente na
+    linha que existe para responder "disse 1h25, foi isso mesmo?". #>
+Checar "ESC: existe quem desista da espera pela medicao" `
+    ([bool]($jan -match 'function Invoke-DesistirDaEspera'))
+Checar "ESC: a tecla passa a valer quando ha espera pendente" `
+    ([bool]($jan -match '"Escape" \{ \$UI\.btnCancelar\.IsEnabled -or \$script:IniciarAposMedir \}')) `
+    "senao o log continua dizendo 'ignorada' para uma tecla que tinha o que fazer"
+Checar "ESC: a espera e tratada ANTES do cancelar da conversao" `
+    ([bool]($jan -match '(?s)"Escape" \{.{0,400}Invoke-DesistirDaEspera.{0,300}elseif \(\$UI\.btnCancelar\.IsEnabled\)'))
+Checar "ESC: desistir da espera NAO para a medicao (ela segue em segundo plano)" `
+    (-not ($jan -match '(?s)function Invoke-DesistirDaEspera.{0,700}(Stop-Motor|Controle\.Cancelar)')) `
+    "a promessa de comecar sozinho e que se cancela, nao a medicao"
+Checar "ESC: e o Iniciar volta a acender ao desistir" `
+    ([bool]($jan -match '(?s)function Invoke-DesistirDaEspera.{0,700}Set-BotaoIniciar ')) `
+    "3.31: passou a pedir pelo lugar unico, que agora existe"
+Checar "ESC: e a espera e desarmada ANTES de repintar o botao" `
+    ([bool]($jan -match '(?s)function Invoke-DesistirDaEspera.{0,300}\$script:IniciarAposMedir = \$false.{0,200}Set-BotaoIniciar')) `
+    "Set-BotaoIniciar se recusa a acender enquanto a espera estiver de pe"
+
+Checar "Resumo: fila cancelada nao vira 'previsto x real'" `
+    ([bool]($jan -match '(?s)if \(\$cancelado\.Count -gt 0\) \{.{0,400}nao comparada - a fila foi cancelada')) `
+    "-99,7% nao mede nada: a fila nao errou, ela nao aconteceu"
+Checar "Resumo: e a comparacao de verdade so sai quando nao houve cancelamento" `
+    ([bool]($jan -match '(?s)nao comparada - a fila foi cancelada.{0,400}elseif \(\$script:LoteSegEstimado -gt 0\)'))
+
+# ---- o contrato el_ini: quem mede avisa, quem desenha escuta ----------------
+Checar "Medicao: o laco anuncia 'el_ini' ANTES de medir" `
+    ([bool]($jan -match '(?s)foreach \(\$pe in \$Pendentes\).{0,3200}T = "el_ini".{0,1200}Get-TipoCamadaDV'))
+Checar "Medicao: e o 'el_ini' carrega serie, indice, posicao e total" `
+    ([bool]($jan -match 'T = "el_ini"; Serie = \$Serie; Idx = \$pe\.Idx; Pos = \$nEL; Total = \$Pendentes\.Count'))
+<#  3.35 - 18.00: o numero de serie e o que torna seguro cancelar sem esperar.
+    Sem ele, um "el" atrasado da rodada velha gravaria veredicto no arquivo
+    errado depois de uma releitura. #>
+<#  "pelo menos N" nao e teste: com uma mensagem a menos ele continua verde.
+    A sabotagem provou isso - tirei o Serie de uma e nada reprovou. O teste
+    certo compara os DOIS lados: quantas mensagens desta familia existem, e
+    quantas carregam o selo. Tem que ser o mesmo numero. #>
+$msgsMed = ([regex]::Matches($jan, 'T = "el(_ini|_fim)?"')).Count
+$msgsSelo = ([regex]::Matches($jan, 'T = "el(_ini|_fim)?"; Serie = \$Serie')).Count
+Checar "Medicao: TODA mensagem da medicao carrega o numero de serie" `
+    (($msgsMed -gt 0) -and ($msgsSelo -eq $msgsMed)) `
+    ("{0} mensagem(ns) da medicao, {1} com selo - sem selo, sobra de rodada velha suja a fila nova" -f $msgsMed, $msgsSelo)
+<#  3.56 - 18.19: CENSO CANCELADO NAO VIRA VEREDICTO.
+    Log dele de 17/09 17:39:26 - censo cancelado 2s depois de comecar escreveu
+    "11 cena(s) do FILME INTEIRO (9,09%)" por cima do numero certo (1.124 cenas,
+    19,22%). Cancelar passou a MATAR o dovi_tool na 18.14, e o que sobra no
+    disco e um RPU pela metade que o motor aceita como bom. #>
+Checar "Censo: resultado de um censo que EU matei e descartado" `
+    ([bool]($jan -match '(?s)if \(\[bool\]\$m\.Ok -and \$script:CensoMorto -and\s*\r?\n.{0,200}resultado DESCARTADO')) `
+    "nao existe censo parcial valido - o veredicto anterior continua valendo"
+Checar "Censo: e RPU muito menor que o previsto tambem e recusado (segunda trava)" `
+    ([bool]($jan -match '(?s)\$m\.RpuMb \* 1MB\) -lt \(\$script:CensoBytesPrev \* 0\.5\).{0,400}resultado DESCARTADO')) `
+    "o dovi_tool devolve 'Done.' em arquivo cortado - quem desconfia e o LaFirma (bancada de 08/09)"
+Checar "Censo: as duas travas vem ANTES de o resultado encostar na linha" `
+    ($(  $iC = $jan.IndexOf('if ("$($m.T)" -eq "censo_fim")')
+         $iD = $jan.IndexOf('resultado DESCARTADO', $iC)
+         $iA = $jan.IndexOf('$m.Idx = $iC', $iC)
+         ($iC -ge 0 -and $iD -gt $iC -and $iA -gt $iD))) `
+    "descartar depois de escrever na tela nao descarta nada"
+Checar "Janela: e existe UM portao que descarta rodada velha, antes do switch" `
+    ([bool]($jan -match '(?s)while \(\$script:FilaMsg\.TryDequeue.{0,1800}?\[int\]\$m\.Serie -ne \[int\]\$script:MedSerie.{0,1600}?continue.{0,12000}?switch \(\$m\.T\)'))
+Checar "Janela: a leitura tem o mesmo selo (sobra dela tambem nao entra)" `
+    ([bool]($jan -match '\[int\]\$m\.SerieL -ne \[int\]\$script:LeituraSerie'))
+Checar "Janela: existe tratador para 'el_ini'" `
+    ([bool]($jan -match '"el_ini" \{'))
+Checar "Janela: o 'el_ini' e quem grava quem esta na vez e a conta" `
+    ([bool]($jan -match '(?s)"el_ini" \{.{0,600}\$script:ELmedindoIdx = \[int\]\$m\.Idx.{0,200}\$script:ELtotal\s+= \[int\]\$m\.Total.{0,200}\$script:ELfeitos\s+= \[int\]\$m\.Pos - 1'))
+Checar "Janela: o fim da medicao devolve o indice para -1 (ninguem na vez)" `
+    ([bool]($jan -match '(?s)"el_fim" \{.{0,200}\$script:ELmedindoIdx = -1'))
+Checar "Medicao: e ninguem nasce 'na vez' - quem acende e o el_ini" `
+    ([bool]($jan -match '(?s)function Start-Medicao.{0,3800}\$script:ELmedindoIdx\s*=\s*-1'))
+
+<#  AS DUAS TRAVAS CONTRA A DEDUCAO VOLTAR.
+    Nao guardam o sintoma - guardam a regra: ninguem calcula "quem esta
+    medindo" a partir da lista de marcados, e ninguem casa linha por nome. #>
+<#  Estes dois olham o CORPO da funcao e o CODIGO de verdade, nao uma janela
+    de regex: a primeira versao deles usava .{0,900} depois do nome da funcao
+    e pegava a funcao SEGUINTE, reprovando codigo certo (licao 18). #>
+$corpoMed = ""
+try {
+    $astMed = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    $fdMed = @($astMed.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                                 $args[0].Name -eq "Get-MedicaoEmCurso" }, $true))
+    if ($fdMed.Count -eq 1) { $corpoMed = $fdMed[0].Extent.Text }
+} catch { }
+Checar "Janela: Get-MedicaoEmCurso NAO consulta a lista de marcados" `
+    (($corpoMed -ne "") -and -not ($corpoMed -match 'Get-MarcadosMedindo')) `
+    "deduzir quem esta medindo a partir dos marcados foi o defeito da 17.18"
+
+<#  Token a token: comentario nao conta. Os blocos que EXPLICAM o defeito da
+    17.18 citam a variavel pelo nome de proposito, e devem continuar podendo. #>
+$tokJan = $null
+[void][System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$tokJan, [ref]$null)
+$vivos = @($tokJan | Where-Object { "$($_.Kind)" -ne "Comment" -and "$($_.Text)" -match 'ELtotalFila' })
+Checar "Janela: a variavel da deducao (ELtotalFila) nao existe mais no codigo" `
+    ($vivos.Count -eq 0) `
+    ("ainda viva em " + $vivos.Count + " lugar(es) fora de comentario")
+Checar "Janela: a linha da fila casa por INDICE, nao por nome" `
+    ([bool]($jan -match '\$i -eq \[int\]\$medindoAgora\.Idx')) `
+    "casar por nome erra em dois arquivos de mesmo nome"
+Checar "Janela: e nao sobrou comparacao por nome no ramo do medindo" `
+    (-not ($jan -match '"\$\(\$v\.Nome\)" -eq "\$\(\$medindoAgora\.Nome\)"'))
+
+# ---- o ramo da coluna SITUACAO e a condicao que estava errada (17.18) -------
 Checar "Janela: Fill-Fila pergunta UMA vez por redesenho quem esta medindo" `
-    ([bool]($jan -match '(?s)function Fill-Fila.{0,1200}\$medindoAgora = Get-MedicaoEmCurso.{0,400}for \(\$i = 0'))
+    ([bool]($jan -match '(?s)function Fill-Fila.{0,2200}\$medindoAgora = Get-MedicaoEmCurso.{0,400}for \(\$i = 0'))
+<#  3.45 - O BOTAO DO CENSO FALA A LINGUA DA CASA (18.10).
+    "toda nova ferramenta ou botao tem que ir refinando igual as outras, sendo
+    que ja existe um padrao" (Diego). O vocabulario de cor deste programa:
+    cinza nao se aplica, normal da para usar, ciano em curso, verde ja feito. #>
+Checar "Censo: existe UMA funcao que pinta o botao pelo estado" `
+    ([bool]($jan -match 'function Update-BotaoCenso'))
+Checar "Censo: ja contado fica VERDE e diz 'Censo Feito'" `
+    ([bool]($jan -match '(?s)\[bool\]\$v\.CensoFeito.{0,300}Censo Feito.{0,200}\$Cores\.okdim'))
+Checar "Censo: e quem pinta e chamado toda vez que a dica e atualizada" `
+    ([bool]($jan -match '(?s)function Update-DicaCenso.{0,300}Update-BotaoCenso \$v'))
+
+<#  3.45 - O NOME PRESO NO CABECALHO DA FILA (18.10).
+    Fill-Faixas roda tambem quando se troca Automatico/Manual - e escrevia o
+    nome do video dela no cabecalho mesmo com a aba FILA na tela, deixando o
+    nome de outro arquivo preso ali. O cabecalho e da aba FAIXAS. #>
+<#  3.50: a 18.10 protegeu so o NOME; a 18.13 levou a regra para o lugar
+    onde ela vale para os TRES textos (nome, "selecione um video", "nao pode
+    ser lido"). O que o teste cobra agora e o modelo: existe UM portao, e
+    Fill-Faixas nao escreve no cabecalho por fora dele. #>
+Checar "Cabecalho: existe um portao unico e ele confere a aba" `
+    ([bool]($jan -match '(?s)function Set-DicaFaixas.{0,200}?if \(\$script:AbaAtual -ne "faixas"\) \{ return \}')) `
+    "print dele: FILA na frente, video marcado, e o cabecalho pedindo para selecionar um video"
+$corpoFX = ""
+try {
+    $iFX = $jan.IndexOf("function Fill-Faixas")
+    if ($iFX -ge 0) {
+        $fFX = $jan.IndexOf("`r`nfunction ", $iFX + 20)
+        if ($fFX -lt 0) { $fFX = $jan.Length }
+        $corpoFX = Remove-Comentarios $jan.Substring($iFX, $fFX - $iFX)
+    }
+} catch { }
+Checar "Cabecalho: Fill-Faixas NAO escreve no cabecalho por fora do portao" `
+    (($corpoFX.Length -gt 1000) -and (-not ($corpoFX -match 'Set-AbaDica'))) `
+    "tres ramos escreviam ali; um deles disparava no instante em que o repinte zera a selecao"
+
+<#  3.44 - O CONTADOR TEM QUE DIZER QUANTO FALTA (18.09).
+    "e esse contador e do que? se cada filme tem seu tempo, ele ta contando ate
+    que tempo?" (Diego). Cronometro subindo prova que nao travou, mas nao
+    responde a pergunta. A previsao sai do tempo da amostra DAQUELE arquivo
+    vezes um fator medido - e o fator se corrige a cada censo. #>
+<#  2.0 - A PREVISAO DO CENSO MUDOU DE MODELO, E A PROVA ESTA NOS LOGS DELE.
+    Ate aqui a previsao era "amostra daquele arquivo x fator da maquina".
+    Nos logs do usuario, dois filmes do MESMO tamanho deram fatores 18 vezes
+    diferentes:
+        Saving Private Ryan  82 GB / 2h49  em SSD -> 4,7x a amostra
+        Transformers ROTF    78 GB / 2h30  em HD  -> 85,5x a amostra
+    Nao foi a CPU que mudou: foi o DISCO. O censo le o filme INTEIRO, e num
+    HD mecanico quem manda no relogio e a leitura. O modelo agora calcula os
+    DOIS tempos e adota o MAIOR - e o log diz qual deles mandou. #>
+Checar "Censo: a previsao e o MAIOR entre o tempo de disco e o de CPU" `
+    ([bool]($jan -match '\$script:CensoPrev = \[math\]::Max\(\$segDisco, \$segCpu\)')) `
+    "com um HD lento, a CPU nunca e quem manda - e era so nela que o modelo velho olhava"
+Checar "Censo: o tempo de disco sai do TAMANHO dividido pela velocidade medida" `
+    ([bool]($jan -match '\$segDisco = \(\$gbCenso \* 1024\.0\) / \$mbsCenso'))
+Checar "Censo: e a velocidade vem da medicao da origem, nao de um chute" `
+    ([bool]($jan -match '\$mbsCenso = Measure-VelocidadeOrigem'))
+Checar "Censo: o tempo de CPU sai da DURACAO vezes o segundos-por-segundo" `
+    ([bool]($jan -match '\$segCpu = \[double\]\$v\.DurSeg \* \$script:CensoSegPorSegFilme'))
+Checar "Censo: o log DIZ qual dos dois mandou no relogio" `
+    ([bool]($jan -match 'quem manda aqui e')) `
+    "numero sem dono nao se confere depois (licao 2)"
+<#  3.45 - 18.10: o rotulo do botao ficou CURTO ("Censo - 00m 45s"). Frase
+    comprida em botao de barra e poluicao: o total previsto e o "passou do
+    previsto" vivem na DICA. O que o teste cobra e que os dois existam. #>
+<#  3.50 - 18.13: o rotulo curto continua curto, mas curto nao pode ser mudo.
+    Sao tres sinais, e o teste cobra os tres pelo EFEITO: o giro (a tela esta
+    viva), a porcentagem (quanto falta, da relacao medida) e o "sem resposta"
+    (o dovi_tool parou de consumir CPU - o unico que nao e estimativa). #>
+<#  3.54 - 18.17: A PORCENTAGEM SAIU DO RELOGIO E FOI PARA O ARQUIVO.
+    "em que sentido voce chega ate 100%?" (Diego). Em nenhum, enquanto a conta
+    fosse de TEMPO: tempo depende de o disco estar livre, e com a medicao
+    rodando junto o censo estourava a previsao no meio do caminho. Agora a conta
+    e de TAMANHO - bytes de RPU escritos contra os previstos para a duracao
+    daquele filme - e a medida se corrige a cada censo. #>
+<#  3.57 - 18.20: A PORCENTAGEM VOLTOU A SER DE TEMPO.
+    A 18.17 apostou que o arquivo de RPU cresce com o trabalho. Os logs dele
+    desmentiram tres vezes: o dovi_tool grava tudo no fim, entao a barra ficava
+    em 0% o censo inteiro e pulava para 99%. O tamanho do RPU nao virou lixo -
+    ele mudou de funcao: nao serve de PROGRESSO, serve de PROVA no fim. #>
+Checar "Censo: e o previsto continua sendo por ARQUIVO, nunca um numero fixo" `
+    ([bool]($jan -match '\$script:CensoPrev = \[math\]::Max\(\$segDisco, \$segCpu\)')) `
+    "era a ressalva dele: cada filme tem o seu tempo"
+Checar "Censo: o previsto de BYTES existe so para conferir o resultado no fim" `
+    ([bool]($jan -match '\$script:CensoBytesPrev = \[double\]\$v\.DurSeg \* \$script:CensoBytesSeg'))
+Checar "Censo: e essa medida se corrige com o RPU real de cada censo" `
+    ([bool]($jan -match '(?s)\$bytesSeg = \(\[double\]\$m\.RpuMb \* 1MB\) / \$durFilme.{0,400}\$script:CensoBytesSeg = \$bytesSeg')) `
+    "licao 1: numero medido numa maquina nao e verdade eterna"
+Checar "Censo: com limite de sanidade (censo cortado no meio nao envenena a conta)" `
+    ([bool]($jan -match '\$bytesSeg -ge 2000 -and \$bytesSeg -le 40000'))
+<#  3.57 - O TESTE QUE TERIA PEGO O MEU ERRO, E VAI PEGAR O PROXIMO.
+
+    Na 18.19 eu criei uma trava que le $m.RpuMb e ESQUECI de acrescentar RpuMb
+    na mensagem que o trabalho envia. O campo chegava vazio, valia zero, e todo
+    censo completo era descartado como se fosse pela metade - o censo inteiro
+    parou de funcionar e os testes continuaram verdes, porque a bancada montava
+    a mensagem na mao (com o campo!) e a bateria so conferia o texto do codigo.
+
+    A regra que faltava, e que vale para qualquer mensagem entre o trabalho e a
+    janela: TODO campo que a janela LE de uma mensagem tem que ser ENVIADO por
+    quem a monta. O teste descobre os dois lados no fonte e cruza - nao ha lista
+    digitada a mao para envelhecer. #>
+$camposLidos = @()
+try {
+    <#  Os DOIS lugares que leem a mensagem: o portao (antes do switch) e o
+        ramo "censo_fim" dentro dele. Cada um delimitado pelo seu proprio fim -
+        janela de regex nao respeita fronteira (licao 18). #>
+    $trecho = ""
+    $iH = $jan.IndexOf('if ("$($m.T)" -eq "censo_fim")')
+    $gH = $jan.IndexOf('$m.Idx = $iC', $iH)
+    if ($iH -ge 0 -and $gH -gt $iH) { $trecho += $jan.Substring($iH, $gH - $iH) }
+    $iSw = $jan.IndexOf('switch ($m.T) {')
+    $iR = $jan.IndexOf("`r`n            `"censo_fim`" {", $iSw)
+    $fR = $jan.IndexOf("`r`n            `"el_fim`" {", $iR)
+    if ($iR -ge 0 -and $fR -gt $iR) { $trecho += $jan.Substring($iR, $fR - $iR) }
+    if ($trecho.Length -gt 100) {
+        $trecho = Remove-Comentarios $trecho
+        $camposLidos = @([regex]::Matches($trecho, '\$m\.([A-Za-z]+)') |
+                         ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    }
+} catch { }
+$camposEnviados = @()
+try {
+    $iE = $jan.IndexOf('Enviar @{ T = "censo_fim"; Serie = $Serie; Idx = $Idx; Caminho = "$Caminho"; Ok = $true')
+    if ($iE -ge 0) {
+        $fE = $jan.IndexOf('} catch {', $iE)
+        $bloco = $jan.Substring($iE, $fE - $iE)
+        $camposEnviados = @([regex]::Matches($bloco, '([A-Za-z]+)\s*=') |
+                            ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    }
+} catch { }
+$semEnvio = @($camposLidos | Where-Object { $_ -notin $camposEnviados -and $_ -ne "Idx" })
+Checar "Censo: os dois lados da mensagem foram achados no fonte" `
+    (($camposLidos.Count -ge 4) -and ($camposEnviados.Count -ge 8))
+Checar "Censo: TODO campo que a janela le do censo_fim e realmente ENVIADO" `
+    ($semEnvio.Count -eq 0) `
+    ("nunca sao enviados: " + ($semEnvio -join ", ") + " - foi assim que a 18.19 matou o censo inteiro")
+
+Checar "Censo: o tamanho do RPU VIAJA na mensagem do fim (a trava depende dele)" `
+    ([bool]($jan -match 'RpuMb = \[double\]\$r\.RpuMb')) `
+    "18.19: eu criei a trava e esqueci de mandar o numero - TODO censo virou descartado"
+<#  3.55 - 18.18: O AVISO DE "SEM RESPOSTA" SAIU DE VEZ.
+    Deu falso nas duas versoes (CPU na 18.15, arquivo na 18.17) porque o comeco
+    e o fim do trabalho sao justamente os momentos em que nada cresce. Licao 6:
+    alarme falso e pior que alarme nenhum. O teste agora GUARDA a ausencia -
+    se algum dia ele voltar sem um sinal confiavel, isto aqui reprova. #>
+Checar "Censo: o botao NAO tem mais aviso de 'sem resposta' (deu falso duas vezes)" `
+    (-not ($janCodigo -match 'sem resposta')) `
+    "17:21:40 'RPU parou de crescer (0,0 MB)' com o censo perfeitamente vivo"
+Checar "Censo: Start-Censo NAO mexe mais no IsEnabled (isso e do dono unico)" `
+    (-not ($jan -match '(?s)function Start-Censo.{0,7000}\$UI\.btnCenso\.IsEnabled')) `
+    "18.20 consertou o clique pondo mais um dono; 18.21 consertou tirando os outros"
+Checar "Censo: cancelamento que nao achou processo nenhum DIZ isso" `
+    ([bool]($jan -match '(?s)\$mortos -eq 0.{0,200}nenhum processo do censo foi encontrado')) `
+    "17:56:37: cancelou, nao matou nada, nao disse nada - e o runspace ficou preso"
+
+<#  ===========================================================================
+    3.58 - 18.21: O CENSO MEDIDO NO LOG DE 17/09 21:47, QUE E O PIOR QUE JA
+           SAIU DAQUI - 20 censos comecados e mortos em 57 segundos, e catorze
+           frases dizendo que "o resultado vale" para censos de 180ms.
+    =========================================================================== #>
+
+<#  1. O FREIO. Cada "pedido" abre ffmpeg + cmd + dovi_tool num arquivo de
+    82 GB; 366ms depois de matar o anterior nao e intencao, e ruido. #>
+Checar "Censo: existe freio entre cancelar e comecar de novo" `
+    ([bool]($jan -match '(?s)function Invoke-BotaoCenso.{0,1200}\$script:CensoParadoEm.{0,600}-lt 2\.0')) `
+    "21:56:29,330 cancelou / 21:56:29,698 pediu de novo - 20 pares em 57s no log dele"
+Checar "Censo: o cancelamento anota a hora (senao o freio nao tem de que medir)" `
+    ([bool]($jan -match '(?s)function Invoke-BotaoCenso.{0,600}\$script:CensoParadoEm = Get-Date.{0,200}Stop-Censo'))
+Checar "Censo: e o freio FALA quando recusa (licao 2 - silencio faz apertar de novo)" `
+    ([bool]($jan -match '(?s)function Invoke-BotaoCenso.{0,1400}CENSO COMPLETO recusado: o censo foi cancelado ha'))
+Checar "Censo: o freio nasce vazio (censo nenhum foi cancelado ainda)" `
+    ([bool]($jan -match '\$script:CensoParadoEm = \$null'))
+
+<#  2. O QUE PODE QUEBRAR O CENSO FICA TRAVADO ENQUANTO ELE RODA - pedido
+    dele: "quando o censo se tiver rodando vc tem q travar teclas que podem
+    travar ele... sem engessar o programa". Sao duas, e as duas foram medidas
+    no log: F12 (dovi_tool no mesmo disco) e F5 (refaz a lista por baixo). #>
+Checar "Censo: com o censo rodando, o F12/medicao e recusado" `
+    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,600}if \(\$script:CensoRodando\).{0,400}return')) `
+    "21:56:32,438 censo lendo o filme inteiro / 21:56:32,551 MEDIR EL: LIGADO"
+Checar "Censo: e a recusa do F12 diz COMO sair dela (cancele o censo)" `
+    ([bool]($jan -match '(?s)function Invoke-TrocarMedirEL.{0,700}MEDIR EL bloqueado \(censo completo em curso.{0,300}F11'))
+Checar "Censo: com o censo rodando, o F5/Atualizar e recusado" `
+    ([bool]($jan -match '(?s)function Invoke-Reler.{0,600}if \(\$script:CensoRodando\).{0,400}return')) `
+    "reler troca a lista embaixo do censo e o resultado cai no 'nao esta mais na lista'"
+Checar "Censo: e a recusa do F5 tambem diz como sair" `
+    ([bool]($jan -match '(?s)function Invoke-Reler.{0,700}ATUALIZAR bloqueado \(censo completo em curso.{0,300}F11'))
+Checar "Censo: travar nao virou engessar - o proprio censo continua cancelavel" `
+    ([bool]($jan -match '(?s)function Invoke-BotaoCenso.{0,600}if \(\$script:CensoRodando\).{0,300}Stop-Censo'))
+
+<#  3. CENSO MORTO NAO TEM RESULTADO - DE NENHUM JEITO. A 18.19 fechou a porta
+    do Ok=true; o log de 21:55:34,093 mostra a do Ok=false passando. #>
+Checar "Censo: censo morto por nos nao anuncia resultado nenhum (nem com Ok=false)" `
+    ([bool]($jan -match '(?s)if \(\$script:CensoMorto -and "\$\(\$m\.Caminho\)" -eq "\$\(\$script:CensoCaminho\)"\) \{.{0,400}cancelado por voce - nao ha numero novo')) `
+    "21:55:34,093: 'terminou... o RESULTADO VALE e esta na tela' depois de 180ms de censo"
+$mCensoFim = [regex]::Match($janCodigo, '(?s)if \("\$\(\$m\.T\)" -eq "censo_fim"\) \{.{0,6000}?\r\n        \}')
+$ordemOk = $false
+if ($mCensoFim.Success) {
+    $iMorto = $mCensoFim.Value.IndexOf('cancelado por voce - nao ha numero novo')
+    $iVale  = $mCensoFim.Value.IndexOf('o resultado vale e esta na tela')
+    $ordemOk = ($iMorto -ge 0) -and ($iVale -ge 0) -and ($iMorto -lt $iVale)
+}
+Checar "Censo: e a pergunta 'foi morto?' vem ANTES da frase que diz que vale" `
+    $ordemOk `
+    "guarda que chega depois da mentira nao e guarda"
+
+<#  4. A PORCENTAGEM. "a % nao conta do censo, fica 0%" e "vc continua errando
+    feio a contagem do CENSO". A causa nao era a conta: era ELsegundos vindo
+    zero do cache, e ai nao havia conta nenhuma. #>
+Checar "Censo: existe previsao por DURACAO para quando a amostra nao foi medida" `
+    ([bool]($jan -match '\$script:CensoSegPorSegFilme')) `
+    "ELsegundos vem 0 quando o veredicto e do cache - e ai a % ficava em 0% o censo inteiro"
+Checar "Censo: o valor de partida e o medido no log dele (106,1s / 10.140s de filme)" `
+    ([bool]($jan -match '\$script:CensoSegPorSegFilme = 0\.0105'))
+Checar "Censo: sem tamanho E sem duracao, ele DIZ que nao ha previsao" `
+    ([bool]($jan -match '(?s)function Start-Censo.{0,12000}sem previsao de tempo')) `
+    "previsao inventada e pior que previsao nenhuma"
+<#  2.0 - A APRENDIZAGEM DO s/s TEM QUE SER GUARDADA.
+    Aprender "0,0711 s/s" de um censo que passou 10 minutos preso num HD era
+    ensinar a coisa errada ao proximo filme, que pode estar num SSD. O s/s e
+    numero de CPU: so se aprende quando foi a CPU que mandou no relogio.
+    E ha um teste especifico para a SEGUNDA dona: ate a 2.0 existiam DUAS
+    aprendizagens do mesmo numero, e a velha (sem guarda) rodava primeiro. #>
+Checar "Censo: o s/s so e reajustado quando quem mandou no relogio foi a CPU" `
+    ([bool]($jan -match '(?s)if \(\$discoAp -gt 0 -and \$discoAp -gt \(\$cpuAp \* 1\.2\)\).{0,400}NAO foi ajustado'))
+Checar "Censo: e o s/s novo sai do tempo de parede dividido pela duracao" `
+    ([bool]($jan -match '\$novoSS = \$segParede / \[double\]\$v\.DurSeg'))
+Checar "Censo: com limite de sanidade (censo cortado nao envenena a proxima previsao)" `
+    ([bool]($jan -match '\$novoSS -ge 0\.003 -and \$novoSS -le 0\.20'))
+Checar "Censo: NAO existe uma segunda aprendizagem do s/s sem guarda" `
+    (-not ($jan -match '\$script:CensoSegPorSegFilme = \$segPorSeg')) `
+    "um numero, um dono (licao 41) - duas donas discordando foi o defeito"
+
+<#  5. "2/3 FOTOS MOSTRAM O FEL SEM O [F12]". Os tres estados do rotulo de
+    cima da medicao carregam a tecla - inclusive o que fica mais tempo na
+    tela, que era justamente o que nao carregava. #>
+$escritasTopo = [regex]::Matches($janCodigo, '\$UI\.lblMedirELTopo\.Text\s*=\s*([^\r\n]+)')
+$todasComF12 = ($escritasTopo.Count -gt 0)
+foreach ($e in $escritasTopo) { if ($e.Groups[1].Value -notmatch '\[F12\]') { $todasComF12 = $false } }
+Checar "Medicao: TODO estado do rotulo de cima carrega o [F12] (os tres)" `
+    $todasComF12 `
+    ("achei $($escritasTopo.Count) escrita(s) no rotulo - '2/3 FOTOS MOSTRAM O FEL SEM O [F12]' (Diego)")
+Checar "Medicao: inclusive o 'Medindo N de M', que e o que fica mais tempo na tela" `
+    ([bool]($jan -match '\$UI\.lblMedirELTopo\.Text = "\[F12\] " \+ \$txtMed'))
+Checar "Barra: o Pausar/Retomar tambem usa a tecla ANTES, entre colchetes" `
+    (($jan -match '"\[F2\] " \+ \(Traduzir "Pausar"\)') -and ($jan -match '"\[F2\] " \+ \(Traduzir "Retomar"\)')) `
+    "ele viu 'Pausar F2' no meio dos [F1] e [ESC] - dois lugares escreviam esse rotulo"
+Checar "Censo: NENHUMA consulta WMI no tique do relogio (foi o congelamento de 55s)" `
+    ($(  $iT = $jan.IndexOf('$TimerFila.add_Tick(')
+         $fT = if ($iT -ge 0) { $jan.IndexOf("`r`n})`r`n", $iT) } else { -1 }
+         if ($iT -ge 0 -and $fT -gt $iT) { -not ((Remove-Comentarios $jan.Substring($iT, $fT - $iT)) -match 'Get-CimInstance|Get-WmiObject') } else { $false })) `
+    "17/09 16:51:46->16:54:28: o trabalho levou 106s e a tela so contou 162s"
+Checar "Censo: toda recusa FALA (nenhum return mudo em Start-Censo)" `
+    ([bool]($jan -match '(?s)function Start-Censo.{0,4000}nenhum video selecionado na fila.{0,600}CENSO COMPLETO recusado para')) `
+    "17:18:29: sete F11 seguidos, sete 'CLIQUE: Censo Completo' e nada mais no log"
+Checar "Teclas: tecla SEGURADA nao vira vinte cliques (auto-repeat)" `
+    ([bool]($jan -match '\$e\.IsRepeat.{0,60}return')) `
+    "no log dele, segurar o F12 virou 20 ligar/desligar em 2 segundos"
+Checar "Censo: quem acha os processos e UM lugar so (matar e vigiar olham a mesma lista)" `
+    ((([regex]::Matches($jan, 'Get-ProcessosDoCenso')).Count -ge 3) -and
+     [bool]($jan -match '(?s)function Matar-ProcessosDoCenso.{0,300}Get-ProcessosDoCenso')) `
+    "duas listas para a mesma coisa e o defeito que este projeto persegue desde a 16.79"
+Checar "Censo: o cmd que segura o pipe tambem e encerrado" `
+    ([bool]($jan -match '(?s)\$n -eq "cmd\.exe".{0,200}pipe_rpu')) `
+    "17/09 15:24:43: matei os dois filhos e o cmd de pe prendeu o runspace para sempre"
+Checar "Censo: handle que nao responde e ABANDONADO (nunca trava o recurso)" `
+    ([bool]($jan -match '(?s)\$orfao = \$true.{0,900}handle abandonado')) `
+    "quinze cliques dizendo 'o anterior ainda esta encerrando' no log dele"
+Checar "Censo: e o abandono NAO usa Dispose (isso esperaria e congelaria a tela)" `
+    ([bool]($jan -match '(?s)handle abandonado.{0,200}\$script:CensoPS = \$null; \$script:CensoRunspace = \$null'))
+Checar "Censo: cada censo comeca com a prova de vida zerada" `
+    ([bool]($jan -match '\$script:CensoCpu = 0\.0; \$script:CensoVivoEm = Get-Date; \$script:CensoMudo = \$false')) `
+    "CPU de um censo anterior nao pode responder pelo de agora"
+Checar "Censo: o previsto continua existindo, na dica" `
+    ([bool]($jan -match 'leva cerca de \{1\} no total'))
+Checar "Censo: a dica diz ha quanto tempo o censo esta rodando (o tempo saiu do rotulo)" `
+    ([bool]($jan -match 'está rodando há \{0\}')) `
+    "18.16: o cronometro saiu do botao e foi para a dica - nao sumiu do programa"
+Checar "Censo: e a dica ENSINA que da para cancelar ali mesmo" `
+    ([bool]($jan -match 'Clique de novo \(ou F11\) para cancelar')) `
+    "botao que so comeca nao se descobre sozinho que tambem para"
+Checar "Censo: a previsao comeca ZERADA a cada censo (nao herda a do anterior)" `
+    ([bool]($jan -match '(?s)\$script:CensoPrev = 0\.0.{0,300}\$gbCenso'))
+Checar "Censo: o fator se corrige com o custo real da maquina" `
+    ([bool]($jan -match '(?s)\$fatorReal = \$segParede / \$amostraSeg.{0,400}\$script:CensoFator = \$fatorReal'))
+<#  2.0: o teto era 12x e o Transformers mediu 85,5x - um caso REAL foi
+    recusado como "numero solto". O teto subiu para 200x, que e o que um HD
+    mecanico produz de verdade; o piso continua em 2x. #>
+Checar "Censo: com limite de sanidade (numero solto nao envenena a previsao)" `
+    ([bool]($jan -match '\$fatorReal -ge 2\.0 -and \$fatorReal -le 200\.0'))
+Checar "Censo: e o aviso do limite diz o teto REAL (nao um numero antigo)" `
+    ([bool]($jan -match 'fora dos limites \(2x a 200x\)')) `
+    "mensagem que mente sobre o proprio limite ja nos custou uma rodada"
+Checar "Censo: a dica para de so mandar esperar - diz quanto leva" `
+    ([bool]($jan -match '(?s)if \(\$script:CensoRodando\) \{.{0,500}leva cerca de'))
+
+<#  3.43 - A MEDICAO MORRIA PARA SEMPRE, E A ESPERA FICAVA PENDURADA (18.08).
+    Log dele: depois de um "Nova Conversao", TODA medicao seguinte caia em "a
+    anterior ainda esta encerrando" - ate o fim da sessao. Start-Leitura
+    esvaziava a fila de mensagens e engolia o "el_fim", que e a unica noticia
+    que fecha o handle. E a espera do Iniciar, que era desarmada dentro desse
+    mesmo "el_fim", ficou tres minutos na tela. #>
+Checar "Fila de mensagens: esvaziar NAO pode engolir a noticia de morte" `
+    ([bool]($jan -match '(?s)while \(\$script:FilaMsg\.TryDequeue\(\[ref\]\$descarte\)\) \{.{0,400}"el_fim".{0,120}Fechar-Runspace-Medicao')) `
+    "sem isso o handle fica preso e nenhuma medicao nova comeca - o log dele prova"
+Checar "Fila de mensagens: o censo tem a mesma protecao" `
+    ([bool]($jan -match '(?s)while \(\$script:FilaMsg\.TryDequeue\(\[ref\]\$descarte\)\) \{.{0,400}"censo_fim".{0,120}Fechar-Runspace-Censo'))
+Checar "Iniciar: a espera olha o ESTADO, nao espera uma mensagem chegar" `
+    ([bool]($jan -match '(?s)\$script:IniciarAposMedir -and \(-not \$script:MedindoEL\) -and \$Estado\.Atual -eq "inicial".{0,800}Invoke-IniciarAutomatico')) `
+    "evento pode nao vir (rodada cancelada, fila esvaziada); estado sempre esta la"
+Checar "Iniciar: e isso roda no relogio da fila, uma vez por batida" `
+    ([bool]($jan -match '(?s)\$TimerFila\.add_Tick.{0,85000}\$script:IniciarAposMedir -and \(-not \$script:MedindoEL\)'))
+
+<#  3.42 - TRABALHO LONGO TEM QUE MOSTRAR QUE ESTA VIVO (18.07).
+    "o censo tem q so imaginar q ele ta fazendo algo ne? demora pra kralho"
+    (Diego). 104 segundos sem sinal na tela e indistinguivel de travado. E a
+    mesma condicao nao pode ter duas cores: o painel de disco pinta "Espaco
+    Insuficiente" de vermelho e o cartao do resumo pintava de ambar. #>
+Checar "Barra: a tecla vem ANTES do rotulo, entre colchetes, em TODOS os botoes" `
+    ($(  $faltam = @()
+         foreach ($par in @(@("[F1] Iniciar","F1"), @("[F2] Pausar","F2"), @("[ESC] Cancelar","ESC"),
+                            @("[F5] Atualizar","F5"), @("[F11] Censo Completo","F11"),
+                            @("[F12] Medir MEL x FEL","F12"))) {
+             if ($jan -notmatch [regex]::Escape($par[0])) { $faltam += $par[1] }
+         }
+         $faltam.Count -eq 0)) `
+    "pedido dele: 'os F TEM QUE VIR ANTES - [F1] Iniciar - uma logica simples de organizacao'"
+<#  3.58: a cor do 'em curso' nunca foi de Start-Censo - ela e escrita por
+    Update-BotaoCenso, o dono do botao. O teste media a DISTANCIA ate la, e
+    portanto reprovava sozinho a cada comentario novo (licao 37). Agora ele
+    cobra o dono, que e o que importa. #>
+Checar "Censo: o botao fica na cor de 'em curso' enquanto trabalha" `
+    ([bool]($corpoUpdBotaoCenso -match '(?s)if \(\$script:CensoRodando\) \{.{0,1600}lblCenso\.Foreground = Pincel \$Cores\.emCurso'))
+Checar "Censo: e a cor volta ao normal junto com o rotulo" `
+    ([bool]($jan -match '(?s)function Reset-BotaoCenso.{0,900}Update-BotaoCenso'))
+Checar "Censo: o icone do botao tem nome (senao a cor nao alcanca ele)" `
+    ([bool]($jan -match 'x:Name="icoCenso"'))
+Checar "Resumo: falta de espaco e VERMELHO, igual ao painel de disco" `
+    ([bool]($jan -match '(?s)"PULADO"\s*\{.{0,900}?Test-PuladoPorEspaco \$R.{0,200}?errBorda'))
+Checar "Resumo: e ja-existia continua ambar (avisa, nao impede)" `
+    ([bool]($jan -match '(?s)Test-PuladoPorEspaco \$R.{0,400}?pausaBorda'))
+Checar "Resumo: a frase acompanha a cor do cartao" `
+    ([bool]($jan -match '\$status -eq "PULADO" -and -not \(Test-PuladoPorEspaco \$R\)'))
+
+<#  3.41 - O PROGRAMA DESMARCAVA ARQUIVO SOZINHO (18.06).
+    Log dele, 17/09: um segundo depois de cada linha ser desenhada saia
+    "SELECAO: <arquivo> -> desmarcado", sem clique nenhum. A caixinha se
+    identificava pelo INDICE e a lista reciclava containers: chegava evento com
+    o indice de uma linha e o estado de outra, e isso virava "clique". #>
+Checar "Selecao: a caixinha se identifica pelo CAMINHO do arquivo" `
+    ([bool]($jan -match 'Tag="\{Binding Caminho\}"')) `
+    "indice e endereco temporario; caminho nao muda de dono (licao 30)"
+Checar "Selecao: e a linha da fila carrega esse caminho" `
+    ([bool]($jan -match 'Idx=\$Idx; Marcado=\$Marcado; PodeMarcar=\$PodeMarcar; Caminho=\$Caminho'))
+Checar "Selecao: o tratador acha o video pelo caminho, nao pelo indice da Tag" `
+    ([bool]($jan -match '(?s)\$script:TrocaMarca = .{0,2600}?Achar-LinhaPorCaminho "\$\(\$cx\.Tag\)"'))
+Checar "Selecao: evento que chega durante o repinte NAO e tratado como clique" `
+    ([bool]($jan -match '(?s)\$script:TrocaMarca = .{0,2600}?if \(\$script:PintandoFila\) \{ return \}'))
+<#  3.49: a regra nao e "a porta fecha na primeira linha da funcao" - e "a
+    porta esta fechada ANTES de qualquer toque na colecao que a tela mostra".
+    Desde a 18.12 a funcao monta as linhas numa lista a parte primeiro (isso
+    nao mexe na tela e nao dispara evento nenhum), e so entao toca na colecao.
+    Cobrar a forma antiga reprovaria o codigo certo - licao 18, de novo. #>
+$corpoFF = ""
+try {
+    $iFF = $jan.IndexOf("function Fill-Fila")
+    if ($iFF -ge 0) { $corpoFF = $jan.Substring($iFF, [Math]::Min(32000, $jan.Length - $iFF)) }
+} catch { }
+$posPorta = $corpoFF.IndexOf('$script:PintandoFila = $true')
+$posToque = $corpoFF.IndexOf('$script:LinhasFila.Clear()')
+Checar "Selecao: a porta esta fechada ANTES de tocar na lista que a tela mostra" `
+    ($posPorta -ge 0 -and $posToque -gt $posPorta) `
+    "evento de caixinha durante o desenho e eco, nao clique (18.06)"
+Checar "Fila: repintura identica nao toca na tela (nem dispara evento)" `
+    ([bool]($jan -match '(?s)\$assinatura -eq \$script:AssinaturaFila.{0,260}?return')) `
+    "133 repinturas iguais e coladas nos logs de 15 a 17/09 - cada uma um Clear() inteiro"
+Checar "Fila: e quem limpa a lista por fora zera a assinatura" `
+    (([regex]::Matches($jan, '\$script:AssinaturaFila = \$null')).Count -ge 3) `
+    "senao a proxima repintura se acha igual a uma tela que nao existe mais"
+Checar "Selecao: e reabre pelo Dispatcher, SEM esperar (a regra da 18.00 vale)" `
+    ([bool]($jan -match '(?s)\$script:PintandoFila = \$true.{0,500}BeginInvoke.{0,200}\$script:PintandoFila = \$false'))
+Checar "Selecao: a lista da fila nao recicla linha (era a origem do descasamento)" `
+    ([bool]($jan -match 'x:Name="lstFila"[^>]{0,400}VirtualizingStackPanel\.IsVirtualizing="False"'))
+
 Checar "Janela: a coluna SITUACAO tem ramo proprio para o que esta sendo medido" `
     ([bool]($jan -match 'Medindo Camada . \{0\} de \{1\}'))
 Checar "Janela: e ele pinta de ciano (emCurso), como o 'Convertendo'" `
     ([bool]($jan -match '(?s)Medindo Camada .{0,200}\$corSit = \$Cores\.emCurso'))
 Checar "Janela: o ramo do medindo vem ANTES do 'Proximo a Converter'" `
-    ([bool]($jan -match '(?s)\$medindoAgora\.Nome.{0,1500}Proximo a Converter'))
-<#  A condicao errada. $Fase e o MOTIVO do redesenho ("el", "idioma"), nao o
-    estado do programa - e por isso o rotulo verde sumia sozinho. #>
+    ([bool]($jan -match '(?s)\$medindoAgora\.Idx.{0,2200}Proximo a Converter'))
 Checar "Janela: 'Proximo a Converter' olha o ESTADO, nao o motivo do redesenho" `
     ([bool]($jan -match '\$primeiroAtivo -and \$Estado\.Atual -eq "inicial"')) `
     "com \$Fase, redesenhar por causa da medicao ou do idioma apagava o rotulo"
 Checar 'Janela: e nao sobrou nenhum $Fase decidindo o "Proximo a Converter"' `
     (-not ($jan -match '\$primeiroAtivo -and \$Fase -eq "inicial"'))
-<#  Os dois redesenhos que quebravam o rotulo continuam existindo - o teste
-    acima so vale enquanto eles passam um motivo diferente de "inicial". #>
 Checar "Janela: o redesenho da medicao continua passando motivo proprio ('el')" `
     ([bool]($jan -match 'Fill-Fila "el"'))
 Checar "Janela: e o da troca de idioma tambem ('idioma')" `
     ([bool]($jan -match 'Fill-Fila "idioma"'))
 
-# ---- a traducao da frase montada ----------------------------------------
+<#  17.19: o aviso de espera e o botao respondem perguntas DIFERENTES e por
+    isso nao podem ter a mesma forma. O botao conta progresso ("2 de 3"); o
+    aviso conta o que falta da fila DELE ("faltam 2"). Escritos iguais, com
+    numeros legitimamente diferentes, pareciam um contador se contradizendo. #>
+Checar "Janela: o aviso de espera nao usa mais a forma 'X de Y' do botao" `
+    (-not ($jan -match '(?s)function Get-TextoEspera.{0,1800}\$de = if \(\$script:Lang -eq "EN"\)'))
+Checar "Janela: o aviso de espera conta o que falta DA FILA do usuario" `
+    ([bool]($jan -match '(?s)function Get-TextoEspera.{0,2200}arquivos da sua fila'))
+Checar "Janela: e ele continua contando so os MARCADOS (regra da 17.15)" `
+    ([bool]($jan -match '(?s)function Get-TextoEspera.{0,1600}\$faltam = @\(Get-MarcadosMedindo\)\.Count'))
+
+# ---- a traducao das frases montadas --------------------------------------
 if ($fnsTrad.Count -eq 3 -and (Test-Path -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt"))) {
     $guardaPastaM = $script:PastaScript
     try {
@@ -4058,7 +5703,9 @@ if ($fnsTrad.Count -eq 3 -and (Test-Path -LiteralPath (Join-Path $Fonte "IDIOMA_
         $simAtual = [string][char]0x25B6
         $paresM = @(
           @{ Pt = "$simAtual Medindo Camada " + [char]0xB7 + " 2 de 3"; En = "$simAtual Measuring Layer " + [char]0xB7 + " 2 of 3" },
-          @{ Pt = "$simAtual Medindo Camada " + [char]0xB7 + " 1 de 12"; En = "$simAtual Measuring Layer " + [char]0xB7 + " 1 of 12" })
+          @{ Pt = "$simAtual Medindo Camada " + [char]0xB7 + " 1 de 12"; En = "$simAtual Measuring Layer " + [char]0xB7 + " 1 of 12" },
+          @{ Pt = "(falta 1 arquivo da sua fila)"; En = "(1 file from your queue to go)" },
+          @{ Pt = "(faltam {0} arquivos da sua fila)"; En = "({0} files from your queue to go)" })
         foreach ($c in $paresM) {
             $saiu = Traduzir-Frase $c.Pt
             Checar ("Idioma: '" + $c.Pt + "' vira '" + $c.En + "'") ($saiu -eq $c.En) ("saiu: $saiu")
@@ -4066,9 +5713,706 @@ if ($fnsTrad.Count -eq 3 -and (Test-Path -LiteralPath (Join-Path $Fonte "IDIOMA_
         $script:Lang = "PT"
     } finally { $script:PastaScript = $guardaPastaM }
 } else {
-    Pular "Idioma: a frase de 'Medindo Camada' tem traducao" "as funcoes de idioma nao carregaram"
+    Pular "Idioma: as frases da medicao tem traducao" "as funcoes de idioma nao carregaram"
 }
 
+
+Titulo "48. O SELO [BL+RPU] NO NOME DO ARQUIVO FINAL (14.6)"
+<#  Pedido do usuario, 21/09: "o arquivo final MKV deve ter o nome no final
+    [BL+RPU] - e mantenha a regra se ai existir um com o mesmo nome [BL+RPU]
+    ai sim falar que ja existe um na pasta".
+
+    O PERIGO DESTA MUDANCA NAO E O NOME: E A TRAVA. Tudo o que ele ja
+    converteu esta gravado com o nome ANTIGO, sem selo. Uma trava que olhe
+    so o nome novo nao encontra nada, e a biblioteca inteira e reconvertida
+    do zero - horas de trabalho e, no fim, a saida boa sobrescrita. Os
+    testes abaixo existem por causa disso, nao por causa do colchete. #>
+Checar "Motor: o nome do arquivo final carrega o selo [BL+RPU]" `
+    ([bool]($mot -match '\$nomeSaida = \$nomeSaida \+ " \[BL\+RPU\]"'))
+Checar "Motor: e o .mkv de saida e montado com esse nome, nao com o original" `
+    ([bool]($mot -match '\$outFile       = Join-Path \$OutputDir \(\$nomeSaida \+ "\.mkv"\)'))
+Checar "Motor: o selo nao e repetido (arquivo ja selado nao ganha outro)" `
+    ([bool]($mot -match '-not \$nomeSaida\.Contains\("\[BL\+RPU\]"\)'))
+Checar "Motor: a conferencia do selo usa Contains, nunca -like" `
+    (-not ($mot -match '-(not)?like\s+"\*\[BL')) `
+    "colchete e classe de caractere em wildcard - foi o que quebrou o Test-Path na 14.32"
+Checar "Motor: o nome ANTIGO continua existindo para a trava" `
+    ([bool]($mot -match '\$outFileAntigo = Join-Path \$OutputDir \(\$name \+ "\.mkv"\)'))
+Checar "Motor: a trava 'ja existe' olha OS DOIS nomes" `
+    ([bool]($mot -match '(?s)\$jaTemNovo   = Test-Path -LiteralPath \$outFile.{0,200}\$jaTemAntigo = Test-Path -LiteralPath \$outFileAntigo.{0,200}if \(\$jaTemNovo -or \$jaTemAntigo\)')) `
+    "sem isto, a primeira fila depois da atualizacao reconverte a biblioteca inteira"
+Checar "Motor: e os dois Test-Path usam -LiteralPath (licao 14.32)" `
+    (-not ($mot -match 'Test-Path \$outFile')) `
+    "nome de release tem colchete; sem -LiteralPath o Test-Path devolve falso com o arquivo do lado"
+Checar "Motor: a trava DIZ qual dos dois nomes encontrou" `
+    ([bool]($mot -match 'Nome Antigo, Sem o Selo'))
+Checar "Motor: a copia solta da legenda acompanha o nome do arquivo final" `
+    ([bool]($mot -match '\$srtDestino = Join-Path \$OutputDir \(\$nomeSaida \+ "\.srt"\)')) `
+    "com o nome antigo o player nao casa a legenda externa com o filme"
+Checar "Motor: o resultado leva o nome real do arquivo para a janela" `
+    ([bool]($mot -match 'NomeSaida     = \$nomeSaida'))
+# 2.0.17: a copia do log saiu da pasta de saida (ver secao 37).
+Checar "Janela 19.15: remontagem com video extraido usa 8s + 4,5 s/GB e historico novo (remontagem2)" `
+    (($jan -match "RemontagemExtraidoSegFixo = 8") -and ($jan -match "RemontagemSegPorGb   = 4\.5") -and ($jan -match '\$fixo5 = if \(\$pl\.Dovi\)') -and ($jan -match '"remontagem2"'))
+Checar "Janela: o cartao final le o arquivo COM o selo (senao le um caminho que nao existe)" `
+    ([bool]($jan -match '(?s)if \("\$\(\$R\.NomeSaida\)" -ne ""\).{0,200}Get-DescricaoDoFinal'))
+Checar "Motor: o Profile 5 NAO recebe o selo (ele sai .mp4 e nao e BL+RPU)" `
+    ([bool]($mot -match '\$destinoMp4 = Join-Path \$OutputDir \(\$name \+ "\.mp4"\)'))
+
+
+Titulo "50. A BATERIA CONFERE O PROPRIO ENCODING (2.0.2)"
+<#  A 3.36 achou um LF solto na linha 43 do LaFirma_JANELA.ps1 e a bateria
+    passou VERDE, porque a tabela de encoding tinha uma excecao justo nele.
+    Licao 10: uma excecao numa tabela desliga um teste em silencio.
+
+    Hoje a bateria confere o CRLF de tudo que esta em fonte\ - e nao conferia
+    o unico arquivo .ps1 que ela NAO alcanca: ela mesma, que mora em _testes\.
+    Tinha TRES LF soltos quando este teste foi escrito. Nenhum estrago: ela
+    roda igual. Mas o contrato do projeto vale para ela tambem, e um arquivo
+    que cobra dos outros o que nao cumpre e o pior lugar para abrir excecao. #>
+$meuArquivo = $MyInvocation.MyCommand.Path
+if (-not $meuArquivo) { $meuArquivo = $PSCommandPath }
+if ($meuArquivo -and (Test-Path -LiteralPath $meuArquivo)) {
+    $meusBytes = [System.IO.File]::ReadAllBytes($meuArquivo)
+    $temBom = ($meusBytes.Length -ge 3 -and $meusBytes[0] -eq 0xEF -and $meusBytes[1] -eq 0xBB -and $meusBytes[2] -eq 0xBF)
+    $lfSoltos = 0
+    for ($b = 0; $b -lt $meusBytes.Length; $b++) {
+        if ($meusBytes[$b] -eq 0x0A -and ($b -eq 0 -or $meusBytes[$b - 1] -ne 0x0D)) { $lfSoltos++ }
+    }
+    Checar "Bateria: ela mesma esta em CRLF puro (sem LF solto)" ($lfSoltos -eq 0) `
+        ("achei $lfSoltos LF solto(s) neste proprio arquivo")
+    Checar "Bateria: ela mesma tem BOM, como o contrato manda" $temBom
+} else {
+    Pular "Bateria: ela mesma esta em CRLF puro" "nao consegui descobrir o proprio caminho"
+}
+
+Titulo "51. CANCELAR E UM ESTADO, NAO UM EVENTO (14.7 / licao 50)"
+<#  DEFEITO MEDIDO (Diego, 22/09, log das 11:57). Quatro linhas do log dele:
+        11:57:31.281  ACAO: cancelar - flag gravada
+        11:57:31.613  [CANCELANDO] Encerrando o Processo Atual...
+        11:57:31.614  [AVISO] seconv Nao Gerou Legenda. Tentando PgsToSrt
+        11:59:01.092  [OK] Legenda Convertida com Sucesso (PgsToSrt)
+    O [ESC] matou o seconv; a etapa leu a morte dele como falha e disparou a
+    rede de seguranca - PgsToSrt (90s) e depois o Corretor, que chama o
+    seconv de novo. Tres programas iniciados DEPOIS do pedido de parar. Ele
+    teve que fechar a janela na mao.
+
+    Estes testes existem para que nenhuma reserva nova nasca sem a pergunta. #>
+Checar "Motor: existe UM lugar que responde 'ainda vale comecar?'" `
+    ([bool]($mot -match 'function Cancelado-AntesDe')) `
+    "um dono da pergunta, nao a mesma regra repetida em quatro lugares (licao 41)"
+Checar "Motor: e ele so diz sim quando ha cancelamento de verdade" `
+    ([bool]($mot -match '(?s)function Cancelado-AntesDe.{0,2600}if \(-not \$script:CancelamentoSolicitado\) \{ return \$false \}'))
+Checar "Motor: o OCR de reserva (PgsToSrt) pergunta antes de comecar" `
+    ([bool]($mot -match 'Cancelado-AntesDe "O OCR de Reserva \(PgsToSrt\)"')) `
+    "era esta a reserva que rodou 90s depois do ESC"
+Checar "Motor: o Corretor_Legenda pergunta antes de comecar" `
+    ([bool]($mot -match 'Cancelado-AntesDe "A Revisao de Blocos-Lixo \(Corretor_Legenda\)"'))
+Checar "Motor: e o Reocr_Legenda tambem" `
+    ([bool]($mot -match 'Cancelado-AntesDe "O Re-OCR de Falas Curtas \(Reocr_Legenda\)"'))
+Checar "Motor: o Corretor NAO e anunciado antes de a pergunta ser feita" `
+    ([bool]($mot -match '(?s)if \(\$temCorretor -and -not \(Cancelado-AntesDe.{0,200}SaySub "Revisao de blocos-lixo')) `
+    "anunciar uma sub-etapa que nao vai rodar deixa a barra com etapa fantasma"
+Checar "Motor: matar o seconv NAO e mais escrito como falha dele" `
+    ([bool]($mot -match 'O seconv Foi Encerrado Porque Voce Cancelou - Nao Foi Falha Dele')) `
+    "terceiro estado precisa de nome (licao 19): 'eu matei' nao e 'ele falhou'"
+Checar "Janela: o [ESC] recusado diz o MOTIVO REAL, nunca 'nao se aplica ao estado'" `
+    ([bool]($jan -match 'TECLA: Escape recusada - o cancelamento ja foi pedido')) `
+    "o mesmo conserto que o F11 ganhou na 18.22 - licao 46, o defeito voltou por outra tecla"
+Checar "Janela: e ele distingue 'ja estou cancelando' de 'nao ha o que cancelar'" `
+    ([bool]($jan -match 'TECLA: Escape recusada - nao ha conversao em curso para cancelar'))
+
+Titulo "52. O CORRETOR NAO PODE INVENTAR NOME PROPRIO (2.28)"
+<#  DEFEITO MEDIDO (relatorio do Diego, 22/09, Transformers):
+        'All Spark'    -> 'Ali Spark'   (5 vezes)
+        'Tut'          -> 'Tui'
+        'Autobotzinho' -> 'Autoboizinho'
+    O OCR tinha ACERTADO nos tres. Quem estragou fomos nos.
+
+    CAUSA: Repair-FamiliaBarraVertical (troca l/t/| por i) era a UNICA regra
+    do Corretor que nao recebia a lista de nomes proprios. E a protecao nem
+    teria salvo: Get-NomesProprios perguntava com Test-NoDicionario (que acha
+    "all" no dicionario de 1,3M e conclui "palavra conhecida, nao precisa de
+    protecao") enquanto a regra perguntava com Test-PalavraPtBr (que, abaixo
+    de 4 letras, nem consulta esse dicionario e conclui "nunca vi"). Duas
+    funcoes, respostas opostas, mesma palavra - licao 41 num lugar novo. #>
+Checar "Corretor: a regra da barra vertical RECEBE a lista de nomes" `
+    ([bool]($corr -match 'function Repair-FamiliaBarraVertical[\s\S]{0,4000}?param\(\[string\]\$Texto, \$Dicionario, \$Nomes\)')) `
+    "era a unica regra de fora - todas as outras ja recebiam"
+Checar "Corretor: e a chamada passa a lista de verdade" `
+    ([bool]($corr -match 'Repair-FamiliaBarraVertical \$resultado \$Dicionario \$Nomes')) `
+    "receber o parametro e nao passar o argumento e pior que nao ter o parametro"
+Checar "Corretor: nome protegido nao e trocado" `
+    ([bool]($corr -match '\$protegido = \$Nomes\.Contains\(\$nu\)'))
+<#  2.0.2 - ESTE TESTE ERA DE TEXTO E DEIXOU A SABOTAGEM PASSAR.
+    Ele conferia que as palavras "antesTok", "depoisTok" e "bigrama"
+    existiam no fonte. Apaguei a linha do IF que usa as duas e o teste
+    passou verde - porque as atribuicoes e o comentario continuavam la.
+    Licao 45 outra vez: conferir o TEXTO de uma conta nao e conferir a
+    conta. Agora a regra e EXTRAIDA e EXECUTADA contra as frases reais do
+    relatorio do Diego, com um dicionario que reproduz a armadilha: tem
+    "all" (ingles, como o de 1,3M tem) e tem "ali" (portugues). #>
+$corrAst = [System.Management.Automation.Language.Parser]::ParseInput($corr, [ref]$null, [ref]$null)
+$corrTop = $corrAst.EndBlock.Statements
+$corrCorpo = New-Object System.Text.StringBuilder
+foreach ($s in $corrTop) {
+    if ($s -is [System.Management.Automation.Language.TryStatementAst]) { continue }
+    [void]$corrCorpo.AppendLine($s.Extent.Text)
+}
+$corrOk = $true
+try { . ([scriptblock]::Create($corrCorpo.ToString())) } catch { $corrOk = $false }
+Checar "Corretor: as regras dele podem ser extraidas e executadas" $corrOk
+if ($corrOk) {
+    $dicArm = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("all","ali","tui","autoboizinho","nossa","estava","esse","quem","seu","como",
+                     "codigo","rei","tutankamon","pai","ir","vou","pirar","favor","coisa","alguma",
+                     "por","temos","para","onde","nao","que","com","no","o","e","a","de","do")) { [void]$dicArm.Add($w) }
+    $frases = @(
+        'da nossa raca estava no All Spark,',
+        'Com esse All Spark destruido,',
+        'Codigo "Tut", como Rei Tutankamon.',
+        'Quem e o seu Autobotzinho?',
+        'Vou pirar. Por favor, faca alguma coisa, pal.',
+        'Nao temos para onde tr!')
+    $nomesArm = Get-NomesProprios ($frases -join "`n") $dicArm
+
+    <#  As tres que NAO podem mudar sao as tres do relatorio real. A ultima
+        coluna diz QUAL guarda tem que segurar cada uma - se uma guarda cair,
+        a linha dela reprova sozinha. #>
+    $casosCor = @(
+        @{ T = 'da nossa raca estava no All Spark,'  ; Q = "All Spark (nome + bigrama)" },
+        @{ T = 'Codigo "Tut", como Rei Tutankamon.'  ; Q = "Tut (bigrama com Rei)" },
+        @{ T = 'Quem e o seu Autobotzinho?'          ; Q = "Autobotzinho (meio da frase)" })
+    foreach ($c in $casosCor) {
+        $saiu = Repair-FamiliaBarraVertical $c.T $dicArm $nomesArm
+        Checar ("EXECUTANDO: o corretor NAO inventa nome - " + $c.Q) ($saiu -ceq $c.T) `
+            ("virou: " + $saiu)
+    }
+    <#  E o conserto legitimo nao pode ter morrido junto: minuscula continua
+        sendo trocada. Se este par ficar verde sozinho, a guarda virou uma
+        desculpa para nao consertar nada. #>
+    $saiuPal = Repair-FamiliaBarraVertical 'Vou pirar. Por favor, faca alguma coisa, pal.' $dicArm $nomesArm
+    Checar "EXECUTANDO: e continua consertando minuscula ('pal' -> 'pai')" `
+        ($saiuPal -cmatch 'pai') ("saiu: " + $saiuPal)
+    $saiuTr = Repair-FamiliaBarraVertical 'Nao temos para onde tr!' $dicArm $nomesArm
+    Checar "EXECUTANDO: e 'tr' -> 'ir'" ($saiuTr -cmatch 'ir!') ("saiu: " + $saiuTr)
+}
+Checar "Corretor: GUARDA 3 - capitalizada no meio da frase nao tem letra trocada" `
+    ([bool]($corr -match 'if \(-not \$protegido -and -not \$abre\) \{ \$protegido = \$true \}')) `
+    "no relatorio real foram 1 acerto contra 7 estragos - o preco esta escrito no codigo"
+Checar "Corretor: a pergunta do coletor de nomes e a MESMA das regras" `
+    ([bool]($corr -match '(?s)function Get-NomesProprios[\s\S]{0,4000}?if \(Test-PalavraPtBr \$k \$Dicionario\) \{ continue \}')) `
+    "era Test-NoDicionario aqui e Test-PalavraPtBr la - duas respostas para a mesma palavra"
+Checar "Corretor: e o coletor NAO usa mais a funcao que discordava" `
+    (-not ($corr -match '(?s)function Get-NomesProprios[\s\S]{0,4000}?Test-NoDicionario \$k'))
+
+Titulo "53. O CANCELAMENTO PARA NA ENTRADA DE CADA ETAPA (14.8)"
+<#  DEFEITO MEDIDO (Diego, 22/09, log das 18:19):
+        18:19:10  TECLA: Escape
+        18:19:16  [CANCELANDO] Encerrando o Processo Atual...
+        18:19:16  > [5/5] Remontando MKV Final (mkvmerge):
+        18:20:59  [OK] Arquivo Finalizado - 19,05 GB
+        18:20:59  [CANCELADO] Removendo a Saida Parcial...
+        18:20:59  Motor encerrou 103,9s depois do pedido
+    Ele cancelou e o motor montou um MKV de 19 GB - 1m42 - para apagar em
+    seguida. A guarda existia, mas no FIM do episodio: protegia o REGISTRO
+    (nao marcar como concluido), nao o TEMPO dele.
+
+    A 14.7 pos a pergunta nas tres reservas do OCR porque foi o que aquele
+    log mostrou. A porta seguinte era a maior de todas. Licao 37: padrao
+    errado se conserta onde ele MORA, nao so onde doeu. Estes testes cobram
+    a pergunta em TODA etapa, uma por uma - e a lista nao pode encolher. #>
+Checar "Motor: existe o guarda que PARA a etapa (irmao do Cancelado-AntesDe)" `
+    ([bool]($mot -match 'function Parar-SeCancelado'))
+Checar "Motor: e ele lanca o MESMO erro de sempre (cai no mesmo catch que limpa)" `
+    ([bool]($mot -match '(?s)function Parar-SeCancelado.{0,3000}throw "Operacao Cancelada pelo Usuario \(\[ESC\]\)\."')) `
+    "erro novo significa caminho de limpeza novo - e a saida parcial ficaria no disco"
+Checar "Motor: e so para quando ha cancelamento de verdade" `
+    ([bool]($mot -match '(?s)function Parar-SeCancelado.{0,3000}if \(-not \$script:CancelamentoSolicitado\) \{ return \}'))
+foreach ($et in @("A Extracao do Video", "A Conversao do Dolby Vision", "A Conversao de Audio",
+                  "A Conversao da Legenda", "A Remontagem do MKV Final", "A Conferencia do Arquivo Final")) {
+    Checar ("Motor: pergunta antes de comecar - " + $et) `
+        ([bool]($mot -match ('Parar-SeCancelado "' + [regex]::Escape($et) + '"')))
+}
+<#  E a prova de que a pergunta vem ANTES do trabalho, nao depois: em cada
+    etapa o Parar-SeCancelado tem que aparecer antes do SayStep dela. Se
+    alguem mover a chamada para depois, isto reprova. #>
+$ordemOk = $true
+foreach ($par in @(@("A Extracao do Video","\[1/5\]"), @("A Conversao do Dolby Vision","\[2/5\]"),
+                   @("A Conversao de Audio","\[3/5\]"), @("A Conversao da Legenda","\[4/5\]"),
+                   @("A Remontagem do MKV Final","\[5/5\]"))) {
+    $iG = $mot.IndexOf('Parar-SeCancelado "' + $par[0] + '"')
+    $mS = [regex]::Match($mot, 'SayStep "' + $par[1])
+    if ($iG -lt 0 -or -not $mS.Success -or $iG -gt $mS.Index) { $ordemOk = $false }
+}
+Checar "Motor: e a pergunta vem ANTES do anuncio da etapa, em todas" $ordemOk `
+    "perguntar depois de fazer e contabilidade, nao cancelamento"
+Checar "Janela: o censo repinta a FILA, nao so o diagnostico" `
+    ([bool]($jan -match '(?s)Reset-BotaoCenso.{0,2000}Update-Diagnostico.{0,2000}Fill-Fila "el"')) `
+    "a linha de baixo virava laranja e a coluna de cima ficava vermelha na mesma tela"
+
+Titulo "54. REVISAO GERAL 2.0.6 (MOTOR 14.9 / JANELA 19.6 / CORRETOR 2.29)"
+<#  Pedido do Diego (23/09): revisar o codigo inteiro atras de bug e de
+    inconsistencia. Cada achado confirmado tem aqui um teste - e onde da,
+    o teste EXECUTA a regra em vez de procurar o texto dela (licao 45). #>
+
+# ---- Motor: Profile 5 ----
+$iDur = $mot.IndexOf('$duracaoTotal = 0.0')
+$iP5  = $mot.IndexOf('if ($infoDV.Perfil -eq 5) {')
+Checar "Motor: a duracao e lida ANTES do ramo do Profile 5" (($iDur -gt 0) -and ($iP5 -gt 0) -and ($iDur -lt $iP5)) `
+    "o P5 usava a duracao do arquivo anterior da fila (ou zero)"
+Checar "Motor: falha do P5 e FALHOU, como no resto (o resumo so conta FALHOU)" `
+    (-not ($mot -match 'Status = "FALHA"; StatusDV = "P5_MP4"'))
+Checar "Motor: no P5 o catch apaga o .mp4 (e nao um .mkv que nunca existiu)" `
+    ([bool]($mot -match '(?s)\$outFile = \$destinoMp4\s*\r?\n\s*Parar-SeCancelado "O Remux do Profile 5"\s*\r?\n\s*\$p5 = Convert-Perfil5ParaMp4'))
+Checar "Motor: ESC durante o P5 vira CANCELADO e para o lote (nao cai no continue)" `
+    ([bool]($mot -match '(?s)\$tempoP5 = \(Get-Date\) - \$tIni\s*\r?\n\s*if \(\$script:CancelamentoSolicitado\) \{ throw'))
+Checar "Motor: o P5 tem status proprio de audio/legenda (nao finge TrueHD e OCR)" `
+    ([bool]($mot -match 'StatusDV = "P5_MP4"; StatusAudio = "P5";[^\r\n]*StatusLegenda = "P5";'))
+Checar "Motor: o cartao do console tem ramo proprio do P5 (MPEG-4, nao Matroska)" `
+    ([bool]($mot -match '(?s)if \(\$r\.StatusDV -eq "P5_MP4"\) \{.{0,600}MPEG-4 \(\.mp4\).{0,80}continue'))
+
+# ---- Motor: processo que nasce depois do ESC ----
+$totWait = 0; $totGuard = 0
+foreach ($fn in @("Invoke-ProcessoComBarraEstimada","Invoke-FfmpegComBarra")) {
+    $mF = [regex]::Match($mot, '(?s)function ' + $fn + ' \{.*?\r?\n\}\r?\n')
+    if ($mF.Success) {
+        $totWait  += ([regex]::Matches($mF.Value, '\$proc\.WaitForExit\(\)')).Count
+        $totGuard += ([regex]::Matches($mF.Value, 'Encerrar-SeCancelado \$proc\s*[^\r\n]*\r?\n\s*\$proc\.WaitForExit\(\)')).Count
+    }
+}
+Checar "Motor: todo WaitForExit das barras e precedido de Encerrar-SeCancelado" (($totWait -ge 2) -and ($totWait -eq $totGuard)) `
+    "achei $totWait espera(s) e $totGuard guarda(s)"
+$mEnc = [regex]::Match($mot, '(?s)function Encerrar-SeCancelado\(\$Proc\) \{.*?\r?\n\}\r?\n')
+$encOk = $false; $encNaoMata = $false
+if ($mEnc.Success) {
+    try {
+        . ([scriptblock]::Create($mEnc.Value))
+        function Matar-ArvoreDoProcesso($x) { return 0 }
+        if (-not ('DdvtJob' -as [type])) { Add-Type -TypeDefinition 'public static class DdvtJob { public static void Retomar(System.IntPtr h) { } }' }
+        $exeSleep = if ($IsWindows -or $env:OS -eq "Windows_NT") { "powershell.exe" } else { "sleep" }
+        $argSleep = if ($exeSleep -eq "sleep") { "30" } else { "-NoProfile -Command Start-Sleep 30" }
+        $script:CancelamentoSolicitado = $false
+        $spArgs = @{ FilePath = $exeSleep; ArgumentList = $argSleep; PassThru = $true; ErrorAction = "Stop" }
+        if ($exeSleep -ne "sleep") { $spArgs.WindowStyle = "Hidden" }
+        $p1 = Start-Process @spArgs
+        Encerrar-SeCancelado $p1
+        Start-Sleep -Milliseconds 300
+        $encNaoMata = -not $p1.HasExited
+        $script:CancelamentoSolicitado = $true
+        Encerrar-SeCancelado $p1
+        $encOk = $p1.WaitForExit(5000)
+        $script:CancelamentoSolicitado = $false
+        try { if (-not $p1.HasExited) { $p1.Kill() } } catch { }
+    } catch { $encOk = $false; $script:CancelamentoSolicitado = $false }
+}
+Checar "Motor: EXECUTADO - sem ESC o processo segue vivo" $encNaoMata
+Checar "Motor: EXECUTADO - com ESC o processo que ja nasceu e morto na hora" $encOk `
+    "antes o laco via a flag, saia, e o WaitForExit esperava o processo inteiro"
+
+# ---- Motor: .srt orfao ----
+Checar "Motor: o .srt copiado so vira 'nosso' depois da copia dar certo" `
+    ([bool]($mot -match '(?s)Copy-Item -LiteralPath \$srtPtBr -Destination \$srtDestino -Force -ErrorAction Stop\s*\r?\n\s*\$srtCopiaFinal = \$srtDestino'))
+Checar "Motor: cancelado ou falho, o .srt deste episodio sai junto com o .mkv" `
+    (([regex]::Matches($mot, 'if \(\$srtCopiaFinal -and \(Test-Path -LiteralPath \$srtCopiaFinal\)\) \{ Remove-Item')).Count -eq 2)
+Checar "Motor: e ele e zerado a cada episodio (nunca apaga o do anterior)" `
+    ([bool]($mot -match 'foreach \(\$f in \$files\) \{\s*\r?\n\s*\$srtCopiaFinal = \$null'))
+
+# ---- Janela ----
+Checar "Janela: Atualizar/F5 durante a conversao NAO mata o lote" `
+    ([bool]($jan -match '(?s)function Invoke-Reler \{.{0,300}\$Estado\.Atual -eq "rodando" -or \$Estado\.Atual -eq "pausado".{0,120}return'))
+Checar "Janela: medicao nao renasce no meio da conversao (el_fim atrasado)" `
+    ([bool]($jan -match '(?s)function Start-Medicao \{\s*\r?\n\s*if \(\$script:MedindoEL\) \{ return \}.{0,300}\$Estado\.Atual -eq "rodando" -or \$Estado\.Atual -eq "pausado"\) \{ return \}'))
+$mSM = [regex]::Match($jan, '(?s)function Start-Motor \{.*?(\$guardar = New-Object System\.Collections\.ArrayList.*?foreach \(\$g in \$guardar\) \{ \$script:FilaMsg\.Enqueue\(\$g\) \})')
+$drenoOk = $false
+if ($mSM.Success) {
+    try {
+        $script:FilaMsg = New-Object 'System.Collections.Concurrent.ConcurrentQueue[object]'
+        foreach ($t in @("pct","etapa","el_fim","log","censo_fim","el","fim")) { $script:FilaMsg.Enqueue(@{ T = $t }) }
+        $descarte = $null
+        . ([scriptblock]::Create($mSM.Groups[1].Value))
+        $sobrou = @(); $x = $null
+        while ($script:FilaMsg.TryDequeue([ref]$x)) { $sobrou += "$($x.T)" }
+        $drenoOk = (($sobrou -join ",") -eq "el_fim,censo_fim,el")
+    } catch { $drenoOk = $false }
+}
+Checar "Janela: EXECUTADO - Start-Motor limpa o motor velho e GUARDA el_fim/censo_fim" $drenoOk `
+    "esvaziar sem olhar perdia a unica mensagem que fecha o runspace (18.08)"
+Checar "Janela: o cartao do P5 tem selo proprio" ([bool]($jan -match '"P5_MP4"\s*\{ \$selos \+= ,@\("Dolby Vision Profile 5 → MP4 - REMUXADO", "ok"\) \}'))
+Checar "Janela: e o container do P5 e MPEG-4" ([bool]($jan -match 'MPEG-4 \(\.mp4\)  \|  \{0\}'))
+
+# ---- Idioma: regras de padrao em ordem ----
+$regrasT = New-Object System.Collections.ArrayList
+foreach ($l in ($idi -split "`r?`n")) {
+    if ($l.StartsWith("~")) { $pp = $l.Substring(1) -split "`t", 2; if ($pp.Count -eq 2) { [void]$regrasT.Add($pp) } }
+}
+function Aplicar-RegrasT([string]$t) { foreach ($r in $regrasT) { try { $t = [regex]::Replace($t, $r[0], $r[1]) } catch { } }; return $t }
+$trA = Aplicar-RegrasT "Áudio TrueHD Mantido a Pedido - CONVERSÃO DESLIGADA"
+Checar "Idioma: EXECUTADO - selo 'Mantido a Pedido' sai inteiro em ingles" ($trA -eq "Audio TrueHD Kept on Request - CONVERSION OFF") "saiu: $trA"
+foreach ($k in @("Áudio → E-AC-3 640k - CONVERTIDO","Áudio → E-AC-3[ATMOS] 1152k - CONVERTIDO",
+                 "Legenda PT-BR [.SRT] - REAPROVEITADA","Legenda PT-BR [.SRT] - DESCARTADA A PEDIDO",
+                 "Legenda - ERRO","Dolby Vision Profile 5 → MP4 - REMUXADO",
+                 "O censo anterior ainda está encerrando - dá para pedir de novo em alguns segundos.")) {
+    Checar ("Idioma: '{0}' tem traducao" -f $k) ([bool]($idi -match ("(?m)^" + [regex]::Escape($k) + "`t")))
+}
+
+# ---- Corretor: EXECUTADO ----
+if ($corrOk) {
+    $dic54 = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("ele","comprou","um","novo","os","rumores","estavam","certos","lutou","com","ontem",
+                     "vamos","ir","embora","eu","estava","foi","agora","carro","ali")) { [void]$dic54.Add($w) }
+    $nom54 = New-Object 'System.Collections.Generic.HashSet[string]'
+    $script:NomesCamel = New-Object 'System.Collections.Generic.HashSet[string]'
+    $c54 = @(
+        @{ E = "Ele comprou um OnStar novo.";            S = "Ele comprou um OnStar novo.";           Q = "Regra C: CamelCase que aparece uma vez" },
+        @{ E = "OS rumores estavam certos.";             S = "Os rumores estavam certos.";            Q = "Regra D: fala nao perde a maiuscula" },
+        @{ E = "Ele lutou com Muhammad Ali ontem.";      S = "Ele lutou com Muhammad Ali ontem.";     Q = "familia Ir: nome composto" },
+        @{ E = "Vamos Ir embora agora.";                 S = "Vamos ir embora agora.";                Q = "familia Ir: o conserto certo continua (controle)" },
+        @{ E = "Eu estava com ele`nSam!`nfoi embora agora"; S = "Eu estava com ele`nSam!`nfoi embora agora"; Q = "Regra X: fala curta com nome" },
+        @{ E = "Eu estava com ele`n- Sam!`nfoi embora agora"; S = "Eu estava com ele`n- Sam!`nfoi embora agora"; Q = "Regra X: fala de dialogo" })
+    foreach ($c in $c54) {
+        $out = ""
+        try { $out = Repair-ErrosClassicos $c.E $dic54 $nom54 } catch { $out = "ERRO: " + $_.Exception.Message }
+        Checar ("Corretor: EXECUTADO - " + $c.Q) ($out -ceq $c.S) ("saiu: " + ($out -replace "`n", " / "))
+    }
+} else {
+    Pular "Corretor: casos executados da 2.29" "as regras nao puderam ser extraidas"
+}
+
+Titulo "55. NADA FICA PARA DEPOIS (2.0.6, segunda passada)"
+<#  "nao e pra deixar nada pra depois e pra fazer agora" (Diego, 23/09).
+    O que a primeira passada tinha adiado, com teste cada um. #>
+
+# ---- Motor ----
+Checar "Motor: a pausa congela a ARVORE (netos primeiro), nao so o filho" `
+    ([bool]($mot -match '(?s)function Invoke-NaArvore\(\$Proc, \[bool\]\$Pausar\).{0,900}foreach \(\$a in \$alvos\) \{ try \{ \[DdvtJob\]::Pausar\(\$a\.Handle\) \} catch \{ \} \}\s*\r?\n\s*try \{ \[DdvtJob\]::Pausar\(\$Proc\.Handle\)')) `
+    "o tesseract debaixo do Corretor seguia rodando com a tela dizendo PAUSADO"
+Checar "Motor: Suspender e Retomar passam pela arvore" `
+    (($mot -match 'function Suspender-Processo\(\$Proc\) \{ Invoke-NaArvore \$Proc \$true \}') -and ($mot -match 'function Retomar-Processo\(\$Proc\)\s+\{ Invoke-NaArvore \$Proc \$false \}'))
+$iMp4 = $mot.IndexOf('$mp4Existente = Join-Path $OutputDir ($name + ".mp4")')
+$iWork = $mot.IndexOf('$WorkDir = Join-Path $f.DirectoryName ("_ddvt_temp_" + $name)')
+Checar "Motor: o .mp4 do P5 ja existente e visto ANTES do diagnostico" (($iMp4 -gt 0) -and ($iMp4 -lt $iWork))
+Checar "Motor: ESC durante o OCR diz cancelado, nao 'OCR nao gerou legenda'" `
+    ([bool]($mot -match '(?s)\} elseif \(\$script:CancelamentoSolicitado\) \{.{0,200}Interrompido pelo Cancelamento.{0,200}\} else \{\s*\r?\n\s*\$motivoLegenda = "Codigo'))
+
+# ---- Janela ----
+Checar "Janela: as consultas de processo tem teto de tempo (thread da tela)" `
+    (([regex]::Matches($jan, 'Get-CimInstance Win32_Process -OperationTimeoutSec 3')).Count -eq 2)
+$mVel = [regex]::Match($jan, '(?s)\$script:CacheVelocidade = @\{\}\s*\r?\nfunction Measure-VelocidadeOrigem\(\[string\]\$Arquivo\) \{.*?\r?\n\}\r?\n')
+$velOk = $false
+if ($mVel.Success) {
+    try {
+        . ([scriptblock]::Create($mVel.Value))
+        $script:ChamadasVel = 0
+        function Measure-VelocidadeOrigemReal([string]$Arquivo) { $script:ChamadasVel++; return 123.0 }
+        $v1 = Measure-VelocidadeOrigem "C:\x\Filme.mkv"; $v2 = Measure-VelocidadeOrigem "C:\X\filme.MKV"
+        $velOk = ($v1 -eq 123.0 -and $v2 -eq 123.0 -and $script:ChamadasVel -eq 1)
+    } catch { $velOk = $false }
+}
+Checar "Janela: EXECUTADO - a medida do disco e lida uma vez por arquivo" $velOk "72 MB lidos na thread da tela a cada clique"
+Checar "Janela: o motivo da pasta vazia sobrevive ao Update-Disco" `
+    (($jan -match 'elseif \(\$script:MotivoVazio\) \{ Traduzir-Frase \$script:MotivoVazio \}') -and ($jan -match '\$script:MotivoVazio = "\$\(\$m\.Motivo\)"'))
+Checar "Janela: e ele e zerado a cada leitura nova" ([bool]($jan -match '\$script:Lendo = \$true\s*\r?\n\s*\$script:MotivoVazio = ""'))
+Checar "Janela: a dica do censo nao manda ligar a chave com o botao aceso" `
+    ([bool]($jan -match 'if \(-not \$script:MedirELLigado -and -not \(Test-PodeCenso \$v\)\)'))
+Checar "Janela: 'A Seguir' traduz cada pedaco UMA vez" ([bool]($jan -match '\$UI\.lblASeguir\.Text = \(Traduzir-Frase "A Seguir: "\) \+ \(Traduzir-Frase \$prox\)'))
+Checar "Janela: fim da espera pela medicao reacende o Iniciar" `
+    ([bool]($jan -match '(?s)Set-BotaoIniciar \(@\(Get-Marcados\)\.Count -gt 0\)\s*\r?\n\s*Escrever-Log "INICIAR: a medicao terminou \(ou foi cancelada\)'))
+
+# ---- Idioma ----
+$vistos = New-Object System.Collections.Hashtable ([System.StringComparer]::Ordinal); $dupIdi = @()
+foreach ($l in ($idiAgora = (Get-Content -Raw -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt")) -split "`r?`n")) {
+    if ($l -eq "" -or $l.StartsWith("#") -or $l.StartsWith("~") -or -not $l.Contains("`t")) { continue }
+    $kk = ($l -split "`t", 2)[0].Trim()
+    if ($vistos.ContainsKey($kk)) { $dupIdi += $kk } else { $vistos[$kk] = 1 }
+}
+Checar "Idioma: nenhuma chave duplicada (caixa conta: FILA e Fila sao duas)" ($dupIdi.Count -eq 0) (($dupIdi | Select-Object -First 3) -join "; ")
+$regrasV = New-Object System.Collections.ArrayList
+foreach ($l in ($idiAgora -split "`r?`n")) { if ($l.StartsWith("~")) { $pp = $l.Substring(1) -split "`t", 2; if ($pp.Count -eq 2) { [void]$regrasV.Add($pp) } } }
+$tv = "Nenhum .mkv aqui, mas ha 3 em subpastas (2 subpasta(s)). A leitura olha so o primeiro nivel."
+foreach ($r in $regrasV) { try { $tv = [regex]::Replace($tv, $r[0], $r[1]) } catch { } }
+Checar "Idioma: EXECUTADO - o motivo da pasta vazia sai em ingles" ($tv -eq "No .mkv here, but there are 3 in subfolders (2 subfolder(s)). Only the first level is read.") "saiu: $tv"
+
+Checar "Janela: o mapa de traducao e EXATO (Ordinal) - FILA e Fila nao se sobrescrevem" `
+    ([bool]($jan -match '\$script:MapaEN = New-Object System\.Collections\.Hashtable \(\[System\.StringComparer\]::Ordinal\)'))
+$mapaOk = $false; $mapaDet = ""
+try {
+    $astM = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    foreach ($nf in @("Carregar-Idioma","Traduzir")) {
+        $fd = @($astM.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq $nf }, $true))
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+    $script:PastaScript = $Fonte
+    Carregar-Idioma | Out-Null
+    $script:Lang = "EN"
+    $a1 = Traduzir "Fila"; $a2 = Traduzir "FILA"; $a3 = Traduzir "Lendo a pasta..."; $a4 = Traduzir "Lendo a Pasta..."
+    $mapaDet = "$a1 | $a2 | $a3 | $a4"
+    $mapaOk = ($a1 -ceq "Queue") -and ($a2 -ceq "QUEUE") -and ($a3 -ceq "Reading the folder...") -and ($a4 -ceq "Reading the Folder...")
+    $script:Lang = "PT"
+} catch { $mapaOk = $false; $mapaDet = $_.Exception.Message; $script:Lang = "PT" }
+Checar "Janela: EXECUTADO - Fila->Queue e FILA->QUEUE (antes a segunda apagava a primeira)" $mapaOk $mapaDet
+
+# ---- Corretor / Reocr: EXECUTADO ----
+if ($corrOk) {
+    $dicE = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("tol","ne","pas")) { [void]$dicE.Add($w) }
+    $outE = ""
+    try { $outE = Repair-ErrosClassicos "Je ne sais pas, toi." $dicE (New-Object 'System.Collections.Generic.HashSet[string]') } catch { $outE = "ERRO" }
+    Checar "Corretor: EXECUTADO - bloco em outra lingua nao recebe troca l/i (toi)" ($outE -ceq "Je ne sais pas, toi.") "saiu: $outE"
+    $srtAl = "1`n00:00:01,000 --> 00:00:02,000`nAl`n`nquebrado aqui`n`n2`n00:00:03,000 --> 00:00:04,000`nOutra fala`n"
+    $repAl = ""
+    try { $repAl = Repair-EstruturaSrt $srtAl } catch { $repAl = "ERRO" }
+    Checar "Corretor: EXECUTADO - nome de duas letras sobrevive ao conserto de bloco" ([bool]($repAl -cmatch "(?m)^Al$")) ("saiu: " + ($repAl -replace "`n", " / "))
+    $repLixo = ""
+    try { $repLixo = Repair-EstruturaSrt ("1`n00:00:01,000 --> 00:00:02,000`nrn`n`nfala certa`n") } catch { $repLixo = "ERRO" }
+    Checar "Corretor: EXECUTADO - e o lixo minusculo ('rn') continua saindo (controle)" (-not ($repLixo -cmatch "(?m)^rn$"))
+}
+$reoTxt = Get-Content -Raw -LiteralPath (Join-Path $Fonte "Reocr_Legenda.ps1")
+$mParse = [regex]::Match($reoTxt, '(?s)function Parse-Srt \{.*?\r?\n\}\r?\n')
+$mConv  = [regex]::Match($reoTxt, '(?s)function Converter-TempoParaMs \{.*?\r?\n\}\r?\n')
+$parseOk = $false; $parseDet = ""
+if ($mParse.Success -and $mConv.Success) {
+    try {
+        . ([scriptblock]::Create($mConv.Value)); . ([scriptblock]::Create($mParse.Value))
+        $bl = @(Parse-Srt "1`n00:00:01,000 --> 00:00:02,000`nPrimeira fala`n`nlinha orfa`n`n2`n00:00:03,000 --> 00:00:04,000`nSegunda fala`n")
+        $parseDet = "blocos: $($bl.Count)"
+        $parseOk = ($bl.Count -eq 2 -and $bl[1].TimingOk -and $bl[1].Texto -eq "Segunda fala" -and $bl[0].Texto -match "linha orfa")
+    } catch { $parseOk = $false; $parseDet = $_.Exception.Message }
+}
+Checar "Reocr: EXECUTADO - linha orfa volta para o bloco de cima e nao come o tempo do de baixo" $parseOk $parseDet
+Checar "Reocr: nome curto decidido pela lista fechada, como no Corretor" `
+    ([bool]($reoTxt -match 'if \(\$k\.Length -le 3\) \{ if \(Test-CurtaComum \$k\) \{ continue \} \}'))
+
+# ---- Documentos ----
+$comoUsar = Get-Content -Raw -LiteralPath (Join-Path $Fonte "COMO_USAR_PT.txt")
+$howTo    = Get-Content -Raw -LiteralPath (Join-Path $Fonte "HOW_TO_USE_EN.txt")
+$faqPt    = Get-Content -Raw -LiteralPath (Join-Path $Fonte "FAQ_PT.txt")
+$faqEn    = Get-Content -Raw -LiteralPath (Join-Path $Fonte "FAQ_EN.txt")
+Checar "Docs: COMO_USAR e HOW_TO_USE dizem o selo [BL+RPU] do nome final" (($comoUsar -match '\[BL\+RPU\]') -and ($howTo -match '\[BL\+RPU\]'))
+Checar "Docs: os dois explicam F11 e F12, e a regra da cor" (($comoUsar -match 'CENSO COMPLETO \[F11\]') -and ($comoUsar -match 'O CENSO INFORMA, NUNCA MUDA A COR') -and ($howTo -match 'FULL CENSUS \[F11\]') -and ($howTo -match 'NEVER CHANGES THE COLOUR'))
+Checar "Docs: HOW_TO_USE nao usa rotulo de tela em portugues" (-not ($howTo -match '"(Fila|Faixas do Vídeo|Iniciar F1|Atualizar|Ferramentas|Marque o vídeo p/ editar|Convertendo · Etapa n/5|Deve Terminar[^"]*)"'))
+Checar "Docs: FAQ EN e PT falam a mesma coisa na secao 4 (lista por MKV)" (($faqPt -match 'QUEM PERDE ALGUMA COISA, EM ARQUIVO MKV') -and ($faqEn -match 'WHO DOES LOSE SOMETHING, IN AN MKV FILE') -and ($faqEn -match 'Chromecast with Google TV'))
+Checar "Docs: as duas FAQs explicam o censo e a EULA" (($faqPt -match 'O CENSO COMPLETO \[F11\]') -and ($faqEn -match 'THE FULL CENSUS \[F11\]') -and ($faqPt -match 'EULA') -and ($faqEn -match 'EULA'))
+# 4.7: a versao vem da JANELA (a 4.6 tinha "2.0.9" escrito a mao - envelhecia a cada entrega)
+$verAppDoc = [regex]::Match($jan, '\$APP_VERSAO = "([\d.]+)"').Groups[1].Value
+Checar "Docs: cabecalho do COMO_USAR na versao de agora ($verAppDoc)" (($verAppDoc -ne "") -and ($comoUsar -match ('Instalador ' + [regex]::Escape($verAppDoc) + '\s')))
+Checar "Docs: e o do HOW_TO_USE tambem ($verAppDoc)" (($verAppDoc -ne "") -and ($howTo -match ('Installer ' + [regex]::Escape($verAppDoc) + '\s')))
+Checar "Docs: os dois manuais dao a tecla do F3 e do F4" (($comoUsar -match '\[F3\] Abrir') -and ($comoUsar -match '\[F4\] Abrir') -and ($howTo -match '\[F3\] Open') -and ($howTo -match '\[F4\] Open'))
+Checar "Docs: nenhum manual/FAQ promete censo em '5x' a amostra (medido: 22x no Ryan)" (-not (($comoUsar + $howTo + $faqPt + $faqEn) -match '5x o tempo da amostra|5x the sample time'))
+
+Titulo "56. O QUE OS LOGS DE 20 DIAS MOSTRARAM (2.0.7)"
+<#  Releitura dos 128 logs de 04/09 a 22/09. Cada item aqui e um defeito que
+    aparece NOS LOGS DELE, com a linha do log no comentario do codigo. #>
+
+# ---- censo -> motor -> rotulo ----
+Checar "Janela: o censo vai para o motor como argumento (como as escolhas manuais)" `
+    (($jan -match 'param\(\$EscolhasDaJanela, \$CensosDaJanela\)') -and ($jan -match '\$null = \$ps\.AddArgument\(\$censos\)'))
+Checar "Janela: e o motor recebe depois do preparo (nome proprio, nao e apagado)" `
+    ([bool]($jan -match '\$script:CensosDoFilme = \$CensosDaJanela'))
+Checar "Motor: com censo, o cabecalho continua NAO RECOMENDADA e o censo vira numero (pedido do Diego, 2.0.9)" `
+    ([bool]($mot -match '(?s)if \(\$censoArq -and \[int\]\$censoArq\.Cenas -gt 0\) \{.{0,900}\[CONVERSAO NAO RECOMENDADA\].{0,300}Censo do filme inteiro'))
+Checar "Nenhum rotulo 'PERDA EM' na tela, no motor, no cartao ou no idioma" `
+    ((-not ($mot -match 'CensoTextoArquivo = \("PERDA')) -and (-not ($jan -match '\$rotPerda')) -and (-not ($jan -match 'Complex FEL - " \+')) -and (-not ((Get-Content -Raw -LiteralPath (Join-Path $Fonte "IDIOMA_EN.txt")) -match 'PERDA EM')))
+Checar "Janela: o cartao volta a dizer 'Complex FEL - CONVERSAO NAO RECOMENDADA'" ([bool]($jan -match '(?s)"EXPANDE"\s*\{.{0,200}?\$selos \+= ,@\("Complex FEL - CONVERSÃO NÃO RECOMENDADA", "err"\)'))
+
+# ---- legenda: frase que nao nega o numero ----
+Checar "Motor: EXCELENTE nao diz mais 'nenhuma falha' ao lado do numero de defeitos" `
+    ((-not ($mot -match 'nenhuma falha encontrada, pode assistir')) -and (-not ($mot -match 'Say "        Nenhum defeito detectavel')))
+Checar "Janela: nem o cartao ('Nenhum defeito detectavel' com '1 falha em 1832')" (-not ($jan -match '"EXCELENTE" \{ \$acao = "Nenhum defeito'))
+Checar "Motor: o Reocr nao anuncia mais um exemplo FIXO ('INF TOL' -> 'Nao!' em todo filme)" (-not ($mot -match "SayOk .{0,120}ex: 'INF TOL'"))
+
+# ---- seconv ----
+Checar "Motor: seconv so roda quando nao ha PgsToSrt (recusado em 7 de 7 filmes)" `
+    (($mot -match '\$seconvPrimeiro = \$temSeconv -and -not \$temOcr') -and ($mot -match '\$viaSeconv = \$false\s*\r?\n\s*if \(\$seconvPrimeiro\)'))
+Checar "Motor: e o Corretor nao chama o seconv de novo como 2a opiniao" ([bool]($mot -match 'if \(\$script:SeconvRecusadoNesteArquivo -or -not \$seconvPrimeiro\) \{ \$argsCorretor \+= "-PularSegundaOpiniao" \}'))
+Checar "Motor: e o aviso 'seconv nao gerou' so aparece se ele rodou" ([bool]($mot -match '(?s)nunca fica sem nada\.\s*\r?\n\s*if \(\$seconvPrimeiro\) \{'))
+
+# ---- calibragem ----
+Checar "Janela: etapa cancelada nao grava calibragem (TROTF 00:45: fator 0,30)" `
+    ([bool]($jan -match 'if \(\$pesoDaEtapa -gt 0 -and \$liquido -ge 2 -and -not \$script:Controle\.Cancelar\)'))
+Checar "Janela: a pausa sai do tempo do arquivo (GoT 22:33: +44,6% gravado)" `
+    (($jan -match '\$seg = \(\(Get-Date\) - \$Motor\.T0Video\)\.TotalSeconds - \[double\]\$Motor\.PausadoVideo') -and ($jan -match '\$Motor\.PausadoVideo = \[double\]\$Motor\.PausadoVideo \+ \$dur') -and ($jan -match '\$Motor\.T0Video = Get-Date\s*\r?\n\s*\$Motor\.PausadoVideo = 0\.0'))
+
+# ---- medicao velha ----
+Checar "Janela: a medicao para quando a rodada dela deixa de ser a viva" `
+    (($jan -match 'if \(\$Controle\.PararMedicao -or \(\[int\]\$Controle\.MedSerieViva -ne \[int\]\$Serie\)\) \{ break \}') -and
+     (([regex]::Matches($jan, '\$script:Controle\.MedSerieViva = \[int\]\$script:MedSerie')).Count -eq 2))
+
+# ---- versao ----
+$mVer = [regex]::Match($jan, '(?s)\$APP_VERSAO = "([\d.]+)"')
+$verOk = $false
+try {
+    $APP_VERSAO = $mVer.Groups[1].Value; $vArq = "1.9.3"
+    if ([version]$vArq -gt [version]$APP_VERSAO) { $APP_VERSAO = $vArq }
+    $verOk = ($APP_VERSAO -eq $mVer.Groups[1].Value)
+} catch { }
+Checar "Janela: o titulo nao volta mais para o VERSAO.txt velho (v1.9.3 por 25 builds)" `
+    ($verOk -and ($jan -match 'if \(\[version\]\$vArq -gt \[version\]\$APP_VERSAO\) \{ \$APP_VERSAO = \$vArq \}'))
+$caminhoIss = Join-Path (Split-Path -Parent $Fonte) "LaFirma_Setup.iss"
+$iss = $null
+if (Test-Path -LiteralPath $caminhoIss) { $iss = Get-Content -Raw -LiteralPath $caminhoIss }
+if ($iss) {
+    $mIss = [regex]::Match($iss, '#define Versao\s+"([\d.]+)"')
+    Checar "Janela: e o numero embutido e o mesmo do instalador" ($mIss.Success -and $mIss.Groups[1].Value -eq $mVer.Groups[1].Value) ("iss " + $mIss.Groups[1].Value + " / janela " + $mVer.Groups[1].Value)
+}
+
+# ---- Corretor 2.30: EXECUTADO com o dicionario "sujo" de verdade ----
+if ($corrOk) {
+    $dicSujo = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("igual","um","gps","da","onstar","ainda","esta","aqui","es","la","ia","casa","del","chicas","en","fuego","ele")) { [void]$dicSujo.Add($w) }
+    $nomV = New-Object 'System.Collections.Generic.HashSet[string]'
+    $script:NomesCamel = New-Object 'System.Collections.Generic.HashSet[string]'
+    $script:MinusculasDoArquivo = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("ainda","esta","aqui","igual","um","da")) { [void]$script:MinusculasDoArquivo.Add($w) }
+    $o1 = ""; try { $o1 = Repair-ErrosClassicos "- Igual a um GPS, da OnStar!" $dicSujo $nomV } catch { $o1 = "ERRO" }
+    Checar "Corretor: EXECUTADO - 'da OnStar' fica, mesmo com 'onstar' no dicionario" ($o1 -ceq "- Igual a um GPS, da OnStar!") "saiu: $o1"
+    $o2 = ""; try { $o2 = Repair-ErrosClassicos "Ele AiNda esta aqui." $dicSujo $nomV } catch { $o2 = "ERRO" }
+    Checar "Corretor: EXECUTADO - 'AiNda' continua virando 'ainda' (controle)" ($o2 -ceq "Ele ainda esta aqui.") "saiu: $o2"
+    $o3 = ""; try { $o3 = Repair-ErrosClassicos "Es la casa del chicas en fuego." $dicSujo $nomV } catch { $o3 = "ERRO" }
+    Checar "Corretor: EXECUTADO - fala em espanhol nao vira 'Es ia casa'" ($o3 -ceq "Es la casa del chicas en fuego.") "saiu: $o3"
+}
+
+Titulo "57. O SECONV SAIU DO INSTALADOR (2.0.7)"
+if ($iss) {
+    Checar "Setup: nenhum ramo depende mais do seconv empacotado" (-not ($iss -match 'TemSeconvLocal'))
+    Checar "Setup: tools\SubtitleEdit fica fora do pacote pelos Excludes (nada para apagar a mao)" ([bool]($iss -match 'Excludes: "[^"]*tools\\SubtitleEdit\\\*'))
+    Checar "Setup: a atualizacao apaga a pasta velha do seconv" ([bool]($iss -match '\[InstallDelete\]\s*\r?\n(;[^\r\n]*\r?\n)*Type: filesandordirs; Name: "\{app\}\\tools\\SubtitleEdit"'))
+    Checar "Setup: nao exige mais a libSkiaSharp.dll" (-not ($iss -match 'SkiaDll'))
+}
+Checar "Janela: o topo mostra cinco ferramentas, sem seconv" ([bool]($jan -match '\$ordem = @\("dovi_tool", "DeeZy", "PgsToSrt", "Tesseract", "mkvmerge"\)'))
+Checar "Janela: e o painel de ferramentas nao lista mais o seconv" (-not ($jan -match 'Chip = "seconv"'))
+$docsSem = $true; $docsQuem = @()
+foreach ($d in @("COMO_USAR_PT.txt","HOW_TO_USE_EN.txt","FAQ_PT.txt","FAQ_EN.txt")) {
+    $t = Get-Content -Raw -LiteralPath (Join-Path $Fonte $d)
+    if ($t -match 'SubtitleEdit|SkiaSharp|seconv\.exe') { $docsSem = $false; $docsQuem += $d }
+}
+Checar "Docs: nenhum manual manda procurar o seconv/SubtitleEdit" $docsSem ($docsQuem -join ", ")
+
+Titulo "58. O INICIAR QUEBROU NA 2.0.7 (teste do Diego, 23/09 01:55)"
+<#  "Os tipos de argumento nao correspondem" em foreach ($vc in @($script:Videos)).
+    @() em cima de List[object] estoura - no 5.1 e no 7. Nenhum teste EXECUTAVA
+    o bloco do censo do Start-Motor; so conferia o texto. Agora executa. #>
+Checar "Janela: nenhum @(`$script:Videos) (List[object] estoura dentro de @())" (-not ($jan -match '@\(\$script:Videos\)'))
+$mCen = [regex]::Match($jan, '(?s)(\$censos = @\{\}\s*\r?\n.*?\r?\n    \}\r?\n)')
+$cenOk = $false; $cenDet = ""
+if ($mCen.Success) {
+    try {
+        $script:Videos = New-Object System.Collections.Generic.List[object]
+        $script:Videos.Add([pscustomobject]@{ Caminho = "C:\a.mkv"; CensoFeito = $false; CensoCenas = 0; CensoAcima = 0; ELpctAcima = 0.0; CensoPico = 0.0 })
+        $script:Videos.Add([pscustomobject]@{ Caminho = "C:\b.mkv"; CensoFeito = $true; CensoCenas = 2225; CensoAcima = 15; ELpctAcima = 0.67; CensoPico = 1555.0 })
+        . ([scriptblock]::Create($mCen.Groups[1].Value))
+        $cenOk = ($censos.Count -eq 1 -and [int]$censos["C:\b.mkv"].Acima -eq 15)
+    } catch { $cenOk = $false; $cenDet = $_.Exception.Message }
+} else { $cenDet = "bloco nao encontrado" }
+Checar "Janela: EXECUTADO - o bloco do censo do Start-Motor roda com a List de verdade" $cenOk $cenDet
+
+Titulo "59. O TESTE DE ACEITE DA 2.0.9 E A AUDITORIA LINHA A LINHA (2.0.10)"
+<#  Logs do Diego de 23/09 02:14 e 02:40 (2.0.9) e a releitura inteira dos
+    fontes. Cada item e um defeito visto no log/print dele ou provado no codigo. #>
+# ---- log ----
+Checar "Motor: o cancelamento nao sai mais '[CANCELADO] [CANCELANDO]' (log 02:42:20)" `
+    ((-not ($mot -match 'SayStop "\[CANCELANDO\]')) -and ($mot -match 'SayStop "Encerrando o Processo Atual e Limpando os Temporarios\.\.\."'))
+Checar "Janela: a sub-etapa nao sai duas vezes no log ('- OCR completo' + 'OCR completo')" `
+    (($jan -match "\`$eco = \(`"\`$\(\`$script:ultimaLinhaMotor\)`" -replace '\^-\\s\+', ''\)\.Trim\(\)") -and ($jan -match 'if \(\$lim -ne \$eco\) \{ Enviar @\{ T = "log"') -and ($jan -match '\$script:ultimaLinhaMotor = \$lim'))
+Checar "Janela: processo que ja terminou sozinho nao vira AVISO de 'nao consegui encerrar'" `
+    (([regex]::Matches($jan, 'ja tinha terminado sozinho antes do pedido')).Count -eq 2)
+# ---- cancelar ----
+Checar "Motor: a marca da legenda e por episodio (zerada no comeco do laco)" `
+    ([bool]($mot -match '(?s)\$srtCopiaFinal = \$null   # 14\.9.{0,400}\$script:T0Legenda = \$null'))
+Checar "Motor: o [ESC] leva os arquivos de trabalho da legenda deste episodio" `
+    ([bool]($mot -match '(?s)Removendo a Saida Parcial e os Temporarios Deste Episodio.{0,2500}if \(\$script:T0Legenda\) \{.{0,400}_corretor.{0,60}_reocr.{0,300}LastWriteTime -lt \$script:T0Legenda'))
+Checar "Janela: cancelar com a conversao PAUSADA tira a tela da pausa" `
+    ([bool]($jan -match '(?s)\$script:Controle\.Pausar = \$false.{0,700}if \(\$Estado\.Atual -eq "pausado"\) \{ Set-Estado "rodando" \}\s*\r?\n\s*\$UI\.btnPausar\.IsEnabled = \$false'))
+Checar "Janela: fechar a janela para o censo e a medicao tambem" `
+    ([bool]($jan -match '(?s)\$Janela\.add_Closed\(\{.{0,2500}Stop-Censo.{0,200}Stop-Medicao.{0,100}Stop-Motor'))
+Checar "Motor: o teto do Reocr mata a arvore (o tesseract ficava vivo)" `
+    ([bool]($mot -match '(?s)\$estourouTeto = \$true.{0,300}Matar-ArvoreDoProcesso \(\[int\]\$proc\.Id\)'))
+# ---- pausa e tempo ----
+Checar "Janela: barra e restante usam o TRABALHO da etapa, nao a parede (pausa de 29s no OCR)" `
+    (($jan -match '\$trabEtapa = \[math\]::Max\(0\.0, \$wallEtapa - \[double\]\$d\.PausadoEtapa - \$pausaAgoraEt\)') -and
+     ($jan -match 'Get-FracaoDaEtapa \$d\.EtapaIdx \(\[double\]\$pct\) \$trabEtapa') -and
+     ($jan -match 'Get-PrevistoAjustadoDaEtapa \$d\.EtapaIdx \(\[double\]\$pct\) \$trabEtapa') -and
+     (-not ($jan -match 'Get-PrevistoAjustadoDaEtapa \$d\.EtapaIdx \(\[double\]\$pct\) \$wallEtapa')))
+Checar "Janela: pausa que atravessa troca de etapa nao some (nem da etapa nem do arquivo)" `
+    (($jan -match '(?s)function Fechar-EtapaNoLog \{\s*\r?\n\s*Dobrar-PausaEmCurso') -and
+     (-not ($jan -match '\$Motor\.PausadoEtapa = 0\.0; \$Motor\.PausaIni = \$null\s*\r?\n\s*\$Motor\.Nota = ""; \$Motor\.Fase = ""')))
+Checar "Janela: ao retomar, o filtro do restante nao desconta a pausa" `
+    ([bool]($jan -match '(?s)\$Motor\.PausaIni = \$null.{0,500}\$script:SuaveEm = Get-Date\s*\r?\n\s*Escrever-Log \("PAUSA de'))
+Checar "Janela: o erro da previsao da fila desconta a pausa" ([bool]($jan -match 'fora \{0\} de pausa'))
+Checar "Motor: DeeZy TrueHD com as fases MEDIDAS (24/7/69), nao 1/3 cada" `
+    (($mot -match '\$tam3 = @\(0\.24, 0\.07, 0\.69\)') -and ($mot -match "if \(\`$linha -match '\(\?i\)truehdd'\) \{ \`$Event\.MessageData\.ComTruehdd = \`$true \}"))
+# ---- o resto da auditoria ----
+Checar "Motor: Get-BrilhoDoContainer nasce com Erro (o catch nao estoura mais)" `
+    ([bool]($mot -match 'MaxFALL = 0; Lido = \$false; Erro = ""'))
+Checar "Janela: titulo 'Pronto para Converter' com o numero (`$ativos nao existia - print 23/09)" `
+    ((-not ($jan -match '-f \$ativos\)')) -and ($jan -match 'Vídeo\(s\) Selecionado\(s\)" -f \$marcadosOk\)'))
+Checar "Janela: arquivo que sumiu da pasta nao entra no lote (o n/N do motor e posicao)" `
+    ([bool]($jan -match '(?s)foreach \(\$v in \$marcados\) \{.{0,700}if \(-not \(Test-Path -LiteralPath "\$\(\$v\.Caminho\)"\)\) \{.{0,200}continue'))
+Checar "Janela: o censo mede o disco POR ARQUIVO" ([bool]($jan -match '\$mbsCenso = Measure-VelocidadeOrigem "\$\(\$v\.Caminho\)"\s*\r?\n\s*if \(\$mbsCenso -le 0\)'))
+Checar "Janela: 'Nova Conversao' + trocar idioma nao redesenha o resumo velho" ([bool]($jan -match '(?s)function Redesenhar-Resumo \{.{0,400}if \(\$Estado\.Atual -ne "fim"\) \{ return \}'))
+Checar "Janela: arquivo novo zera o % e a nota da etapa" ([bool]($jan -match '(?s)\$Motor\.PctEtapa = 0; \$Motor\.Nota = "".{0,700}# 16\.47'))
+if ($iss) {
+    $issBytes = [System.IO.File]::ReadAllBytes($caminhoIss)
+    $lfSo = 0
+    for ($k = 0; $k -lt $issBytes.Length; $k++) { if ($issBytes[$k] -eq 10 -and ($k -eq 0 -or $issBytes[$k - 1] -ne 13)) { $lfSo++ } }
+    Checar "Setup: o .iss e CRLF inteiro (a 2.0.7 deixou 6 linhas so com LF)" ($lfSo -eq 0) ("$lfSo linha(s) so com LF")
+}
+Checar "Motor: espaco conferido POR DISCO (origem fator-1, saida 1x) nas duas travas" `
+    ((([regex]::Matches($mot, 'Get-FaltaDeEspaco \(\[double\]')).Count -eq 2) -and ($mot -match '\(\$Fator - 1\.0\)') -and ($mot -match '"espaco insuficiente em " \+ \$fp0\.Drive'))
+$mFal = [regex]::Match($mot, '(?s)(function Get-FaltaDeEspaco\(.*?\r?\n\})\r?\n')
+$falOk = $false; $falDet = ""
+if ($mFal.Success) {
+    try {
+        . ([scriptblock]::Create($mFal.Groups[1].Value))
+        function Get-PSDrive { param($Name, $ErrorAction) $livres = @{ C = 100GB; E = 30GB }; return [pscustomobject]@{ Free = $livres[$Name] } }
+        $a1 = @(Get-FaltaDeEspaco 40GB 3.15 "C:\" "C:\LaFirma\01")      # mesmo disco: 126 GB > 100 -> falta em C:
+        $a2 = @(Get-FaltaDeEspaco 40GB 3.15 "C:\" "E:\Saida")           # origem 86 GB cabe; saida 40 > 30 -> falta em E:
+        $a3 = @(Get-FaltaDeEspaco 20GB 3.15 "C:\" "E:\Saida")           # 43 GB em C:, 20 em E: -> cabe
+        $falOk = ($a1.Count -eq 1 -and $a1[0].Drive -eq "C:" -and $a2.Count -eq 1 -and $a2[0].Drive -eq "E:" -and $a2[0].EhSaida -and $a3.Count -eq 0)
+        $falDet = "mesmo=$($a1.Count) dois=$($a2.Count)/$($a2[0].Drive) cabe=$($a3.Count)"
+        Remove-Item Function:\Get-PSDrive -ErrorAction SilentlyContinue
+    } catch { $falDet = $_.Exception.Message }
+} else { $falDet = "funcao nao encontrada" }
+Checar "Motor: EXECUTADO - mesmo disco cobra tudo; discos diferentes, cada um o seu" $falOk $falDet
+Checar "Janela: o cartao nomeia o disco que faltou" ([bool]($jan -match 'Faltam ~\{0\} livres no disco \{1\}'))
+Checar "Motor: faixa SRT com acento sem byte acentuado no motor" ([bool]($mot -match '"0:Portugu" \+ \[char\]0x00EA \+ "s \(Brasil\) \[OCR\]"'))
+Checar "Janela: trocar o idioma retraduz o [F12] do topo (print 23/09 13:35)" ([bool]($jan -match '(?s)function Set-Idioma.{0,4000}try \{ Update-BotaoMedirEL \} catch \{ \}'))
+Checar "Janela: arquivo novo zera o relogio da etapa e poe o restante DELE" (($jan -match '\$Motor\.SegEtapa = 0\s*\r?\n\s*\$idxNovoA = \[int\]\$m\.Idx') -and ($jan -match '\$Motor\.RestVideo = \[double\]\$script:LoteAtual\[\$idxNovoA\]\.SegEstimado'))
+Checar "Janela: abaixo de 20% o ritmo nao projeta a etapa (OCR do Ryan: 1.867 -> 2.403 s)" (-not ($jan -match '(?s)function Get-PrevistoAjustadoDaEtapa.{0,600}if \(\$fr -gt 0\.05\)'))
+Checar "Janela: arquivo pulado (ja existia) nao vira 'erro -100%' na previsao (log 13:33:45)" (($jan -match 'nao comparada - nada foi convertido \(arquivo pulado\)') -and ($jan -match 'nao comparada - nenhum arquivo foi convertido nesta fila'))
+if ($corrOk) {
+    $dicR = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("vamos","explodir","tubos","saiam","salam","dos","cascalhos","se","eu","magoei","somos","sobras","das","companhias","viu","mais","vem","ele","seus","meus","atirem","corram")) { [void]$dicR.Add($w) }
+    $nR = New-Object 'System.Collections.Generic.HashSet[string]'
+    $script:MinusculasDoArquivo = New-Object 'System.Collections.Generic.HashSet[string]'
+    $script:NomesCamel = New-Object 'System.Collections.Generic.HashSet[string]'
+    $casosR = @(
+        @("Vamos explodir os tubos!`nSailam dos cascalhos!", "Vamos explodir os tubos!`nSaiam dos cascalhos!"),
+        @("Se eu a magoel...", "Se eu a magoei..."),
+        @(("- Viu mais algu" + [char]0x00E9 + "m?`n- S" + [char]0x00D3 + " Jackson."), ("- Viu mais algu" + [char]0x00E9 + "m?`n- S" + [char]0x00F3 + " Jackson.")),
+        @(("A" + [char]0x00CD + " vem ele."), ("A" + [char]0x00ED + " vem ele.")),
+        @("Somos as sobras das companhias F, Ae G.", "Somos as sobras das companhias F, A e G."),
+        @("Atirem e corram. 2 Seus, 2 meus.", "Atirem e corram. 2 seus, 2 meus."),
+        @("Voce e amigo da Coroa e do Norte.", "Voce e amigo da Coroa e do Norte."),
+        @("- Ai estao eles.`n- E Isso o que eu vejo.", ("- Ai estao eles.`n- " + [char]0x00C9 + " isso o que eu vejo.")),
+        @("- E uma rainha Targaryen.", "- E uma rainha Targaryen."),
+        @("E ela tambem.`nSel.", "E ela tambem.`nSei."),
+        @("Pal...", "Pai..."),
+        @("Encontrei Sel Pal na rua.", "Encontrei Sel Pal na rua."))
+    foreach ($c in $casosR) {
+        $sR = ""; try { $sR = Repair-ErrosClassicos $c[0] $dicR $nR } catch { $sR = "ERRO: " + $_.Exception.Message }
+        Checar ("Corretor 2.32: EXECUTADO - '" + ($c[0] -replace "`n", " / ") + "'") ($sR -ceq $c[1]) ("saiu: " + ($sR -replace "`n", " / "))
+    }
+}
+Checar "Motor: o resumo do console separa 'sem espaco' de 'ja existiam'" ([bool]($mot -match 'Pulados por Falta de Espaco'))
+if ($corrOk) {
+    $dicE = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($w in @("porque","vou","pegar","agora","eles","para","casa")) { [void]$dicE.Add($w) }
+    $e1 = $null; try { $e1 = Test-BlocoEhPtBr "Porque vou pegá-los agora." $dicE } catch { $e1 = "ERRO: " + $_.Exception.Message }
+    Checar "Corretor: EXECUTADO - 'Porque vou pegá-los' continua portugues (2.31)" ($e1 -eq $true) "saiu: $e1"
+    $e2 = $null; try { $e2 = Test-BlocoEhPtBr "Es la casa del chicas en fuego." $dicSujo } catch { $e2 = "ERRO" }
+    Checar "Corretor: EXECUTADO - e o espanhol do TROTF continua espanhol" ($e2 -eq $false) "saiu: $e2"
+}
 
 Titulo "21. A PROPRIA BATERIA NAO PODE TER ERRO DE EXECUCAO (2.4)"
 <#  Este teste olha para dentro: $Error junta todo erro nao-terminante que
@@ -4087,6 +6431,96 @@ Checar "nenhum erro de execucao dentro da propria bateria" ($errosMeus.Count -eq
                 $li + ($_.Exception.Message -replace "`r?`n", " ")
              }) -join " | ")
          }))
+
+<#  ===========================================================================
+    3.59 - 18.22: O ROTULO DO CENSO EM CURSO MUDOU DE DONO.
+
+    Ele saiu do relogio da fila e foi para Update-BotaoCenso, junto com a cor,
+    a DICA e o IsEnabled. Os testes seguem o dono, nao o lugar antigo.
+    =========================================================================== #>
+$mUBC2 = [regex]::Match($janCodigo, '(?s)function Update-BotaoCenso\(\$v\) \{.{0,5000}?\r\n\}')
+$corpoUBC = ""
+if ($mUBC2.Success) { $corpoUBC = $mUBC2.Value }
+Checar "Censo: o corpo de Update-BotaoCenso foi extraido" ($corpoUBC.Length -gt 400)
+Checar "Censo: contando fica na cor de em-curso" `
+    ([bool]($corpoUBC -match '(?s)\$script:CensoRodando.{0,1400}\$Cores\.emCurso'))
+Checar "Censo: o que nao se aplica fica cinza de inativo" `
+    ([bool]($corpoUBC -match '(?s)Test-PodeCenso \$v.{0,600}\$Cores\.dim2'))
+Checar "Censo: o rotulo tem um giro que muda a cada segundo (a tela esta viva)" `
+    ([bool]($corpoUBC -match '(?s)\$giros = @\(.{0,40}\).{0,200}\$seg % 4')) `
+    "'so ter um tempo, nao se sabe se ta funcionando' - foi a queixa dele"
+Checar "Censo: a porcentagem sai do tempo contra o previsto medido" `
+    ([bool]($corpoUBC -match '100\.0 \* \$seg / \[double\]\$script:CensoPrev'))
+Checar "Censo: passando do previsto o rotulo avisa com (+)" `
+    ([bool]($corpoUBC -match '(?s)\$seg -gt \[int\]\$script:CensoPrev.{0,200}\(\+\)'))
+Checar "Censo: a porcentagem nunca passa de 99 e vira (+) depois da previsao" `
+    ([bool]($corpoUBC -match 'Min\(99')) `
+    "pedido dele: chegar perto de 100% e SO entao virar o +"
+Checar "Censo: o rotulo NAO carrega mais o cronometro (so giro e quanto falta)" `
+    (-not ($corpoUBC -match 'Format-MinSeg')) `
+    "'tira o tempo do censo contando ali, deixa so o % e o - /'"
+
+<#  "AGORA O CENSO QUANDO TA RODANDO NAO APARECE [F11]" (Diego, 17/09). Mesma
+    varredura que a 3.58 fez no rotulo da MEDICAO, agora no do CENSO: toda
+    escrita carrega a tecla, inclusive a de "em curso" - que era a unica sem
+    ela. O mesmo buraco, no mesmo estado, do outro lado da barra (licao 37). #>
+$escritasCenso = [regex]::Matches($janCodigo, '\$UI\.lblCenso\.Text\s*=\s*([^\r\n]+)')
+$censoComF11 = ($escritasCenso.Count -gt 0)
+foreach ($e in $escritasCenso) {
+    $val = $e.Groups[1].Value
+    if ($val -match '^\$txtCenso\s*$') { continue }
+    if ($val -notmatch '\[F11\]') { $censoComF11 = $false }
+}
+Checar "Censo: TODA escrita no rotulo do censo carrega o [F11]" `
+    $censoComF11 `
+    ("achei $($escritasCenso.Count) escrita(s) - 'QUANDO TA RODANDO NAO APARECE [F11]'")
+Checar "Censo: e o texto de 'em curso' comeca pelo [F11], antes do giro" `
+    ([bool]($corpoUBC -match '\$txtCenso = "\[F11\] " \+ \(Traduzir "Censo"\)'))
+Checar "Censo: nao existe mais o rotulo 'Censo: contando...' (sem tecla, sem %)" `
+    (-not ($janCodigo -match 'Censo: contando'))
+
+<#  A DICA CONGELAVA ENQUANTO O CENSO RODAVA: ela so era recalculada na troca
+    de linha da fila, e comecar um censo nao troca linha nenhuma. Por isso ele
+    viu "Ligue Medir MEL x FEL" com o censo rodando - frase certa no instante
+    em que foi escrita, e ninguem a apagou nos dois minutos seguintes. #>
+Checar "Censo: a dica tambem e do dono do botao (nao so da troca de linha)" `
+    ([bool]($corpoUBC -match 'btnCenso\.ToolTip = Traduzir-Frase \(Get-MotivoCenso \$v\)'))
+Checar "Censo: e a dica e escrita TAMBEM no ramo de 'em curso'" `
+    ([bool]($corpoUBC -match '(?s)\$script:CensoRodando.{0,1600}btnCenso\.ToolTip.{0,300}return'))
+Checar "Censo: o relogio da fila nao escreve mais o rotulo - ele chama o dono" `
+    ([bool]($jan -match '(?s)\$segCenso -ne \$script:CensoSegMostrado.{0,700}Update-BotaoCenso')) `
+    "tres donos do rotulo eram tres chances de um deles esquecer a tecla"
+Checar "Censo: a contagem so muda quando o segundo VIRA (nao 4x por segundo)" `
+    ([bool]($jan -match '(?s)\$segCenso -ne \$script:CensoSegMostrado'))
+
+<#  ===========================================================================
+    3.59 - 18.22: O F11 TRAVOU PARA SEMPRE. LICAO 47.
+
+    Log dele de 17/09, da linha 139 ate o fim da sessao:
+      22:26:00,8  TECLA: F11 (ignorada - nao se aplica ao estado 'inicial')
+      ... mais de trinta vezes, ate ele fechar o programa.
+
+    A 18.21 mandou o F11 conferir o botao - certo - e com isso tirou do
+    caminho a unica saida de emergencia do handle preso, que morava dentro de
+    Start-Censo, onde o F11 nao chega mais.
+    =========================================================================== #>
+Checar "Censo: existe liberacao do handle preso FORA de Start-Censo" `
+    ([bool]($jan -match 'function Liberar-CensoOrfao')) `
+    "'APERTEI TANTO O F11 QUE TEVE UMA HORA QUE NAO FUNCIONOU NUNCA MAIS'"
+Checar "Censo: e ela roda no relogio da fila (o estado se desfaz sozinho)" `
+    ([bool]($jan -match '(?s)\$TimerFila\.add_Tick.{0,85000}Liberar-CensoOrfao')) `
+    "trava que so sai fechando o programa nao pode existir (18.15, de novo)"
+Checar "Censo: ela olha o HANDLE, nunca processos (WMI no relogio congela a tela)" `
+    ([bool]($jan -match '(?s)function Liberar-CensoOrfao.{0,1200}CensoHandle\.IsCompleted') -and
+     -not ($jan -match '(?s)function Liberar-CensoOrfao.{0,1200}Get-ProcessosDoCenso')) `
+    "licao 40: rede de seguranca que custa a thread da tela nao e rede"
+Checar "Censo: e ela nao encosta em censo que esta rodando" `
+    ([bool]($jan -match '(?s)function Liberar-CensoOrfao.{0,700}if \(\$script:CensoRodando\) \{ return \$false \}'))
+Checar "Teclas: o F11 recusado diz o MOTIVO REAL, nunca 'nao se aplica ao estado'" `
+    ([bool]($jan -match '(?s)elseif \(\$e\.Key -eq "F11"\).{0,1600}TECLA: F11 recusada')) `
+    "o estado ERA 'inicial' - a frase apontava para onde o problema nao estava"
+Checar "Teclas: e o motivo sai da MESMA frase da dica do botao (um lugar so)" `
+    ([bool]($jan -match '(?s)TECLA: F11 recusada.{0,200}Get-MotivoCenso'))
 
 Write-Host ""
 Write-Host "==============================================================================" -ForegroundColor Cyan

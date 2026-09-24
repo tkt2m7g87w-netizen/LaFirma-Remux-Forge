@@ -119,8 +119,8 @@
  MOST DEVICES ALREADY DISCARD THE EXTRA LAYER
 
    NVIDIA Shield, Apple TV, Fire TV Stick and Fire TV Cube, Zidoo, Dune HD,
-   Windows, LG CX and newer TVs and Sony TVs: they read only the base layer
-   and the RPU, and ignore the second track. That is exactly what the
+   Windows, LG TVs from the CX onwards and Sony TVs: they read only the base
+   layer and the RPU, and ignore the second track. That is exactly what the
    conversion does - only permanently.
 
    If you watch on those devices, Profile 7 already looks today the way the
@@ -134,18 +134,18 @@
 
      . Ugoos AM6B Plus and the other SoCs running CoreELEC
      . Chromecast with Google TV
-     . A PC with MPV, JRiver or another player using libplacebo
+     . A PC with MPV, JRiver or another player that uses libplacebo
 
  AND OUTSIDE MKV
 
    The list is longer, and it is where Profile 7's reputation comes from.
    The OPPO UDP-203/205 disc players, the OPPO clones (M9201/M9203/M9205),
-   Sony X700 and X800M2, Panasonic UB820/UB9000 and the LG C7, C8 and C9 TVs
-   also combine both layers - but only from M2TS, TS or MP4. None of them
-   reads the extra layer from inside an MKV.
+   Sony X700 and X800M2, Panasonic UB820/UB9000 and the LG C7, C8 and C9
+   TVs also combine both layers - but only from M2TS, TS or MP4. None of
+   them reads the extra layer from inside an MKV.
 
-   Which means: if your file is an MKV and your device is one of those, you
-   are already watching without the extra layer today.
+   In other words: if your file is an MKV and your device is one of these,
+   you are already watching without the extra layer today.
 
    We tested none of them - this list is report, not our own measurement.
 
@@ -223,6 +223,20 @@
    film is, and letting you compare this file with another. To decide whether
    the extra layer was raising brightness, only the master peak will do - and
    when it is not there, the honest answer is that it cannot be known.
+
+
+ THE FULL CENSUS [F11] - THE WHOLE COUNT, ONLY WHEN IT MATTERS
+
+   On a Complex FEL the sample already says what the layer IS. The census
+   reads the RPU of the whole film (far longer than the sample: on Saving
+   Private Ryan, 5 s against 1m50) and says how
+   much it WEIGHS: how many scenes ask for more brightness than the master,
+   and the peak.
+
+   The census informs, it never changes the colour. A Complex FEL with few
+   scenes stays red - the colour answers one question only ("what is this
+   layer?"), and swapping the colour for frequency would make the screen
+   say two different things about the same file.
 
 
 ------------------------------------------------------------------------------
@@ -419,6 +433,12 @@
  list, with the official link for each tool, in the installation guide.
 
 
+ AND LAFIRMA'S OWN LICENCE
+
+   The installer shows the licence (EULA) in the chosen language before
+   installing, and leaves a copy in "licenca\" inside the installed folder.
+
+
 ------------------------------------------------------------------------------
  13. CREDITS
 ------------------------------------------------------------------------------
@@ -450,11 +470,8 @@
    Conversion to E-AC-3 with Atmos preserved. It is what lets a TrueHD Atmos
    track come out the other side still carrying Atmos.
 
- seconv / BinaryOCR
-   OCR of the PGS subtitles, the main path.
-
  PgsToSrt / Tesseract
-   Fallback OCR, for when the main path cannot cope.
+   OCR of the PGS subtitles.
 
  And two acknowledgements that are not code:
 
@@ -465,15 +482,6 @@
  Reset9999 and the community
    For the MEL x FEL spreadsheet by title. Manual, patient work that serves
    as a second opinion for everybody.
-
- An honest caveat about these two acknowledgements: they are for KNOWLEDGE,
- not for code. Not one line of DoVi_Scripts or dovi_convert is in here, and
- this program is not derived from either. Profile conversion is done by
- dovi_tool (quietvoid), called directly. What came from the community is what
- matters before any code: that MEL and FEL are not the same thing, that
- discarding a FEL which raises brightness has a consequence on the picture,
- and that this gets checked title by title instead of assumed. This program
- measures because that discussion happened.
 
 
 ------------------------------------------------------------------------------

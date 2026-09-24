@@ -4,7 +4,7 @@
 #  ffmpeg + dovi_tool + mkvmerge (+ OCR de legenda PT-BR opcional via PgsToSrt)
 # ============================================================================
 #
-#  VERSAO: 14.54 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
+#  VERSAO: 14.14 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
 #  ----------------------------------------------------------------------
 #  REGRA DE VERSIONAMENTO (definida com o usuario):
 #    - Atualizacao GRANDE (muda comportamento/logica): sobe o numero maior
@@ -15,6 +15,60 @@
 #
 #  Historico (v1.0 -> v2.0 reconstruido a partir das evidencias documentadas
 #  nos proprios comentarios do script; v3.0 em diante e registrado na hora).
+#
+#   v14.14 (a pasta de saida recebe so .mkv + .srt: a copia do log ao
+#           lado do arquivo saiu - o log fica em _logs - 23/09/2026)
+#   v14.13 (espaco por DISCO: com origem e saida em discos diferentes a
+#           origem precisa de (fator - 1)x e a saida de 1x - antes cobrava
+#           tudo da origem e nunca olhava a saida; faixa SRT "Portugues"
+#           com acento - 23/09/2026)
+#
+#   v14.12 (teste de aceite da 2.0.9 + auditoria linha a linha: o ESC
+#           leva os arquivos de trabalho da legenda; "[CANCELADO]
+#           [CANCELANDO]" duplicado; barra do DeeZy TrueHD com as fases
+#           medidas em 20 conversoes (24/7/69); o catch do brilho HDR
+#           estourava e derrubava o diagnostico inteiro; aviso de .NET
+#           perguntava pelo seconv antes de ele existir; teto do Reocr
+#           mata a arvore; resumo separa "sem espaco" - 23/09/2026)
+#
+#   v14.11 (desfeito o rotulo "PERDA EM": volta [CONVERSAO NAO RECOMENDADA]
+#           e o censo aparece como numero na linha de baixo - 23/09/2026)
+#
+#   v14.10 (com o censo feito o veredicto usa o filme inteiro: "PERDA EM
+#           15 DE 2.225 CENAS" em vez de "NAO RECOMENDADA"; seconv sai da
+#           frente - recusado em 7 de 7 filmes medidos; frase EXCELENTE nao
+#           nega mais o numero; [CANCELADO] duplicado - 23/09/2026)
+#
+#   v14.9  (revisao geral: o Profile 5 usava a duracao do arquivo ANTERIOR
+#           da fila; ESC no P5 nao parava o lote; processo que nascia
+#           depois do ESC nao era morto; cartao do P5 dizia TrueHD/OCR/
+#           Matroska; falha do P5 era "FALHA" e sumia do resumo - 23/09/2026)
+#
+#   v14.8  (TODA etapa pergunta se ainda vale comecar. A 14.7 pos a
+#           pergunta nas tres reservas do OCR - o log seguinte mostrou o
+#           motor montando um MKV de 19 GB por 1m42 DEPOIS do [ESC], para
+#           apagar o arquivo em seguida: 104s de trabalho iniciado depois
+#           do pedido de parar - 22/09/2026)
+#
+#   v14.7  (o [ESC] passou a ser lido pela cadeia de reserva do OCR: matar o
+#           seconv era lido como 'o seconv falhou' e disparava PgsToSrt +
+#           Corretor DEPOIS do cancelamento - tres programas comecados
+#           depois de o usuario mandar parar; e a leitura do L1_export.csv
+#           saiu do Select-Object -Unique (quadratico, ~1 min escondido de
+#           todo relogio) para uma passada com HashSet - 22/09/2026)
+#
+#   v14.61 (o aviso de expansao de brilho passou a dizer que a medida dele
+#           e por AMOSTRA, e que o Censo Completo da janela e quem separa
+#           um pico isolado de uma expansao constante - 22/09/2026)
+#
+#   v14.6  (o arquivo final passou a sair com o selo [BL+RPU] no nome, e a
+#           trava 'ja existe na pasta de saida' passou a olhar OS DOIS
+#           nomes - o novo e o antigo, sem selo - para que nada do que ja
+#           foi convertido seja reconvertido do zero; a copia solta da
+#           legenda e a copia do log acompanham o nome novo - 22/09/2026)
+#
+#   v14.55 (a frase do veredicto da legenda parou de prometer o que o
+#           contador nao mede: nome proprio trocado ele nao pega - 18/09/2026)
 #
 #   v14.54 (a ordem manual de OCR passou a ter idioma: apontada para uma
 #           legenda que nao e pt-BR, ela e recusada com o motivo no log -
@@ -268,7 +322,7 @@
 #   v14.15 (a barra do dovi_tool encostava em 99% e ficava minutos parada)
 #         * A estimativa dele era 15 SEGUNDOS, fixa, num trabalho que leva
 #           3-4 MINUTOS em remux 4K. A curva encostava em 99% no primeiro
-#           minuto e ficava la o resto da etapa - o "[3/7] em 99% durante 64%
+#           minuto e ficava la o resto da etapa - o "[2/5] em 99% durante 64%
 #           da etapa" ja registrado no STATUS.
 #         * Medido em tres arquivos: 2,4 a 3,3 segundos por GB. A estimativa
 #           passa a acompanhar o tamanho (1,2 s/GB, mesma regra do seconv e do
@@ -294,7 +348,7 @@
 #           Mais teto duro em 99% e trava de retrocesso.
 #
 #   v14.13 (7 etapas viraram 5 - as duas que nao eram trabalho sairam da regua)
-#         * [1/7] era DIAGNOSTICO (decide o que fazer, media 1s) e [7/7] era
+#         * [1/5] era DIAGNOSTICO (decide o que fazer, media 1s) e [5/5] era
 #           LIMPEZA (fecha em 00m00s em TODOS os logs medidos). Duas caixas de
 #           sete - 29% da regua - reservadas pra 1 segundo. Era dai que vinha
 #           o pedaco vazio no fim da barra do video durante a remontagem.
@@ -305,9 +359,9 @@
 #           As duas continuam na tela e no log, com relogio proprio - so
 #           sairam da regua e da divisao do tempo restante.
 #
-#   v14.12 (a barra da [5/7] para de mentir no OUTRO extremo)
+#   v14.12 (a barra da [4/5] para de mentir no OUTRO extremo)
 #         * MEDIDO no teste do Troia de 18/08 (log 14:53:53): a 14.11 mostrou
-#           100% na [5/7] as 15h16:21 e a etapa so fechou as 15h19:54.
+#           100% na [4/5] as 15h16:21 e a etapa so fechou as 15h19:54.
 #           TRES MINUTOS E MEIO de barra cheia com o tesseract ainda
 #           trabalhando. Duas causas, as duas corrigidas:
 #           (a) Show-BarraFaixa podia encostar no fim da faixa enquanto o
@@ -327,8 +381,8 @@
 #           deixaria a barra em 62% com o trabalho ja terminado.
 #           Era a estimativa de 25s que fazia a barra colar em 94% e ficar la.
 #
-#   v14.11 (a etapa [5/7] passa a ser HONESTA, e o re-OCR entra no arquivo)
-#         * BUG REAL: a barra da [5/7] saltava de 5% para 90% depois de uma
+#   v14.11 (a etapa [4/5] passa a ser HONESTA, e o re-OCR entra no arquivo)
+#         * BUG REAL: a barra da [4/5] saltava de 5% para 90% depois de uma
 #           pausa. Causa: as rampas do seconv e do Corretor eram
 #           (decorrido / 60) * 90 medidas no RELOGIO DE PAREDE, sem descontar
 #           o tempo pausado. Pausar 3m38s no meio do OCR fazia o relogio
@@ -343,21 +397,21 @@
 #           desenhava a barra e, na linha seguinte, escrevia "preparando
 #           OCR..." POR CIMA dela, a cada 200ms. Mesmo defeito no Corretor.
 #           Agora o nome da sub-etapa e dito UMA vez, acima da barra.
-#         * A [5/7] deixou de ser uma caixa-preta: ela roda de um a quatro
+#         * A [4/5] deixou de ser uma caixa-preta: ela roda de um a quatro
 #           programas em sequencia e cada um enchia a barra de 0 a 100 por
 #           conta propria - a barra da mesma etapa enchia, zerava e enchia de
 #           novo ("subiu pra 90, depois 100, e comecou outra parte"). Agora
 #           cada sub-etapa tem NOME e um PEDACO da barra (FAIXA), calculado
 #           antes de comecar; o total fecha em 100 uma vez so, e nunca anda
 #           pra tras ($script:FaixaUltimo).
-#         * O Reocr_Legenda ENTRA NO MOTOR, como ultima sub-etapa da [5/7].
+#         * O Reocr_Legenda ENTRA NO MOTOR, como ultima sub-etapa da [4/5].
 #           Ele ja resolvia o "INF TOL" no lugar do "Nao!" (8 de 8 casos,
 #           duas rodadas byte a byte identicas), mas so existia como
 #           ferramenta solta: escrevia _reocr\<nome>_REOCR.srt e parava ali,
-#           enquanto o .mkv ja tinha sido remontado na [6/7] com o .srt
+#           enquanto o .mkv ja tinha sido remontado na [5/5] com o .srt
 #           anterior - e nenhuma etapa remontava de novo. A correcao existia
 #           e nunca chegava dentro do arquivo (visto no player, Troia 57:06).
-#           Agora o .srt que sai da [5/7] e o que vai pro mkvmerge.
+#           Agora o .srt que sai da [4/5] e o que vai pro mkvmerge.
 #           Roda nos DOIS caminhos (seconv e PgsToSrt): o alvo dele nao e o
 #           motor de OCR, e o TAMANHO da fala.
 #           Sem tesseract.exe standalone ele simplesmente nao entra - avisado
@@ -399,8 +453,8 @@
 #         * Latin.db tambem procurado em %AppData%\Subtitle Edit\Ocr\ quando
 #           nao esta em tools\SubtitleEdit\, pra parar de depender so de copia
 #           manual. (Mesmo fallback foi pro Corretor_Legenda 2.1.)
-#   v14.3 (acabamento do [5/7] achado no primeiro teste real)
-#         * Barra de progresso do [5/7] "pulava" entre as 3 sub-fases (seconv,
+#   v14.3 (acabamento do [4/5] achado no primeiro teste real)
+#         * Barra de progresso do [4/5] "pulava" entre as 3 sub-fases (seconv,
 #           PgsToSrt, Corretor) sem alimentar % real - agora tem rampa suave
 #           por tempo decorrido, capada em 90% ate terminar de verdade.
 #         * Copia solta do .srt final agora fica em 01_Arquivos_Finalizados do
@@ -427,7 +481,7 @@
 #           real, nao da pra automatizar dentro do motor sem depender de
 #           clique manual toda conversao - inviavel pro objetivo do projeto.
 #         * NOVA SOLUCAO: PgsToSrt/Tesseract continua sendo quem faz o OCR
-#           (como sempre foi), e logo em seguida, ainda dentro do [5/7], o
+#           (como sempre foi), e logo em seguida, ainda dentro do [4/5], o
 #           motor chama o Corretor_Legenda.ps1 (ferramenta ja existente e ja
 #           validada - 6/7 blocos-lixo reais detectados e corrigidos, 0 falso
 #           positivo em 15 falas boas) automaticamente, sem pausa nem clique.
@@ -446,9 +500,9 @@
 #           seconv.exe de verdade pro Windows, revisitar o caminho do 14.0.
 #
 #   v13.8 (status da legenda agora reflete o resultado FINAL, nao so o
-#          diagnostico do [5/7])
-#         * BUG CORRIGIDO: $statusLegenda = "JA_TEXTO" e decidido no [5/7],
-#           antes de qualquer escolha manual ser resolvida no [6/7]. Se a
+#          diagnostico do [4/5])
+#         * BUG CORRIGIDO: $statusLegenda = "JA_TEXTO" e decidido no [4/5],
+#           antes de qualquer escolha manual ser resolvida no [5/5]. Se a
 #           legenda PT-BR ja em texto fosse descartada por escolha manual
 #           depois disso, o status NUNCA mudava - o card final e o selo da
 #           janela continuavam dizendo "REAPROVEITADA", contradizendo a
@@ -456,7 +510,7 @@
 #           "Nenhuma (Todas Descartadas a Pedido)".
 #         * Status novo: DESCARTADA_MANUAL. So entra em uso quando
 #           JA_TEXTO tinha sido decidido E a faixa some da lista final de
-#           legenda resolvida no [6/7]. Na-tilo muda nada pra quem nunca usa
+#           legenda resolvida no [5/5]. Na-tilo muda nada pra quem nunca usa
 #           Modo Manual - o automatico nunca gera esse status.
 #   v13.7 (LegendaManter vazio agora e respeitado - excluir tudo na mao
 #          funciona de verdade)
@@ -642,13 +696,13 @@
 #           de fato na v10.0, via MediaInfo (ver adiante).
 #         * CORRIGIDO BUG REAL (video - arquivo nao-HEVC): antes falhava com
 #           erro generico "Codigo 1" na extracao (o bsf hevc_mp4toannexb e
-#           especifico de HEVC). Agora o [1/7] checa o codec_name e pula o
+#           especifico de HEVC). Agora o [1/5] checa o codec_name e pula o
 #           episodio com mensagem clara (confirmado no Vampira 1974/AVC).
 #         * CORRIGIDO BUG REAL (video - arquivo sem Dolby Vision): antes o
 #           dovi_tool rodava sem erro em arquivo sem RPU e o script reportava
 #           "[OK] RPU Convertido" - SUCESSO FALSO, gastando tempo com audio/
 #           legenda a toa (confirmado no Avatar SDR: 1h02m perdida). Agora o
-#           [1/7] faz deteccao PROPRIA e confiavel de DV (Get-InfoDolbyVision,
+#           [1/5] faz deteccao PROPRIA e confiavel de DV (Get-InfoDolbyVision,
 #           nao o diagnostico previo que e informativo e pode falhar em
 #           silencio) e pula cedo com mensagem clara quando nao ha DV.
 #         * CORRIGIDO BUG REAL (legenda - variante pt-PT sem nome): uma
@@ -717,13 +771,13 @@
 #           NECESSARIA]" (audio ja tem Atmos/JOC; nenhuma legenda PT-BR em
 #           PGS) mudaram de cinza para amarelo, com o colchete movido para
 #           o INICIO da mensagem (igual ao padrao ja usado nas etapas
-#           ao vivo [4/7]/[5/7]).
+#           ao vivo [3/5]/[4/5]).
 #         * CORRIGIDO BUG REAL: o diagnostico previo de legenda so
 #           verificava PGS (Find-PtBrPgsTrack) - nunca checava se a PT-BR
 #           ja existia pronta em TEXTO (Get-FaixaLegendaPtBrTexto, criada
 #           na v7.0). Resultado: para arquivos com PT-BR ja em .srt (sem
 #           PGS), a previa dizia erroneamente "nenhuma legenda
-#           identificada", quando na verdade o [5/7] real ia reaproveitar
+#           identificada", quando na verdade o [4/5] real ia reaproveitar
 #           a .srt normalmente. Agora a previa segue a MESMA ordem de
 #           prioridade real (texto primeiro, depois PGS, depois nada).
 #         * Cartao final: coluna de rotulo aumentada de 34 para 40
@@ -733,7 +787,7 @@
 #           coluna de valor. Corrigido na fonte (largura fixa da funcao
 #           Write-CampoResumo), nao mais remendado rotulo por rotulo.
 #   v8.2  (ajuste - texto de mensagens e rotulos do cartao)
-#         * [5/7]: mensagem de PT-BR ja em texto reformulada para
+#         * [4/5]: mensagem de PT-BR ja em texto reformulada para
 #           "[NAO NECESSARIO] Legenda 'PT-BR .SRT' na Faixa X 'Nome'".
 #         * Cartao final: rotulo de audio JA_OTIMO reformulado para
 #           "Audio (E-AC-3 Atmos/JOC - PRESENTE)" / "Audio (E-AC-3/AC-3 -
@@ -760,11 +814,11 @@
 #           linha propria abaixo.
 #   v8.0  (mudanca grande - status de audio + reformulacao do cartao final)
 #         * Nova sinalizacao "PROCESSO INICIALIZADO" entre o diagnostico
-#           previo e o inicio real das etapas [1/7]-[7/7].
-#         * [4/7]: mensagem de "Ja Possui Faixa E-AC-3 Atmos/JOC" agora
+#           previo e o inicio real das etapas [1/5]-[5/5].
+#         * [3/5]: mensagem de "Ja Possui Faixa E-AC-3 Atmos/JOC" agora
 #           mostra o CODEC REAL da faixa existente (ex: "E-AC-3 JOC").
-#         * [5/7]: cor da mensagem de PT-BR ja em texto corrigida de cinza
-#           para amarelo (igual ao [4/7]), e texto reformatado para
+#         * [4/5]: cor da mensagem de PT-BR ja em texto corrigida de cinza
+#           para amarelo (igual ao [3/5]), e texto reformatado para
 #           "[NAO NECESSARIO] ..." sem sufixo redundante.
 #         * Removida redundancia de "[NAO NECESSARIO] ... Nenhuma Conversao
 #           Necessaria." (dizia a mesma coisa duas vezes) em 3 mensagens de
@@ -786,10 +840,10 @@
 #           faixas que nunca foram PGS (ex: PT-BR ja em texto).
 #         * Cartao final: quando ha descarte de faixas extras, mostra
 #           agora quais faixas de audio/legenda sobreviveram (mesma
-#           informacao que ja aparecia ao vivo no [6/7]), alinhada
+#           informacao que ja aparecia ao vivo no [5/5]), alinhada
 #           corretamente sob a coluna de valor mesmo com rotulos longos.
-#   v7.2  (ajuste pontual - rotulos da mensagem de legenda no [6/7])
-#         * Mensagem do [6/7] agora diferencia os dois caminhos possiveis:
+#   v7.2  (ajuste pontual - rotulos da mensagem de legenda no [5/5])
+#         * Mensagem do [5/5] agora diferencia os dois caminhos possiveis:
 #           "Legenda Reaproveitada: ..." quando a PT-BR ja existia pronta em
 #           texto (tag "[SRT]"), e "Legenda PGS Convertida: ..." quando foi
 #           gerada via OCR a partir de uma faixa PGS (tag "[OCR/SRT]").
@@ -818,7 +872,7 @@
 #           texto, usa ela direto (mais confiavel que OCR, sem risco de
 #           erro de reconhecimento) e aplica a mesma regra de descarte -
 #           mantem so ela + a legenda inglesa completa.
-#         * [6/7] agora mostra mensagens detalhadas (nao mais um "[OK]"
+#         * [5/5] agora mostra mensagens detalhadas (nao mais um "[OK]"
 #           generico): "Audio Mantido: <faixas reais> - Demais Faixas de
 #           Audio Descartadas [OK]" e o mesmo para legenda, usando o nome
 #           real de cada faixa mantida. As linhas so aparecem quando o
@@ -837,12 +891,12 @@
 #           Agora Get-FaixaAudioPrincipal procura TrueHD/MLP em QUALQUER
 #           idioma PRIMEIRO (ignorando a flag default) - so cai para
 #           default/ingles/primeira faixa quando nao ha TrueHD no arquivo.
-#         * Corrigido log duplicado no [7/7]: "Show-Barra 100" seguido de
+#         * Corrigido log duplicado no [5/5]: "Show-Barra 100" seguido de
 #           "Show-BarraCompleta" imprimia a barra de 100% duas vezes no
 #           arquivo de log (o Start-Transcript nao processa "\r" como um
 #           terminal real, entao grava as duas chamadas como linhas
 #           separadas). Agora so uma chamada, igual as outras 5 barras.
-#         * [6/7] agora mostra linhas separadas e claras: "Descartando
+#         * [5/5] agora mostra linhas separadas e claras: "Descartando
 #           Faixas de AUDIO Extras Desnecessarias... [OK]" e "Descartando
 #           Faixas de LEGENDA Extras Desnecessarias... [OK]" (cada uma so
 #           quando aplicavel), seguidas de "Montando o Arquivo MKV Final
@@ -896,7 +950,7 @@
 #           os comandos agora usam o indice real da faixa escolhida
 #           (Get-IndiceAudioNaFaixa), nao mais um indice fixo em "0".
 #   v3.1  (ajuste pontual - desempenho/travamento da maquina)
-#         * Corrigido: a etapa [3/7] fazia uma segunda leitura redundante do
+#         * Corrigido: a etapa [2/5] fazia uma segunda leitura redundante do
 #           arquivo de origem so para checar se podia pular o dovi_tool -
 #           agora reaproveita o diagnostico ja feito no inicio do episodio.
 #         * PRIORIDADE DE I/O EM DISCO: ate a v3.0, so a prioridade de CPU
@@ -956,7 +1010,7 @@
 #         de video via ffmpeg, conversao Dolby Vision para Profile 8.1 via
 #         dovi_tool, remux final via mkvmerge, log via Start-Transcript.
 # ============================================================================
-$SCRIPT_VERSION  = "14.54"
+$SCRIPT_VERSION  = "14.14"
 $SCRIPT_CODINOME = "LaFirma"
 #
 #  PASTA TEMPORARIA: SEMPRE NO MESMO DISCO DO ARQUIVO DE ORIGEM
@@ -1633,7 +1687,7 @@ function Show-BarraCompleta() {
 
 <#  v14.11: FAIXA DA BARRA (sub-etapas dentro de uma etapa [n/7])
     -------------------------------------------------------------------------
-    POR QUE ISTO EXISTE. A etapa [5/7] nao e uma coisa so: ela pode rodar ate
+    POR QUE ISTO EXISTE. A etapa [4/5] nao e uma coisa so: ela pode rodar ate
     QUATRO programas em sequencia (seconv -> PgsToSrt -> Corretor_Legenda ->
     Reocr_Legenda). Ate a 14.10 cada um deles desenhava a barra de 0 a 100 por
     conta propria, entao a barra da MESMA etapa enchia, zerava e enchia de
@@ -1740,11 +1794,112 @@ $script:SegundosPausadosEtapa  = 0.0
 $script:ConsoleInterativo = $false
 try { $null = [Console]::KeyAvailable; $script:ConsoleInterativo = $true } catch { $script:ConsoleInterativo = $false }
 
-function Suspender-Processo($Proc) {
-    if ($Proc -and -not $Proc.HasExited) { try { [DdvtJob]::Pausar($Proc.Handle) } catch { } }
+<#  14.9 - A PAUSA CONGELAVA SO O FILHO.
+    Quando o filho e um powershell.exe (Corretor, Reocr) quem trabalha de
+    verdade e o NETO (tesseract.exe). NtSuspendProcess nao desce a arvore:
+    o pai congelava e o tesseract seguia comendo CPU com a tela dizendo
+    "PAUSADO". Agora a arvore inteira e congelada e descongelada. #>
+function Get-DescendentesPid([int]$Pid0, [int]$Profundidade = 0) {
+    if ($Pid0 -le 0 -or $Profundidade -gt 5) { return @() }
+    $lista = @()
+    $filhos = @()
+    try { $filhos = @(Get-CimInstance Win32_Process -Filter ("ParentProcessId=" + $Pid0) -ErrorAction Stop) } catch { $filhos = @() }
+    foreach ($f in $filhos) {
+        $lista += [int]$f.ProcessId
+        $lista += @(Get-DescendentesPid ([int]$f.ProcessId) ($Profundidade + 1))
+    }
+    return $lista
 }
-function Retomar-Processo($Proc) {
-    if ($Proc -and -not $Proc.HasExited) { try { [DdvtJob]::Retomar($Proc.Handle) } catch { } }
+function Invoke-NaArvore($Proc, [bool]$Pausar) {
+    if (-not $Proc) { return }
+    try { if ($Proc.HasExited) { return } } catch { return }
+    $pids = @(Get-DescendentesPid ([int]$Proc.Id))
+    $alvos = @()
+    foreach ($id in $pids) { try { $alvos += (Get-Process -Id $id -ErrorAction Stop) } catch { } }
+    # Pausa: netos primeiro, depois o filho. Retomada: o filho primeiro.
+    if ($Pausar) {
+        foreach ($a in $alvos) { try { [DdvtJob]::Pausar($a.Handle) } catch { } }
+        try { [DdvtJob]::Pausar($Proc.Handle) } catch { }
+    } else {
+        try { [DdvtJob]::Retomar($Proc.Handle) } catch { }
+        foreach ($a in $alvos) { try { [DdvtJob]::Retomar($a.Handle) } catch { } }
+    }
+}
+function Suspender-Processo($Proc) { Invoke-NaArvore $Proc $true }
+function Retomar-Processo($Proc)   { Invoke-NaArvore $Proc $false }
+
+<#  ============================================================================
+    2.0 - O [ESC] MATAVA O FILHO E DEIXAVA O NETO VIVO (item 2 da auditoria).
+
+    Request-Cancelamento matava so o handle direto. Nas duas sub-etapas que
+    rodam "powershell.exe" (o Corretor e o Reocr), o neto e o tesseract.exe -
+    e matar o powershell pai NAO mata o tesseract. Resultado: depois de um ESC
+    durante a [4/5], um tesseract orfao continuava queimando CPU ate o motor
+    inteiro sair.
+
+    O Job Object cobre o caso de FECHAR a janela (KILL_ON_JOB_CLOSE), mas nao
+    o ESC, que nao fecha nada. E o .NET Framework do PowerShell 5.1 nao tem
+    Kill($true) - ele so chegou no .NET Core. Entao a arvore se varre a mao,
+    pelo ParentProcessId, matando das FOLHAS para a raiz: matar o pai primeiro
+    faria os netos serem reparentados e some com eles.
+
+    Licao 39, que o censo ja tinha aprendido: matar o processo e matar a
+    ARVORE dele.
+    ============================================================================ #>
+function Matar-ArvoreDoProcesso([int]$Pid0, [int]$Profundidade = 0) {
+    if ($Pid0 -le 0) { return 0 }
+    if ($Profundidade -gt 5) { return 0 }   # trava contra ciclo de PID reciclado
+    $mortos = 0
+    $filhos = @()
+    try {
+        $filhos = @(Get-CimInstance Win32_Process -Filter ("ParentProcessId=" + $Pid0) -ErrorAction Stop)
+    } catch { $filhos = @() }
+    foreach ($f in $filhos) {
+        $mortos += (Matar-ArvoreDoProcesso ([int]$f.ProcessId) ($Profundidade + 1))
+    }
+    # So agora o proprio: das folhas para a raiz.
+    if ($Profundidade -gt 0) {
+        try {
+            Stop-Process -Id $Pid0 -Force -ErrorAction Stop
+            $mortos++
+        } catch { }
+    }
+    return $mortos
+}
+
+<#  2.0.10: O ESPACO QUE CADA DISCO PRECISA.
+    Os temporarios (video extraido, RPU, audio) nascem no disco da ORIGEM; o
+    .mkv final e escrito direto no disco da SAIDA. Com os dois no mesmo disco
+    a conta e a de sempre (3,15x ou 1,6x, tudo junto). Com discos diferentes
+    a conta se divide: a saida recebe ~1x (o arquivo final) e a origem fica
+    com o resto (fator - 1). Antes a trava cobrava os 3,15x da origem e nunca
+    olhava a saida - recusava arquivo que cabia e deixava passar saida cheia.
+    Devolve o que falta por disco; lista vazia = cabe. Disco que nao da para
+    medir (rede) nao entra - quem avisa disso e o chamador, como antes. #>
+function Get-FaltaDeEspaco([double]$TamanhoBytes, [double]$Fator, [string]$DriveWork, [string]$DirSaida) {
+    $faltas = @()
+    $driveSai = ""
+    if ($DirSaida -match '^([A-Za-z]:)') { $driveSai = $Matches[1] + '\' }
+    else { try { if ($DirSaida) { $driveSai = [System.IO.Path]::GetPathRoot($DirSaida) } } catch { $driveSai = "" } }
+    $mesmoDisco = ($driveSai -eq "") -or ($driveSai.TrimEnd('\').ToUpperInvariant() -eq $DriveWork.TrimEnd('\').ToUpperInvariant())
+    $pedidos = @()
+    if ($mesmoDisco) { $pedidos += ,@($DriveWork, ($TamanhoBytes * $Fator), $Fator) }
+    else {
+        $pedidos += ,@($DriveWork, ($TamanhoBytes * ($Fator - 1.0)), ($Fator - 1.0))
+        $pedidos += ,@($driveSai, $TamanhoBytes, 1.0)
+    }
+    foreach ($pd in $pedidos) {
+        $livre = $null
+        try { $livre = [double](Get-PSDrive -Name ($pd[0].TrimEnd('\','/').TrimEnd(':')) -ErrorAction Stop).Free } catch { $livre = $null }
+        if ($null -eq $livre) { continue }
+        if ($livre -lt [double]$pd[1]) {
+            $faltas += [PSCustomObject]@{ Drive = $pd[0].TrimEnd('\'); Precisa = [double]$pd[1]; Livre = $livre; Falta = ([double]$pd[1] - $livre); Fator = [double]$pd[2]; EhSaida = (-not $mesmoDisco -and $pd[0] -eq $driveSai) }
+        }
+    }
+    # SEM virgula: os chamadores envolvem em @(), e @( ,@() ) tem Count 1 -
+    # uma lista vazia viraria "falta espaco" e pularia TODO arquivo (pego pela
+    # bateria executando a funcao, 2.0.11).
+    return $faltas
 }
 
 function Request-Cancelamento($Proc) {
@@ -1755,14 +1910,111 @@ function Request-Cancelamento($Proc) {
     # processo atual e marcamos a flag; o loop principal ve a flag e para.
     $script:CancelamentoSolicitado = $true
     Write-Host ""
-    SayStop "[CANCELANDO] Encerrando o Processo Atual e Limpando os Temporarios..."
+    # 2.0.10: o SayStop ja poe "[CANCELADO]" na frente - o "[CANCELANDO]"
+    # aqui saia duplicado no log: "[CANCELADO] [CANCELANDO] Encerrando...".
+    SayStop "Encerrando o Processo Atual e Limpando os Temporarios..."
     if ($Proc -and -not $Proc.HasExited) {
         # Retomar antes de matar: um processo suspenso pode nao processar o
         # pedido de encerramento enquanto estiver congelado.
-        try { [DdvtJob]::Retomar($Proc.Handle) } catch { }
+        try { Retomar-Processo $Proc } catch { }
+        <#  2.0: os NETOS primeiro. Se o filho for um powershell.exe (Corretor
+            ou Reocr), quem esta consumindo CPU de verdade e o tesseract.exe
+            debaixo dele - e matar o pai antes deixaria o neto orfao e vivo. #>
+        $netos = 0
+        try { $netos = Matar-ArvoreDoProcesso ([int]$Proc.Id) } catch { $netos = 0 }
+        if ($netos -gt 0) {
+            Say ("  (" + $netos + " processo(s) filho(s) encerrado(s) junto)") "DarkGray"
+        }
         try { $Proc.Kill() } catch { }
         try { $null = $Proc.WaitForExit(5000) } catch { }
     }
+}
+
+function Encerrar-SeCancelado($Proc) {
+    # 14.9: o ESC pode chegar ANTES do processo nascer (entre duas etapas).
+    # O laco de espera via a flag e saia sem matar ninguem - e o
+    # WaitForExit() seguinte esperava o processo inteiro terminar.
+    if (-not $script:CancelamentoSolicitado) { return }
+    if (-not $Proc) { return }
+    try { if ($Proc.HasExited) { return } } catch { return }
+    try { [DdvtJob]::Retomar($Proc.Handle) } catch { }
+    try { $null = Matar-ArvoreDoProcesso ([int]$Proc.Id) } catch { }
+    try { $Proc.Kill() } catch { }
+}
+
+function Parar-SeCancelado {
+    <#  2.0.4 - O GUARDA ESTAVA NO FIM, DEPOIS DE TODO O TRABALHO.
+        =====================================================================
+        DEFEITO MEDIDO (Diego, 22/09, log das 18:19):
+
+            18:19:06.683  OCR completo (PgsToSrt) comecou
+            18:19:10.353  TECLA: Escape
+            18:19:16.333  [CANCELANDO] Encerrando o Processo Atual...
+            18:19:16.442  [AVISO] O OCR Nao Gerou Legenda. Seguindo Sem Ela.
+            18:19:16.527  > [5/5] Remontando MKV Final (mkvmerge):   <<<<
+            18:20:59.191  [OK] Arquivo Finalizado - 19,05 GB
+            18:20:59.724  [CANCELADO] Removendo a Saida Parcial...
+            18:20:59.942  Motor encerrou 103,9s depois do pedido
+
+        Ele cancelou e o motor foi montar o MKV INTEIRO - 19 GB, 1m42 - para
+        em seguida APAGAR o arquivo. Cento e quatro segundos de trabalho
+        iniciado depois do [ESC], e jogado fora no fim.
+
+        E a guarda existia. Ela estava no FIM do episodio, com um comentario
+        que dizia exatamente isto: "se o ESC for pressionado no intervalo
+        entre duas etapas, nenhuma delas falha - sem esta guarda o episodio
+        seria registrado como concluido". Ela protegia o REGISTRO, nao o
+        TEMPO do usuario. Perguntar "ainda valia?" depois de fazer e
+        contabilidade, nao cancelamento.
+
+        A 2.0.3 poz a pergunta nas tres reservas do OCR porque foi o que o
+        log daquele dia mostrou. Nao fui procurar as outras portas - e a
+        porta seguinte era a maior de todas. Licao 37: padrao errado se
+        conserta onde ele MORA, nao so onde doeu.
+
+        Agora toda etapa pergunta na entrada, e o throw e o mesmo de sempre:
+        cai no mesmo catch, que apaga a saida parcial e registra CANCELADO.
+        ===================================================================== #>
+    param([string]$Etapa)
+    if (-not $script:CancelamentoSolicitado) { return }
+    SayStop ($Etapa + " Nao Vai Comecar - Voce Mandou Parar.")
+    throw "Operacao Cancelada pelo Usuario ([ESC])."
+}
+
+function Cancelado-AntesDe {
+    <#  2.0.2 - O CANCELAMENTO NAO ERA LIDO PELA CADEIA DE RESERVA.
+        =====================================================================
+        DEFEITO MEDIDO (Diego, 22/09, log das 11:57). Ele apertou [ESC] no
+        meio do OCR. O log conta a historia inteira em quatro linhas:
+
+            11:57:31.281  ACAO: cancelar - flag gravada
+            11:57:31.613  [CANCELANDO] Encerrando o Processo Atual...
+            11:57:31.614  [AVISO] seconv Nao Gerou Legenda. Tentando PgsToSrt
+            11:59:01.092  [OK] Legenda Convertida com Sucesso (PgsToSrt)
+
+        O cancelamento MATOU o seconv - e a etapa leu a morte dele como
+        "o seconv falhou", que e a condicao exata que dispara a rede de
+        seguranca. Entao ela comecou o PgsToSrt DO ZERO, rodou 90 segundos,
+        e no fim chamou o Corretor_Legenda, que por sua vez chama o seconv de
+        novo para a segunda opiniao. Tres programas iniciados DEPOIS de o
+        usuario ter mandado parar. A tela ficou "Cancelando - esperando a
+        etapa atual terminar" por quatro minutos e ele teve que fechar a
+        janela na mao.
+
+        A causa nao e o matar - e a LEITURA do resultado. Para quem esta
+        embaixo, "eu matei a ferramenta" e "a ferramenta falhou" tem
+        exatamente a mesma cara: nao saiu arquivo. E a reacao honesta a uma
+        falha e tentar a reserva. Faltava a pergunta anterior a essa.
+
+        LICAO 50: CANCELAR E UM ESTADO, NAO UM EVENTO. Quem tem plano B tem
+        que perguntar se ainda ha PARA QUE fazer, antes de perguntar se deu
+        certo. Um plano B que roda depois do [ESC] e pior que nenhum: o
+        usuario ja decidiu, e o programa continua gastando o tempo dele.
+        ===================================================================== #>
+    param([string]$Proxima)
+    if (-not $script:CancelamentoSolicitado) { return $false }
+    SayStop ($Proxima + " Nao Vai Comecar - Voce Mandou Parar.")
+    return $true
 }
 
 function Enter-Pausa($Proc) {
@@ -1976,7 +2228,7 @@ $mediainfo  = Join-Path $ToolsDir "MediaInfo.exe"
 $pgsToSrt   = Join-Path $ToolsDir "PgsToSrt\PgsToSrt.exe"
 $tessData   = Join-Path $ToolsDir "PgsToSrt\tessdata"
 # v14.0 (revisado): Corretor_Legenda.ps1 - roda automaticamente logo apos o
-# PgsToSrt/Tesseract, na mesma etapa [5/7], sem passo manual nenhum. Detecta
+# PgsToSrt/Tesseract, na mesma etapa [4/5], sem passo manual nenhum. Detecta
 # e corrige os blocos "alienigenas" que o Tesseract produz em fala curta
 # (ex: "Quase." -> "OITECT") usando dicionario PT-BR + regras de
 # plausibilidade - mesma ferramenta ja validada em 6/7 casos reais, 0 falso
@@ -2049,7 +2301,66 @@ foreach ($t in @($ffmpeg, $ffprobe, $doviTool, $mkvmerge)) {
     if (-not (Test-Path -LiteralPath $t)) { throw "Ferramenta Obrigatoria Nao Encontrada: $t" }
 }
 
-$LinkDotNetRuntime = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/8.0.30/windowsdesktop-runtime-8.0.30-win-x64.exe"
+<#  ============================================================================
+    2.0 - O dovi_tool PASSOU A DIZER QUAL VERSAO ELE E (item 3 da auditoria).
+
+    O motor DEPENDE do comportamento da 2.3.3: e dela o "export --levels
+    level1", que entrega min_pq/max_pq/avg_pq - a base do veredicto MEL x FEL
+    e do censo. Com um binario mais antigo em tools\, o export devolve vazio e
+    a medicao sai sem numero NENHUM, em silencio.
+
+    O contraste estava no proprio motor: o DeeZy ja era conferido assim desde
+    a 13.x, com versao capturada e guardada. O dovi_tool, que e a ferramenta
+    mais importante das quatro, nunca foi.
+
+    Falhar aqui NAO impede de converter: a conversao P7 -> 8.1 usa o "convert",
+    que existe ha muitas versoes. O que fica em risco e a MEDICAO - entao o
+    aviso diz exatamente isso, em vez de assustar com uma falha geral.
+    ============================================================================ #>
+$script:VersaoDoviTool = ""
+$script:DoviToolAntigo = $false
+try {
+    $psiDv = New-Object System.Diagnostics.ProcessStartInfo
+    $psiDv.FileName = $doviTool
+    $psiDv.Arguments = "--version"
+    $psiDv.UseShellExecute = $false
+    $psiDv.RedirectStandardOutput = $true
+    $psiDv.RedirectStandardError = $true
+    $psiDv.CreateNoWindow = $true
+    $procDv = [System.Diagnostics.Process]::Start($psiDv)
+    Adotar-Processo $procDv
+    $saidaDv = ($procDv.StandardOutput.ReadToEnd() + " " + $procDv.StandardError.ReadToEnd()).Trim()
+    [void]$procDv.WaitForExit(10000)
+    # "dovi_tool 2.3.3" - a regex e estrita para nao pegar numero de caminho.
+    if ($saidaDv -match '(?i)dovi_tool[^\d]*(\d+)\.(\d+)\.(\d+)') {
+        $script:VersaoDoviTool = ($Matches[1] + "." + $Matches[2] + "." + $Matches[3])
+        $maiorDv = [int]$Matches[1]; $menorDv = [int]$Matches[2]; $corrDv = [int]$Matches[3]
+        # Precisa ser >= 2.3.3
+        if (($maiorDv -lt 2) -or ($maiorDv -eq 2 -and $menorDv -lt 3) -or
+            ($maiorDv -eq 2 -and $menorDv -eq 3 -and $corrDv -lt 3)) {
+            $script:DoviToolAntigo = $true
+        }
+    }
+} catch { $script:VersaoDoviTool = "" }
+
+if ($script:DoviToolAntigo) {
+    SayWarn ("dovi_tool " + $script:VersaoDoviTool + " e ANTERIOR a 2.3.3. A conversao Perfil 7 -> 8.1 continua funcionando, mas a MEDICAO MEL x FEL e o CENSO dependem do 'export --levels', que so existe da 2.3.3 em diante - eles vao sair sem numero.")
+} elseif ($script:VersaoDoviTool -ne "") {
+    Say ("  dovi_tool " + $script:VersaoDoviTool + " (a medicao MEL x FEL exige 2.3.3 ou mais novo)") "DarkGray"
+} else {
+    SayWarn "Nao consegui ler a versao do dovi_tool. Se a medicao MEL x FEL sair sem numero, confira se ele e 2.3.3 ou mais novo."
+}
+
+<#  2.0: era o link direto do 8.0.30. Link com numero de correcao envelhece
+    sozinho, e no dia em que a Microsoft tirar esse arquivo do ar a mensagem
+    manda o usuario para um 404. A pagina da familia 8.0 nao expira - e a
+    FAMILIA e o que importa: o PgsToSrt pede 8.0.0 sem rollForward, entao
+    8.0.qualquer serve e 9.x nao serve. #>
+$LinkDotNetRuntime = "https://dotnet.microsoft.com/download/dotnet/8.0"
+# 2.0.10: o $temSeconv nasce ANTES do teste do PgsToSrt - o aviso de .NET
+# faltando (logo abaixo) pergunta por ele, e antes ele so era calculado depois:
+# sem .NET e com seconv presente, o log dizia "NAO Havera OCR" e o seconv fazia.
+$temSeconv = (Test-Path -LiteralPath $seconv) -and (Test-Path -LiteralPath $seconvDb)
 $temOcr = Test-Path -LiteralPath $pgsToSrt
 if ($temOcr) {
     # Teste rapido: so confere se o Windows CONSEGUE abrir o PgsToSrt.exe.
@@ -2058,11 +2369,35 @@ if ($temOcr) {
     $tmpErrTeste = [System.IO.Path]::GetTempFileName()
     $tmpOutTeste = [System.IO.Path]::GetTempFileName()
     try {
-        $procTeste = Start-Process -FilePath $pgsToSrt -NoNewWindow -PassThru -Wait -RedirectStandardError $tmpErrTeste -RedirectStandardOutput $tmpOutTeste
+        <#  2.0 (item 4 da auditoria): era a UNICA chamada de processo do motor
+            com -Wait, e a unica fora do Job Object. Se o PgsToSrt travasse na
+            abertura, o motor ficava preso aqui: o [ESC] nao respondia (nenhum
+            Invoke-ControlesTeclado roda dentro de um -Wait) e o processo nem
+            estava adotado, entao fechar a janela tambem nao o mataria na certa.
+
+            Agora ele e adotado pelo Job Object e tem prazo: dez segundos sao
+            muito mais do que abrir um .exe precisa, e quem estourar o prazo
+            morre em vez de travar o programa. #>
+        $procTeste = Start-Process -FilePath $pgsToSrt -NoNewWindow -PassThru -RedirectStandardError $tmpErrTeste -RedirectStandardOutput $tmpOutTeste
+        Adotar-Processo $procTeste
+        if (-not $procTeste.WaitForExit(10000)) {
+            try { [void](Matar-ArvoreDoProcesso ([int]$procTeste.Id)) } catch { }
+            try { $procTeste.Kill() } catch { }
+            SayWarn "O Teste de Abertura do PgsToSrt Nao Respondeu em 10s e Foi Encerrado. A Rede de Seguranca do OCR Fica Desativada Nesta Execucao."
+            $temOcr = $false
+        }
         $saidaTeste = Get-Content -LiteralPath $tmpErrTeste -Encoding UTF8 -Raw -ErrorAction SilentlyContinue
         if ($saidaTeste -match "\.NET" -and $saidaTeste -match "(?i)install|update") {
             $temOcr = $false
-            SayWarn "PgsToSrt Encontrado, Mas Falta o .NET Desktop Runtime 8.0 no Windows. OCR de Legenda Sera Desativado Nesta Execucao."
+            <#  2.0: a frase afirmava que o OCR inteiro morria. Falso desde a
+                14.2: o seconv/BinaryOCR e o caminho PREFERENCIAL e nao depende
+                do runtime .NET - o PgsToSrt e a rede de seguranca. Sem o
+                seconv TAMBEM, ai sim nao ha OCR nenhum, e ai a frase muda. #>
+            if ($temSeconv) {
+                SayWarn "PgsToSrt Encontrado, Mas Falta o .NET Desktop Runtime 8.0 no Windows. A Legenda Sera Feita pelo seconv (Reserva), Que Esta Presente."
+            } else {
+                SayWarn "PgsToSrt Encontrado, Mas Falta o .NET Desktop Runtime 8.0 no Windows, e o seconv Tambem Nao Esta Presente. NAO Havera OCR de Legenda Nesta Execucao."
+            }
             Say ("        Baixe e Instale em: {0}" -f $LinkDotNetRuntime) "Yellow"
         }
     } catch { } finally {
@@ -2071,18 +2406,26 @@ if ($temOcr) {
     }
 }
 $temCorretor = Test-Path -LiteralPath $corretorLegenda
-$temSeconv = (Test-Path -LiteralPath $seconv) -and (Test-Path -LiteralPath $seconvDb)
+<#  14.10 (2.0.7) - O SECONV SAI DA FRENTE.
+    Os logs de 04/09 a 22/09 mediram o seconv em TODOS os lancamentos
+    testados, e ele foi recusado em TODOS: GoT 8,4%, Troy 47,1%, Ryan 25,7%,
+    Se7en 72,8%, Spider-Man 2 62,8%, Amazing Spider-Man 20,3%, TROTF 53,4%
+    dos caracteres saindo como '*'. Zero de sete. Cada tentativa custava de
+    20s a 1m26s, e a legenda final era SEMPRE a do PgsToSrt. A "2a opiniao"
+    do Corretor, que chama o mesmo seconv, fechou com 0 correcoes em todos.
+    Agora ele so roda quando o PgsToSrt nao existe na maquina. #>
+$seconvPrimeiro = $temSeconv -and -not $temOcr
 
 <#  v14.11: Reocr_Legenda entra no MOTOR.
     -------------------------------------------------------------------------
     O DEFEITO QUE ISTO FECHA. O Reocr_Legenda ja resolvia o "INF TOL" no lugar
     do "Nao!" (8 de 8 casos, duas rodadas com resultado identico byte a byte),
     MAS ele so existia como ferramenta solta: escrevia _reocr\<nome>_REOCR.srt
-    e parava ali. O .mkv final ja tinha sido remontado na [6/7] com o .srt
+    e parava ali. O .mkv final ja tinha sido remontado na [5/5] com o .srt
     ANTERIOR, e nenhuma etapa remontava de novo. Ou seja: a correcao existia e
     nunca chegava dentro do arquivo. Foi exatamente isso que o usuario viu no
     player, aos 57:06 do Troia.
-    Agora ele roda como ULTIMA sub-etapa da [5/7], antes da remontagem - o
+    Agora ele roda como ULTIMA sub-etapa da [4/5], antes da remontagem - o
     .srt que vai pro mkvmerge ja e o corrigido.
 
     PRE-REQUISITO: tesseract.exe STANDALONE (o tessdata\ do PgsToSrt e so a
@@ -2119,12 +2462,13 @@ if ($tesseractExe -eq "") {
 }
 $temReocr = (Test-Path -LiteralPath $reocrLegenda) -and ($tesseractExe -ne "")
 SayTitulo "  FERRAMENTAS DISPONIVEIS:"
-if ($temSeconv) { SayOk "OCR de Legenda PT-BR Disponivel (seconv / BinaryOCR - preferencial)" }
+if ($seconvPrimeiro) { SayOk "OCR de Legenda PT-BR Disponivel (seconv / BinaryOCR - o PgsToSrt nao esta nesta maquina)" }
+elseif ($temSeconv) { SayOk "seconv Presente na Pasta, Mas Nao e Usado: Quem Faz o OCR e o PgsToSrt (o seconv Saiu do Instalador na 2.0.7)" }
 elseif ((Test-Path -LiteralPath $seconv) -and -not (Test-Path -LiteralPath $seconvDb)) {
     SayWarn "seconv.exe Encontrado, Mas Falta o Banco 'Latin.db' em tools\SubtitleEdit\. Caindo Para PgsToSrt + Corretor_Legenda."
 }
-if ($temOcr -and $temCorretor) { SayOk "Rede de Seguranca Disponivel (PgsToSrt + Corretor_Legenda automatico)" }
-elseif ($temOcr -and -not $temCorretor) { SayOk "Rede de Seguranca Disponivel (PgsToSrt - sem Corretor_Legenda.ps1, correcao de blocos-lixo desativada)" }
+if ($temOcr -and $temCorretor) { SayOk "OCR de Legenda PT-BR Disponivel (PgsToSrt + Corretor_Legenda automatico)" }
+elseif ($temOcr -and -not $temCorretor) { SayOk "OCR de Legenda PT-BR Disponivel (PgsToSrt - sem Corretor_Legenda.ps1, correcao de blocos-lixo desativada)" }
 elseif (-not $temOcr -and -not $temSeconv) { SayWarn "Nem seconv Nem PgsToSrt Encontrados. A Conversao Vai Seguir Sem Legenda OCR." }
 if ($temReocr -and $tesseractEmpacotado) { SayOk "Re-OCR de Falas Curtas Disponivel (Reocr_Legenda + Tesseract PSM 6 empacotado - roda dentro da [4/5])" }
 elseif ($temReocr) { SayOk "Re-OCR de Falas Curtas Disponivel (Reocr_Legenda + Tesseract PSM 6 do sistema - roda dentro da [4/5])" }
@@ -2396,6 +2740,9 @@ function Get-IndiceAudioNaFaixa {
 # devolve $null em todas as chamadas e o motor se comporta exatamente como na
 # 13.2. Nao existe caminho novo no modo automatico - so um $null a mais.
 $script:EscolhasManuais = $null
+# 2.0.7: censo do filme inteiro vindo da janela (chave = caminho completo).
+# Fora da janela fica $null e o veredicto segue so pela amostra.
+$script:CensosDoFilme = $null
 
 function Get-EscolhaManual {
     # Devolve a hashtable de escolhas deste arquivo, ou $null. Aceita a chave
@@ -3269,8 +3616,8 @@ function Get-InfoDolbyVision {
     # lida com qualquer perfil de origem automaticamente.
     param([string]$MkvPath)
     # Cache por arquivo: esta funcao e chamada 2x por episodio (uma no
-    # diagnostico previo informativo, outra na etapa [1/7] que decide se o
-    # arquivo e um DV valido e alimenta a [3/7]). Como o resultado e o mesmo,
+    # diagnostico previo informativo, outra na etapa [1/5] que decide se o
+    # arquivo e um DV valido e alimenta a [2/5]). Como o resultado e o mesmo,
     # a segunda chamada reaproveita o cache em vez de reabrir o .mkv - mesmo
     # padrao de Get-MkvJson. O cache guarda tambem os "misses" (resultado
     # $null) para nao re-tentar um arquivo sem DV.
@@ -3345,7 +3692,10 @@ function Get-BrilhoDoContainer {
     param([string]$MkvPath)
     $ErrorActionPreference = "Continue"
     $res = New-Object PSObject -Property ([ordered]@{
-        MasterMax = 0.0; MasterMin = 0.0; MaxCLL = 0; MaxFALL = 0; Lido = $false
+        # 2.0.10: Erro nasce aqui. Sem ele, o catch abaixo ('$res.Erro = ...')
+        # lancava 'propriedade nao encontrada' DENTRO do catch, e o diagnostico
+        # inteiro do arquivo caia no 'Nao Foi Possivel Gerar o Diagnostico'.
+        MasterMax = 0.0; MasterMin = 0.0; MaxCLL = 0; MaxFALL = 0; Lido = $false; Erro = ""
     })
     if (-not (Test-Path -LiteralPath $MkvPath)) { return $res }
     try {
@@ -3375,7 +3725,16 @@ function Get-BrilhoDoContainer {
                 }
             }
         }
-    } catch { }
+    } catch {
+        <#  2.0 (item 7 da auditoria): este catch era VAZIO e devolvia o $res
+            em branco. Do lado de fora, "o ffprobe quebrou" e "o arquivo nao
+            tem metadado HDR" ficavam IDENTICOS - e o cartao do episodio
+            mostrava "sem HDR" para um erro de leitura. Terceiro estado
+            precisa de nome (licao 19), e catch que engole vira misterio
+            (licao 22). #>
+        $res.Erro = "$($_.Exception.Message)"
+        Say ("  (Nao consegui ler o metadado HDR deste arquivo: " + $res.Erro + " - o diagnostico segue sem esse dado)") "DarkGray"
+    }
     return $res
 }
 
@@ -3565,6 +3924,11 @@ function Get-TipoCamadaDV {
             quer dizer nada - sao 3 cenas. #>
         ReguaSuspeita       = $false
         ReguaSuspeitaMotivo = ""
+        <#  2.0 (item 7 da auditoria): vazio = a regua foi lida, ou o
+            arquivo nao declara mastering display - que e um estado
+            legitimo. Preenchido = a LEITURA falhou, e isso tem nome.
+            Sem este campo os dois viravam o mesmo desenho na tela. #>
+        ReguaFalhou         = ""
         PctAcimaDoMaster    = 0.0
         CtnMaxCLL      = 0
         CtnMaxFALL     = 0
@@ -3646,7 +4010,21 @@ function Get-TipoCamadaDV {
             $res.CtnMaxCLL  = [int]$brilhoCtx.MaxCLL
             $res.CtnMaxFALL = [int]$brilhoCtx.MaxFALL
         }
-    } catch { }
+        <#  2.0 (item 7 da auditoria): Get-BrilhoDoContainer agora tem um campo
+            Erro. Se ela FALHOU, quem chama tem que saber - sem regua o
+            veredicto MEL x FEL perde o unico numero com que se compara o L1,
+            e ate aqui isso era indistinguivel de "este arquivo nao declara
+            mastering display". Dois estados diferentes, um so desenho na tela
+            (licao 19). #>
+        if ($brilhoCtx -and "$($brilhoCtx.Erro)" -ne "") {
+            $res.ReguaFalhou = "$($brilhoCtx.Erro)"
+        }
+    } catch {
+        <#  E este catch era VAZIO. Falha aqui apagava a regua em silencio e o
+            veredicto saia sem dizer por que estava sem ela. #>
+        $res.ReguaFalhou = "$($_.Exception.Message)"
+        Say ("  (Nao consegui ler a regua de brilho deste arquivo: " + $res.ReguaFalhou + " - o veredicto sai sem ela)") "DarkGray"
+    }
     <#  14.48 - SEM REGUA, A AMOSTRA GRANDE NAO PAGA O QUE CUSTA.
 
         A 14.47 subiu a amostra de 3 para ate 11 pontos, e o Diego sentiu:
@@ -3781,10 +4159,17 @@ function Get-TipoCamadaDV {
                 $csvL1 = Join-Path $pastaEx "L1_export.csv"
                 if (Test-Path -LiteralPath $csvL1) {
                     $linhas = @(Import-Csv -LiteralPath $csvL1)
-                    # Cada CENA e um bloco de quadros com o mesmo trio
-                    # min/max/avg. Contar os trios distintos conta cenas.
-                    $cenas = @($linhas | Select-Object -Property min_pq, max_pq, avg_pq -Unique)
-                    foreach ($cena in $cenas) {
+                    <#  Cada CENA e um bloco de quadros com o mesmo trio
+                        min/max/avg. Contar os trios distintos conta cenas.
+                        2.0.2: era Select-Object -Unique aqui tambem. Na
+                        amostra o CSV e pequeno e o custo nao aparecia - mas
+                        e o mesmo trabalho quadratico do censo completo, onde
+                        custou 107 segundos. Padrao errado nao se conserta
+                        so onde doeu: se conserta onde ele mora (licao 37). #>
+                    $vistosAm = New-Object 'System.Collections.Generic.HashSet[string]'
+                    foreach ($cena in $linhas) {
+                        $chaveAm = "$($cena.min_pq)|$($cena.max_pq)|$($cena.avg_pq)"
+                        if (-not $vistosAm.Add($chaveAm)) { continue }
                         $codigo = 0.0
                         [double]::TryParse("$($cena.max_pq)", [System.Globalization.NumberStyles]::Float, $inv, [ref]$codigo) | Out-Null
                         if ($codigo -le 0) { continue }
@@ -4047,6 +4432,7 @@ function Get-CensoCompletoDV {
         MasterMax           = 0.0
         ReguaSuspeita       = $false
         ReguaSuspeitaMotivo = ""
+        ReguaFalhou         = ""
         RpuMb               = 0.0
         SegundosRpu         = 0.0
         SegundosCenso       = 0.0
@@ -4065,7 +4451,15 @@ function Get-CensoCompletoDV {
         try {
             $b = Get-BrilhoDoContainer -MkvPath $MkvPath
             if ($b -and $b.MasterMax -gt 0) { $res.MasterMax = [double]$b.MasterMax }
-        } catch { }
+            <#  2.0 (item 7 da auditoria): o censo completo le o filme INTEIRO.
+                Descobrir no fim que ele rodou sem regua - e nao saber se foi
+                porque o arquivo nao declara ou porque a leitura quebrou - e o
+                pior lugar possivel para um catch mudo. #>
+            if ($b -and "$($b.Erro)" -ne "") { $res.ReguaFalhou = "$($b.Erro)" }
+        } catch {
+            $res.ReguaFalhou = "$($_.Exception.Message)"
+            Say ("  (Nao consegui ler a regua de brilho para o censo: " + $res.ReguaFalhou + " - o censo continua, mas sem comparar com o pico do master)") "DarkGray"
+        }
     }
 
     $base = Split-Path -Parent $MkvPath
@@ -4119,12 +4513,44 @@ function Get-CensoCompletoDV {
             return $res
         }
 
+        <#  2.0.2 - O MINUTO QUE NAO APARECIA EM RELOGIO NENHUM.
+            =================================================================
+            QUEIXA MEDIDA (Diego, 22/09): "o censo e 1 minuto e pouco a mais
+            quando chega a 100%". Estava certo, e o tempo sumido estava AQUI.
+
+            Os dois relogios do censo paravam antes desta parte:
+                SegundosRpu   = extracao do RPU
+                SegundosCenso = dovi_tool export
+            e a leitura do CSV vinha depois dos dois. Nos logs dele:
+
+                Ryan          243.760 quadros / 1.124 cenas  -> 53s fora de conta
+                Transformers  215.617 quadros / 2.225 cenas  -> 107s fora de conta
+
+            Repare: o Transformers tem MENOS quadros e levou o DOBRO. A conta
+            que explica isso e quadros x cenas (Ryan 274M, Transformers 480M,
+            razao 1,75 - o tempo deu 2,0). Ou seja: o custo era do
+            Select-Object -Unique, que compara cada linha com todas as unicas
+            ja guardadas. Com 215 mil linhas isso e trabalho quadratico feito
+            em PowerShell para responder uma pergunta de uma passada so.
+
+            DOIS CONSERTOS, e o segundo so existe por causa do primeiro:
+            1. UMA PASSADA, com HashSet. O trio min/max/avg vira uma chave de
+               texto; quem ja apareceu e pulado. Mesmo resultado, tempo linear.
+            2. E ele passou a SER CONTADO. Um tempo que nenhum relogio mede
+               nao entra no aprendizado da previsao - e era por isso que a
+               previsao errava sempre para menos, por mais que se corrigisse:
+               ela aprendia 88s de um censo que custou 196s (licao 43: medida
+               boa no lugar errado continua sendo medida errada).
+            ================================================================= #>
+        $relogio.Restart()
         $linhas = @(Import-Csv -LiteralPath $csvL1)
         $res.QuadrosNoRpu = $linhas.Count
         # Cada CENA e um bloco de quadros com o mesmo trio min/max/avg -
         # contar os trios distintos conta cenas. Mesma conta da amostra.
-        $cenas = @($linhas | Select-Object -Property min_pq, max_pq, avg_pq -Unique)
-        foreach ($c in $cenas) {
+        $vistos = New-Object 'System.Collections.Generic.HashSet[string]'
+        foreach ($c in $linhas) {
+            $chave = "$($c.min_pq)|$($c.max_pq)|$($c.avg_pq)"
+            if (-not $vistos.Add($chave)) { continue }
             $cod = 0.0
             [double]::TryParse("$($c.max_pq)", [System.Globalization.NumberStyles]::Float, $inv, [ref]$cod) | Out-Null
             if ($cod -le 0) { continue }
@@ -4135,6 +4561,10 @@ function Get-CensoCompletoDV {
                 $res.CenasAcimaDoMaster = $res.CenasAcimaDoMaster + 1
             }
         }
+        <#  2.0.2: a leitura do CSV entra na conta do censo (ver o bloco
+            acima). Sem isto o numero que a previsao aprende descreve so
+            metade do trabalho. #>
+        $res.SegundosCenso = [math]::Round([double]$res.SegundosCenso + $relogio.Elapsed.TotalSeconds, 1)
 
         # Mesma regra de regua torta da amostra (14.50), com uma amostra que
         # agora e o filme inteiro - aqui o piso de 20 cenas nunca aperta.
@@ -4296,6 +4726,7 @@ function Invoke-ProcessoComBarraEstimada {
             Show-Barra $pct
             Start-Sleep -Milliseconds 150
         }
+        Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
         $proc.WaitForExit()
         # v14.18: a barra cheia so e desenhada se o processo terminou BEM.
         # Antes ela era desenhada sempre, entao uma falha do dovi_tool ou do
@@ -4361,6 +4792,7 @@ function Invoke-FfmpegComBarra {
         Show-Barra $pct
         Start-Sleep -Milliseconds 200
     }
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     Unregister-Event -SourceIdentifier $subOut.Name -ErrorAction SilentlyContinue
     Unregister-Event -SourceIdentifier $subErr.Name -ErrorAction SilentlyContinue
@@ -4418,7 +4850,7 @@ function Invoke-DeezyComBarra {
     $proc.StartInfo = $psi
 
     $sync = [hashtable]::Synchronized(@{
-        FaseAtual = 0; FaseTotal = 0; FasePct = 0.0
+        FaseAtual = 0; FaseTotal = 0; FasePct = 0.0; ComTruehdd = $false
         Linhas = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     })
     $onData = {
@@ -4429,6 +4861,7 @@ function Invoke-DeezyComBarra {
                 $Event.MessageData.FaseAtual = [int]$Matches[1]
                 $Event.MessageData.FaseTotal = [int]$Matches[2]
                 $Event.MessageData.FasePct   = [double]$Matches[3]
+                if ($linha -match '(?i)truehdd') { $Event.MessageData.ComTruehdd = $true }
             }
         }
     }
@@ -4456,6 +4889,22 @@ function Invoke-DeezyComBarra {
             if ($iFase -gt $nFases) { $iFase = $nFases }
             $dentro = [math]::Max(0.0, [math]::Min(100.0, [double]$sync.FasePct)) / 100.0
             $pct = 100.0 * (($iFase - 1) + $dentro) / $nFases
+            <#  2.0.10: NO TRUEHD AS TRES FASES NAO DURAM O MESMO - MEDIDO.
+                O 1/N da 14.14 corrigiu o 80/10/10 chutado, mas continuava
+                supondo fases iguais. Medido em 20 conversoes TrueHD dos logs
+                do Diego (04/09 a 23/09, filmes de 13 a 46 min de audio):
+                    truehdd      ~24% do tempo   (desvio pequeno: 0,20-0,25)
+                    DEE measure  ~ 7%            (0,06-0,09)
+                    DEE encode   ~69%            (0,67-0,73)
+                Com 1/3 cada, a barra ia a 67% na metade do tempo e gastava
+                2/3 do relogio nos ultimos 33% - no log de 23/09 o rodape
+                dizia 374s restantes com 740s por fazer. Fora do TrueHD (DTS,
+                sem truehdd) as fases medidas sao parelhas, e fica o 1/N. #>
+            if ($sync.ComTruehdd -and $nFases -eq 3) {
+                $ini3 = @(0.0, 0.24, 0.31)
+                $tam3 = @(0.24, 0.07, 0.69)
+                $pct = 100.0 * ($ini3[$iFase - 1] + $tam3[$iFase - 1] * $dentro)
+            }
         } else {
             # Ainda sem nenhuma leitura de fase (DeeZy ainda inicializando/
             # extraindo) - sobe bem devagar so para indicar atividade real.
@@ -4470,6 +4919,7 @@ function Invoke-DeezyComBarra {
         Show-Barra $pct
         Start-Sleep -Milliseconds 200
     }
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     Unregister-Event -SourceIdentifier $subOut.Name -ErrorAction SilentlyContinue
     Unregister-Event -SourceIdentifier $subErr.Name -ErrorAction SilentlyContinue
@@ -4547,6 +4997,7 @@ function Invoke-MkvMergeComProgresso {
         fechar e se junta o que foi guardado. WaitForExit vem antes do
         EndInvoke para o processo poder fechar o pipe e o dreno sair do
         ReadLine sozinho. #>
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     try { $null = $psDreno.EndInvoke($drenoHandle) } catch { }
     try { $psDreno.Dispose() } catch { }
@@ -4622,6 +5073,7 @@ function Invoke-PgsToSrtComProgresso {
         }
         Start-Sleep -Milliseconds 200
     }
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     Unregister-Event -SourceIdentifier $subOut.Name -ErrorAction SilentlyContinue
     Unregister-Event -SourceIdentifier $subErr.Name -ErrorAction SilentlyContinue
@@ -4644,7 +5096,7 @@ function Invoke-SeconvOcrComProgresso {
     # v14.5: ATENCAO - $TrackId aqui e o TrackNumber do MATROSKA (1-based,
     # gravado no cabecalho do .mkv), NAO o "id" do mkvmerge (0-based,
     # posicional). Quem chama e responsavel por converter. Ver o comentario
-    # grande no [5/7], onde a conversao acontece.
+    # grande no [4/5], onde a conversao acontece.
     param([string]$MkvPath, [int]$TrackId, [string]$DestinoSrt, [string]$IdiomaEsperado = "")
 
     $tmpDir = Join-Path $WorkDir ("_seconv_tmp_" + [guid]::NewGuid().ToString("N").Substring(0,8))
@@ -4702,6 +5154,7 @@ function Invoke-SeconvOcrComProgresso {
         Show-BarraFaixa (Get-PctSuave $inicioSeconv $pausaBaseSeconv 115)
         Start-Sleep -Milliseconds 200
     }
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     Unregister-Event -SourceIdentifier $subOut.Name -ErrorAction SilentlyContinue
     Unregister-Event -SourceIdentifier $subErr.Name -ErrorAction SilentlyContinue
@@ -4913,7 +5366,7 @@ function Invoke-CorretorLegenda {
         roda como sempre. Os blocos suspeitos seguem para o Reocr de qualquer
         jeito, que usa outro caminho (Tesseract PSM 6) e nao depende do banco. #>
     $argsCorretor = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$corretorLegenda", "-Mkv", "$MkvPath", "-Srt", "$SrtPath", "-SemPausa")
-    if ($script:SeconvRecusadoNesteArquivo) { $argsCorretor += "-PularSegundaOpiniao" }
+    if ($script:SeconvRecusadoNesteArquivo -or -not $seconvPrimeiro) { $argsCorretor += "-PularSegundaOpiniao" }
     $psi.Arguments = ConvertTo-ArgString $argsCorretor
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError  = $true
@@ -4973,6 +5426,7 @@ function Invoke-CorretorLegenda {
         Show-BarraFaixa (Get-PctSuave $inicioCorretor $pausaBaseCorretor 60)
         Start-Sleep -Milliseconds 200
     }
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     # v14.8: solta os assinantes de evento, senao eles vazam a cada arquivo da
     # fila (as outras 5 chamadas ja faziam isso).
@@ -5015,8 +5469,8 @@ function Invoke-CorretorLegenda {
 
 <#  v14.11: Invoke-ReocrLegenda
     -------------------------------------------------------------------------
-    Roda o Reocr_Legenda.ps1 como subprocesso, como ULTIMA sub-etapa da [5/7]
-    - depois do Corretor, antes do mkvmerge da [6/7].
+    Roda o Reocr_Legenda.ps1 como subprocesso, como ULTIMA sub-etapa da [4/5]
+    - depois do Corretor, antes do mkvmerge da [5/5].
 
     O QUE ELE FAZ (resumo; o detalhe esta no cabecalho do proprio script): o
     PgsToSrt nao deixa escolher o PSM do Tesseract e usa o padrao (PSM 3,
@@ -5170,6 +5624,9 @@ function Invoke-ReocrLegenda {
         $trabalhoReocr = ((Get-Date) - $inicioReocr).TotalSeconds - $pausadoReocr
         if ($trabalhoReocr -gt $tetoReocrSeg) {
             $estourouTeto = $true
+            # 2.0.10: a arvore, nao so o powershell.exe - o tesseract.exe e filho
+            # dele e continuaria rodando (e gravando em _reocr) depois do teto.
+            try { $null = Matar-ArvoreDoProcesso ([int]$proc.Id) } catch { }
             try { $proc.Kill() } catch { }
             break
         }
@@ -5247,6 +5704,7 @@ function Invoke-ReocrLegenda {
         }
         Start-Sleep -Milliseconds 200
     }
+    Encerrar-SeCancelado $proc   # 14.9: ESC antes do processo nascer nao o matava
     $proc.WaitForExit()
     if ($subOutReocr) { Unregister-Event -SourceIdentifier $subOutReocr.Name -ErrorAction SilentlyContinue }
     if ($subErrReocr) { Unregister-Event -SourceIdentifier $subErrReocr.Name -ErrorAction SilentlyContinue }
@@ -5469,6 +5927,11 @@ function Remove-SobrasDeTemporarios {
 $numero = 0
 $script:FaxinaJaFeita = $false
 foreach ($f in $files) {
+    $srtCopiaFinal = $null   # 14.9: por episodio - o catch apaga o .srt DESTE episodio, nunca o do anterior
+    # 2.0.10: a marca da legenda tambem e POR EPISODIO. Sem zerar aqui, um
+    # [ESC] antes da etapa 4 do segundo filme usaria a marca do primeiro - e a
+    # faxina do cancelamento apagaria os arquivos de trabalho DELE.
+    $script:T0Legenda = $null
 
     # v14.9: a faxina roda DENTRO do laco, no primeiro arquivo, de proposito.
     # A JANELA executa SO o "foreach ($f in $files)" do motor - tudo que fica
@@ -5480,6 +5943,7 @@ foreach ($f in $files) {
     # 14.51: zerado por ARQUIVO - senao o segundo video da fila herda o
     # veredicto do primeiro, que e a familia de bug da 16.76.
     $script:SeloELdoArquivo   = ""
+    $script:CensoTextoArquivo = ""
     $script:MotivoELdoArquivo = ""
 
     if (-not $script:FaxinaJaFeita) {
@@ -5501,7 +5965,26 @@ foreach ($f in $files) {
 
     $numero++
     $name    = $f.BaseName
-    $outFile = Join-Path $OutputDir ($name + ".mkv")
+    <#  2.0: O SELO [BL+RPU] NO NOME DO ARQUIVO FINAL.
+        Todo .mkv que sai deste laco e video de camada unica BL+RPU: ou o
+        dovi_tool converteu o Profile 7 (FEL/MEL) para 8.1, ou o arquivo ja
+        era Profile 8.x sem Enhancement Layer. Quem nao tem DV nenhum e
+        pulado la no diagnostico, e o Profile 5 sai por outra porta, em
+        .mp4 - nenhum dos dois chega ate aqui. Entao o selo vale para todo
+        .mkv que este motor produz, e diz no proprio nome o que o arquivo e.
+        O selo nao e repetido: reconverter um arquivo ja selado nao gera
+        "Filme [BL+RPU] [BL+RPU]".
+        E A TRAVA "JA EXISTE" TEM QUE OLHAR OS DOIS NOMES. Tudo que ja foi
+        convertido antes desta versao esta gravado SEM o selo. Se a trava
+        olhasse so o nome novo, a biblioteca inteira seria reconvertida do
+        zero na primeira fila depois da atualizacao - e no fim sobrescrita.
+        Contains() e nao -like de proposito: "[" e classe de caractere em
+        wildcard (licao da 14.32, o mesmo colchete que ja quebrou o
+        Test-Path). #>
+    $nomeSaida     = $name
+    if (-not $nomeSaida.Contains("[BL+RPU]")) { $nomeSaida = $nomeSaida + " [BL+RPU]" }
+    $outFile       = Join-Path $OutputDir ($nomeSaida + ".mkv")
+    $outFileAntigo = Join-Path $OutputDir ($name + ".mkv")
     $tIni    = Get-Date
 
     <#  14.44: A CONFERENCIA DE ESPACO SUBIU PARA ANTES DO ANUNCIO.
@@ -5523,7 +6006,15 @@ foreach ($f in $files) {
         $livrePre = $null
         try {
             $livrePre = (Get-PSDrive -Name ($driveWorkPre.TrimEnd('\','/').TrimEnd(':')) -ErrorAction Stop).Free
-        } catch { }
+        } catch { $livrePre = $null }
+        <#  2.0: em caminho de rede o GetPathRoot devolve o compartilhamento,
+            que nao e nome de PSDrive - a medida falha e a trava e pulada. Isso
+            esta certo (nao da para medir), mas tem que ser DITO: ate aqui o
+            usuario nao recebia nem a protecao nem a noticia de que ela nao
+            rodou. Licao 2 vale tambem para a rede de seguranca. #>
+        if ($null -eq $livrePre) {
+            SayWarn ("Nao Consegui Medir o Espaco Livre em " + $driveWorkPre + " (pasta de rede?). A Conferencia Previa de Disco Nao Roda Neste Caminho.")
+        }
         if ($null -ne $livrePre) {
             $dvPre = $null
             try { $dvPre = Get-InfoDolbyVision -MkvPath $f.FullName } catch { }
@@ -5534,23 +6025,34 @@ foreach ($f in $files) {
                             ($dvPre.Perfil -eq 8 -and ($dvPre.Camadas -notmatch "EL")) -or
                              $dvPre.Perfil -eq 5))
             $fatorPre = if ($diretoPre) { 1.6 } else { 3.15 }
-            $precisaPre = [double]$f.Length * $fatorPre
-            if ([double]$livrePre -lt $precisaPre) {
-                $faltaPre = $precisaPre - [double]$livrePre
+            $faltasPre = @(Get-FaltaDeEspaco ([double]$f.Length) $fatorPre $driveWorkPre $OutputDir)
+            if ($faltasPre.Count -gt 0) {
+                $fp0 = $faltasPre[0]
+                $faltaPre = [double]$fp0.Falta
                 Write-Host ""
                 Line "#" "DarkMagenta"
                 SayTitulo ("  ARQUIVO {0}/{1}: {2}" -f $numero, $files.Count, $name)
                 Line "#" "DarkMagenta"
-                SayWarn ("[NAO INICIADO] Espaco Insuficiente em {0}. Necessario ~{1} (~{2}x o Tamanho do Arquivo), Disponivel {3}. Faltam ~{4}." -f `
-                            $driveWorkPre, (Format-Tamanho $precisaPre), `
-                            ($fatorPre.ToString("0.##", [System.Globalization.CultureInfo]::InvariantCulture)), `
-                            (Format-Tamanho $livrePre), (Format-Tamanho $faltaPre))
+                foreach ($fp in $faltasPre) {
+                    $papel = if ($fp.EhSaida) { " (pasta de saida - o arquivo final)" } elseif ($fp.Fator -lt $fatorPre) { " (temporarios, ao lado da origem)" } else { "" }
+                    SayWarn ("[NAO INICIADO] Espaco Insuficiente em {0}{5}. Necessario ~{1} (~{2}x o Tamanho do Arquivo), Disponivel {3}. Faltam ~{4}." -f `
+                                $fp.Drive, (Format-Tamanho $fp.Precisa), `
+                                ($fp.Fator.ToString("0.##", [System.Globalization.CultureInfo]::InvariantCulture)), `
+                                (Format-Tamanho $fp.Livre), (Format-Tamanho $fp.Falta), $papel)
+                }
                 SayWarn "Este Arquivo Nem Chegou a Comecar - Nenhuma Pasta Temporaria Foi Criada e Nenhuma Etapa Rodou."
-                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = ("espaco insuficiente - faltam ~" + (Format-Tamanho $faltaPre)) }
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = ("espaco insuficiente em " + $fp0.Drive + " - faltam ~" + (Format-Tamanho $faltaPre)) }
                 $puloPorEspaco = $true
             }
         }
-    } catch { }
+    } catch {
+        <#  2.0: este catch era VAZIO. Qualquer excecao aqui dentro fazia a
+            trava de espaco sumir EM SILENCIO e o arquivo entrava na conversao
+            como se houvesse espaco - o caso exato que a 14.45 criou esta trava
+            para impedir. Rede de seguranca que some sem avisar e pior que rede
+            nenhuma (licao 6): sem rede, ao menos ninguem confia nela. #>
+        SayWarn ("Nao Consegui Conferir o Espaco em Disco Antes de Comecar (" + $_.Exception.Message + "). A Conversao Segue, Mas Sem Essa Protecao.")
+    }
     if ($puloPorEspaco) { continue }
 
     Write-Host ""
@@ -5565,10 +6067,27 @@ foreach ($f in $files) {
         existindo do lado. A trava "ja existe, pulando" nao disparava: o
         motor reconvertia o episodio inteiro do zero e no fim sobrescrevia
         a saida boa. Era o unico Test-Path do programa sem -LiteralPath. #>
-    if (Test-Path -LiteralPath $outFile) {
-        SayWarn "Ja Existe na Pasta de Saida. Pulando."
+    $jaTemNovo   = Test-Path -LiteralPath $outFile
+    $jaTemAntigo = Test-Path -LiteralPath $outFileAntigo
+    if ($jaTemNovo -or $jaTemAntigo) {
+        if ($jaTemNovo) { SayWarn ("Ja Existe na Pasta de Saida: " + (Split-Path -Leaf $outFile) + ". Pulando.") }
+        else            { SayWarn ("Ja Existe na Pasta de Saida: " + (Split-Path -Leaf $outFileAntigo) + " (Nome Antigo, Sem o Selo [BL+RPU]). Pulando - Nada a Reconverter.") }
         $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = "ja existia na pasta de saida" }
         continue
+    }
+
+    <#  14.9: o .mp4 do Profile 5 so era conferido DEPOIS do diagnostico
+        inteiro. Existindo o .mp4, uma unica leitura do perfil (a mesma que o
+        ramo do P5 faz, e que fica em cache) decide ja aqui. #>
+    $mp4Existente = Join-Path $OutputDir ($name + ".mp4")
+    if (Test-Path -LiteralPath $mp4Existente) {
+        $dvCedo = $null
+        try { $dvCedo = Get-InfoDolbyVision -MkvPath $f.FullName } catch { $dvCedo = $null }
+        if ($dvCedo -and $dvCedo.Perfil -eq 5) {
+            SayWarn ("Ja Existe na Pasta de Saida: " + (Split-Path -Leaf $mp4Existente) + ". Pulando.")
+            $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = "ja existia na pasta de saida" }
+            continue
+        }
     }
 
     # Pasta temporaria deste episodio: sempre criada na MESMA pasta/disco
@@ -5705,8 +6224,25 @@ foreach ($f in $files) {
             if ($diagEL.Selo -eq "LIMPA") {
                 SayResposta "ok" ("[CONVERSAO LIMPA] {0}" -f $diagEL.Motivo)
             } elseif ($diagEL.Selo -eq "EXPANDE") {
-                # 14.43: o unico caso que estraga a imagem tem selo proprio.
-                SayResposta "alerta" ("[CONVERSAO NAO RECOMENDADA] {0}" -f $diagEL.Motivo)
+                <#  2.0.7 - COM O CENSO FEITO, O MOTOR USA O NUMERO DO FILME INTEIRO.
+                    Antes ele escrevia "NAO RECOMENDADA" e mandava rodar o censo
+                    que a janela JA tinha rodado (TROTF, 22/09 23:11: 15 de 2.225
+                    cenas). O rotulo passa a ser o fato medido. #>
+                $censoArq = $null
+                if ($script:CensosDoFilme) {
+                    if ($script:CensosDoFilme.ContainsKey($f.FullName)) { $censoArq = $script:CensosDoFilme[$f.FullName] }
+                }
+                if ($censoArq -and [int]$censoArq.Cenas -gt 0) {
+                    $pctC = [double]$censoArq.Pct
+                    $pctCt = if ($pctC -lt 10) { $pctC.ToString("0.0", [System.Globalization.CultureInfo]::GetCultureInfo("pt-BR")) } else { $pctC.ToString("0", [System.Globalization.CultureInfo]::GetCultureInfo("pt-BR")) }
+                    # 2.0.9: sem rotulo novo - o cabecalho de sempre, e o censo como numero.
+                    SayResposta "alerta" ("[CONVERSAO NAO RECOMENDADA] {0}" -f $diagEL.Motivo)
+                    Say ("          (Censo do filme inteiro, feito na janela: {0} de {1} cenas ({2}%) passam do master.)" -f [int]$censoArq.Acima, [int]$censoArq.Cenas, $pctCt) "DarkGray"
+                } else {
+                    # 14.43: o unico caso que estraga a imagem tem selo proprio.
+                    SayResposta "alerta" ("[CONVERSAO NAO RECOMENDADA] {0}" -f $diagEL.Motivo)
+                    Say "          (Medida por AMOSTRA. O Censo Completo [F11] na janela le o filme inteiro e diz em QUANTAS cenas isso acontece.)" "DarkGray"
+                }
             } elseif ($diagEL.Selo -eq "RESSALVA") {
                 SayResposta "lar" ("[CONVERSAO COM RESSALVA] {0}" -f $diagEL.Motivo)
             } elseif ($diagEL.Tipo -eq "NAO_MEDIDO") {
@@ -5719,7 +6255,7 @@ foreach ($f in $files) {
         } else {
             # FIX: antes essa mensagem dizia "Sera Convertido" mesmo sem
             # nenhum Dolby Vision identificado - o episodio agora e PULADO
-            # cedo no processamento real (ver [1/7]), entao o diagnostico
+            # cedo no processamento real (ver [1/5]), entao o diagnostico
             # precisa refletir isso em vez de prometer uma conversao que
             # nao vai acontecer.
             Say "        Dolby Vision: Nenhum Perfil Identificado pelo ffprobe [AVISO]" "DarkYellow"
@@ -5729,7 +6265,7 @@ foreach ($f in $files) {
         # --- Audio ---
         # A decisao olha a faixa de audio PRINCIPAL (nao necessariamente a
         # faixa 01 - ver Get-FaixaAudioPrincipal: default/ingles/nao-comentario
-        # tem prioridade). Mesma ordem de verificacao da etapa real [4/7]:
+        # tem prioridade). Mesma ordem de verificacao da etapa real [3/5]:
         #   TrueHD -> SEMPRE converte para Atmos/JOC, EXCETO se ja existir uma
         #             faixa E-AC-3 Atmos/JOC em outro lugar do arquivo.
         #   DTS    -> converte para E-AC-3 comum, EXCETO se ja existir uma
@@ -5739,7 +6275,7 @@ foreach ($f in $files) {
         $diagFaixaAudio = Get-FaixaAudioPrincipal -MkvPath $f.FullName
         # v14.8: o DIAGNOSTICO nao consultava a escolha manual. Resultado: com
         # "manter audio" marcado na janela, ele anunciava "SERA CONVERTIDO
-        # E-AC-3" e la na [4/7] fazia o certo ("Conversao Desligada na Escolha
+        # E-AC-3" e la na [3/5] fazia o certo ("Conversao Desligada na Escolha
         # Manual"). O motor sempre respeitou a escolha; quem mentia era o
         # aviso. Mesma familia dos outros: anunciar uma coisa e fazer outra.
         $diagEscolheuConverter = Test-EscolheuConverter $f.FullName
@@ -5779,12 +6315,12 @@ foreach ($f in $files) {
         }
         Write-Host ""
         # --- Legenda ---
-        # Mesma ordem de prioridade real usada no [5/7]: primeiro verifica se
+        # Mesma ordem de prioridade real usada no [4/5]: primeiro verifica se
         # ja existe PT-BR em TEXTO (nao precisa de OCR, e o melhor caso) -
         # so se nao houver isso e que verifica PGS (precisa de OCR). Antes
         # esse diagnostico so checava PGS, entao para arquivos com PT-BR ja
         # em texto (sem PGS) ele dizia erroneamente "nenhuma legenda
-        # identificada", quando na verdade o [5/7] ia reaproveitar a .srt.
+        # identificada", quando na verdade o [4/5] ia reaproveitar a .srt.
         # v14.53: quem mandou converter uma PGS na mao nao quer o
         # reaproveitamento - nem no diagnostico, que tem que anunciar o que
         # vai mesmo acontecer.
@@ -5830,9 +6366,9 @@ foreach ($f in $files) {
             O usuario reclamou, com razao: "essas etapas de 1 a 7 ja deveriam
             ter virado outras etapas faz tempo". Duas das sete nunca foram
             trabalho:
-              [1/7] era o DIAGNOSTICO (ffprobe/mkvmerge -J) - ele decide o que
+              [1/5] era o DIAGNOSTICO (ffprobe/mkvmerge -J) - ele decide o que
                     vai ser feito, nao faz nada com o arquivo. Media 1s.
-              [7/7] era a LIMPEZA dos temporarios. Fecha em 00m00s em TODOS os
+              [5/5] era a LIMPEZA dos temporarios. Fecha em 00m00s em TODOS os
                     logs medidos, sem excecao.
             Duas caixas de sete (29% da regua) reservadas pra 1 segundo de
             trabalho - e era dai que vinha o pedaco vazio no fim da barra do
@@ -5851,7 +6387,7 @@ foreach ($f in $files) {
 
         # FIX: antes, um arquivo que nao fosse HEVC (ex: AVC/H.264) ou que
         # simplesmente nao tivesse Dolby Vision seguia para as proximas
-        # etapas mesmo assim - o filtro bsf hevc_mp4toannexb do [2/7] e
+        # etapas mesmo assim - o filtro bsf hevc_mp4toannexb do [2/5] e
         # especifico de HEVC e falhava com um erro generico e confuso
         # ("Codigo 1") em arquivos AVC (confirmado com arquivo real,
         # Vampira 1974). Pior: em arquivos HEVC SEM Dolby Vision (confirmado
@@ -5860,7 +6396,7 @@ foreach ($f in $files) {
         # "[OK] RPU Convertido para Profile 8.1" mesmo sem converter nada de
         # util - sucesso falso que so era descoberto depois de gastar tempo
         # com audio/legenda a toa (nesse caso real, 55+ minutos). Agora as
-        # duas checagens acontecem cedo, aqui no [1/7], pulando o episodio
+        # duas checagens acontecem cedo, aqui no [1/5], pulando o episodio
         # com mensagem clara em vez de seguir em frente.
         $codecVideoOrigem = $infoJson.streams[0].codec_name
         if ($codecVideoOrigem -notmatch "(?i)^hevc$") {
@@ -5888,6 +6424,10 @@ foreach ($f in $files) {
             O ramo fica aqui, DEPOIS da deteccao confiavel de DV e ANTES da
             decisao sobre o video, porque e exatamente onde se sabe o perfil
             pela primeira vez de forma confiavel. #>
+        # 14.9: duracao lida ANTES do ramo do Profile 5 (antes ele usava o valor
+        # do arquivo anterior da fila, ou nada).
+        $duracaoTotal = 0.0
+        [double]::TryParse($infoJson.format.duration, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$duracaoTotal) | Out-Null
         if ($infoDV.Perfil -eq 5) {
             $destinoMp4 = Join-Path $OutputDir ($name + ".mp4")
             if (Test-Path -LiteralPath $destinoMp4) {
@@ -5895,18 +6435,24 @@ foreach ($f in $files) {
                 $resultados += [PSCustomObject]@{ Episodio = $name; Status = "PULADO"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = "ja existia na pasta de saida" }
                 continue
             }
+            # 14.9: o catch do episodio apaga $outFile - no P5 a saida e o .mp4.
+            # Antes ele apontava para um .mkv que nunca existiu, e um ESC
+            # durante o P5 caia no "continue" e o lote seguia.
+            $outFile = $destinoMp4
+            Parar-SeCancelado "O Remux do Profile 5"
             $p5 = Convert-Perfil5ParaMp4 -Origem $f.FullName -Destino $destinoMp4 `
                                          -Nome $name -DuracaoSegundos $duracaoTotal -InfoDV $infoDV
             $tempoP5 = (Get-Date) - $tIni
+            if ($script:CancelamentoSolicitado) { throw "Operacao Cancelada pelo Usuario ([ESC])." }
             if ($p5.Ok) {
                 $tamP5 = (Get-Item -LiteralPath $destinoMp4).Length
                 Write-Host ""
                 SayOk ("MP4 Pronto: {0} ({1})" -f ([System.IO.Path]::GetFileName($destinoMp4)), (Format-Tamanho $tamP5))
-                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "OK"; StatusDV = "P5_MP4"; StatusAudio = "OK"; MotivoAudio = $p5.AudioFeito; CodecAudio = "-"; TipoConvAudio = "P5/MP4"; StatusLegenda = "OK"; MotivoLegenda = $p5.LegendaFeita; DescarteAudio = ($p5.Descartes.Count -gt 0); DescarteLegenda = ($p5.Descartes.Count -gt 0); FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = $fpsRaw; Tamanho = (Format-Tamanho $tamP5); DuracaoVideo = (Format-Duracao $duracaoTotal); Tempo = (Format-Duracao $tempoP5.TotalSeconds); Motivo = "Profile 5 remuxado para MP4" }
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "OK"; StatusDV = "P5_MP4"; StatusAudio = "P5"; MotivoAudio = $p5.AudioFeito; CodecAudio = "-"; TipoConvAudio = "P5/MP4"; StatusLegenda = "P5"; MotivoLegenda = $p5.LegendaFeita; DescarteAudio = ($p5.Descartes.Count -gt 0); DescarteLegenda = ($p5.Descartes.Count -gt 0); FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = $fpsRaw; Tamanho = (Format-Tamanho $tamP5); DuracaoVideo = (Format-Duracao $duracaoTotal); Tempo = (Format-Duracao $tempoP5.TotalSeconds); Motivo = "Profile 5 remuxado para MP4" }
             } else {
                 SayErr ("Nao Foi Possivel Gerar o MP4: {0}." -f $p5.Motivo)
                 if (Test-Path -LiteralPath $destinoMp4) { Remove-Item -LiteralPath $destinoMp4 -Force -ErrorAction SilentlyContinue }
-                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "FALHA"; StatusDV = "P5_MP4"; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = $p5.Motivo }
+                $resultados += [PSCustomObject]@{ Episodio = $name; Status = "FALHOU"; StatusDV = "P5_MP4"; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = ""; Motivo = $p5.Motivo }
             }
             continue
         }
@@ -5938,8 +6484,6 @@ foreach ($f in $files) {
             $videoDireto = $false
         }
 
-        $duracaoTotal = 0.0
-        [double]::TryParse($infoJson.format.duration, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$duracaoTotal) | Out-Null
 
         SayOk "FPS: $fpsRaw | Duracao: $(Format-Duracao $duracaoTotal)"
 
@@ -5970,14 +6514,16 @@ foreach ($f in $files) {
             # 1,6x, e arquivo grande deixa de ser recusado por espaco que o
             # motor nem ia usar.
             $fatorEspaco = if ($videoDireto) { 1.6 } else { 3.15 }
-            $espacoNecessario = $tamanhoOrigemBytes * $fatorEspaco
-            if ($espacoLivre -lt $espacoNecessario) {
-                $faltamEpisodio = $espacoNecessario - $espacoLivre
-                throw ("Espaco Insuficiente em {0} para Converter Este Arquivo com Seguranca. Necessario ~{1} (~{2}x o Tamanho do Arquivo), Disponivel {3}. Faltam ~{4}. Pulando Este Episodio para Nao Gerar um Arquivo Final Incompleto/Corrompido." -f $driveWork, (Format-Tamanho $espacoNecessario), ($fatorEspaco.ToString("0.##", [System.Globalization.CultureInfo]::InvariantCulture)), (Format-Tamanho $espacoLivre), (Format-Tamanho $faltamEpisodio))
+            # 2.0.10: mesma conta da trava previa, por disco (Get-FaltaDeEspaco).
+            $faltasEp = @(Get-FaltaDeEspaco ([double]$tamanhoOrigemBytes) $fatorEspaco $driveWork $OutputDir)
+            if ($faltasEp.Count -gt 0) {
+                $fe = $faltasEp[0]
+                throw ("Espaco Insuficiente em {0} para Converter Este Arquivo com Seguranca. Necessario ~{1} (~{2}x o Tamanho do Arquivo), Disponivel {3}. Faltam ~{4}. Pulando Este Episodio para Nao Gerar um Arquivo Final Incompleto/Corrompido." -f $fe.Drive, (Format-Tamanho $fe.Precisa), ($fe.Fator.ToString("0.##", [System.Globalization.CultureInfo]::InvariantCulture)), (Format-Tamanho $fe.Livre), (Format-Tamanho $fe.Falta))
             }
         }
 
         Say-TempoEtapa $etapaIni
+        Parar-SeCancelado "A Extracao do Video"
 
         SayStep "[1/5] Extraindo Video Puro do MKV (ffmpeg, Sem Recodificar):"
         $etapaIni = Get-Date
@@ -5999,6 +6545,7 @@ foreach ($f in $files) {
             SayOk "Video Extraido: $(Format-Tamanho (Get-Item -LiteralPath $rawHevc).Length)"
         }
         Say-TempoEtapa $etapaIni
+        Parar-SeCancelado "A Conversao do Dolby Vision"
 
         SayStep "[2/5] Convertendo Dolby Vision para Profile 8.1 (dovi_tool):"
         $etapaIni = Get-Date
@@ -6006,7 +6553,7 @@ foreach ($f in $files) {
         # Layer, converter de novo nao muda nada de util - o video ja esta no
         # formato-alvo (BL+RPU). Nesse caso pulamos o dovi_tool e apenas
         # reaproveitamos o video extraido como se fosse o "_P81".
-        # Reaproveita o $infoDV ja lido de forma confiavel na etapa [1/7]
+        # Reaproveita o $infoDV ja lido de forma confiavel na etapa [1/5]
         # (aquela leitura pula o episodio se nao houver DV, entao aqui
         # $infoDV nunca e nulo) - evita um segundo ffprobe no arquivo de
         # origem (que pode ser grande) bem no meio do processamento, sem
@@ -6043,7 +6590,7 @@ foreach ($f in $files) {
                     Spider-Man  61,50 GB -> 3m23s (203s)
                     GoT S08E01  20,60 GB ->   49s
                 Com 15s a barra encostava em 99% no primeiro minuto e ficava
-                la pelos dois minutos seguintes - foi o "[3/7] fica em 99%
+                la pelos dois minutos seguintes - foi o "[2/5] fica em 99%
                 durante 64% da etapa" que voce apontou.
                 Os tres casos dao 2,4 a 3,3 segundos por GB. A estimativa agora
                 acompanha o TAMANHO do arquivo: usando a mesma regra ja aplicada
@@ -6064,6 +6611,7 @@ foreach ($f in $files) {
             Remove-Item -LiteralPath $rawHevc -Force -ErrorAction SilentlyContinue
         }
         Say-TempoEtapa $etapaIni
+        Parar-SeCancelado "A Conversao de Audio"
 
         SayStep "[3/5] Conversao de Audio para E-AC-3:"
         $etapaIni = Get-Date
@@ -6081,7 +6629,7 @@ foreach ($f in $files) {
         # tudo que nao for a faixa principal (e, quando aplicavel, a faixa
         # extra ja existente reaproveitada) e descartado (comentario,
         # dublagem, faixas extras). Preenchido conforme o resultado da
-        # decisao abaixo; usado la no [6/7].
+        # decisao abaixo; usado la no [5/5].
         $audioSemRestricao = $false   # $true = nao mexe em nada (faixa principal nao identificada - modo seguro)
         $idAudioExtra = $null         # Id de uma faixa ja existente reaproveitada (Atmos/JOC ou compativel)
         $audioPrincipalEhCompativel = $false  # $true = a propria faixa principal ja e E-AC-3/AC-3/AAC
@@ -6100,7 +6648,7 @@ foreach ($f in $files) {
             # O usuario marcou MANTER na faixa principal. Entra antes de todos
             # os caminhos de conversao: nao ha o que decidir depois de uma
             # escolha explicita. A faixa fica como esta, e quais faixas vao
-            # para o remux quem diz e o Resolve-FaixasDoRemux la no [6/7].
+            # para o remux quem diz e o Resolve-FaixasDoRemux la no [5/5].
             $motivoAudio = "Conversao de Audio Desligada na Escolha Manual"
             $statusAudio = "JA_OTIMO"
             $audioPrincipalEhCompativel = $true   # o resultado e 'bom' por decisao do usuario
@@ -6311,6 +6859,7 @@ foreach ($f in $files) {
             $audioSemRestricao = $true
         }
         Say-TempoEtapa $etapaIni
+        Parar-SeCancelado "A Conversao da Legenda"
 
         SayStep "[4/5] Conversao de Legenda PGS para .SRT:"
         $etapaIni = Get-Date
@@ -6376,7 +6925,7 @@ foreach ($f in $files) {
                 $srtCandidate = Join-Path $WorkDir ($name + "_ptbr.srt")
                 if (Test-Path -LiteralPath $srtCandidate) { Remove-Item -LiteralPath $srtCandidate -Force }
 
-                <#  v14.11: REPARTICAO DA BARRA DA [5/7].
+                <#  v14.11: REPARTICAO DA BARRA DA [4/5].
                     Esta etapa roda de UM a QUATRO programas em sequencia, e
                     ate a 14.10 cada um desenhava a barra de 0 a 100 por conta
                     propria - a barra da mesma etapa enchia, zerava e enchia
@@ -6399,7 +6948,7 @@ foreach ($f in $files) {
                 $fimSeconv = 35
                 $iniPgs = 35; $fimPgs = 42
                 $iniCorretor = 42; $fimCorretor = 58
-                if (-not $temSeconv) {
+                if (-not $seconvPrimeiro) {
                     # sem seconv, o PgsToSrt e o Corretor herdam a faixa dele
                     $iniPgs = 0; $fimPgs = 12; $iniCorretor = 12; $fimCorretor = 45
                 }
@@ -6423,7 +6972,7 @@ foreach ($f in $files) {
                 }
 
                 $viaSeconv = $false
-                if ($temSeconv) {
+                if ($seconvPrimeiro) {
                     # v14.2: seconv/BinaryOCR - PREFERENCIAL. Ja resolveu o
                     # problema real (blocos-lixo tipo "OITECT") no teste de
                     # 12/08, sem os erros pontuais que o Tesseract deixava.
@@ -6447,11 +6996,18 @@ foreach ($f in $files) {
                     $ocrResult = Invoke-SeconvOcrComProgresso -MkvPath $f.FullName -TrackId $numeroSeconv -DestinoSrt $srtCandidate -IdiomaEsperado $idiomaSeconv
                     if ($ocrResult.Sucesso) { $viaSeconv = $true }
                 }
-                if (-not $viaSeconv) {
+                <#  2.0.2: a pergunta que faltava, e ela vem ANTES de tudo.
+                    Sem ela o [ESC] no meio do seconv virava "o seconv
+                    falhou" e a rede de seguranca comecava um PgsToSrt de 90
+                    segundos que ninguem mais queria. Ver Cancelado-AntesDe. #>
+                if ((-not $viaSeconv) -and (Cancelado-AntesDe "O OCR de Reserva (PgsToSrt)")) {
+                    $ocrResult = @{ ExitCode = -1; TrocasAcento = 0; Output = @("cancelado pelo usuario") }
+                }
+                elseif (-not $viaSeconv) {
                     # Rede de seguranca: seconv ausente OU falhou nesta rodada.
                     # PgsToSrt/Tesseract de sempre, seguido do Corretor_Legenda
                     # automatico (mesma logica da v14.1) - nunca fica sem nada.
-                    if ($temSeconv) {
+                    if ($seconvPrimeiro) {
                         # v14.10: a manchete agora conta o que de fato aconteceu.
                         # Ver o comentario "MotivoRecusa" em Invoke-SeconvOcrComProgresso.
                         $motivoSeconv = ""
@@ -6473,6 +7029,12 @@ foreach ($f in $files) {
                             SayWarn ("seconv Gerou a Legenda, mas o Motor Recusou: " + $pctRuim + "% dos Caracteres Sairam como '*'. Refazendo com PgsToSrt (Tesseract).")
                         } elseif ($motivoSeconv -eq "idioma") {
                             SayWarn "seconv Gerou Legenda de OUTRO Idioma - Recusada pelo Motor. Refazendo com PgsToSrt (Tesseract)."
+                        } elseif ($script:CancelamentoSolicitado) {
+                            <#  2.0.2: quando FUI EU que matei, a frase nao pode
+                                dizer que a ferramenta falhou. Terceiro estado
+                                precisa de nome (licao 19) - e este estado tem
+                                dono conhecido: o usuario. #>
+                            SayStop "O seconv Foi Encerrado Porque Voce Cancelou - Nao Foi Falha Dele."
                         } else {
                             SayWarn "seconv Nao Gerou Legenda. Tentando PgsToSrt (Tesseract) Como Alternativa."
                         }
@@ -6526,7 +7088,11 @@ foreach ($f in $files) {
                         # so roda o Corretor_Legenda quando o caminho foi o
                         # PgsToSrt/Tesseract - o seconv ja nao produz o tipo
                         # de lixo que o Corretor foi feito pra pegar
-                        if ($temCorretor) {
+                        <#  2.0.2: o guarda vem ANTES do SaySub. Anunciar
+                            "Revisao de blocos-lixo" e so depois nao rodar
+                            deixa a barra com uma sub-etapa fantasma - e foi
+                            exatamente isto que o Diego viu por 4 minutos. #>
+                        if ($temCorretor -and -not (Cancelado-AntesDe "A Revisao de Blocos-Lixo (Corretor_Legenda)")) {
                             SaySub "Revisao de blocos-lixo (Corretor_Legenda)" $iniCorretor $fimCorretor
                             $srtCorrigido = Invoke-CorretorLegenda -MkvPath $f.FullName -SrtPath $srtCandidate
                             if ($srtCorrigido) {
@@ -6547,12 +7113,12 @@ foreach ($f in $files) {
                         trava dele; nos testes de 13/08 foram 8 de 8 blocos,
                         duas rodadas seguidas com saida identica byte a byte, e
                         zero bloco bom estragado.
-                        E aqui, dentro da [5/7], que ele precisava estar: o
-                        .srt que sai desta linha e o mesmo que a [6/7] entrega
+                        E aqui, dentro da [4/5], que ele precisava estar: o
+                        .srt que sai desta linha e o mesmo que a [5/5] entrega
                         pro mkvmerge. Como ferramenta solta ele corrigia um
                         arquivo que ninguem mais lia.
                     #>
-                    if ($temReocr) {
+                    if ($temReocr -and -not (Cancelado-AntesDe "O Re-OCR de Falas Curtas (Reocr_Legenda)")) {
                         # v14.12: se o seconv foi aceito, PgsToSrt e Corretor
                         # nao rodaram - a faixa deles vai toda pro Reocr, em
                         # vez de a barra dar um pulo de 35 pra 58 do nada.
@@ -6563,7 +7129,7 @@ foreach ($f in $files) {
                         if ($reocrRes -and $reocrRes.Caminho) {
                             $srtPtBr = $reocrRes.Caminho
                             if ($reocrRes.Trocados -gt 0) {
-                                SayOk ("Reocr_Legenda Refez " + $reocrRes.Trocados + " Fala(s) Curta(s) em PSM 6 (ex: 'INF TOL' -> 'Nao!')")
+                                SayOk ("Reocr_Legenda Refez " + $reocrRes.Trocados + " Fala(s) Curta(s) em PSM 6")   # 2.0.7: o exemplo era fixo e aparecia em todo filme
                             } else {
                                 SayOk "Reocr_Legenda Revisou as Falas Curtas Suspeitas (PSM 6)"
                             }
@@ -6600,7 +7166,7 @@ foreach ($f in $files) {
                                     mandando o usuario NAO usar a legenda que acabou de
                                     sair perfeita. Agora EXCELENTE tem ramo proprio. #>
                                 if ($reocrRes.Veredicto -ceq "EXCELENTE") {
-                                    SayOk ($txtNota + " - nenhuma falha encontrada, pode assistir por ela")
+                                    SayOk ($txtNota + " - pode assistir por ela")   # 2.0.7: "nenhuma falha" ao lado de "1 bloco com defeito" se contradizia
                                 } elseif ($reocrRes.Veredicto -ceq "BOA") {
                                     SayOk $txtNota
                                 } elseif ($reocrRes.Veredicto -ceq "RAZOAVEL") {
@@ -6641,6 +7207,10 @@ foreach ($f in $files) {
                     } elseif ([int]$ocrResult.ExitCode -eq -1 -and $textoOcr -match "(?i)PgsToSrt nao instalado") {
                         $motivoLegenda = "PgsToSrt Indisponivel Nesta Maquina"
                         SayWarn "Sem OCR Disponivel para Esta Faixa. Seguindo Sem Legenda Nova."
+                    } elseif ($script:CancelamentoSolicitado) {
+                        # 14.9: o ESC mata o OCR com codigo -1 - nao e o OCR que falhou.
+                        $motivoLegenda = "Interrompido pelo Cancelamento"
+                        SayStop "O OCR Foi Encerrado Porque Voce Cancelou."
                     } else {
                         $motivoLegenda = "Codigo $($ocrResult.ExitCode)"
                         SayWarn "O OCR Nao Gerou Legenda (Codigo $($ocrResult.ExitCode)). Seguindo Sem Ela."
@@ -6651,7 +7221,7 @@ foreach ($f in $files) {
 
         # ---- Resolve quais legendas ORIGINAIS vao para o remux ------------
         # MESMO PADRAO usado para o audio (ver bloco $resultadoAudioBom logo
-        # acima, no [4/7]): a fase de DECISAO (bloco if/elseif acima) so
+        # acima, no [3/5]): a fase de DECISAO (bloco if/elseif acima) so
         # descobre/gera o que for possivel; esta fase de RESOLUCAO, sempre
         # ao final, e quem decide - com base no "o resultado foi bom?" - se
         # o descarte de fato acontece. So filtra (descarta pt-BR redundante/
@@ -6688,13 +7258,14 @@ foreach ($f in $files) {
             $legendaSemRestricao = $true
         }
         Say-TempoEtapa $etapaIni
+        Parar-SeCancelado "A Remontagem do MKV Final"
 
         SayStep "[5/5] Remontando MKV Final (mkvmerge):"
         $etapaIni = Get-Date
 
         # ---- v13.3: ultima palavra das escolhas manuais -------------------
         # Aqui, e SO aqui, a lista que vai pro mkvmerge pode ser trocada. Fica
-        # depois do audio ([4/7]) e da legenda ([5/7]) porque precisa das duas
+        # depois do audio ([3/5]) e da legenda ([4/5]) porque precisa das duas
         # listas prontas, e antes de qualquer flag ser montada. Sem escolha
         # manual, Resolve-FaixasDoRemux devolve identico ao que recebeu.
         $remux = Resolve-FaixasDoRemux -Arquivo $f.FullName -IdsAudio $idsAudioManter -IdAudioDefault $idAudioDefault -IdsLegenda $idsLegendaManter -AudioSemRestricao $audioSemRestricao -LegendaSemRestricao $legendaSemRestricao
@@ -6737,16 +7308,16 @@ foreach ($f in $files) {
             SayResposta "skip" ("[ESCOLHA MANUAL] Audio: {0} | Legenda: {1}" -f ((@($idsAudioManter) -join ", ")), ((@($idsLegendaManter) -join ", ")))
         }
 
-        # v13.8: BUG CORRIGIDO - $statusLegenda foi decidido la no [5/7], ANTES
+        # v13.8: BUG CORRIGIDO - $statusLegenda foi decidido la no [4/5], ANTES
         # desta resolucao manual existir. Se ele ficou "JA_TEXTO" (a PT-BR ja
         # em texto seria reaproveitada) mas a escolha manual excluiu essa
-        # faixa aqui no [6/7], o status tinha que mudar - sem isso, o card
+        # faixa aqui no [5/5], o status tinha que mudar - sem isso, o card
         # final e o selo da janela continuavam dizendo "REAPROVEITADA" mesmo
         # com a faixa fora do arquivo. Achado real: badge "Legenda PT-BR
         # [.SRT] - REAPROVEITADA" ao lado da tabela dizendo corretamente
         # "Nenhuma (Todas Descartadas a Pedido)" - as duas descrevendo o
         # MESMO resultado de jeitos contraditorios.
-        if ($statusLegenda -eq "JA_TEXTO" -and $idLegendaPtBrOriginal -and (@($idsLegendaManter) -notcontains $idLegendaPtBrOriginal)) {
+        if ($statusLegenda -eq "JA_TEXTO" -and $null -ne $idLegendaPtBrOriginal -and (@($idsLegendaManter) -notcontains $idLegendaPtBrOriginal)) {
             $statusLegenda = "DESCARTADA_MANUAL"
         }
 
@@ -6813,7 +7384,7 @@ foreach ($f in $files) {
                     # (sem OCR), ELA e a padrao. Caso contrario (SRT novo via
                     # OCR sera adicionado mais abaixo, ou so sobrou o ingles),
                     # a legenda original mantida nunca e a padrao.
-                    $padraoLeg = if ($idLegendaPtBrOriginal -and $idLeg -eq $idLegendaPtBrOriginal) { "yes" } else { "no" }
+                    $padraoLeg = if ($null -ne $idLegendaPtBrOriginal -and $idLeg -eq $idLegendaPtBrOriginal) { "yes" } else { "no" }
                     $flagsOriginal += @("--default-track", "${idLeg}:${padraoLeg}")
                 }
             } else {
@@ -6824,7 +7395,7 @@ foreach ($f in $files) {
             }
         }
 
-        # Mensagens do [6/7]: so aparecem quando o descarte de fato foi
+        # Mensagens do [5/5]: so aparecem quando o descarte de fato foi
         # aplicado naquela frente (audio/legenda) - em modo seguro (nada
         # descartado), a linha correspondente e omitida por completo, para
         # nao poluir com informacao que nao reflete nenhuma acao real.
@@ -6848,7 +7419,7 @@ foreach ($f in $files) {
             sufixo diz qual e qual.  #>
             $rotulosLegenda = @($idsLegendaManter | ForEach-Object {
                 $rot = Get-RotuloFaixa -MkvPath $f.FullName -Id $_
-                if ($rot -and $idLegendaPtBrOriginal -and $_ -eq $idLegendaPtBrOriginal) { $rot = "$rot [SRT]" }
+                if ($rot -and $null -ne $idLegendaPtBrOriginal -and $_ -eq $idLegendaPtBrOriginal) { $rot = "$rot [SRT]" }
                 elseif ($rot -and $null -ne $idLegendaPtBrOriginalPgs -and $_ -eq $idLegendaPtBrOriginalPgs -and $srtPtBr) { $rot = "$rot [PGS original]" }
                 $rot
             } | Where-Object { $_ })
@@ -6885,7 +7456,12 @@ foreach ($f in $files) {
                     # comentario grande la em cima. EXCELENTE caia no else e o
                     # resumo do arquivo mandava usar a PGS original.
                     Say $linhaNota "Green"
-                    Say "        Nenhuma falha encontrada. Pode assistir por ela." "DarkGray"
+                    <#  2.0b: "nenhuma falha encontrada" afirmava o absoluto. O
+                        contador mede a familia de defeito residual que o Reocr
+                        sabe detectar - nome proprio trocado e letra que forma
+                        outra palavra valida passam, e sempre passaram. Agora a
+                        frase diz o que foi conferido. Ver o bloco na janela. #>
+                    Say "        Pode assistir por ela." "DarkGray"   # 2.0.7: a frase anterior negava o numero da linha de cima
                 } elseif ($script:NotaLegendaVeredicto -ceq "BOA") {
                     Say $linhaNota "Green"
                     Say "        Pode assistir por ela." "DarkGray"
@@ -6976,7 +7552,9 @@ foreach ($f in $files) {
             $idiomaOriginal = if ($faixaPrincipal.properties.language) { $faixaPrincipal.properties.language } else { "eng" }
             $mkvArgs += @("--language", "0:$idiomaOriginal", "--track-name", "0:$eac3TrackName", "--default-track", "0:yes", "$eac3File")
         }
-        if ($srtPtBr) { $mkvArgs += @("--language", "0:por", "--track-name", "0:Portugues (Brasil) [OCR]", "--default-track", "0:yes", "$srtPtBr") }
+        # 2.0.10: "Portugues" com acento no nome da faixa. O motor e ASCII puro,
+        # entao o e-circunflexo vem de [char]0x00EA - o arquivo continua sem byte acentuado.
+        if ($srtPtBr) { $mkvArgs += @("--language", "0:por", "--track-name", ("0:Portugu" + [char]0x00EA + "s (Brasil) [OCR]"), "--default-track", "0:yes", "$srtPtBr") }
         $exitCode = Invoke-MkvMergeComProgresso -ArgList $mkvArgs
         if ($exitCode -ne 0 -and $exitCode -ne 1) {
             # mkvmerge retorna 1 para "avisos" (nao fatal); qualquer coisa >=2 e erro real
@@ -6999,14 +7577,18 @@ foreach ($f in $files) {
 
         # v14.3: copia solta do .srt final na pasta de saida, do lado do mkv.
         # Antes a legenda OCR so existia MUXADA dentro do mkv - o WorkDir com
-        # o .srt era apagado no [7/7] e nao sobrava nada solto pra conferir
+        # o .srt era apagado no [5/5] e nao sobrava nada solto pra conferir
         # rapido sem abrir o mkv inteiro. So copia se realmente gerou uma
         # legenda nova via OCR ($srtPtBr setado) - nao copia nada quando a
         # PT-BR ja veio pronta em texto (nao ha OCR pra "salvar copia de").
         if ($srtPtBr -and (Test-Path -LiteralPath $srtPtBr)) {
-            $srtCopiaFinal = Join-Path $OutputDir ($name + ".srt")
+            <#  2.0: o nome da copia solta acompanha o nome do MKV final
+                (com o selo [BL+RPU]). E assim que o player casa a legenda
+                externa com o filme - com o nome antigo ela ficaria orfa. #>
+            $srtDestino = Join-Path $OutputDir ($nomeSaida + ".srt")
             try {
-                Copy-Item -LiteralPath $srtPtBr -Destination $srtCopiaFinal -Force
+                Copy-Item -LiteralPath $srtPtBr -Destination $srtDestino -Force -ErrorAction Stop
+                $srtCopiaFinal = $srtDestino   # so vira "nosso" depois de copiado
             } catch { }
         }
 
@@ -7022,6 +7604,7 @@ foreach ($f in $files) {
             duvida no colo do usuario.
             Nao apaga nem rejeita o arquivo: quem decide o que fazer com ele e
             o usuario. O motor so para de mentir que esta tudo certo. #>
+        Parar-SeCancelado "A Conferencia do Arquivo Final"
         SayStep "[VERIFICACAO] Conferindo se o Arquivo Final Decodifica do Inicio ao Fim:"
         $etapaIni = Get-Date
         $statusVerif = "OK"
@@ -7214,6 +7797,7 @@ foreach ($f in $files) {
 
         $resultados += [PSCustomObject]@{
             Episodio      = $name
+            NomeSaida     = $nomeSaida
             Status        = $statusGeral
             StatusDV      = $statusDV
             StatusAudio   = $statusAudio
@@ -7238,6 +7822,7 @@ foreach ($f in $files) {
             # 14.51: o veredicto da camada viaja com o resultado, para o
             # cartao final poder repetir a ressalva que o log ja deu.
             SeloEL        = "$($script:SeloELdoArquivo)"
+            CensoEL       = "$($script:CensoTextoArquivo)"
             MotivoEL      = "$($script:MotivoELdoArquivo)"
             Fps           = $fpsRaw
             Tamanho       = Format-Tamanho $tamanhoFinal
@@ -7254,11 +7839,36 @@ foreach ($f in $files) {
         if ($script:CancelamentoSolicitado) {
             SayStop "Operacao Cancelada pelo Usuario. Removendo a Saida Parcial e os Temporarios Deste Episodio..."
             if (Test-Path -LiteralPath $outFile) { Remove-Item -LiteralPath $outFile -Force -ErrorAction SilentlyContinue }
+            # 14.9: a copia do .srt sai ANTES da conferencia final - um ESC ali
+            # deixava o .srt orfao na pasta de saida, sem o .mkv ao lado.
+            if ($srtCopiaFinal -and (Test-Path -LiteralPath $srtCopiaFinal)) { Remove-Item -LiteralPath $srtCopiaFinal -Force -ErrorAction SilentlyContinue }
+            <#  2.0.10: OS ARQUIVOS DE TRABALHO DA LEGENDA FICAVAM PARA TRAS NO [ESC].
+                Log do Diego, 23/09 (2.0.8): cancelou na remontagem e o
+                _CORRIGIDO.srt e o relatorio do Reocr ficaram em _corretor\ e
+                _reocr\. A faxina da legenda so rodava no fim de uma conversao
+                BEM-SUCEDIDA. Cancelar e decisao do usuario, nao defeito a
+                investigar: a legenda nao vai para lugar nenhum, entao o
+                material dela e lixo. So o que ESTE episodio criou (>= T0Legenda).
+                Na FALHA (o else abaixo) continua tudo guardado - la e o que
+                explica o erro. #>
+            if ($script:T0Legenda) {
+                $apagadosCanc = 0
+                foreach ($plc in @((Join-Path $ScriptDir "_corretor"), (Join-Path $ScriptDir "_reocr"))) {
+                    if (-not (Test-Path -LiteralPath $plc)) { continue }
+                    foreach ($arqC in @(Get-ChildItem -LiteralPath $plc -File -ErrorAction SilentlyContinue)) {
+                        if ($arqC.LastWriteTime -lt $script:T0Legenda) { continue }
+                        try { Remove-Item -LiteralPath $arqC.FullName -Force -ErrorAction Stop; $apagadosCanc++ } catch { }
+                    }
+                }
+                if ($apagadosCanc -gt 0) {
+                    Say ("        (" + $apagadosCanc + " arquivo(s) de trabalho da legenda removido(s) de _corretor e _reocr)") "DarkGray"
+                }
+            }
             # O Motivo aqui NAO repete "cancelado pelo usuario" (isso ja esta
             # no Status, logo acima) - em vez disso, informa QUAL etapa estava
             # em andamento quando o [ESC] foi pressionado, que e a informacao
             # nova e util para quem esta lendo o resumo depois.
-            # SayStep formata o texto da etapa com ":" no final (ex: "[2/7]
+            # SayStep formata o texto da etapa com ":" no final (ex: "[2/5]
             # Extraindo Video Puro do MKV (ffmpeg, Sem Recodificar):"), porque
             # e pensado pra aparecer sozinho como cabecalho de etapa. Usado
             # aqui dentro de uma frase, esse ":" sobrando deixava a mensagem
@@ -7287,6 +7897,7 @@ foreach ($f in $files) {
             foreach ($ln in @($erroFiltrado -split "(?<=\.)\s+" | Where-Object { $_ -and $_.Trim() -ne "" })) {
                 Say ("        " + $ln.Trim()) "Red"
             }
+            if ($srtCopiaFinal -and (Test-Path -LiteralPath $srtCopiaFinal)) { Remove-Item -LiteralPath $srtCopiaFinal -Force -ErrorAction SilentlyContinue }
             if (Test-Path -LiteralPath $outFile) { Remove-Item -LiteralPath $outFile -Force -ErrorAction SilentlyContinue }
             $resultados += [PSCustomObject]@{
                 Episodio = $name; Status = "FALHOU"; StatusDV = ""; StatusAudio = ""; MotivoAudio = ""; CodecAudio = "-"; TipoConvAudio = ""; StatusLegenda = ""; MotivoLegenda = ""; DescarteAudio = $false; DescarteLegenda = $false; FaixasAudioMantidas = $null; FaixasLegendaMantidas = $null; NotaLegendaVeredicto = ""; NotaLegendaDefeitos = -1; NotaLegendaPct = ""; NotaLegendaBlocos = 0; Fps = ""; Tamanho = ""; DuracaoVideo = ""; Tempo = Format-Duracao ((Get-Date) - $tIni).TotalSeconds; Motivo = $erroFiltrado
@@ -7318,6 +7929,11 @@ $ok       = @($resultados | Where-Object { $_.Status -eq "OK" })
 $parcial  = @($resultados | Where-Object { $_.Status -eq "OK_PARCIAL" })
 $falhou   = @($resultados | Where-Object { $_.Status -eq "FALHOU" })
 $pulado   = @($resultados | Where-Object { $_.Status -eq "PULADO" })
+# 2.0.10: "PULADO" cobre dois casos opostos - ja existia (nada a fazer) e
+# faltou espaco (o usuario precisa agir). Iam juntos no mesmo "Ja Existiam".
+# Mesmo criterio da janela (Test-PuladoPorEspaco).
+$puladoEspaco = @($pulado | Where-Object { "$($_.Motivo)" -match "(?i)espaco insuficiente" })
+$pulado       = @($pulado | Where-Object { "$($_.Motivo)" -notmatch "(?i)espaco insuficiente" })
 $cancelado = @($resultados | Where-Object { $_.Status -eq "CANCELADO" })
 $processados = @($ok + $parcial)   # episodios onde o Dolby Vision foi convertido (sucesso total ou parcial)
 
@@ -7331,6 +7947,9 @@ Say-Contador "Convertidos com Sucesso"  $ok.Count      "Green"
 Say-Contador "Convertidos com Avisos"   $parcial.Count "Yellow"
 Say-Contador "Nao Finalizados (Erro)"   $falhou.Count  "Red"
 Say-Contador "Ignorados (Ja Existiam)"  $pulado.Count  "DarkGray"
+if ($puladoEspaco.Count -gt 0) {
+    Say ("  Pulados por Falta de Espaco    : {0}" -f $puladoEspaco.Count) "Yellow"
+}
 # A linha de cancelamento so aparece quando realmente houve [ESC] - em uma
 # execucao normal ela nao polui o resumo.
 if ($cancelado.Count -gt 0) {
@@ -7351,6 +7970,7 @@ Say ("  Tempo Total                    : {0}" -f (Format-Duracao $duracaoGeral.T
 if ($processados.Count -gt 0) {
     $dvConvertido       = @($processados | Where-Object { $_.StatusDV -eq "OK" }).Count
     $dvNaoNecess        = @($processados | Where-Object { $_.StatusDV -eq "NAO_NECESSARIO" }).Count
+    $dvP5Mp4            = @($processados | Where-Object { $_.StatusDV -eq "P5_MP4" }).Count
     $audioTrueHdConv    = @($processados | Where-Object { $_.StatusAudio -eq "OK" -and $_.TipoConvAudio -eq "TRUEHD" }).Count
     $audioDtsConv       = @($processados | Where-Object { $_.StatusAudio -eq "OK" -and $_.TipoConvAudio -eq "DTS" }).Count
     $audioJaOtimo       = @($processados | Where-Object { $_.StatusAudio -eq "JA_OTIMO" }).Count
@@ -7365,6 +7985,7 @@ if ($processados.Count -gt 0) {
     Write-Host ""
     SayTitulo "  DETALHAMENTO POR PROCESSO:"
     if ($dvConvertido -gt 0) { Say ("        Dolby Vision Convertido para Profile 8.1   : {0}" -f $dvConvertido) "Green" }
+    if ($dvP5Mp4      -gt 0) { Say ("        Dolby Vision Profile 5 Remuxado para MP4   : {0}" -f $dvP5Mp4) "Green" }
     if ($dvNaoNecess  -gt 0) { Say ("        Dolby Vision Ja Era Profile 8.1 (Mantido)  : {0}" -f $dvNaoNecess) "DarkGray" }
     if ($audioTrueHdConv   -gt 0) { Say ("        Audio TrueHD Convertido para E-AC-3 Atmos  : {0}" -f $audioTrueHdConv) "Green" }
     if ($audioDtsConv      -gt 0) { Say ("        Audio DTS Convertido para E-AC-3           : {0}" -f $audioDtsConv) "Green" }
@@ -7533,6 +8154,15 @@ if ($resultados.Count -gt 0) {
         Write-Host ""
 
         if ($r.Status -eq "OK" -or $r.Status -eq "OK_PARCIAL") {
+            # 14.9: o Profile 5 nao passa por audio/OCR/.mkv - o cartao dele
+            # dizia "TrueHD -> E-AC-3 Atmos", "Legenda (OCR)" e "Matroska".
+            if ($r.StatusDV -eq "P5_MP4") {
+                Write-CampoResumo "[OK]" "Green" "Dolby Vision Profile 5 -> MP4" "[REMUXADO]" "Green"
+                Write-CampoResumo " " "DarkGray" "Audio" $r.MotivoAudio "Gray"
+                Write-CampoResumo " " "DarkGray" "Legenda" $r.MotivoLegenda "Gray"
+                Write-CampoResumo " " "DarkGray" "Container Final" ("MPEG-4 (.mp4)  |  {0}" -f $r.Tamanho) "Gray"
+                continue
+            }
             # --- Video / Dolby Vision ---
             if ($r.StatusDV -eq "NAO_NECESSARIO") {
                 Write-CampoResumo "[--]" "Yellow" "Dolby Vision -> Profile 8.1 (RPU)" "[NAO NECESSARIO]" "Yellow"
@@ -7717,27 +8347,8 @@ Line
 
         Falhar aqui nao custa nada: a conversao acabou, o log oficial esta
         gravado em _logs, e o pior caso e o arquivo ficar sem a copia. #>
-    try {
-        $convertidos = @($resultados | Where-Object { $_.Status -eq "OK" -or $_.Status -eq "OK_PARCIAL" })
-        if ($convertidos.Count -gt 0 -and (Test-Path -LiteralPath $LogFile)) {
-            $textoLog = [System.IO.File]::ReadAllText($LogFile)
-            foreach ($c in $convertidos) {
-                $nomeBase = "$($c.Episodio)"
-                if ($nomeBase -eq "") { continue }
-                # O nome vem do episodio, nao do caminho: o P5 sai .mp4 e o
-                # resto sai .mkv, e a copia nao precisa saber qual foi.
-                $destino = Join-Path $OutputDir ($nomeBase + ".LaFirma.log.txt")
-                [System.IO.File]::WriteAllText($destino, $textoLog, (New-Object System.Text.UTF8Encoding($false)))
-            }
-            if ($convertidos.Count -eq 1) {
-                Say ("  Copia do Log ao Lado do Arquivo: {0}.LaFirma.log.txt" -f "$($convertidos[0].Episodio)") "DarkGray"
-            } else {
-                Say ("  Copia do Log ao Lado de Cada um dos {0} Arquivos Convertidos" -f $convertidos.Count) "DarkGray"
-            }
-        }
-    } catch {
-        try { Say ("  Nao consegui gravar a copia do log na pasta de saida: {0}" -f $_.Exception.Message) "Yellow" } catch { }
-    }
+    # v14.14: a copia <nome>.LaFirma.log.txt na pasta de saida SAIU (pedido
+    # do Diego 23/09): a pasta final recebe so .mkv + .srt. O log fica em _logs.
 
     Read-Host "Pressione ENTER para Fechar" | Out-Null
 }

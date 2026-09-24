@@ -4,10 +4,6 @@
 # Editar aqui NAO exige mexer em codigo nem reinstalar nada.
 
 # ---- Barra de botoes ----
-Iniciar F1	Start F1
-Pausar F2	Pause F2
-Retomar F2	Resume F2
-Cancelar ESC	Cancel ESC
 Parar	Stop
 Abrir Origem	Open Source
 Abrir Saída	Open Output
@@ -16,9 +12,14 @@ Censo Completo	Full Census
 Medir MEL x FEL: Ligado	Measure MEL x FEL: On
 Medir MEL x FEL: Desligado	Measure MEL x FEL: Off
 Esperando a medição terminar para começar...	Waiting for the measurement to finish...
+# 17.19: o aviso conta O QUE FALTA PARA VOCE; o botao conta progresso
+# ("2 de 3"). Formas diferentes de proposito - eram dois contadores com a
+# mesma cara e numeros legitimamente diferentes.
+(falta 1 arquivo da sua fila)	(1 file from your queue to go)
+(faltam {0} arquivos da sua fila)	({0} files from your queue to go)
 Não Iniciado - Espaço Insuficiente em Disco	Not Started - Not Enough Disk Space
 Contando...	Counting...
-Entenda	Learn
+Entenda	Understand
 Log	Log
 Ferramentas	Tools
 
@@ -59,7 +60,7 @@ AÇÃO	ACTION
 # ---- Paineis ----
 DIAGNÓSTICO:	DIAGNOSIS:
 ESPAÇO EM DISCO:	DISK SPACE:
-FERRAMENTAS DISPONIVEIS:	AVAILABLE TOOLS:
+FERRAMENTAS DISPONÍVEIS:	AVAILABLE TOOLS:
 RESUMO DA CONVERSÃO:	CONVERSION SUMMARY:
 DETALHAMENTO POR PROCESSO:	BREAKDOWN BY PROCESS:
 VÍDEO	VIDEO
@@ -112,7 +113,6 @@ Encerrar Programa	Quit
 ~  ·  Manual	  ·  Manual
 
 # ---- Rotulos que o CODIGO reescreve (a varredura da arvore nao segura) ----
-Parar	Stop
 Lendo a Pasta...	Reading the Folder...
 Origem e Saída São a Mesma Pasta	Source and Output Are the Same Folder
 Cancelando - Aguardando o Motor Encerrar...	Cancelling - Waiting for the Engine to Stop
@@ -139,13 +139,17 @@ Marque o vídeo p/ editar	Tick the video to edit
 ~^DIAGNÓSTICO - 	DIAGNOSIS - 
 
 # ---- Coluna DOLBY VISION enquanto mede ----
-~ ⋯ → 	 ⋯ → 
+# 18.00: as duas regras que moravam aqui ("~ ⋯ → " e "~^P(d).(d+) medindo")
+# apontavam para formatos de coluna que deixaram de existir. A coluna nao diz
+# mais "medindo": enquanto nao ha veredicto ela mostra so o detectado
+# ("P7 → P8.1"), porque atividade e assunto da coluna SITUACAO e do contador da
+# barra - nao do veredicto. Regra de traducao orfa nao quebra nada, mas mente
+# para quem le o arquivo depois.
 # 17.14: esta linha vem ANTES de '~medindo' de proposito. As regras
 # rodam em ordem, e a regra da palavra solta desmanchava a frase
 # inteira antes de ela ser testada (o Diego viu 'measuring a camada
 # de melhoria' na tela em ingles).
 ~medindo a camada de melhoria \(MEL x FEL\)	measuring the enhancement layer (MEL x FEL)
-~^P(\d)\.(\d+) medindo	P$1.$2 measuring
 ~medindo	measuring
 
 # ---- Titulos de janela que faltavam ----
@@ -194,7 +198,6 @@ Marque o vídeo p/ editar	Tick the video to edit
 ~borda do RPU \(L5\) dá ([^,]+), que não é formato de cinema - já vem assim da origem	RPU border (L5) gives $1, which is no cinema format - it came that way from the source
 
 # ---- Linha do audio ----
-~^ÁUDIO PRINCIPAL: 	MAIN AUDIO: 
 ~^ÁUDIO PRINCIPAL: NENHUM$	MAIN AUDIO: NONE
 ~^ÁUDIO PRINCIPAL: 	MAIN AUDIO: 
 ~O Arquivo Não Tem Faixa de Áudio	The File Has No Audio Track
@@ -223,10 +226,8 @@ Marque o vídeo p/ editar	Tick the video to edit
 ~^Já Convertido$	Already Converted
 
 # ---- 17.03: a aba Faixas (grupos, padrao, extras, rodape) ----
-ÁUDIO	AUDIO
 LEGENDAS	SUBTITLES
 EXTRAS	EXTRAS
-PADRÃO	DEFAULT
 Capítulos	Chapters
 Anexos	Attachments
 Mantidos	Kept
@@ -247,6 +248,11 @@ nenhum anexo	no attachments
 # ' a Pedido' corta a frase longa pela metade (mesmo erro do 'medindo').
 ~Todas as Faixas de Áudio Excluídas por Você	All Audio Tracks Dropped by You
 ~Sem Legenda PT-BR no Arquivo Final	No PT-BR Subtitle in the Final File
+# 2.0.6: as duas regras em CAIXA ALTA vinham DEPOIS de "~ a Pedido" e nunca
+# casavam (regex diferencia maiuscula). Agora vem antes, com o selo inteiro.
+~^Áudio (\S+) Mantido a Pedido - CONVERSÃO DESLIGADA$	Audio $1 Kept on Request - CONVERSION OFF
+~ Mantido a Pedido - CONVERSÃO DESLIGADA	 Kept on Request - CONVERSION OFF
+~ Mantida a Pedido - CONVERSÃO DESLIGADA	 Kept on Request - CONVERSION OFF
 ~ a Pedido - a Legenda Anterior Foi Descartada	 on Request - the Previous Subtitle Was Dropped
 ~ Mantido a Pedido - Conversão Desligada	 Kept on Request - Conversion Off
 ~ Mantida a Pedido - Conversão Desligada	 Kept on Request - Conversion Off
@@ -261,7 +267,7 @@ nenhum anexo	no attachments
 # ---- 17.15: o RODAPE inteiro (montado por codigo, linha por linha) ----
 # Ordem: os pedacos longos primeiro. Cada linha do rodape e uma colagem de
 # rotulo + valor, entao o que casa e o PEDACO, nunca a frase inteira.
-~Deve Terminar por Volta das 	 Should Finish Around 
+~Deve Terminar por Volta das 	Should Finish Around 
 ~Tempo Restante: 	Time Left: 
 ~   Terminando Agora	   Finishing Now
 ~PAUSADO POR VOCÊ há 	PAUSED BY YOU for 
@@ -287,6 +293,7 @@ nenhum anexo	no attachments
 A camada de melhoria está sendo medida agora. A fila fica livre - isto roda em segundo plano.	The enhancement layer is being measured right now. The queue stays free - this runs in the background.
 
 # ---- 17.16: o motivo do arquivo que nao comecou ----
+~^Faltam ~(.*) livres no disco ([A-Z]:)$	Short by ~$1 free on drive $2
 ~^Faltam ~(.*) livres no disco de saída$	Short by ~$1 free on the output drive
 
 # ---- 17.16: os selos e a linha de qualidade do CARTAO FINAL ----
@@ -294,8 +301,6 @@ A camada de melhoria está sendo medida agora. A fila fica livre - isto roda em 
 # caixa normal: sobrava 'Mantido on Request - CONVERSAO DESLIGADA' na tela
 # em ingles. Caixa alta primeiro, pelo mesmo motivo de sempre (a regra mais
 # especifica antes da mais geral).
-~ Mantido a Pedido - CONVERSÃO DESLIGADA	 Kept on Request - CONVERSION OFF
-~ Mantida a Pedido - CONVERSÃO DESLIGADA	 Kept on Request - CONVERSION OFF
 ~\[SERÁ CONVERTIDO COM RESSALVA\]	[WILL BE CONVERTED WITH A CAVEAT]
 ~\[SERÁ CONVERTIDA COM RESSALVA\]	[WILL BE CONVERTED WITH A CAVEAT]
 
@@ -313,8 +318,7 @@ nada agora - a conta aperta no meio da fila	nothing right now - the squeeze happ
 Conversão de Perfil Dolby Vision 7 → 8.1 (dovi_tool)	Dolby Vision Profile 7 → 8.1 Conversion (dovi_tool)
 Extração e Remontagem de Vídeo (ffmpeg + mkvmerge)	Video Extraction and Rebuild (ffmpeg + mkvmerge)
 Leitura de Metadados (ffprobe)	Metadata Reading (ffprobe)
-OCR de Legenda PT-BR (seconv/BinaryOCR - preferencial)	PT-BR Subtitle OCR (seconv/BinaryOCR - preferred)
-OCR de Legenda PT-BR (PgsToSrt - reserva)	PT-BR Subtitle OCR (PgsToSrt - fallback)
+OCR de Legenda PT-BR (PgsToSrt)	PT-BR Subtitle OCR (PgsToSrt)
 Áudio TrueHD → E-AC-3 Atmos (DeeZy)	TrueHD → E-AC-3 Atmos Audio (DeeZy)
 Sinal de Atmos (MediaInfo)	Atmos Signalling (MediaInfo)
 Revisão de Blocos-Lixo do OCR (Corretor_Legenda)	OCR Junk-Block Review (Corretor_Legenda)
@@ -344,12 +348,10 @@ Conversão de Áudio para E-AC-3	Converting audio to E-AC-3
 Conversão de Legenda PGS para .SRT	Converting PGS subtitle to .SRT
 Remontando MKV Final (mkvmerge)	Rebuilding the final MKV (mkvmerge)
 Diagnóstico do arquivo	File diagnosis
-Limpeza dos temporários	Cleaning up temporary files
 
 # ---- Rodape de progresso (17.12) ----
 ETAPA	STEP
 FILA	QUEUE
-(aguardando o motor)	(waiting for the engine)
 
 # ---- Cartao final: rotulos e frases (17.12) ----
 Situação	Status
@@ -358,8 +360,6 @@ Tempo	Time
 Container Final	Final Container
 Áudio	Audio
 Legenda	Subtitle
-Áudio  (★ = faixa padrão)	Audio  (★ = default track)
-Legenda  (★ = faixa padrão)	Subtitle  (★ = default track)
 Qualidade da Legenda	Subtitle Quality
 Duração / Taxa de Quadros	Duration / Frame Rate
 Tempo de Processamento	Processing Time
@@ -373,7 +373,7 @@ EXCELENTE	EXCELLENT
 BOA	GOOD
 RAZOAVEL	FAIR
 RUIM	POOR
-Nenhuma falha encontrada. Pode assistir por esta legenda.	No faults found. You can watch with this subtitle.
+Nenhum defeito detectável. O contador não pega nome próprio trocado.	No detectable defects. The counter does not catch a swapped proper name.
 Pode assistir por esta legenda.	You can watch with this subtitle.
 Dá para assistir. Se tropeçar numa fala, troque no player para a legenda PGS original.	Watchable. If a line trips you up, switch in the player to the original PGS subtitle.
 Prefira a legenda PGS original - ela está neste mesmo arquivo.	Prefer the original PGS subtitle - it is in this same file.
@@ -381,11 +381,9 @@ Prefira a legenda PGS original - ela está neste mesmo arquivo.	Prefer the origi
 # ---- Resumo final: as linhas das duas colunas (17.12) ----
 Total de Vídeos na Fila	Total Videos in Queue
 Convertidos com Sucesso	Converted Successfully
-Convertidos com Ressalva	Converted with Caveat
 Ignorados (Já Existiam)	Skipped (Already Existed)
 Não Iniciados (Sem Espaço)	Not Started (No Disk Space)
 Cancelados pelo Usuário	Cancelled by User
-Falharam	Failed
 Tempo Total	Total Time
 Dolby Vision Convertido para Profile 8.1	Dolby Vision Converted to Profile 8.1
 Áudio Convertido para E-AC-3[ATMOS]	Audio Converted to E-AC-3[ATMOS]
@@ -416,11 +414,78 @@ Cancelando - esperando a etapa atual terminar e limpando os temporários...	Canc
 # ---- 17.14: legenda redundante e dica do Censo Completo ----
 Já Existe .SRT - OCR Não Necessário	Text .SRT Already Exists - No OCR Needed
 Selecione um vídeo na fila para poder contar as cenas.	Select a video in the queue to count its scenes.
-Já existe um censo em andamento - espere ele terminar.	A census is already running - wait for it to finish.
-Este arquivo já foi contado - o número está no diagnóstico e no log.	This file has already been counted - the number is in the diagnosis and in the log.
+Este arquivo já foi contado - o número está no diagnóstico e no log. Clique (ou F11) para contar de novo.	This file has already been counted - the number is in the diagnosis and in the log. Click (or F11) to count it again.
 Ligue 'Medir MEL x FEL' e releia a pasta: sem a amostra não há veredicto para conferir.	Turn 'Measure MEL x FEL' on and re-read the folder: without the sample there is no verdict to check.
 A camada de melhoria deste arquivo ainda está sendo medida.	The enhancement layer of this file is still being measured.
 A camada de melhoria deste arquivo não foi medida - meça a amostra antes, ela custa 5x menos.	The enhancement layer of this file was not measured - measure the sample first, it costs 5x less.
 Só vale em Complex FEL: aqui a camada extra não carrega imagem, não há cena para contar.	Only makes sense on Complex FEL: here the extra layer carries no picture, there is no scene to count.
 Só vale em Complex FEL: aqui o L1 cabe dentro do master, contar o filme inteiro não muda o veredicto.	Only makes sense on Complex FEL: here L1 fits inside the master, counting the whole film does not change the verdict.
 Lê o filme inteiro e conta quantas cenas pedem mais brilho que o master. Demora cerca de 5x a amostra - a fila continua livre.	Reads the whole film and counts how many scenes ask for more brightness than the master. Takes about 5x the sample - the queue stays free.
+# ---- 17.21: o censo nao pode disputar o disco com a conversao ----
+A conversão está em curso - o censo lê o filme inteiro e disputaria o disco com ela. Espere a fila terminar.	A conversion is running - the census reads the whole film and would fight it for the disk. Wait for the queue to finish.
+# ---- 17.22: a faixa de PAUSADO ficava em portugues com a tela em ingles ----
+#  Achado do Diego (16/09, print): a tela inteira em EN e a faixa amarela do
+#  meio escrita 'PAUSADO (sem consumir CPU/disco)'. O texto esta DECLARADO no
+#  XAML - entao a varredura alcancava ele - mas nunca teve entrada aqui, e o
+#  que nao tem entrada sai no original, por regra. Nao era bug de codigo: era
+#  linha faltando no dicionario.
+>>> PAUSADO (sem consumir CPU/disco) - [F2] Retomar   [ESC] Cancelar <<<	>>> PAUSED (not using CPU/disk) - [F2] Resume   [ESC] Cancel <<<
+#  Os dois abaixo o codigo reescreve sozinho na partida, mas entrada faltando
+#  e divida esperando vencer - se um dia alguem parar de reescrever, some.
+Medir MEL x FEL	Measure MEL x FEL
+# ---- 17.24: o resultado do censo passou a aparecer na linha ----
+~ · censo: (.+) de (.+) cenas do filme \((\d+)%\) passam do master, pico (.+) nits	 · census: $1 of $2 scenes in the film ($3%) exceed the master, peak $4 nits
+~ · censo: (.+) de (.+) cenas do filme \((\d+)%\) passam do master$	 · census: $1 of $2 scenes in the film ($3%) exceed the master
+
+# ---- 18.03: achados no print do Diego (16/09) e na auditoria que virou teste ----
+Sem PT-BR (só pt-PT)	No PT-BR (pt-PT only)
+Nenhum vídeo selecionado.	No video selected.
+Nenhum vídeo a converter nesta pasta.	No video to convert in this folder.
+→ [SEM DOLBY VISION] Este Vídeo Será Ignorado	→ [NO DOLBY VISION] This Video Will Be Skipped
+Áudio E-AC-3[ATMOS] Já Existente - REAPROVEITADO	E-AC-3[ATMOS] Audio Already There - REUSED
+Áudio E-AC-3/AC-3 Já Existente - REAPROVEITADO	E-AC-3/AC-3 Audio Already There - REUSED
+Áudio - NÃO NECESSÁRIO	Audio - NOT NEEDED
+Áudio - ERRO	Audio - ERROR
+Áudios e Legendas - TODOS MANTIDOS (Modo Seguro)	Audio and Subtitles - ALL KEPT (Safe Mode)
+Áudios Extras - DESCARTADOS  ·  Legendas - TODAS MANTIDAS	Extra Audio - DROPPED  ·  Subtitles - ALL KEPT
+Legendas Extras - DESCARTADAS  ·  Áudios - TODOS MANTIDOS	Extra Subtitles - DROPPED  ·  Audio - ALL KEPT
+
+# ---- 18.09: o contador do censo diz quanto falta ----
+~^ de ~(.+)$	 of ~$1
+~^O censo deste arquivo está rodando há (.+) - leva cerca de (.+) no total \(a amostra dele levou (.+)\)\. Clique de novo \(ou F11\) para cancelar\.$	This file's census has been running for $1 - about $2 in total (its sample took $3). Click again (or F11) to cancel.
+~^O censo está rodando há (.+) - ele lê o RPU do filme inteiro e a fila continua livre\. Clique de novo \(ou F11\) para cancelar\.$	The census has been running for $1 - it reads the whole film's RPU and the queue stays free. Click again (or F11) to cancel.
+~^O censo deste arquivo está rodando - leva cerca de (.+) no total \(a amostra dele levou (.+)\)\.$	This file's census is running - about $1 in total (its sample took $2).
+
+# ---- 18.10: o botao do censo no padrao de cores ----
+Censo Feito	Census Done
+Censo	Census
+ (+)	 (+)
+[F11] Censo Completo	[F11] Full Census
+[F12] Medir MEL x FEL	[F12] Measure MEL x FEL
+Clique para escolher a pasta de ORIGEM.	Click to choose the SOURCE folder.
+Clique para escolher a pasta de SAÍDA.	Click to choose the OUTPUT folder.
+Pausar	Pause
+Retomar	Resume
+Convertidos com Avisos        : {0}	Converted with Warnings       : {0}
+Não Finalizados (Erro)        : {0}	Not Finished (Error)          : {0}
+[F3] Abrir Origem	[F3] Open Source
+[F4] Abrir Saída	[F4] Open Output
+[F5] Atualizar	[F5] Refresh
+[F5] Parar	[F5] Stop
+[F1] Iniciar	[F1] Start
+[F2] Pausar	[F2] Pause
+[ESC] Cancelar	[ESC] Cancel
+[F2] Retomar	[F2] Resume
+
+# ---- 2.0.6: selos do cartao que nao tinham traducao ----
+Áudio → E-AC-3 640k - CONVERTIDO	Audio → E-AC-3 640k - CONVERTED
+Áudio → E-AC-3[ATMOS] 1152k - CONVERTIDO	Audio → E-AC-3[ATMOS] 1152k - CONVERTED
+Legenda PT-BR [.SRT] - REAPROVEITADA	PT-BR [.SRT] Subtitle - REUSED
+Legenda PT-BR [.SRT] - DESCARTADA A PEDIDO	PT-BR [.SRT] Subtitle - DROPPED ON REQUEST
+Legenda - ERRO	Subtitle - ERROR
+Dolby Vision Profile 5 → MP4 - REMUXADO	Dolby Vision Profile 5 → MP4 - REMUXED
+O censo anterior ainda está encerrando - dá para pedir de novo em alguns segundos.	The previous census is still shutting down - you can ask again in a few seconds.
+Nenhum .mkv nesta pasta.	No .mkv in this folder.
+~^Nenhum \.mkv aqui, mas ha (\d+) em subpastas \((\d+) subpasta\(s\)\)\. A leitura olha so o primeiro nivel\.$	No .mkv here, but there are $1 in subfolders ($2 subfolder(s)). Only the first level is read.
+~^Nenhum \.mkv, mas ha (\d+) video\(s\) de outra extensao \((.*)\)\. O conversor so trabalha com \.mkv\.$	No .mkv, but there are $1 video(s) with another extension ($2). The converter only works with .mkv.
+~^Pasta sem videos no primeiro nivel \((\d+) subpasta\(s\) dentro\)\.$	No videos at the first level ($1 subfolder(s) inside).

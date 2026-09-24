@@ -1,43 +1,57 @@
-================================================================================
-                  CONTEÚDO NECESSÁRIO DENTRO DA PASTA 'tools'
+﻿================================================================================
+          LaFirma Remux Forge - CONTEÚDO DA PASTA 'tools'
 ================================================================================
 
-Para garantir o funcionamento correto do LaFirma Remux Forge, a pasta "tools\" 
-deve conter estritamente os seguintes executáveis, bibliotecas e subpastAS:
+A pasta "tools\" fica ao lado do LaFirma_JANELA.ps1 e precisa ter EXATAMENTE
+o que está abaixo. O instalador já traz tudo. Este texto é para quem quiser
+montar a pasta por fora.
+
+Download da pasta pronta:
+  tools.rar    - MEGA  : https://mega.nz/file/OGB3Xb7I#9MsNg8kaJD4R0f0xnHdnPnEjaKwlqKJpDFss1KOaNCo
+  tools.rar    - Proton: https://drive.proton.me/urls/REAQGVN7D4#RXvf7kjVeJ1I
+  pasta        - MEGA  : https://mega.nz/folder/HbwiFAab#4-tWrGlGfoEN0xRopn_8IQ
+  pasta        - Proton: https://drive.proton.me/urls/5Y8AZ9QZ6C#YnOKpcuVRXUk
 
 1. ARQUIVOS NA RAIZ (tools\)
 --------------------------------------------------------------------------------
-   - ffmpeg.exe        : Ferramenta principal de processamento de mídia
-   - ffprobe.exe       : Analisador de faixas e fluxos de mídia
-   - dovi_tool.exe     : Utilitário para manipulação de Dolby Vision RPU
-   - mkvmerge.exe      : Multiplexador de arquivos Matroska (.mkv)
-   - mkvextract.exe    : Extrator de faixas de arquivos .mkv
-   - MediaInfo.exe     : Leitor detalhado de metadados
-   - LIBCURL.DLL       : Biblioteca para requisições de rede
-   - nvcuda.dll        : Biblioteca de aceleração NVIDIA CUDA
-   - nvcuvid.dll       : Biblioteca do NVIDIA Video Codec SDK
+   - ffmpeg.exe      : extrai o vídeo do MKV e confere o arquivo final
+   - ffprobe.exe     : lê faixas, duração e FPS
+   - dovi_tool.exe   : converte o Dolby Vision (Profile 7 -> 8.1) e mede a
+                       camada de melhoria (MEL x FEL). Versão 2.3.3.
+   - mkvmerge.exe    : lê as faixas e monta o MKV final
+   - MediaInfo.exe   : detecta Atmos/JOC nas faixas de áudio
 
-2. SUBPASTAS OBRIGATÓRIAS (tools\)
+2. SUBPASTAS
 --------------------------------------------------------------------------------
-   - SubtitleEdit\
-       |-- seconv.exe         : Executável principal para o OCR preferencial
-       |-- Latin.db           : Banco de dados de caracteres ópticos
-       |-- libSkiaSharp.dll   : Biblioteca gráfica (obrigatória para o seconv)
-
-   - PgsToSrt\
-       |-- PgsToSrt.exe       : Utilitário de OCR reserva (rede de segurança)
-       |-- x64\               : Binários de arquitetura
-       |-- tessdata\          : Modelo de linguagem do Tesseract
+   - PgsToSrt\        OCR da legenda PGS -> .SRT
+       |-- PgsToSrt.exe
+       |-- x64\                   (bibliotecas do Tesseract usadas por ele)
+       |-- tessdata\
              |-- por.traineddata
 
-   - Tesseract\
-       |-- tesseract.exe      : Motor de Re-OCR para falas curtas
-       |-- tessdata\          : Arquivos de treinamento de linguagem
+   - Tesseract\       Re-OCR das falas curtas (conserta "INF TOL" -> "Não!")
+       |-- tesseract.exe          (+ as DLLs que vêm junto dele)
+       |-- tessdata\
              |-- por.traineddata
-             |-- osd.traineddata
 
-   - DeeZy\
-       |-- deezy.exe          : Utilitário para conversão TrueHD/Atmos -> E-AC-3
-       |-- apps\              : Motores internos de áudio (dee, truehdd)
-       |-- bundle\            : Módulos e dependências de suporte
+   - DeeZy\           TrueHD/Atmos -> E-AC-3 Atmos
+       |-- deezy.exe
+       |-- apps\dee\dee.exe
+       |-- apps\truehdd\truehdd.exe
+       |-- (demais arquivos que vêm com o DeeZy)
+       O DeeZy usa o ffmpeg.exe da raiz de tools\ - a cópia em
+       apps\ffmpeg\ não é necessária.
+
+3. O QUE NÃO PRECISA MAIS
+--------------------------------------------------------------------------------
+   - SubtitleEdit\ (seconv, Latin.db, libSkiaSharp.dll): saiu na 2.0.
+     O OCR agora é só PgsToSrt + Tesseract.
+   - mkvextract.exe, LIBCURL.DLL, nvcuda.dll, nvcuvid.dll: o programa não usa.
+   - PgsToSrt\x86\: só a x64 é usada.
+
+4. FORA DA PASTA tools
+--------------------------------------------------------------------------------
+   - .NET Desktop Runtime 8 (x64): o PgsToSrt precisa dele. O instalador
+     instala se faltar; montando por fora, instale você:
+     https://dotnet.microsoft.com/download/dotnet/8.0
 ================================================================================

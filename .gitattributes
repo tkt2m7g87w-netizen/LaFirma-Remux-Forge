@@ -1,74 +1,47 @@
 # ============================================================================
-#  LaFirma Remux Forge - fim de linha, fixado NO REPOSITORIO
+#  LaFirma Remux Forge - quem manda na quebra de linha
 # ----------------------------------------------------------------------------
-#  POR QUE ESTE ARQUIVO EXISTE (achado da auditoria de 15/09/2026)
+#  Este arquivo existe por um defeito MEDIDO (auditoria de 15/09/2026).
+#  Sete arquivos estavam guardados no GitHub com LF, nao CRLF:
 #
-#  Sem ele, quem decide o fim de linha e o core.autocrlf da maquina que comita -
-#  e ele estava decidindo COISAS DIFERENTES para arquivos diferentes. Medido
-#  byte a byte no repositorio publicado, sete arquivos estavam guardados com LF
-#  enquanto todo o resto estava com CRLF:
-#
-#      fonte\IDIOMA_EN.txt
-#      fonte\CHANGELOG_EN.txt
-#      fonte\FAQ_PT.txt
+#      fonte\IDIOMA_EN.txt          _testes\Testar_LaFirma.ps1
+#      fonte\CHANGELOG_EN.txt       _testes\Testar_LaFirma.bat
+#      fonte\FAQ_PT.txt             README_INSTALLER[ENGLISH].txt
 #      fonte\FAQ_EN.txt
-#      _testes\Testar_LaFirma.ps1
-#      _testes\Testar_LaFirma.bat
-#      README_INSTALLER[ENGLISH].txt
 #
-#  O mesmo estado ja existia na tag v1.8.1, entao nao veio de nenhuma entrega
-#  recente. As copias locais sempre estiveram certas - errado estava o que o
-#  git guardou.
+#  As copias locais sempre estiveram em CRLF - errado estava o que o git
+#  guardou. Sem .gitattributes quem decidia era o core.autocrlf da maquina,
+#  e ele nao decidia igual para todos os arquivos.
 #
-#  O QUE ISSO ESTRAGAVA
-#    - O instalador compilado sai da pasta LOCAL, que e CRLF: nenhum instalador
-#      publicado tem esse problema. Ninguem baixou arquivo ruim.
-#    - Mas quem CLONA o repositorio e roda a bateria REPROVA nos testes de
-#      encoding: o repositorio nao passava na propria bateria.
-#    - E .bat com LF pode se comportar mal em goto/rotulos.
+#  O instalador e compilado da pasta LOCAL, que e CRLF - nenhum instalador
+#  publicado foi afetado. O problema era de quem CLONA: reprovava nos testes
+#  de encoding da propria bateria, e .bat com LF pode se comportar mal em
+#  goto.
 #
-#  COMO FUNCIONA O CONSERTO
-#    O git passa a guardar LF (normalizado - diff limpo, sem "arquivo inteiro
-#    mudou") e a ENTREGAR CRLF no checkout. Quem clonar no Windows recebe CRLF,
-#    que e o que o instalador empacota e o que a bateria exige.
-#
-#    O contrato do projeto continua o mesmo, e nada aqui o muda:
-#      Converter_AUTO_DIRETO.ps1 . ASCII, SEM BOM, CRLF
-#      todo o resto .............. BOM, CRLF
-#    O BOM e CONTEUDO - o git nao toca nele. Este arquivo cuida so do fim de
-#    linha.
-#
-#  PARA APLICAR NOS ARQUIVOS QUE JA ESTAO NO REPOSITORIO, uma vez so:
-#      git add --renormalize .
-#      git commit -m "gitattributes: fim de linha fixado (CRLF no checkout)"
-#  Sem o --renormalize, os blobs antigos continuam como estao e um deles pode
-#  sair com CR duplicado no checkout.
+#  DEPOIS de adicionar este arquivo, rodar UMA VEZ:   git add --renormalize .
+#  Sem isso os blobs antigos ficam como estao.
 # ============================================================================
 
-# ---- Padrao: texto normalizado, entregue em CRLF no checkout ----
+# Regra da casa: texto sai do checkout em CRLF, sempre.
 * text=auto eol=crlf
 
-# ---- Binarios: byte a byte, sem conversao nenhuma ----
-#  O .ico e os .dic.gz ja eram tratados como binarios pelo git (tem byte NUL),
-#  mas declarar e melhor que depender de heuristica - um arquivo novo pode nao
-#  ter NUL nos primeiros 8000 bytes e ser corrompido calado.
-*.gz     binary
-*.zip    binary
-*.rar    binary
-*.7z     binary
-*.exe    binary
-*.dll    binary
-*.ico    binary
-*.png    binary
-*.jpg    binary
-*.jpeg   binary
-*.xlsx   binary
-*.pdf    binary
+# ---- Texto do projeto, explicito (nao depender do palpite do git) ----
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.txt   text eol=crlf
+*.iss   text eol=crlf
+*.md    text eol=crlf
+.gitignore      text eol=crlf
+.gitattributes  text eol=crlf
 
-# ---- Midia: nunca deveria estar aqui (o .gitignore ja bloqueia), mas se
-#      escapar, que escape intacta ----
-*.mkv    binary
-*.mp4    binary
-*.m2ts   binary
-*.hevc   binary
-*.sup    binary
+# ---- Binario: o git nao encosta ----
+*.exe   binary
+*.dll   binary
+*.ico   binary
+*.png   binary
+*.jpg   binary
+*.gz    binary
+*.db    binary
+*.zip   binary
+*.7z    binary
+*.rar   binary

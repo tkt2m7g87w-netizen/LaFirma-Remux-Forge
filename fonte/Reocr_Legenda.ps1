@@ -1,10 +1,15 @@
 ﻿<#
 ================================================================================
  LaFirma - Reocr_Legenda.ps1
- Versao 1.29
+ Versao 1.30
  --------------------------------------------------------------------------
  HISTORICO (entrada nova a cada mudanca de $Versao, na MESMA edicao)
  --------------------------------------------------------------------------
+  1.30  23/09/2026 - Parse-Srt: linha orfa (texto depois de linha em branco)
+        era lida como indice e a linha seguinte como tempo; agora volta
+        para o bloco de cima. Linha que nao e tempo nao e mais consumida.
+        Get-NomesProprios: curtas (<=3) respondem pela lista fechada, como
+        no Corretor - "Al", "Tut" passam a ser nome protegido.
   1.29  01/09/2026 - Nenhuma regra mudou. Uma auditoria apontou que a regra 3
         (e a nota que escolhe a leitura vencedora) pergunta ao dicionario sobre
         palavra curta. MEDI nos 8.887 blocos dos quatro filmes: a 'correcao'
@@ -126,7 +131,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
-$Versao = "1.29"
+$Versao = "1.30"
 
 $script:Relatorio = New-Object System.Collections.Generic.List[string]
 function Diz {
@@ -333,13 +338,29 @@ function Parse-Srt {
         $indice = $null
         if ($linhas[$i] -notmatch '-->') {
             $cand = $linhas[$i].Trim()
-            if ($cand -match '^\d+$') { $indice = [int]$cand }
-            $i++
+            if ($cand -match '^\d+$') {
+                $indice = [int]$cand
+                $i++
+            } else {
+                <#  1.30: LINHA ORFA (texto depois de uma linha em branco no
+                    meio do bloco). Antes ela era consumida como se fosse o
+                    indice e a linha SEGUINTE era lida como tempo - o bloco
+                    de baixo perdia o tempo e o texto orfao sumia. Agora o
+                    orfao volta para o bloco de cima, que e de onde ele caiu. #>
+                $orfa = New-Object System.Collections.Generic.List[string]
+                while ($i -lt $n -and $linhas[$i].Trim() -ne "" -and $linhas[$i] -notmatch '-->' -and $linhas[$i].Trim() -notmatch '^\d+$') { $orfa.Add($linhas[$i]); $i++ }
+                if ($blocos.Count -gt 0 -and $orfa.Count -gt 0) {
+                    $ult = $blocos[$blocos.Count - 1]
+                    $ult.Texto = (@($ult.Texto, ($orfa -join "`n")) | Where-Object { $_ -ne "" }) -join "`n"
+                }
+                continue
+            }
         }
         if ($i -ge $n) { break }
         $ini = ""; $fim = ""; $timingOk = $false
         $mt = [regex]::Match($linhas[$i], '(\d+:\d{2}:\d{2}[,\.]\d{1,3})\s*-->\s*(\d+:\d{2}:\d{2}[,\.]\d{1,3})')
-        if ($mt.Success) { $ini = $mt.Groups[1].Value; $fim = $mt.Groups[2].Value; $timingOk = $true; $i++ } else { $i++ }
+        # 1.30: linha que nao e tempo NAO e mais consumida - ela e texto.
+        if ($mt.Success) { $ini = $mt.Groups[1].Value; $fim = $mt.Groups[2].Value; $timingOk = $true; $i++ }
         $corpo = New-Object System.Collections.Generic.List[string]
         while ($i -lt $n -and $linhas[$i].Trim() -ne "") { $corpo.Add($linhas[$i]); $i++ }
         $blocos.Add((New-Object PSObject -Property ([ordered]@{
@@ -613,7 +634,12 @@ function Get-NomesProprios {
         if ($k -cnotmatch '^[\p{Lu}]') { continue }
         if ($k -cnotmatch '[\p{Ll}]') { continue }
         if ($k -cmatch '[\p{Ll}][\p{Lu}]') { continue }
-        if (Test-NoDicionario $k $Dicionario) { continue }
+        <#  1.30: MESMA PERGUNTA DO CORRETOR (licao 41). Abaixo de 4 letras o
+            dicionario de 1,3M acha "all", "tut", "al" - e o nome nao entrava
+            na lista. O Corretor 2.28 ja responde curta pela lista fechada;
+            aqui passa a responder igual. #>
+        if ($k.Length -le 3) { if (Test-CurtaComum $k) { continue } }
+        elseif (Test-NoDicionario $k $Dicionario) { continue }
         [void]$nomes.Add($k)
     }
     return ,$nomes

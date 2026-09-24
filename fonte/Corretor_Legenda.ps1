@@ -1,10 +1,31 @@
 ﻿<#
 ================================================================================
  LaFirma - Corretor_Legenda.ps1
- Versao 2.27
+ Versao 2.34
  --------------------------------------------------------------------------
  HISTORICO (entrada nova a cada mudanca de $Versao, na MESMA edicao)
  --------------------------------------------------------------------------
+  2.34  23/09/2026 - Fala inteira "Sel." -> "Sei." (GoT) e "Pal..." abrindo
+        a fala -> "Pai..." (Troia, 3x). i lido como l.
+  2.33  23/09/2026 - "- E Isso o que eu vejo" -> "- \u00c9 isso" (Transformers).
+  2.32  23/09/2026 - Grande teste final (Ryan/Troia): "Sailam"->"Saiam" (empate
+        de delecao: sai o 'l'), "Se eu a magoel"->"magoei" (bloco com uma
+        palavra longa so nao e votado estrangeiro), "- SO Jackson"/"AI vem"
+        com acento (Regra D aceita travessao e curtas acentuadas), "F, Ae G"
+        -> "F, A e G", "2 Seus" -> "2 seus". Testado nos 8 .srt de teste:
+        so esses mudam.
+  2.31  23/09/2026 - A guarda de espanhol contava "porque" (portugues tambem)
+        e "los/las" de "pegá-los"/"vê-las" (pronome, depois de hifen).
+        "Porque vou pegá-los" virava bloco espanhol e perdia as correcoes.
+  2.30  23/09/2026 - Medido no TROTF com o dicionario de verdade: "da OnStar"
+        ainda virava "da onstar" (o 1,3M tem "onstar") e "Es la casa del
+        chicas" virava "Es ia casa". Regra C so baixa a caixa de palavra
+        que o proprio arquivo escreve em minuscula em outro lugar; bloco
+        com duas palavras funcionais espanholas nao e portugues.
+  2.29  23/09/2026 - Quatro regras que estragavam texto certo: Regra C
+        baixava nome CamelCase (OnStar); Regra D tirava a maiuscula de fala
+        ("OS rumores" -> "os"; agora "Os"); familia Ir baixava nome composto
+        ("Muhammad Ali"); Regra X apagava fala curta de dialogo ("- Sam!").
   2.27  01/09/2026 - Nenhuma regra mudou. Registrada ao lado da regra 3 a
         medicao que prova por que ela PRECISA contar palavra curta: com a
         guarda de 4 letras os 8.887 blocos dos quatro filmes iriam de ~10
@@ -192,7 +213,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
-$Versao = "2.27"
+$Versao = "2.34"
 
 $script:Relatorio = New-Object System.Collections.Generic.List[string]
 function Diz {
@@ -369,7 +390,10 @@ function Repair-EstruturaSrt {
         # portuguesa. Fechada de proposito: "aceita qualquer duas letras"
         # deixaria passar o "ln" e o "rn" que sao lixo classico de OCR.
         $curtasBoas = '^(a|e|o|ai|ui|ih|ah|eh|oh|uh|ei|oi|hm|he|ha|ue|ne|ce|po|so|ou|se|me|te|no|na|do|da|um|eu|tu|va|ta|la|ca|ja|ma|pa|vo|vi|li|ir|to|ta|ok|tv|dr|sr|si|ia|as|os|es|is|us|ah)$'
+        # 2.29: "Al", "Jo", "Bo" - nome de duas letras em forma Xx - ficam.
+        # O lixo classico ("ln", "rn", "s") e minusculo.
         if ($corpo.Count -eq 1 -and $corpo[0].Trim().Length -le 2 -and
+            $soLetrasCorpo -cnotmatch '^[\p{Lu}][\p{Ll}]$' -and
             $soLetrasCorpo -notmatch ('(?i)' + $curtasBoas)) {
             $corpo.Clear()
             $tinhaLixo = $true
@@ -799,6 +823,9 @@ foreach ($w in @("claro","isso","verdade","mesmo","mesma","obvio","possivel","ce
 $script:FuncionaisCaixa = New-Object 'System.Collections.Generic.HashSet[string]'
 foreach ($w in @("OU","DE","DO","DA","DOS","DAS","EM","NO","NA","NOS","NAS","COM","POR","PARA",
                  "QUE","SE","MAS","NEM","AO","AOS","AS","OS","UM","UMA")) { [void]$script:FuncionaisCaixa.Add($w) }
+# 2.32: as curtas ACENTUADAS ("SO Jackson", "AI vem ele" - Ryan). Sigla nao
+# tem acento, entao essas em caixa alta no comeco de linha normal sao OCR.
+foreach ($w in @(("S" + [char]0x00D3), ("A" + [char]0x00CD), ("J" + [char]0x00C1), ("L" + [char]0x00C1), ("N" + [char]0x00C3 + "O"), ("T" + [char]0x00C1), ("V" + [char]0x00CA))) { [void]$script:FuncionaisCaixa.Add($w) }
 
 
 <#
@@ -1062,6 +1089,13 @@ function Test-EhMarcaCamel {
       siglas e o ingles). "inf", "tol" e "tor" NAO estao aqui - e por isso
       que o "INF TOL" continua sendo pego.
 #>
+<#  2.29 - POR QUE EXISTEM DUAS LISTAS DE CURTAS (CurtasComuns e CurtasPtBr).
+    Nao e descuido. Esta (CurtasComuns) responde "isto e FALA?" - e ali
+    "la", "lo", "al", "et" contam (aparecem em fala real, inclusive citacao
+    estrangeira). A CurtasPtBr responde "isto e PORTUGUES CERTO?" para a
+    familia da barra vertical - e ali "la" NAO pode estar, senao o
+    conserto "la mesmo" -> "Ia mesmo" deixa de existir. Perguntas
+    diferentes, listas diferentes. #>
 $script:CurtasComuns = New-Object 'System.Collections.Generic.HashSet[string]'
 foreach ($w in @(
     "de","que","do","em","da","é","não","um","uma","com","no","se",
@@ -1197,7 +1231,13 @@ function Get-NomesProprios {
         if ($k -cmatch '[\p{Ll}][\p{Lu}]') { continue }
         if ($cont[$k] -lt 2) { continue }
         if (-not $noMeio.Contains($k)) { continue }
-        if (Test-NoDicionario $k $Dicionario) { continue }
+        <#  2.0.2 - A PERGUNTA TEM QUE SER A MESMA DAS REGRAS.
+            Era Test-NoDicionario aqui e Test-PalavraPtBr la nas regras. Para
+            "All" (3 letras) uma respondia "conhecida" e a outra "nunca vi" -
+            e o resultado era o pior dos dois mundos: sem protecao aqui E com
+            troca la. Perguntando com a funcao que as regras usam, tudo que
+            elas consideram desconhecido entra na lista de protegidos. #>
+        if (Test-PalavraPtBr $k $Dicionario) { continue }
         [void]$nomes.Add($k)
     }
     return ,$nomes
@@ -1499,8 +1539,26 @@ function Test-BlocoEhPtBr {
     # So olha palavras de 4+ letras: as curtas sao as suspeitas (nao votam
     # sobre si mesmas) e nome proprio nao esta em dicionario nenhum.
     param([string]$Texto, $Dicionario)
+    <#  2.30: "Es la casa del chicas en fuego" (TROTF) virou "Es ia casa..."
+        - o dicionario de 1,3M tem casa, chicas e fuego, entao o bloco
+        passava por portugues. Palavra funcional espanhola nao engana:
+        duas delas no bloco e ele nao e portugues. #>
+    <#  2.31: "porque" saiu da lista (e portugues tambem), e o "-" antes da
+        palavra nao conta como fronteira: "pegá-los", "vê-las" sao pronome
+        portugues, e "Porque vou pegá-los" dava DOIS votos de espanhol - o
+        bloco perdia as correcoes l/i e da barra vertical. #>
+    $funcEs = @([regex]::Matches($Texto.ToLowerInvariant(), '(?<![\p{L}\-])(del|el|los|las|es|en|y|muy|pero|usted|estoy|eres|soy|tengo|hola|gracias|qué|cómo)(?![\p{L}])') | ForEach-Object { $_.Value })
+    if ($funcEs.Count -ge 2) { return $false }
     $longas = @([regex]::Matches($Texto, '[\p{L}]{4,}') | ForEach-Object { $_.Value })
-    if ($longas.Count -eq 0) { return $true }
+    <#  2.32: com UMA palavra longa so, o voto e a propria palavra com defeito
+        ("Se eu a magoel..." - Troia): ela nao esta no dicionario, o bloco dava
+        0% de portugues e a Regra C nem tentava "magoei". Uma palavra nao e
+        maioria de nada; o espanhol ja e pego pelas funcionais acima. #>
+    if ($longas.Count -lt 2) {
+        # sem maioria de palavras longas, votam as de 2+ letras do bloco
+        $longas = @([regex]::Matches($Texto, '[\p{L}]{2,}') | ForEach-Object { $_.Value })
+        if ($longas.Count -eq 0) { return $true }
+    }
     $ok = 0
     foreach ($l in $longas) { if (Test-NoDicionario $l $Dicionario) { $ok++ } }
     return ((($ok * 1.0) / $longas.Count) -ge 0.50)
@@ -1534,8 +1592,47 @@ function Get-TrocaBarraVertical {
 }
 
 function Repair-FamiliaBarraVertical {
-    param([string]$Texto, $Dicionario)
+    <#  2.0.2 - ESTA REGRA ERA A UNICA QUE NAO RECEBIA A LISTA DE NOMES.
+        =====================================================================
+        DEFEITO MEDIDO (relatorio do Diego, 22/09, Transformers):
+
+            ANTES : 'da nossa raca estava no All Spark'
+            DEPOIS: 'da nossa raca estava no Ali Spark'      (5 vezes)
+            ANTES : 'Codigo "Tut", como Rei Tutankamon'
+            DEPOIS: 'Codigo "Tui", como Rei Tutankamon'
+            ANTES : 'Quem e o seu Autobotzinho?'
+            DEPOIS: 'Quem e o seu Autoboizinho?'
+
+        O OCR tinha acertado. Fomos NOS que estragamos - e os 13 "erros de
+        OCR" que eu tinha contado na legenda dele eram, em boa parte, obra
+        desta funcao.
+
+        POR QUE: "All" tem 3 letras. Test-PalavraPtBr, abaixo de 4 letras,
+        NAO pergunta ao dicionario de 1,3M - so consulta a lista curta. Entao
+        para ela "All" e palavra desconhecida, e trocando l por i ela acha
+        "ali", que e palavra portuguesa legitima. Um candidato unico, troca
+        feita.
+        E a protecao? Get-NomesProprios usa Test-NoDicionario, que NAO tem
+        piso de tamanho e ACHA "all" no dicionario de 1,3M - entao ela
+        concluiu que "All" e palavra conhecida e nao precisa de protecao.
+
+        DUAS FUNCOES RESPONDENDO O CONTRARIO SOBRE A MESMA PALAVRA, e a
+        protecao dependendo de uma enquanto o estrago dependia da outra. E a
+        licao 41 outra vez, num lugar novo: um fato, um dono.
+
+        TRES CONSERTOS, e sao tres de proposito:
+          1. esta funcao passa a RECEBER $Nomes, como todas as outras regras
+             ja recebiam - ela era a unica de fora;
+          2. Get-NomesProprios passa a perguntar com a MESMA funcao que as
+             regras usam (Test-PalavraPtBr), para nunca mais existirem duas
+             respostas;
+          3. e a guarda que nao depende de dicionario nenhum: palavra
+             capitalizada colada em outra capitalizada e NOME ("All Spark",
+             "Rei Tutankamon"). Essa pega mesmo que as duas primeiras falhem.
+        ===================================================================== #>
+    param([string]$Texto, $Dicionario, $Nomes)
     if ([string]::IsNullOrEmpty($Texto)) { return $Texto }
+    if ($null -eq $Nomes) { $Nomes = New-Object 'System.Collections.Generic.HashSet[string]' }
     $ehPt = Test-BlocoEhPtBr $Texto $Dicionario
     $partes = [regex]::Split($Texto, '(\s+)')
     $saida = New-Object System.Text.StringBuilder
@@ -1543,7 +1640,12 @@ function Repair-FamiliaBarraVertical {
     $reticencias = [string][char]0x2026
     $travessao   = [string][char]0x2013
     $travessaoL  = [string][char]0x2014
-    foreach ($parte in $partes) {
+    <#  2.0.2: o laco virou indexado so para poder olhar a PROXIMA palavra
+        (o bigrama de maiusculas). $partes vem de um Split com grupo de
+        captura, entao os separadores ficam nas posicoes impares - a proxima
+        palavra esta em +2, nunca em +1. #>
+    for ($idxParte = 0; $idxParte -lt $partes.Count; $idxParte++) {
+        $parte = [string]$partes[$idxParte]
         if ($parte -match '^\s*$') { [void]$saida.Append($parte); continue }
         # Token sem letra nenhuma (traco de dialogo, reticencias) vai inteiro:
         # picotar em prefixo/sufixo devolvia comprimento negativo e duplicava
@@ -1560,7 +1662,10 @@ function Repair-FamiliaBarraVertical {
         $abre = $primeiro -or
                 ($ateAqui -match ('[.!?:' + $reticencias + '][")\]]?\s*$')) -or
                 ($pref -match ('[.!?:\-' + $travessao + $travessaoL + ']\s*$')) -or
-                ($pref.Trim() -eq '-') -or ($pref.Trim() -eq '"')
+                ($pref.Trim() -eq '-') -or ($pref.Trim() -eq '"') -or
+                # 2.29: traco de dialogo SOLTO no comeco da linha ("- Ol,") vira
+                # token proprio e chegava aqui ja no $ateAqui, nao no $pref.
+                ($ateAqui -match ('(^|\n)\s*[\-' + $travessao + $travessaoL + ']\s*$'))
         # --- pipe solto grudado na palavra: "|Isso" -> "Isso"
         if ($nu.Contains('|')) {
             $semPipe = $nu -replace '\|', ''
@@ -1577,8 +1682,50 @@ function Repair-FamiliaBarraVertical {
                 $script:RepairMexeu = $true; $nu = $cand
             }
         }
+        <#  2.0.2: as duas guardas, antes de qualquer troca.
+            (a) nome proprio levantado do proprio arquivo;
+            (b) BIGRAMA DE MAIUSCULAS - esta palavra e capitalizada e a
+                vizinha (antes ou depois) tambem. Isso e nome composto em
+                qualquer lingua e nao precisa de dicionario para ser visto,
+                que e justamente a graca: e a unica guarda que sobrevive a
+                um dicionario que discorda de si mesmo. #>
+        $protegido = $Nomes.Contains($nu)
+        if (-not $protegido -and $nu -cmatch '^[\p{Lu}]') {
+            $antesTok = ""
+            $mAntes = [regex]::Match($saida.ToString(), '([\p{L}|]+)[^\p{L}]*$')
+            if ($mAntes.Success) { $antesTok = $mAntes.Groups[1].Value }
+            $depoisTok = ""
+            if ($idxParte + 2 -lt $partes.Count) {
+                $mDep = [regex]::Match([string]$partes[$idxParte + 2], '^[^\p{L}|]*([\p{L}|]+)')
+                if ($mDep.Success) { $depoisTok = $mDep.Groups[1].Value }
+            }
+            if (($antesTok -cmatch '^[\p{Lu}]') -or ($depoisTok -cmatch '^[\p{Lu}]')) { $protegido = $true }
+            <#  2.0.2 - A GUARDA GERAL, E ELA TEM UM PRECO QUE ESTA MEDIDO.
+
+                Palavra capitalizada NO MEIO da frase e, quase sempre, nome
+                proprio - e esta regra nao "conserta" nome proprio: ela
+                INVENTA outro, porque so troca quando o resultado e palavra
+                portuguesa valida. "All" virou "Ali", "Tut" virou "Tui",
+                "Autobotzinho" virou "Autoboizinho". Nos tres a saida do OCR
+                estava CERTA.
+
+                Contado no relatorio real do Diego (Transformers, 22/09), as
+                trocas desta regra em palavra capitalizada no meio da frase:
+                    1 acerto  - "Xangal" -> "Xangai"
+                    7 estragos - All (5x), Tut, Autobotzinho
+                O preco de fechar isso e perder o acerto do Xangai. E o preco
+                certo: deixar de consertar e nao fazer nada; trocar nome
+                proprio por outra palavra e entregar o arquivo PIOR do que
+                chegou, em silencio - que e a unica coisa que este projeto
+                trata como inaceitavel.
+
+                Quem abre a frase continua sendo consertado ("- Ol," -> "- Oi,"),
+                e minuscula continua sendo consertada ("pal" -> "pai",
+                "tr" -> "ir"). #>
+            if (-not $protegido -and -not $abre) { $protegido = $true }
+        }
         # --- barra vertical: l / t / | lidos no lugar de i / I
-        if ($ehPt) {
+        if ($ehPt -and -not $protegido) {
             $troca = Get-TrocaBarraVertical $nu $Dicionario $abre
             if ($troca -ne "") { $script:RepairMexeu = $true; $nu = $troca }
         }
@@ -1728,6 +1875,24 @@ function Repair-ErrosClassicos {
         return $m.Value
     })
 
+    <#  2.32: "- E Isso o que eu vejo." (Transformers) - o OCR leu o E-agudo
+        como "E" e subiu a caixa da palavra seguinte. "Isso" com I maiusculo
+        logo depois de um "E" que abre a fala nao existe em frase certa: a
+        conjuncao seria "E isso"; o maiusculo e o rastro do acento perdido. #>
+    $resultado = [regex]::Replace($resultado, '(?m)^([\-\u2013]?[ ]?)E Isso(?![\p{L}])', {
+        param($m)
+        $script:RepairMexeu = $true
+        return ($m.Groups[1].Value + [string][char]0x00C9 + ' isso')
+    })
+
+    <#  2.34: i lido como l em palavra curta que abre a fala. "Sel" e "Pal"
+        nao existem em portugues; so casa no inicio da linha e seguido de
+        pontuacao, para nao tocar em nome proprio no meio da frase. #>
+    $resultado = [regex]::Replace($resultado, '(?m)^([\-\u2013]?[ ]?)Sel(?=[.!?]+[ ]*$)', {
+        param($m); $script:RepairMexeu = $true; return ($m.Groups[1].Value + 'Sei') })
+    $resultado = [regex]::Replace($resultado, '(?m)^([\-\u2013]?[ ]?)Pal(?=\.\.\.|,)', {
+        param($m); $script:RepairMexeu = $true; return ($m.Groups[1].Value + 'Pai') })
+
     # ---- REGRA B: "E claro." / "E isso." -> com acento.
     # A linha inteira e "E" + UMA palavra predicativa + pontuacao final. Sem
     # verbo, a conjuncao "e" nao tem o que ligar - so o verbo "e-agudo" fecha
@@ -1788,6 +1953,9 @@ function Repair-ErrosClassicos {
     })
 
     # ---- REGRA C: palavra a palavra (l<->i, caixa, glifo partido)
+    # 2.29: bloco em outra lingua ("toi", "lo") nao recebe troca l<->i - a
+    # mesma guarda que a Regra W ja tinha (Test-BlocoEhPtBr).
+    $script:EhPtRegraC = Test-BlocoEhPtBr $resultado $Dicionario
     $resultado = [regex]::Replace($resultado, '[\p{L}]{3,}', {
         param($m)
         $p = $m.Value
@@ -1796,6 +1964,12 @@ function Repair-ErrosClassicos {
         # v2.10: marca conhecida escrita em CamelCase nao e garbling.
         # Sem isto, o dicionario de 1,3M faz "BuzzFeed" virar "buzzfeed".
         if ($garbling -and (Test-EhMarcaCamel $p)) { return $p }
+        # 2.29: a Regra C nao consultava os nomes CamelCase do proprio arquivo
+        # (Get-NomesCamel) - so a Regra 2 consultava. E um nome CamelCase que
+        # aparece UMA vez ("OnStar") virava "onstar". Forma limpa Xxx+Xxx cuja
+        # minuscula nao existe no dicionario e nome, nao garbling: nao se mexe.
+        if ($garbling -and $script:NomesCamel -and $script:NomesCamel.Contains($p)) { return $p }
+        if ($garbling -and ($p -cmatch '^[\p{Lu}][\p{Ll}]+[\p{Lu}][\p{Ll}]+$') -and -not (Test-NoDicionario $p.ToLowerInvariant() $Dicionario)) { return $p }
         if ((Test-NoDicionario $p $Dicionario) -and -not $garbling) { return $p }
 
         # O @() e OBRIGATORIO: sem ele o PowerShell desembrulha a lista de 1
@@ -1806,7 +1980,7 @@ function Repair-ErrosClassicos {
         # outro lixo. Esses blocos vao pra 2a opiniao ou pra mao de qualquer
         # jeito; polir eles so suja o relatorio.
         $curtaMaiuscula = ($p.Length -lt 5 -and $p -ceq $p.ToUpperInvariant())
-        if (-not $curtaMaiuscula) {
+        if (-not $curtaMaiuscula -and $script:EhPtRegraC) {
             $cands = @(Get-CandidatosTrocaLI $p $Dicionario)
             if ($cands.Count -eq 1) { $script:RepairMexeu = $true; return $cands[0] }
         }
@@ -1835,13 +2009,20 @@ function Repair-ErrosClassicos {
                 }
             }
             $baixa = $p.ToLowerInvariant()
-            if (Test-NoDicionario $baixa $Dicionario) {
+            <#  2.30 - "da OnStar" VIRAVA "da onstar" COM O DICIONARIO DE VERDADE.
+                O 1,3M tem "onstar" (e corpus, nao dicionario), entao a guarda
+                da 2.29 - "a minuscula nao existe" - nao segurava. A prova que
+                nao depende do dicionario: palavra de verdade aparece escrita
+                em minuscula em OUTRO lugar do proprio arquivo ("ainda" aparece
+                em qualquer filme; "onstar" nunca). Sem essa prova, nao mexe. #>
+            $corroborada = ($script:MinusculasDoArquivo -and $script:MinusculasDoArquivo.Contains($baixa))
+            if ((Test-NoDicionario $baixa $Dicionario) -and $corroborada) {
                 $script:RepairMexeu = $true
                 if ($inicioFrase) { return ($baixa.Substring(0,1).ToUpperInvariant() + $baixa.Substring(1)) }
                 return $baixa
             }
             $del = @(Get-CandidatosDelecao $baixa $Dicionario)
-            if ($del.Count -eq 1) {
+            if ($del.Count -eq 1 -and $script:MinusculasDoArquivo -and $script:MinusculasDoArquivo.Contains($del[0])) {
                 $script:RepairMexeu = $true
                 if ($inicioFrase) { return ($del[0].Substring(0,1).ToUpperInvariant() + $del[0].Substring(1)) }
                 return $del[0]
@@ -1850,6 +2031,14 @@ function Repair-ErrosClassicos {
             # palavra normal: so o traco partido ("Pali" -> "Pai")
             $del = @(Get-CandidatosDelecaoFina $p $Dicionario)
             if ($del.Count -eq 1) { $script:RepairMexeu = $true; return $del[0] }
+            <#  2.32: "Sailam" (Ryan) da dois: apagar o 'l' ("Saiam") ou o 'i'
+                ("Salam"). O traco que o OCR INVENTA e o 'l' encostado no 'i' -
+                o 'i' com pingo e desenho real. Com empate, fica o candidato que
+                tirou um 'l' (e so se for exatamente um desses). #>
+            if ($del.Count -eq 2) {
+                $semL = @($del | Where-Object { ($p.Length - $_.Length) -eq 1 -and (($p -replace '[lL]', '').Length -eq ($_ -replace '[lL]', '').Length) })
+                if ($semL.Count -eq 1) { $script:RepairMexeu = $true; return $semL[0] }
+            }
         }
         return $p
     })
@@ -1871,9 +2060,23 @@ function Repair-ErrosClassicos {
             # nao a preposicao. Agora so age no COMECO da linha, que era onde
             # os casos reais estavam ("OS rumores", "OU MOrTrer"). No meio da
             # frase, palavra em caixa alta e sigla ate prova em contrario.
-            $linhas[$i] = [regex]::Replace($ln, '^[\p{Lu}]{2,4}(?![\p{L}])', {
+            # 2.29: "OS rumores" virava "os rumores" - a fala perdia a maiuscula.
+            # Comeco de linha que abre frase (primeira linha, ou a anterior
+            # fechou com . ! ? ...) volta como "Os".
+            $script:DAbreFrase = ($i -eq 0) -or ($linhas[$i - 1].TrimEnd() -match '[.!?:\u2026"]$') -or ($linhas[$i - 1].Trim() -eq "")
+            # 2.32: o travessao de dialogo ("- SO Jackson.") tambem e comeco de
+            # fala - e abre frase.
+            if ($ln -match '^\s*[-\u2013]\s*') { $script:DAbreFrase = $true }
+            $linhas[$i] = [regex]::Replace($ln, '^(\s*[-\u2013]\s*)?([\p{Lu}]{2,4})(?![\p{L}])', {
                 param($m)
-                if ($script:FuncionaisCaixa.Contains($m.Value)) { return $m.Value.ToLowerInvariant() }
+                $pref = $m.Groups[1].Value
+                $w = $m.Groups[2].Value
+                if ($script:FuncionaisCaixa.Contains($w)) {
+                    $b = $w.ToLowerInvariant()
+                    $script:RepairMexeu = $true
+                    if ($script:DAbreFrase) { return ($pref + $b.Substring(0,1).ToUpperInvariant() + $b.Substring(1)) }
+                    return ($pref + $b)
+                }
                 return $m.Value
             })
         }
@@ -1888,14 +2091,47 @@ function Repair-ErrosClassicos {
       com maiuscula, e nao e nome proprio conhecido do arquivo.
     #>
     $script:NomesAtuais = $Nomes
+    $script:DicAtualIr = $Dicionario
     $resultado = [regex]::Replace($resultado,
         '(?<=[\p{Ll}][ \n])([\p{Lu}][\p{Ll}]+)(?![\p{L}])(?![ \n][\p{Lu}])', {
         param($m)
         $p = $m.Groups[1].Value
         if ($script:NomesAtuais -and $script:NomesAtuais.Contains($p)) { return $p }
+        # 2.29: "Muhammad Ali", "Capitao Nada" - palavra capitalizada colada
+        # em outra capitalizada e nome composto (mesma guarda da Regra W).
+        $antesIr = $m.Groups[1].Index
+        # A vizinha capitalizada so conta como nome se ELA nao estiver abrindo
+        # a frase ("Vamos Ir embora" continua virando "Vamos ir"), ou se ela
+        # nao for palavra conhecida ("Muhammad").
+        $mPrev = [regex]::Match($resultado.Substring(0, $antesIr), '([\p{L}]+)[ \n]$')
+        if ($mPrev.Success -and $mPrev.Groups[1].Value -cmatch '^[\p{Lu}]') {
+            $antesPrev = $resultado.Substring(0, $mPrev.Groups[1].Index).TrimEnd(" `t")
+            $prevAbre = ($antesPrev.Length -eq 0) -or ($antesPrev -match '[.!?:\u2026"\n\-\u2013\u2014]$')
+            if ((-not $prevAbre) -or -not (Test-NoDicionario $mPrev.Groups[1].Value $script:DicAtualIr)) { return $p }
+        }
         if (-not $script:FuncionaisMeio.Contains($p.ToLowerInvariant())) { return $p }
         $script:RepairMexeu = $true
         return $p.ToLowerInvariant()
+    })
+
+    <#  2.32: "companhias F, Ae G" (Ryan) - o espaco entre "A" e "e" sumiu no
+        OCR. Letra maiuscula solta + virgula + "Xe" + letra maiuscula solta e
+        uma lista de letras; "Xe" ali nao e palavra. #>
+    $resultado = [regex]::Replace($resultado, '(?<=(?<![\p{L}])[\p{Lu}], )([\p{Lu}])e (?=[\p{Lu}](?![\p{L}]))', {
+        param($m)
+        $script:RepairMexeu = $true
+        return ($m.Groups[1].Value + ' e ')
+    })
+    <#  2.32: MAIUSCULA PERDIDA DEPOIS DE NUMERO ("2 Seus, 2 meus" - Ryan).
+        Testei a versao larga (qualquer palavra capitalizada uma vez so depois
+        de artigo) contra os tres filmes e ela estragava titulo de verdade:
+        "no Canal", "da Coroa", "a Frota de Ferro", "do Sul". Fica so o caso
+        seguro: numero + possessivo/determinante capitalizado. "a Salvo"
+        continua sem conserto - nao ha regra que separe ele de "a Coroa". #>
+    $resultado = [regex]::Replace($resultado, '(?<=(?<![\p{L}\d])\d+ )(Seus|Suas|Meus|Minhas|Teus|Tuas|Nossos|Nossas|Dos|Das|Os|As|Mil|Vezes)(?![\p{L}])', {
+        param($m)
+        $script:RepairMexeu = $true
+        return $m.Value.ToLowerInvariant()
     })
 
     # v2.5: "E" circunflexo sozinho e sempre "E" agudo lido errado. O
@@ -1912,7 +2148,7 @@ function Repair-ErrosClassicos {
     # ---- REGRA W (v2.16): familia da barra vertical (l / t / | -> i / I),
     # pipe solto e letra dobrada com caixa trocada. Ver o bloco grande acima
     # de Test-PalavraPtBr.
-    $resultado = Repair-FamiliaBarraVertical $resultado $Dicionario
+    $resultado = Repair-FamiliaBarraVertical $resultado $Dicionario $Nomes
 
     <#  ---- REGRA X (v2.19): ASPAS CURVAS PICOTADAS.
         Spider-Man 22/08, bloco 652. O disco tem  como "por favor".  e o OCR
@@ -1964,7 +2200,10 @@ function Repair-ErrosClassicos {
             }
             if (-not $achou) { $bordasOk = $false; break }
         }
-        if ($bordasOk -and -not $temPalavraMeio -and $meio -ne "" -and $meio.Length -le 12) {
+        # 2.29: fala de dialogo ("- Sam!") e nome sozinho ("Sam!") nao sao
+        # caco de aspas - eram apagados porque "Sam" nao esta na lista curta.
+        $meioEhFala = ($meio -match '^[-\u2013\u2014]') -or ($meio -cmatch '^[\p{Lu}][\p{Ll}]+[!.?,]*$')
+        if ($bordasOk -and -not $temPalavraMeio -and -not $meioEhFala -and $meio -ne "" -and $meio.Length -le 12) {
             $topo  = $linhasX[0].Trim()
             $baixo = $linhasX[2].Trim()
             <#  v2.20 - AS DUAS ASPAS ORFAS.
@@ -2107,6 +2346,17 @@ try {
     $textoTodo = ($blocos | ForEach-Object { $_.Texto }) -join "`n"
     $nomes = Get-NomesProprios $textoTodo $dicionario
     $script:NomesCamel = Get-NomesCamel $textoTodo $dicionario
+    # 2.30: palavras que o proprio arquivo escreve em minuscula - a prova de
+    # que uma palavra "garbled" (AiNda) e mesmo palavra (ainda). Ver Regra C.
+    $script:MinusculasDoArquivo = New-Object 'System.Collections.Generic.HashSet[string]'
+    foreach ($mm in [regex]::Matches($textoTodo, '(?<![\p{L}])[\p{Ll}]{2,}(?![\p{L}])')) { [void]$script:MinusculasDoArquivo.Add($mm.Value) }
+    # 2.32: quantas vezes cada palavra Capitalizada aparece - nome se repete,
+    # maiuscula errada de OCR aparece uma vez (ver a regra no fim da Regra D).
+    $script:ContagemCapitalizadas = @{}
+    foreach ($mm in [regex]::Matches($textoTodo, '(?<![\p{L}])[\p{Lu}][\p{Ll}]{2,}(?![\p{L}])')) {
+        $k = $mm.Value
+        if ($script:ContagemCapitalizadas.ContainsKey($k)) { $script:ContagemCapitalizadas[$k]++ } else { $script:ContagemCapitalizadas[$k] = 1 }
+    }
     if ($nomes.Count -gt 0) {
         $amostra = ((@($nomes) | Sort-Object | Select-Object -First 8) -join ", ")
         if ($nomes.Count -gt 8) { $amostra = $amostra + ", ..." }
@@ -2419,8 +2669,7 @@ try {
             Diz "Nenhuma correcao automatica foi possivel nesta rodada." "Yellow"
         }
         Diz "Os blocos alienigenas estao listados acima, com o tempo exato -" "Yellow"
-        Diz "da pra corrigir na mao no .srt, ou rodar o Reocr_Legenda.bat" "Yellow"
-        Diz "passando tambem o .mkv original." "Yellow"
+        Diz "da pra corrigir na mao no .srt." "Yellow"
     }
 
 } catch {

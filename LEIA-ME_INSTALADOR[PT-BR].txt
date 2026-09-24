@@ -65,25 +65,21 @@ diretamente na estrutura da pasta 'tools\':
      A troca foi validada em bancada própria: 5 arquivos, 3 perfis, 2 versões de
      CM, zero divergência na leitura entre 2.3.2 e 2.3.3.
 
-3. MKVToolNix (mkvmerge.exe, mkvextract.exe):
+3. MKVToolNix (mkvmerge.exe):
    - Fonte: Download oficial do MKVToolNix.
    - Link: https://mkvtoolnix.download/downloads.html#windows
-   - Ação: Baixe a versão 'portable' (.7z ou .zip), extraia e copie 'mkvmerge.exe' e 
-     'mkvextract.exe' para a raiz de 'tools\'.
+   - Ação: Baixe a versão 'portable' (.7z ou .zip), extraia e copie o
+     'mkvmerge.exe' para a raiz de 'tools\'. (O mkvextract não é mais usado.)
 
-4. MediaInfo CLI (MediaInfo.exe, DLLs nvcuda/nvcuvid/LIBCURL):
+4. MediaInfo CLI (MediaInfo.exe):
    - Fonte: Download oficial do MediaInfo (CLI release).
    - Link: https://mediaarea.net/en/MediaInfo/Download/Windows
-   - Ação: Baixe a versão "Command Line Interface (CLI)" de 64-bit e extraia o 
-     'MediaInfo.exe' e suas DLLs auxiliares para a raiz de 'tools\'.
+   - Ação: Baixe a versão "Command Line Interface (CLI)" de 64-bit e copie o
+     'MediaInfo.exe' para a raiz de 'tools\'. As DLLs que vêm junto (LIBCURL,
+     nvcuda, nvcuvid) não são necessárias.
 
-5. SubtitleEdit (Subpasta SubtitleEdit\):
-   - Fonte: Repositório SubtitleEdit no GitHub.
-   - Link: https://github.com/SubtitleEdit/subtitleedit/releases
-   - Ação: Baixe o pacote portátil 'SE3xx.zip' e extraia seus arquivos dentro de 
-     'tools\SubtitleEdit\'. 
-     *IMPORTANTE*: Certifique-se de que a biblioteca 'libSkiaSharp.dll' e o arquivo 
-     'Latin.db' estão presentes nessa subpasta junto ao 'seconv.exe'.
+5. SubtitleEdit / seconv: REMOVIDO na 2.0. O OCR de legenda é PgsToSrt + Tesseract.
+   Não coloque pasta SubtitleEdit\ em tools\ - o instalador a exclui.
 
 6. PgsToSrt (Subpasta PgsToSrt\):
    - Fonte: Repositório PgsToSrt no GitHub.
@@ -96,12 +92,17 @@ diretamente na estrutura da pasta 'tools\':
    - Link: https://github.com/UB-Mannheim/tesseract/wiki
    - Ação: Instale/Extraia os arquivos em 'tools\Tesseract\', certificando-se de 
      que 'tesseract.exe' esteja presente e que dentro de 'tools\Tesseract\tessdata\' 
-     estejam os arquivos 'por.traineddata' e 'osd.traineddata'.
+     esteja o arquivo 'por.traineddata' (o osd.traineddata é opcional).
 
 8. DeeZy (Subpasta DeeZy\):
    - Fonte: Repositório JessieLW/DeeZy no GitHub.
    - Link: https://jessielw.github.io/DeeZy/ ou https://github.com/JessieLW/DeeZy
    - Ação: Extraia o executável 'deezy.exe' e a pasta 'apps\' em 'tools\DeeZy\'.
+     O DeeZy usa o ffmpeg.exe da raiz de tools\; apps\ffmpeg\ não é necessário.
+
+ATALHO: a pasta tools pronta (tools.rar) está no README.md -
+https://mega.nz/file/OGB3Xb7I#9MsNg8kaJD4R0f0xnHdnPnEjaKwlqKJpDFss1KOaNCo
+
 
 
 --------------------------------------------------------------------------------
@@ -148,16 +149,10 @@ conter exatamente a estrutura abaixo:
 |           |-- ffprobe.exe
 |           |-- dovi_tool.exe        <- VERSÃO MÍNIMA 2.3.3
 |           |-- mkvmerge.exe
-|           |-- mkvextract.exe
 |           |-- MediaInfo.exe
-|           |-- nvcuda.dll / nvcuvid.dll / LIBCURL.DLL
+|           |-- COMO_USAR_TOOLS_PT.txt / HOW_TO_USE_TOOLS_EN.txt
 |           |
-|           |-- SubtitleEdit\        <- Motor de OCR preferencial
-|           |     |-- seconv.exe
-|           |     |-- Latin.db
-|           |     |-- libSkiaSharp.dll / libHarfBuzzSharp.dll
-|           |
-|           |-- PgsToSrt\            <- OCR secundário (.NET 8 x64)
+|           |-- PgsToSrt\            <- OCR da legenda (.NET 8 x64)
 |           |     |-- PgsToSrt.exe
 |           |     |-- x64\
 |           |     |-- tessdata\
@@ -167,7 +162,6 @@ conter exatamente a estrutura abaixo:
 |           |     |-- tesseract.exe
 |           |     |-- tessdata\
 |           |           |-- por.traineddata
-|           |           |-- osd.traineddata
 |           |
 |           |-- DeeZy\               <- Conversor TrueHD/Atmos -> E-AC-3
 |                 |-- deezy.exe
@@ -218,7 +212,8 @@ ATENÇÃO A DOIS DETALHES QUE JÁ CUSTARAM CARO:
 
 5. O Inno Setup lerá os scripts da raiz, empacotará os executáveis da pasta 
    'tools\', incluirá as dependências do 'redist\' (se existirem) e criará 
-   o arquivo instalador final dentro da pasta 'Output\' (ex: Output\LaFirma_Setup.exe).
+   o instalador final dentro da pasta 'Saida\' (ex: Saida\LaFirma_Setup_2.0.exe).
+   Ou simplesmente dê dois cliques no Compilar.bat.
 
 6. Pronto! O 'LaFirma_Setup.exe' resultante já estará pronto para ser distribuído. 
    Quando o usuário final executá-lo, o Inno Setup criará a estrutura completa 

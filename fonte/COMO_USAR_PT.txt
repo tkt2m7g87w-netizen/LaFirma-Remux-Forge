@@ -3,8 +3,8 @@
            + Conversor de AUDIO [Dolby TrueHD / DTS:HD / DTS:X -> E-AC-3]
  Profile 7/5/8 para Profile 8.1  (com OCR automático de legenda PT-BR em PGS)
  --------------------------------------------------------------------------
- JANELA (GUI) 16.75  ·  MOTOR 14.36  ·  CORRETOR 2.27  ·  REOCR 1.29
- Instalador 1.7.3                                 -   "LaFirma"
+ JANELA (GUI) 19.15  ·  MOTOR 14.14  ·  CORRETOR 2.34  ·  REOCR 1.30
+ Instalador 2.0                                   -   "LaFirma"
 ================================================================================
 
 COMO ABRIR
@@ -43,8 +43,8 @@ barra de progresso:
   2. Converte o Dolby Vision para Profile 8.1.
      - Se o vídeo JÁ for Profile 8.x (sem Enhancement Layer), essa etapa é
        PULADA automaticamente - não há o que converter, e ele reaproveita o
-       vídeo ("[NÃO NECESSÁRIO] Já é Profile 8.1"). Perfis 5 e 7 convertem
-       normalmente.
+       vídeo ("[NÃO NECESSÁRIO] Já é Profile 8.1"). O Profile 7 converte
+       normalmente; o Profile 5 tem caminho próprio (ver mais abaixo).
      - O diagnóstico agora diz QUE TIPO de camada de melhoria o Profile 7
        tem, porque isso muda o que a conversão significa. Ele lê essa
        informação do próprio arquivo, em alguns trechos curtos do vídeo:
@@ -113,21 +113,19 @@ barra de progresso:
   4. Se existir legenda PT-BR no MKV, prepara pra ser a PADRÃO do player:
      texto pronto (.srt/.ass) é usado direto; PGS (legenda-imagem) é
      convertida por OCR. Se não existir nenhuma, pula a etapa.
-     O OCR tem DOIS caminhos, e o programa escolhe sozinho:
-       - seconv / BinaryOCR (preferencial) - vem junto com o programa, não
-         precisa de nada instalado. É o que dá o melhor resultado.
-       - PgsToSrt / Tesseract + Corretor_Legenda (rede de segurança) - entra
-         sozinho se o seconv faltar, falhar, ou devolver a faixa errada. O
-         Corretor_Legenda roda logo depois e conserta os blocos que saíram
-         como lixo. Só este caminho precisa do .NET 8 instalado.
-     Você não escolhe nem configura nada: se o resultado do preferencial não
-     for confiável, o programa desce pro seguinte por conta própria.
+     O OCR é feito pelo PgsToSrt / Tesseract (precisa do .NET 8 - o
+     instalador instala, ou oferece baixar da Microsoft se ele não vier no
+     pacote). O Corretor_Legenda roda logo depois e conserta
+     os blocos que saíram como lixo. Você não escolhe nem configura nada.
+     (Até a 1.9 vinha também o seconv / BinaryOCR; ele foi removido na
+     2.0 porque foi rejeitado em todos os filmes medidos de 13/08 a 22/09 -
+     o Latin.db não batia com as fontes das legendas e saíam de 8% a 73% dos
+     caracteres como '*' - e a legenda final sempre vinha do PgsToSrt.)
 
      Esta etapa é a única que roda VÁRIOS programas em sequência, e cada um
      aparece pelo nome na tela enquanto trabalha:
 
-         OCR rápido (seconv / BinaryOCR)
-         OCR completo (PgsToSrt / Tesseract)     - só se o primeiro falhar
+         OCR (PgsToSrt / Tesseract)
          Revisão de blocos-lixo (Corretor_Legenda)
          Re-OCR de falas curtas (Reocr_Legenda / Tesseract PSM 6)
 
@@ -140,8 +138,10 @@ barra de progresso:
 
   5. Remonta o MKV final mantendo só o essencial: áudio principal + a
      faixa nova/reaproveitada (comentário de diretor, dublagens extras e
-     demais faixas são descartadas); legenda PT-BR nova + inglês completa
-     (demais idiomas, forçada e SDH são descartadas). Vídeo e capítulos
+     demais faixas são descartadas); legenda PT-BR nova (.SRT, a padrão) +
+     a PGS PT-BR original (fica ao lado, para quem preferir) + uma legenda
+     em inglês (a completa; a SDH só quando não há outra). Demais idiomas e
+     forçadas são descartados. Vídeo e capítulos
      sempre intactos. MODO SEGURO: se algo falhar na conversão de áudio ou
      não houver legenda pra gerar, nada é descartado naquela frente.
 
@@ -165,9 +165,10 @@ roda só 3 das 5 etapas, e a régua mostra 3 pedaços.
 Arquivos incompatíveis (não-HEVC, ou sem Dolby Vision nenhum) são pulados
 com aviso claro, sem gastar tempo processando o que não é candidato.
 
-O resultado fica em "01_Arquivos_Finalizados", com o mesmo nome do
-episódio original. Nada dentro de "00_Arquivos_Base" é apagado ou
-modificado.
+O resultado fica em "01_Arquivos_Finalizados", com o nome do episódio
+original mais o selo [BL+RPU] (ex: "Filme [BL+RPU].mkv") - assim o arquivo
+convertido nunca se confunde com o original. Profile 5 sai como .mp4, com o
+nome original. Nada dentro de "00_Arquivos_Base" é apagado ou modificado.
 
 
 A TELA - FILA E FAIXAS DO VÍDEO
@@ -184,8 +185,10 @@ faixa por faixa (vídeo, áudios, legendas, capítulos) exatamente como o
 motor vai decidir - é a mesma decisão que entra na conversão, não uma
 previsão à parte.
 
-Botões da barra: "Iniciar F1", "Pausar F2", "Cancelar ESC", "Abrir Origem"
-e "Abrir Saída" (abrem as pastas no Explorer), "Atualizar" (relê a pasta),
+Botões da barra: "[F1] Iniciar", "[F2] Pausar", "[ESC] Cancelar", "[F3] Abrir
+Origem" e "[F4] Abrir Saída" (abrem as pastas no Explorer), "[F5] Atualizar"
+(relê a pasta; fica bloqueado durante a conversão), "[F11] Censo Completo" e
+"[F12] Medir MEL x FEL" (ver a seção própria abaixo),
 "Log" (mostra o log desta sessão em tempo real - é o que você me manda
 quando algo parece estranho) e "Ferramentas" (confere uma a uma se foram
 encontradas e mostra ONDE cada uma está).
@@ -195,10 +198,10 @@ SAÍDA. CLIQUE EM CIMA DO CAMINHO para trocar a pasta: abre o seletor de
 pastas do Windows, com árvore, digitação de caminho e busca. Não precisa de
 botão nenhum.
 
-No canto direito, durante a conversão, ficam as seis que decidem se um
+No canto direito, durante a conversão, ficam as cinco que decidem se um
 pedaço do trabalho acontece:
 
-    dovi_tool   DeeZy   seconv   PgsToSrt   Tesseract   mkvmerge
+    dovi_tool   DeeZy   PgsToSrt   Tesseract   mkvmerge
 
     verde    = encontrada
     âmbar    = OPCIONAL que falta - essa parte é pulada, o resto roda
@@ -209,12 +212,39 @@ convertida mostra "Convertendo · Etapa n/5", as que já acabaram mostram
 "Convertido".
 
 
+MEDIR MEL x FEL [F12] E CENSO COMPLETO [F11]
+--------------------------------------------------------------------------------
+[F12] MEDIR MEL x FEL (ligado por padrão): ao ler a pasta, o programa lê
+alguns trechos de 2 segundos de cada filme Profile 7 e classifica a camada
+extra. A cor da linha na Fila vem daqui, e SÓ daqui:
+
+    verde    = MEL          - a camada extra não carrega imagem
+    laranja  = Simple FEL   - carrega, mas dentro do brilho do master
+    vermelho = Complex FEL  - pede mais brilho que o master declara
+
+Desligado, a leitura fica mais rápida e o arquivo aparece como "EL não
+medida" - nunca como limpo.
+
+[F11] CENSO COMPLETO: só vale em Complex FEL. Lê o RPU do filme INTEIRO
+(bem mais que a amostra: no Ryan, 5 s da amostra contra 1m50 do censo) e conta quantas cenas pedem mais brilho
+que o master. O botão mostra a porcentagem; clicar de novo (ou F11)
+cancela. A fila continua livre durante o censo, mas iniciar a conversão
+encerra o censo (os dois leriam o mesmo disco).
+
+O CENSO INFORMA, NUNCA MUDA A COR. Ele acrescenta os números (quantas
+cenas, qual o pico) ao diagnóstico e ao log. Um Complex FEL com poucas
+cenas continua vermelho: a cor diz o que a camada É, o censo diz quanto
+ela pesa.
+
+
 MODO MANUAL - FORÇAR UMA ESCOLHA DIFERENTE NUM VÍDEO
 --------------------------------------------------------------------------------
 Por padrão o motor decide tudo sozinho (regra acima). Se quiser mudar o
 resultado de um episódio específico:
 
-1. Marque o vídeo na aba Fila e clique "Marque o vídeo p/ editar".
+1. Marque a caixinha do vídeo na aba Fila. O botão de modo, que até então
+   dizia "Marque o vídeo p/ editar" (apagado), passa a mostrar
+   "Modo: Automático" - clique nele para trocar para Manual.
 2. Na aba Faixas do Vídeo, cada linha de áudio e legenda ganha um seletor
    com três opções:
      CONVERTER - força a conversão mesmo que já exista uma faixa pronta
@@ -296,6 +326,12 @@ episódio sozinho. Ele mostra a maior de propósito: até a 16.60 a tela usava
 só a conta frouxa e dizia "cabe" três segundos antes de o motor recusar por
 falta de espaço.
 
+Com a ORIGEM e a SAÍDA em discos diferentes, a conta se divide: os
+temporários ficam no disco da origem (o fator menos 1x) e o arquivo final
+vai direto para o disco da saída (cerca de 1x). O programa confere os dois
+e, se faltar, diz qual disco. Durante a conversão o "Livre Agora" mostra os
+dois discos.
+
 A conferência real acontece de novo, por arquivo, na vez de cada um: se um
 episódio específico não tiver espaço quando chegar sua vez, ele é pulado com
 aviso, sem travar o resto do lote.
@@ -349,10 +385,9 @@ Tudo precisa estar dentro da MESMA pasta principal:
     |-- Reocr_Legenda.ps1              <- o motor chama sozinho (não mexer)
     |-- LaFirma_PTBR_1.3M.dic.gz       <- dicionário PT-BR, 1,29 milhão de
     |                                     palavras (não mexer)
-    |-- Auditor_OCR.dic.gz             <- dicionário de 50 mil palavras. O nome
-    |                                     engana: quem usa é o MOTOR, na
-    |                                     correção de acento da legenda que sai
-    |                                     do seconv. Não apague (não mexer)
+    |-- Auditor_OCR.dic.gz             <- dicionário de 50 mil palavras: o
+    |                                     dicionário de reserva do Corretor.
+    |                                     Não apague (não mexer)
     |-- COMO_USAR_PT.txt               <- este arquivo
     |-- HOW_TO_USE_EN.txt              <- o mesmo, em inglês
     |-- Changelog.txt                  <- o que mudou em cada versão
@@ -364,6 +399,15 @@ Tudo precisa estar dentro da MESMA pasta principal:
     |                                     desta máquina. Apagar não quebra
     |                                     nada - o programa volta ao número
     |                                     de fábrica e recomeça a aprender.
+    |-- CALIBRAGEM_ETAPAS.txt          <- criado sozinho: o mesmo aprendizado,
+    |                                     etapa por etapa (áudio, legenda...)
+    |-- IDIOMA.txt                     <- o idioma escolhido (bandeira/instalador)
+    |-- MEDIR_EL.txt                   <- se o [F12] fica ligado ou desligado
+    |                                     (os quatro .txt acima vão para
+    |                                     %LOCALAPPDATA%\LaFirma quando a pasta
+    |                                     do programa não aceita gravação)
+    |-- FAQ_PT.txt / FAQ_EN.txt        <- o texto do botão ENTENDA
+    |-- IDIOMA_EN.txt                  <- a tradução da tela para o inglês
     |-- _logs\                         <- criada sozinha, log de cada sessão
     |-- _corretor\                     <- só aparece quando a legenda sai com
     |-- _reocr\                           defeito (ver abaixo)
@@ -373,16 +417,9 @@ Tudo precisa estar dentro da MESMA pasta principal:
     |     |-- ffprobe.exe
     |     |-- dovi_tool.exe
     |     |-- mkvmerge.exe
-    |     |-- mkvextract.exe
     |     |-- MediaInfo.exe
-    |     |-- nvcuda.dll / nvcuvid.dll / LIBCURL.DLL
     |     |
-    |     |-- SubtitleEdit\           <- OCR preferencial (não precisa de nada)
-    |     |     |-- seconv.exe
-    |     |     |-- Latin.db
-    |     |     |-- libSkiaSharp.dll  (o seconv não abre sem ela)
-    |     |
-    |     |-- PgsToSrt\               <- OCR reserva (o .NET 8 já vem no
+    |     |-- PgsToSrt\               <- OCR da legenda (o .NET 8 já vem no
     |     |     |-- PgsToSrt.exe          instalador)
     |     |     |-- x64\
     |     |     |-- tessdata\
@@ -415,10 +452,6 @@ Se você instalou pelo instalador: NADA. Tudo o que o OCR usa vem dentro do
 programa. Esta seção já mandou instalar o Tesseract com winget e baixar o
 .NET 8 à mão - ficou velha e foi reescrita.
 
-  - seconv / BinaryOCR (caminho preferencial) - vem em tools\SubtitleEdit\
-    com o Latin.db e a libSkiaSharp.dll. Não depende de nada instalado no
-    Windows e é o que dá o melhor resultado.
-
   - TESSERACT - o motor do RE-OCR de falas curtas, o que troca "INF TOL" por
     "Não!", "tejlorL" por "Suba!", "BIOININNICIO)" por "DOMINGO". Vem em
     tools\Tesseract\ com o por.traineddata e o osd.traineddata. O programa
@@ -427,20 +460,20 @@ programa. Esta seção já mandou instalar o Tesseract com winget e baixar o
     Atenção: NÃO é o mesmo que o tessdata do PgsToSrt. Aquele é a biblioteca
     de dados; este é o programa - e agora os dois vêm junto.
 
-  - .NET DESKTOP RUNTIME 8.0 (x64) - só a rede de segurança (PgsToSrt +
-    Corretor_Legenda) precisa dele. O instalador verifica se a máquina já
-    tem e, se não tiver, instala sozinho a partir do que vem dentro dele.
-    Não há nada para baixar à mão.
+  - .NET DESKTOP RUNTIME 8.0 (x64) - o OCR da legenda (PgsToSrt) precisa
+    dele. O instalador verifica se a máquina já tem e, se não tiver,
+    instala sozinho quando ele vem dentro do pacote; quando não vem, oferece
+    abrir a página de download da Microsoft na hora (precisa de internet
+    naquele momento).
 
 O único caso em que ainda pode faltar alguma coisa é usar os .ps1 soltos
-numa pasta, sem instalador: aí o .NET 8 pode não estar na máquina. Mesmo
-assim o programa converte normalmente pelo seconv - você só fica sem o
-segundo caminho de OCR.
+numa pasta, sem instalador: aí o .NET 8 pode não estar na máquina. Sem o
+.NET 8 não há OCR de legenda: o programa PULA a legenda nova e converte o
+resto normalmente - vídeo e áudio não são afetados.
 
-Se NENHUM dos dois caminhos estiver disponível (nem tools\SubtitleEdit\ com
-o seconv.exe + Latin.db, nem tools\PgsToSrt\ com o por.traineddata), o
-programa simplesmente PULA a etapa de legenda e converte o vídeo
-normalmente, avisando na tela.
+O mesmo vale se faltar tools\PgsToSrt\ com o por.traineddata: o programa
+simplesmente PULA a etapa de legenda e converte o vídeo normalmente,
+avisando na tela.
 
 
 AS PASTAS _corretor\ E _reocr\ (só aparecem quando há problema)
@@ -459,6 +492,9 @@ No fim da conversão o programa olha a nota da legenda e decide:
     diz no log que manteve de propósito. É por esses arquivos que se
     descobre o que saiu torto - e é onde você vai olhar.
 
+Se você CANCELAR com o [ESC], o material da legenda daquele episódio também
+é apagado: a legenda não vai para arquivo nenhum, não há o que investigar.
+
 Ele só apaga o que AQUELA conversão criou. Arquivo de outro filme, ou de uma
 rodada anterior que você ainda não olhou, nunca é tocado.
 
@@ -471,24 +507,21 @@ SE VOCÊ FECHAR O PROGRAMA NO MEIO DA CONVERSÃO
 Fechar pelo X durante uma conversão pede confirmação (mesma regra do
 ESC). Se confirmado, o Windows encerra automaticamente os processos
 ffmpeg/dovi_tool/DeeZy/mkvmerge que estavam rodando junto - não precisa
-finalizar nada pelo Gerenciador de Tarefas.
+finalizar nada pelo Gerenciador de Tarefas. Um Censo Completo [F11] ou uma
+medição MEL x FEL em andamento também são encerrados ao fechar.
 
 
 ISSO É PORTÁTIL? POSSO LEVAR PRA OUTRO PC?
 --------------------------------------------------------------------------------
-Quase 100% sim. Copiando a pasta INTEIRA (o .vbs, os .bat, os dois .ps1,
+Quase 100% sim. Copiando a pasta INTEIRA (o .vbs, os .bat, os .ps1,
 tools\ e 00_Arquivos_Base\ juntos, na mesma estrutura) pra um pendrive, HD
 externo ou outro PC, o programa funciona igual - usa caminhos relativos à
 própria pasta.
 
-O OCR de legenda agora também é portátil: o seconv.exe (caminho
-preferencial) carrega tudo que precisa dentro dele mesmo, então funciona
-em qualquer PC sem instalar nada.
-
-A única parte que ainda depende do PC de destino é a REDE DE SEGURANÇA: o
+A única parte que ainda depende do PC de destino é o OCR de legenda: o
 PgsToSrt.exe precisa do .NET Desktop Runtime 8.0 instalado no WINDOWS (não
-fica dentro da pasta). Se faltar, o programa detecta sozinho e continua
-usando o seconv normalmente - você só fica sem o segundo caminho.
+fica dentro da pasta). Se faltar, o programa detecta sozinho e converte
+sem a legenda nova - vídeo e áudio saem normalmente.
 
 ffmpeg, ffprobe, dovi_tool, mkvmerge, MediaInfo e o DeeZy são 100% portáteis,
 sem nada pra instalar.

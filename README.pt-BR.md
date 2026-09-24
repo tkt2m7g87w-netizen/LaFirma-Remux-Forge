@@ -18,7 +18,7 @@
 | | Onde |
 |---|---|
 | **Instalador** | [Releases](../../releases/latest) |
-| Espelho | [Proton Drive](https://drive.proton.me/urls/6DYE4H7M0G#pwvdUdFvgfaU) · [MEGA](https://mega.nz/file/SC4CkTgD#_5z5HJ6QbQm-ruFXr28uMdZjk7Xlgw4yYlYqw19KTCI) |
+| Espelho | [Proton Drive](https://drive.proton.me/urls/YY97JR92X4#jqGcuhqe5EVu) · [MEGA](https://mega.nz/file/KDpHkBCT#47nNVCfHuWM6TbcZ-zlqx50NKFwSi8Dq7YSZG_Kk_Rc) |
 
 Baixe, instale e use. **As ferramentas já vão dentro do instalador** — não precisa baixar mais nada.
 
@@ -28,8 +28,8 @@ Aí sim você precisa da pasta `tools`, que não pode viver neste repositório (
 
 | | Onde |
 |---|---|
-| **Pasta `tools`** | [Proton Drive](https://drive.proton.me/urls/ENVFS0JVY4#LkoRfX5WzjzI) · [MEGA](https://mega.nz/folder/yOoiBRjC#UDsfFm1dxky7nPtT1yFZfQ) |
-| **`tools` em .rar** | [Proton Drive](https://drive.proton.me/urls/8GFBM9P074#qK16EIrndB4D) · [MEGA](https://mega.nz/file/vCo2WDqC#T3IGsESlfBfPU-fiof2ECnJAkRqQ5oKl8KssomkQIxI) |
+| **Pasta `tools`** | [Proton Drive](https://drive.proton.me/urls/5Y8AZ9QZ6C#YnOKpcuVRXUk) · [MEGA](https://mega.nz/folder/HbwiFAab#4-tWrGlGfoEN0xRopn_8IQ) |
+| **`tools` em .rar** | [Proton Drive](https://drive.proton.me/urls/REAQGVN7D4#RXvf7kjVeJ1I) · [MEGA](https://mega.nz/file/OGB3Xb7I#9MsNg8kaJD4R0f0xnHdnPnEjaKwlqKJpDFss1KOaNCo) |
 
 **Guia de compilação do instalador:** [LEIA-ME_INSTALADOR[PT-BR].txt](./LEIA-ME_INSTALADOR%5BPT-BR%5D.txt)
 
@@ -46,22 +46,20 @@ Aí sim você precisa da pasta `tools`, que não pode viver neste repositório (
 fonte\tools\
 ├── dovi_tool.exe          ├── DeeZy\
 ├── ffmpeg.exe             ├── PgsToSrt\
-├── ffprobe.exe            ├── SubtitleEdit\
-├── mkvmerge.exe           └── Tesseract\
-├── mkvextract.exe
-├── MediaInfo.exe
-├── LIBCURL.DLL
-├── nvcuda.dll
-└── nvcuvid.dll
+├── ffprobe.exe            └── Tesseract\
+├── mkvmerge.exe
+└── MediaInfo.exe
 ```
 
 **3.** Os arquivos `.txt` que já vêm no repositório (`COMO_USAR_TOOLS_PT.txt` e `HOW_TO_USE_TOOLS_EN.txt`) continuam ali — eles dizem de onde cada ferramenta veio e para que serve. Não apague.
 
 **4.** Confira sem adivinhar: abra o programa. Na faixa acima da fila, cada ferramenta aparece com um visto:
 
-`✔ dovi_tool  ✔ DeeZy  ✔ seconv  ✔ PgsToSrt  ✔ Tesseract  ✔ mkvmerge`
+`✔ dovi_tool  ✔ DeeZy  ✔ PgsToSrt  ✔ Tesseract  ✔ mkvmerge`
 
 Se algum não aparecer verde, é essa que falta ou está no lugar errado.
+
+**Versões com que esta release foi testada:** `mkvmerge` v102.0 · `ffmpeg` / `ffprobe` 9.0.1 · `MediaInfo` CLI v26.05 · `dovi_tool` 2.3.3.
 
 **Versão mínima:** `dovi_tool` **2.3.3**. As anteriores não têm o `export --levels`, e sem ele o programa não mede MEL × FEL.
 
@@ -80,7 +78,7 @@ A pasta `tools\` tem centenas de MB de programas de **outras pessoas**, cada um 
 
 O **LaFirma Remux Forge** foi criado para resolver de forma definitiva os problemas de incompatibilidade de mídia em Smart TVs (LG, Samsung), players (Shield, Apple TV, Zidoo) e servidores de mídia (**Plex**, **Jellyfin**, **Emby**).
 
-Ele é uma ponte de automação: nós fizemos a interface, a lógica de decisão e o motor em PowerShell que conectam e orquestram ferramentas consagradas da comunidade (`ffmpeg`, `mkvmerge`, `dovi_tool`, `DDVT`, `PgsToSrt`, `Tesseract`, `DeeZy`, `seconv`). Serve para um arquivo só ou para temporadas inteiras.
+Ele é uma ponte de automação: nós fizemos a interface, a lógica de decisão e o motor em PowerShell que conectam e orquestram ferramentas consagradas da comunidade (`ffmpeg`, `mkvmerge`, `dovi_tool`, `PgsToSrt`, `Tesseract`, `DeeZy`). Serve para um arquivo só ou para temporadas inteiras.
 
 ---
 
@@ -164,9 +162,13 @@ Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minuto
 
 Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**.
 
+### 🏷️ O nome diz o que o arquivo é
+
+Todo `.mkv` que este programa escreve é vídeo de camada única **BL+RPU**, e o nome do arquivo diz isso: `Filme.2009.2160p.REMUX-GRUPO [BL+RPU].mkv`. A trava "já existe na pasta de saída" confere os **dois** nomes — com e sem o selo — para que nada convertido numa versão anterior seja reconvertido do zero.
+
 ### 🌍 Duas línguas
 
-Português e inglês, trocados por uma bandeira ao lado do botão Entenda. A escolha fica guardada entre as sessões.
+Português e inglês, trocados por uma bandeira ao lado do botão Entenda. A escolha fica guardada entre as sessões. **O instalador pergunta antes**: escolha português ou inglês na instalação e o programa abre nesse idioma, com a licença exibida na mesma língua.
 
 ---
 
@@ -176,19 +178,19 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 | # | Seção |
 |---|---|
-| 1 | O que é BL, EL e RPU |
-| 2 | Perfil 7, 8.1 e 5 — o que muda |
-| 3 | MEL, Simple FEL e Complex FEL |
-| 4 | **Quem realmente perde com o descarte da EL** |
-| 5 | Por que a ressalva existe (o L1 não é recalculado) |
-| 6 | Vermelho não quer dizer que estraga |
-| 7 | A amostra não é o filme inteiro |
-| 8 | Perfil 5 → MP4 |
-| 9 | Áudio: TrueHD, DTS e o que sai com Atmos |
-| 10 | Legenda PGS → SRT, só PT-BR |
-| 11 | Espaço em disco e a fila |
-| 12 | Área ativa (L5) |
-| 13 | Créditos das ferramentas |
+| 1 | O problema que o programa resolve |
+| 2 | As peças: BL, EL e RPU |
+| 3 | MEL, Simple FEL e Complex FEL — o que o programa mede |
+| 4 | **O vermelho não quer dizer que a conversão estraga** |
+| 5 | Como a medição é feita, e até onde ela vale |
+| 6 | Áudio |
+| 7 | Legendas |
+| 8 | Perfil 5 — o caminho dele é o container, não o perfil |
+| 9 | Bordas (L5) |
+| 10 | O que o programa não faz |
+| 11 | De onde veio o que sabemos |
+| 12 | Por que as ferramentas não vêm no GitHub |
+| 13 | Créditos |
 | 14 | **Onde conferir e aprender mais** — as fontes |
 
 ---
@@ -196,7 +198,7 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 ## 🛠️ Instalação e requisitos
 
 * **Instalador:** instala o programa no sistema como qualquer aplicativo nativo e cria atalhos no Menu Iniciar e na Área de Trabalho.
-* **Pré-requisito (opcional):** o programa traz suas próprias ferramentas portáteis. O **.NET Desktop Runtime 8.0** é usado apenas pelo motor de OCR reserva (`PgsToSrt`) e, se faltar, pode ser baixado automaticamente durante a instalação.
+* **Pré-requisito (opcional):** o programa traz suas próprias ferramentas portáteis. O **.NET Desktop Runtime 8.0** é usado pelo OCR de legenda (`PgsToSrt`) e, se faltar, pode ser baixado automaticamente durante a instalação; sem ele não há OCR de legenda (vídeo e áudio não são afetados).
 * **`dovi_tool` 2.3.3 ou mais novo.** Versões anteriores não têm o `export --levels`, e sem ele o programa não consegue medir MEL × FEL.
 * **Sobre a legenda:** a precisão do OCR varia conforme a fonte usada no release, e o programa emite um diagnóstico de qualidade no final. Os processos de vídeo são **sem re-encode**, sempre.
 
@@ -204,37 +206,25 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 ## 🖼️ Telas do programa
 
-**1. Análise inicial, medição LIGADA** — a fila é lida e cada arquivo recebe seu veredicto (MEL, Simple FEL, Complex FEL). A linha que está sendo medida diz isso enquanto acontece.
+**1. Análise inicial** — leitura da fila, cálculo de espaço em disco e diagnóstico de cada arquivo.
 
-[![Análise inicial, medição LIGADA](https://i.ibb.co/GfrSfP7R/01-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-LIGADO-INGLES.jpg)](https://ibb.co/cKsnKTJQ)
+[![Análise inicial](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
 
-**2. A mesma tela, medição DESLIGADA** — a leitura é imediata e a coluna da camada diz `EL não medida` em vez de chutar. Nada fica verde sem leitura por trás.
+**2. Modo automático** — o mapeamento de faixas que o programa decidiu.
 
-[![A mesma tela, medição DESLIGADA](https://i.ibb.co/BD0ZRG6/02-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-DESLIGADO-INGLES.jpg)](https://ibb.co/fRjp79N)
+[![Modo automático](https://i.ibb.co/h1V3dKRK/image.png)](https://ibb.co/h1V3dKRK)
 
-**3. A mesma tela em português** — a interface inteira troca por uma bandeira ao lado do botão Entenda, e a escolha fica guardada entre as sessões.
+**3. Modo manual** — controle total para manter, converter ou excluir cada áudio e legenda.
 
-[![A mesma tela em português](https://i.ibb.co/hRmh32c5/03-PRIMEIRA-PAGINA-DO-PROGRAMA-PORTUGUES.jpg)](https://ibb.co/bgKqcNFh)
+[![Modo manual](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
 
-**4. Modo automático** — o motor de decisão mapeia cada faixa e escreve, lado a lado, o que encontrou à esquerda e o que vai fazer à direita.
+**4. Conversão em andamento** — acompanhamento por etapas, em tempo real.
 
-[![Modo automático](https://i.ibb.co/zh3fzqgr/04-MODOS-AUTOMATICO-INGLES.jpg)](https://ibb.co/pvHXSYTx)
+[![Conversão em andamento](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
 
-**5. Modo manual** — faixa por faixa: manter, converter ou excluir. O manual manda no automático, com um limite só — legenda que não é PT-BR não recebe a opção de converter.
+**5. Resumo final** — relatório com verificação de integridade e a nota da legenda.
 
-[![Modo manual](https://i.ibb.co/jPL8m6Zd/05-MODOS-MANUAL-INGLES.jpg)](https://ibb.co/dwQfFWJS)
-
-**6. Conversão em andamento** — etapa por etapa, com porcentagem real, a ferramenta que está rodando e quanto falta.
-
-[![Conversão em andamento](https://i.ibb.co/3xps97h/06-DURANTE-A-CONVERSAO-PROGRESSO-INGLES.jpg)](https://ibb.co/N093dsY)
-
-**7. Conversão em andamento, mais adiante** — a fila mantém marcada a linha que está convertendo — não é preciso adivinhar qual arquivo está sendo processado.
-
-[![Conversão em andamento, mais adiante](https://i.ibb.co/Kx3frPc8/07-DURANTE-A-CONVERSAO-PROGRESSO-INGLES-2.jpg)](https://ibb.co/Ld2cZFDs)
-
-**8. Relatório final** — o que foi feito em cada arquivo, a verificação de integridade do MKV pronto e a nota da legenda que o programa gerou.
-
-[![Relatório final](https://i.ibb.co/v62nXZJC/08-RELATORIO-FINAL-INGLES.jpg)](https://ibb.co/xtVTFJMK)
+[![Resumo final](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
 
 ---
 
@@ -247,7 +237,7 @@ Este programa é uma casca em volta do trabalho de outras pessoas. Cada uma dela
 * **dovi_tool (por `quietvoid`)** — leitura e conversão dos metadados Dolby Vision. É ele que identifica o perfil, diz se a camada é MEL ou FEL, exporta o L1 e o L5, e faz a conversão de Perfil 7 para 8.1. **Nada disso é reimplementado aqui** — o LaFirma organiza o trabalho em volta e mostra o resultado de um jeito que dê para decidir.
 * **DDVT (por `DonaldFaQ`)** — trabalho com RPU e correção de corte. **Foi a ferramenta que ensinou este projeto a existir:** antes do LaFirma, era com ela que se convertia, e foi usando ela que se entendeu o que é RPU, o que é camada de melhoria, o que muda entre um perfil e outro e por que Perfil 7 dá trabalho. A ideia de automatizar essa conversão nasceu dali.
 * **DeeZy** — codificação para E-AC-3 com o Dolby Atmos preservado. É o que permite sair de um TrueHD Atmos e continuar com Atmos do outro lado.
-* **PgsToSrt, Tesseract OCR & seconv** — o ecossistema responsável pela extração, renderização e conversão OCR das legendas PGS em texto `.SRT`.
+* **PgsToSrt & Tesseract OCR** — o ecossistema responsável pela extração, renderização e conversão OCR das legendas PGS em texto `.SRT`.
 
 E dois agradecimentos que não são de código:
 

@@ -1,4 +1,4 @@
-PASTA redist\  -  O .NET DESKTOP RUNTIME 8.0 (OPCIONAL)
+﻿PASTA redist\  -  O .NET DESKTOP RUNTIME 8.0 (OPCIONAL)
 ================================================================================
 
 ESTA PASTA VEM VAZIA DE PROPOSITO, e o instalador compila do mesmo jeito.
@@ -65,7 +65,7 @@ ATENCAO AO NOME DO ARQUIVO
 
 PARA QUE SERVE
 
-    O PgsToSrt (o OCR de legenda RESERVA, que entra quando o seconv falha)
+    O PgsToSrt (o OCR de legenda - desde a 2.0 o UNICO, o seconv saiu)
     precisa do .NET Desktop Runtime 8.0 instalado no Windows.
 
     COM o arquivo aqui:  o instalador carrega o runtime dentro dele e o
@@ -77,9 +77,9 @@ PARA QUE SERVE
                          BAIXAR da Microsoft na hora de instalar - o que
                          exige internet naquele momento.
 
-    Em nenhum dos dois casos o programa deixa de converter video: sem o
-    .NET 8 o OCR continua funcionando pelo seconv (caminho preferencial,
-    que nao depende de nada instalado). Perde-se so o segundo caminho.
+    Em nenhum dos dois casos o programa deixa de converter video. Mas sem o
+    .NET 8 a legenda PGS NAO vira .SRT (desde a 2.0 o PgsToSrt e o unico OCR):
+    o video e o audio saem normais e a PGS original fica no MKV.
 
 POR QUE ESTE ARQUIVO EXISTE
 

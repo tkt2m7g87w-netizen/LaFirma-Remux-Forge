@@ -66,25 +66,21 @@ executables/folders directly into the 'tools\' structure:
      The change was validated on our own bench: 5 files, 3 profiles, 2 CM
      versions, zero divergence in reading between 2.3.2 and 2.3.3.
 
-3. MKVToolNix (mkvmerge.exe, mkvextract.exe):
+3. MKVToolNix (mkvmerge.exe):
    - Source: Official MKVToolNix downloads.
    - Link: https://mkvtoolnix.download/downloads.html#windows
-   - Action: Download the portable version (.7z or .zip), extract, and copy 
-     'mkvmerge.exe' and 'mkvextract.exe' into the 'tools\' root.
+   - Action: Download the portable version (.7z or .zip), extract, and copy
+     'mkvmerge.exe' into the 'tools\' root. (mkvextract is no longer used.)
 
-4. MediaInfo CLI (MediaInfo.exe, DLLs nvcuda/nvcuvid/LIBCURL):
+4. MediaInfo CLI (MediaInfo.exe):
    - Source: Official MediaInfo downloads (CLI release).
    - Link: https://mediaarea.net/en/MediaInfo/Download/Windows
-   - Action: Download the 64-bit "Command Line Interface (CLI)" package and extract 
-     'MediaInfo.exe' along with its supporting DLLs into the 'tools\' root.
+   - Action: Download the 64-bit "Command Line Interface (CLI)" package and copy
+     'MediaInfo.exe' into the 'tools\' root. The DLLs that come with it
+     (LIBCURL, nvcuda, nvcuvid) are not needed.
 
-5. SubtitleEdit (SubtitleEdit\ Subfolder):
-   - Source: SubtitleEdit repository on GitHub.
-   - Link: https://github.com/SubtitleEdit/subtitleedit/releases
-   - Action: Download the portable package 'SE3xx.zip' and extract its contents into 
-     'tools\SubtitleEdit\'.
-     *IMPORTANT*: Ensure 'libSkiaSharp.dll' and 'Latin.db' are present in this subfolder 
-     alongside 'seconv.exe'.
+5. SubtitleEdit / seconv: REMOVED in 2.0. Subtitle OCR is PgsToSrt + Tesseract.
+   Do not put a SubtitleEdit\ folder in tools\ - the installer excludes it.
 
 6. PgsToSrt (PgsToSrt\ Subfolder):
    - Source: Tensai75/PgsToSrt repository on GitHub.
@@ -96,13 +92,18 @@ executables/folders directly into the 'tools\' structure:
    - Source: tesseract-ocr/tesseract or UB-Mannheim binaries.
    - Link: https://github.com/UB-Mannheim/tesseract/wiki
    - Action: Install/Extract files into 'tools\Tesseract\', ensuring 'tesseract.exe' 
-     is present and that 'por.traineddata' and 'osd.traineddata' are placed inside 
-     'tools\Tesseract\tessdata\'.
+     is present and that 'por.traineddata' is placed inside
+     'tools\Tesseract\tessdata\' (osd.traineddata is optional).
 
 8. DeeZy (DeeZy\ Subfolder):
    - Source: JessieLW/DeeZy repository on GitHub.
    - Link: https://jessielw.github.io/DeeZy/ or https://github.com/JessieLW/DeeZy
    - Action: Extract 'deezy.exe' and the 'apps\' folder into 'tools\DeeZy\'.
+     DeeZy uses the ffmpeg.exe in the tools\ root; apps\ffmpeg\ is not needed.
+
+SHORTCUT: the ready-made tools folder (tools.rar) is linked in README.md -
+https://mega.nz/file/OGB3Xb7I#9MsNg8kaJD4R0f0xnHdnPnEjaKwlqKJpDFss1KOaNCo
+
 
 
 --------------------------------------------------------------------------------
@@ -149,16 +150,10 @@ exactly the structure below:
 |           |-- ffprobe.exe
 |           |-- dovi_tool.exe        <- MINIMUM VERSION 2.3.3
 |           |-- mkvmerge.exe
-|           |-- mkvextract.exe
 |           |-- MediaInfo.exe
-|           |-- nvcuda.dll / nvcuvid.dll / LIBCURL.DLL
+|           |-- COMO_USAR_TOOLS_PT.txt / HOW_TO_USE_TOOLS_EN.txt
 |           |
-|           |-- SubtitleEdit\        <- Preferred OCR engine
-|           |     |-- seconv.exe
-|           |     |-- Latin.db
-|           |     |-- libSkiaSharp.dll / libHarfBuzzSharp.dll
-|           |
-|           |-- PgsToSrt\            <- Secondary OCR (.NET 8 x64)
+|           |-- PgsToSrt\            <- Subtitle OCR (.NET 8 x64)
 |           |     |-- PgsToSrt.exe
 |           |     |-- x64\
 |           |     |-- tessdata\
@@ -168,7 +163,6 @@ exactly the structure below:
 |           |     |-- tesseract.exe
 |           |     |-- tessdata\
 |           |           |-- por.traineddata
-|           |           |-- osd.traineddata
 |           |
 |           |-- DeeZy\               <- TrueHD/Atmos -> E-AC-3 converter
 |                 |-- deezy.exe
@@ -219,8 +213,8 @@ TWO DETAILS THAT HAVE ALREADY COST TIME:
 
 5. Inno Setup will read the scripts from the root directory, package all binary 
    executables from 'tools\', include dependencies from 'redist\' (if present), 
-   and generate the final installer inside the 'Output\' folder 
-   (e.g., Output\LaFirma_Setup.exe).
+   and generate the final installer inside the 'Saida\' folder
+   (e.g., Saida\LaFirma_Setup_2.0.exe). Or just double-click Compilar.bat.
 
 6. Done! The generated 'LaFirma_Setup.exe' is fully standalone and ready for 
    distribution. When executed on an end-user machine, it will automatically deploy 

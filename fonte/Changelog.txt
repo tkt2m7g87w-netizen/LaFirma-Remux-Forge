@@ -19,6 +19,3044 @@
 
 
 ================================================================================
+ INSTALADOR 2.0  -  23/09/2026      *** VERSAO PUBLICA ***
+================================================================================
+ Componentes: MOTOR 14.14 | JANELA 19.15 | CORRETOR 2.34 | REOCR 1.30 | BATERIA 4.7 (1.334 testes) | BANCADA 4.0 (336 invariantes)
+ Depende do dovi_tool 2.3.3.
+
+ TUDO O QUE MUDOU DESDE A 1.9.3 (a ultima publicada, 15/09/2026).
+ Foram 9 dias e 28 builds de teste (1.9.4 a 1.11.8 e 2.0 a 2.0.18), cada uma
+ descrita logo abaixo, na ordem inversa. Este bloco e o resumo para quem vem
+ da 1.9.3.
+
+ 1. A PREVISAO DE TEMPO PASSOU A SE CORRIGIR DE VERDADE
+    - A calibragem antiga se anulava na conta (a constante aparecia dos dois
+      lados) e nunca corrigiu nada. Agora ela multiplica os SEGUNDOS e existe
+      uma por etapa (extracao, dovi, audio, legenda, remontagem).
+    - Pausa sai da conta; o log compara previsto x real por filme e da fila.
+    - Remontagem com video extraido refeita com medidas reais (8s + 4,5 s/GB).
+    - Teste final (3 filmes): erro da fila entre -8% e +2%.
+
+ 2. MEL x FEL: UMA COR, UM SIGNIFICADO
+    - Verde = MEL, laranja = Simple FEL, vermelho = Complex FEL. A cor diz o
+      que a camada E; o Censo Completo acrescenta quantas cenas pesam, sem
+      mudar a cor. O cabecalho "[CONVERSAO NAO RECOMENDADA]" ficou.
+    - Leitura da regua do master deixou de falhar calada (3 catch vazios).
+
+ 3. CENSO COMPLETO [F11]
+    - Le o RPU do filme inteiro e conta as cenas acima do master (Ryan: 216
+      de 1.124, 19%). O resultado vai para o motor e aparece no log dele.
+    - Previsao pelo maior entre disco e CPU (erro caiu de 1.700% para 1-22%);
+      velocidade do disco medida por arquivo.
+    - Cancelar mata os processos na hora e nunca vira veredicto; freio contra
+      cliques repetidos; 2,2x mais rapido (196s -> 89s em 78 GB).
+
+ 4. CANCELAR, PAUSAR E FECHAR
+    - [ESC] para na entrada de cada etapa: nada novo comeca depois dele (antes
+      podia montar um MKV de 19 GB so para apagar).
+    - Cancelar durante a pausa funciona; fechar a janela encerra censo,
+      medicao e motor; o cancelamento limpa os arquivos de trabalho da
+      legenda.
+
+ 5. ESPACO EM DISCO, ANTES DE COMECAR
+    - Origem e saida no mesmo disco: cobra tudo dele. Em discos diferentes:
+      cada um paga a sua parte. O cartao diz quanto falta e em qual disco.
+    - A trava de espaco estava dentro de um catch vazio e podia sumir calada.
+
+ 6. LEGENDA
+    - O seconv/SubtitleEdit saiu: o OCR e PgsToSrt + Tesseract.
+    - Corretor 2.34: conserta "Sailam", "SO"/"AI" em caixa alta, "F, Ae G",
+      "magoel", "E Isso", "Sel.", "Pal...", entre outros - conferido nas
+      legendas de 7 filmes: so linhas erradas mudaram.
+    - Deixou de inventar nome proprio (All Spark virava Ali Spark).
+    - A nota diz o que mede: blocos ilegiveis, nao palavra lida errada.
+    - A faixa sai como "Portugues (Brasil) [OCR]", com acento.
+
+ 7. O ARQUIVO ENTREGUE
+    - O nome leva o selo [BL+RPU]; a trava de "ja existe" confere os dois
+      nomes, com e sem selo.
+    - A pasta final recebe so .mkv + .srt. O log fica em _logs.
+
+ 8. JANELA E INSTALADOR
+    - Barra na ordem do trabalho: [F1] [F2] [ESC] | [F3] [F4] [F5] | [F11] [F12].
+      F3/F4 ganharam freio (eram 65 janelas do Explorer em 20 s).
+    - Leitura, medicao e censo viraram tres trabalhos separados: a janela nao
+      congela mais.
+    - O instalador pergunta o idioma e mostra a licenca (EULA PT/EN).
+    - O instalador roda em 64 bits e a desinstalacao nao deixa mais _logs
+      e icone para tras.
+    - Icone em branco na barra de tarefas: o instalador apaga o atalho velho
+      (agosto) que ficava no menu Iniciar do usuario apontando para
+      C:\LaFirma\icone.
+    - Traducao PT/EN fechada; manual, FAQ e guias do instalador revistos.
+
+ 9. FERRAMENTAS
+    - Sairam: seconv/SubtitleEdit, mkvextract, LIBCURL, nvcuda, nvcuvid.
+    - mkvmerge v102.0, ffmpeg/ffprobe 9.0.1, MediaInfo CLI 26.05, dovi_tool 2.3.3.
+
+ TESTE FINAL: GoT (Simple FEL), Ryan (Complex FEL, com censo) e Troy (MEL):
+ 3 de 3 convertidos, video integro, legendas EXCELENTE.
+
+
+================================================================================
+ INSTALADOR 2.0.18  -  23/09/2026      *** A PREVISAO DO FILME CURTO ***
+================================================================================
+ Componentes: MOTOR 14.14 | JANELA 19.15 | CORRETOR 2.34 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+
+ O GoT errava a previsao para cima em 3 testes seguidos (-20%, -25%, -27%).
+ Nao era o disco: Ryan e Troy, no mesmo disco, erram 3-7%. Era a reta da
+ remontagem com video extraido (51s fixos emprestados do remux direto).
+ Refeita com 6 medidas de 23/09: 8s + 4,5 s/GB. Simulado nos 3 filmes:
+ GoT -27,6% -> ~-19%, Ryan -3,9% -> ~-3%, Troy -6,8% -> ~-6%. O resto do
+ erro do GoT e a legenda (446 falas curtas, 65s para 110 previstos) - sem
+ regra segura com 3 filmes, fica com a calibragem.
+ O historico da etapa 5 recomeca ("remontagem2") porque foi medido contra
+ a reta velha.
+
+
+================================================================================
+ INSTALADOR 2.0.17  -  23/09/2026      *** PASTA FINAL SO COM MKV + SRT ***
+================================================================================
+ Componentes: MOTOR 14.14 | JANELA 19.14 | CORRETOR 2.34 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+
+ A pasta de saida recebia uma copia do log (<nome>.LaFirma.log.txt) ao lado
+ de cada filme. Saiu, na janela e no motor: a pasta final recebe so .mkv +
+ .srt. O log da sessao continua em _logs, como sempre.
+ Teste da 2.0.16 (3 filmes): "Sei." (GoT) e "Pai..." (Troia) confirmados;
+ previsao da fila -7,9%.
+
+
+================================================================================
+ INSTALADOR 2.0.16  -  23/09/2026      *** SEL E PAL ***
+================================================================================
+ Componentes: MOTOR 14.13 | JANELA 19.13 | CORRETOR 2.34 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+
+ Revisao das legendas do teste da 2.0.14 achou dois erros fora da conta:
+ "Sel." (GoT, fala inteira) -> "Sei." e "Pal..." (Troia, 3x) -> "Pai...".
+ So casam no inicio da fala seguidos de pontuacao.
+
+
+================================================================================
+ INSTALADOR 2.0.15  -  23/09/2026      *** OS ERROS QUE A NOTA NAO CONTAVA ***
+================================================================================
+ Componentes: MOTOR 14.13 | JANELA 19.13 | CORRETOR 2.33 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+ Depende do dovi_tool 2.3.3 (sem mudanca).
+
+ O Ryan saiu "EXCELENTE - 1 falha em 1385" com varios erros de OCR na tela.
+ A nota conta bloco ILEGIVEL (o "NEL" solto); palavra lida errada que parece
+ palavra passa por ela. CORRETOR 2.32 conserta os que tem regra segura:
+ "Sailam"->"Saiam", "SO Jackson"->"So", "AI vem"->"Ai", "F, Ae G"->"F, A e G",
+ "2 Seus"->"2 seus", "magoel"->"magoei" (Troia), "- E Isso o que"
+ -> "- E-agudo isso o que" (Transformers). Rodado nos 8 .srt de teste
+ que existem: so essas linhas mudam (e o "AI estao"/"SO queremos" do
+ Transformers e o "-OS corpos" do Se7en, tambem certos).
+ NAO consertados, sem regra segura: "a Salvo" (igual a "a Coroa", que e
+ certo), "Ai nos manteve" (Ai tambem e interjeicao), "lanico" (nome).
+
+
+================================================================================
+ INSTALADOR 2.0.13  -  23/09/2026      *** O GRANDE TESTE FINAL ***
+================================================================================
+ Componentes: MOTOR 14.13 | JANELA 19.13 | CORRETOR 2.31 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+ Depende do dovi_tool 2.3.3 (sem mudanca).
+
+ Fila de 3 (GoT Simple FEL, Ryan Complex FEL com censo, Troy MEL/DTS): 3 de
+ 3 convertidos, 1h43m. Previsao por filme -10,1% / +1,2% / -0,3%. Censo no
+ log do motor, pausa fora das contas, legendas EXCELENTE (0/446, 1/1385,
+ 0/1378), faixa "Portugues (Brasil) [OCR]" com acento nos tres MediaInfo.
+ - O "[F12] Medir MEL x FEL: Ligado" do topo ficava em portugues depois de
+   trocar para ingles.
+ - Ao passar para o filme seguinte, o rodape herdava o relogio da ultima
+   etapa do anterior (restante pulava ~100 s por um instante).
+ - OCR parado em 10% por 90 s inflava o restante (1.867 -> 2.403 s); abaixo
+   de 20% de progresso vale a previsao, nao o ritmo.
+ - Arquivo que ja existia na saida (pulado em 1 s) saia no log como
+   "previsao: erro -100%" e dava AVISO de calibragem. Agora: "nao comparada".
+
+
+================================================================================
+ INSTALADOR 2.0.11  -  23/09/2026      *** CADA DISCO COM A SUA CONTA ***
+================================================================================
+ Componentes: MOTOR 14.13 | JANELA 19.11 | CORRETOR 2.31 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+ Depende do dovi_tool 2.3.3 (sem mudanca).
+
+ - ESPACO POR DISCO. Os temporarios nascem no disco da origem e o .mkv final
+   vai direto para o disco da saida. Com os dois no mesmo disco, nada muda
+   (3,15x ou 1,6x). Com discos diferentes: origem (fator - 1)x, saida 1x. A
+   trava antiga cobrava tudo da origem e nunca olhava a saida.
+ - O cartao "Faltam ~X livres" diz QUAL disco (antes dizia "disco de saida"
+   sempre, e o que o motor media era a origem).
+ - "Livre Agora" mostra o disco da origem, e tambem o da saida quando e outro.
+ - A faixa SRT no MKV se chama "Portugues (Brasil) [OCR]" com acento.
+
+
+================================================================================
+ INSTALADOR 2.0.10  -  23/09/2026      *** O TESTE DE ACEITE E A AUDITORIA ***
+================================================================================
+ Componentes: MOTOR 14.12 | JANELA 19.10 | CORRETOR 2.31 | REOCR 1.30 | BATERIA 4.7 | BANCADA 4.0
+ Depende do dovi_tool 2.3.3 (sem mudanca).
+
+ O teste de aceite da 2.0.9 passou nos quatro itens: titulo v2.0.9; Ryan
+ com censo mostra "[CONVERSAO NAO RECOMENDADA]" e "censo: 216 de 1.124
+ cenas (19%)"; GoT vai direto ao PgsToSrt, sem seconv, legenda EXCELENTE
+ 0 de 446; pausa confirmada em 89 a 333 ms, ESC recusado segue, ESC aceito
+ encerra em 1,2 s. Esta versao so conserta o que os logs desse teste e uma
+ releitura inteira dos fontes mostraram. Nada de recurso novo.
+
+ DO LOG DO TESTE
+ - "[CANCELADO] [CANCELANDO] Encerrando..." saia com os dois rotulos.
+ - A sub-etapa da legenda saia duas vezes no log ("- OCR completo" e
+   "OCR completo"; o mesmo com Corretor e Reocr).
+ - PAUSA DENTRO DAS CONTAS DO RODAPE. Pausa de 29 s no comeco do OCR: o
+   restante subiu de 196 s para 422 s e o % do video voltou de 86% para 84%.
+   A barra e o restante agora usam o tempo de TRABALHO da etapa.
+ - BARRA DO AUDIO TRUEHD. As tres fases do DeeZy valiam 1/3 cada; medidas
+   em 20 conversoes dos logs, sao 24% / 7% / 69%. O restante dizia 374 s
+   com 740 s por fazer.
+ - O ESC deixava o _CORRIGIDO.srt e o relatorio em _corretor e _reocr.
+   Agora o cancelamento leva os arquivos de trabalho da legenda DESTE
+   episodio (na falha eles continuam la - explicam o erro).
+ - Titulo "Pronto para Converter -  Video(s) na Fila" sem o numero.
+ - "nao consegui encerrar ffmpeg" como AVISO quando o processo ja tinha
+   terminado sozinho.
+
+ DA RELEITURA DOS FONTES
+ - Pausa que atravessava a troca de etapa sumia das contas (ia como
+   trabalho para a barra, o restante e a calibragem).
+ - Cancelar com a conversao PAUSADA deixava a tela escrevendo "PAUSADO"
+   enquanto o motor limpava.
+ - Fechar a janela com o Censo Completo rodando deixava o dovi_tool lendo
+   o filme sem janela. Fechar agora para o censo e a medicao.
+ - Ao retomar de uma pausa longa, o restante caia de uma vez.
+ - A previsao da fila no log contava a pausa como erro da previsao.
+ - O diagnostico do arquivo caia inteiro se o metadado HDR nao fosse
+   lido (um catch que estourava dentro do catch).
+ - Sem .NET 8 e com o seconv presente, o log dizia "NAO havera OCR" e
+   o seconv fazia a legenda.
+ - Arquivo apagado da pasta entre a leitura e o Iniciar: o seguinte
+   recebia a estimativa e a calibragem dele.
+ - O teto de 15 min do Reocr deixava o tesseract vivo.
+ - O censo usava a velocidade de disco do PRIMEIRO censo da sessao para
+   qualquer disco.
+ - "Nova Conversao" e depois trocar o idioma punha no titulo o resultado
+   da fila anterior.
+ - CORRETOR 2.31: "Porque vou pega-los" era lido como espanhol ("porque"
+   e "los" contavam) e perdia as correcoes l/i.
+ - Resumo do console: "sem espaco" separado de "ja existiam".
+ - LaFirma_Setup.iss tinha 6 linhas so com LF (da 2.0.7).
+
+ O QUE ESTA VERSAO NAO FAZ
+ - Nao muda nenhum texto aprovado da tela.
+ - Nao adiciona recurso. Censo que sobrevive a reabrir o programa e
+   arrastar-e-soltar continuam fora da 2.0.
+
+
+================================================================================
+ INSTALADOR 2.0.9  -  23/09/2026      *** O CABECALHO DE VOLTA ***
+================================================================================
+ Componentes: MOTOR 14.11 | JANELA 19.9 | CORRETOR 2.30 | REOCR 1.30 | BATERIA 4.6 | BANCADA 4.0
+
+ Desfeito a pedido do usuario o rotulo "[PERDA EM N DE M CENAS]" da 2.0.7.
+ Eu tinha trocado o cabecalho de sempre por um rotulo novo sem perguntar.
+ Volta "[CONVERSAO NAO RECOMENDADA]" na tela, no motor e no cartao; o censo
+ so acrescenta o numero no fim da linha, como era. O censo continua indo
+ para o motor, que escreve o numero dele no log em vez de mandar rodar o
+ censo de novo.
+
+
+================================================================================
+ INSTALADOR 2.0.8  -  23/09/2026      *** O INICIAR QUEBRADO ***
+================================================================================
+ Componentes: MOTOR 14.10 | JANELA 19.8 | CORRETOR 2.30 | REOCR 1.30 | BATERIA 4.6 | BANCADA 4.0
+
+ A 2.0.7 nao iniciava conversao nenhuma: "Os tipos de argumento nao
+ correspondem" (log do usuario, 23/09 01:55:53). O bloco novo que manda o
+ censo para o motor fazia foreach em @($script:Videos) - e @() em cima de uma
+ List[object] estoura no PowerShell 5.1 e no 7. A bateria conferia o TEXTO
+ do bloco e nunca o executou; agora executa (secao 58), e reprova com o @()
+ de volta. Nada mais mudou.
+
+
+================================================================================
+ INSTALADOR 2.0.7  -  23/09/2026      *** O QUE OS LOGS MOSTRARAM ***
+================================================================================
+ Componentes: MOTOR 14.10 | JANELA 19.7 | CORRETOR 2.30 | REOCR 1.30 | BATERIA 4.6 | BANCADA 4.0
+ Depende do dovi_tool 2.3.3 (sem mudanca).
+
+ Releitura dos 128 logs de teste de 04/09 a 22/09. Nada de recurso novo:
+ so o que os logs mostram errado, cada item com a linha do log ao lado do
+ conserto e teste na bateria (secao 56).
+
+ - CENSO E VEREDICTO SE CONTRADIZIAM. TROTF: "[CONVERSAO NAO RECOMENDADA]"
+   ao lado de "censo: 15 de 2.225 cenas (1%)", e o motor mandando rodar o
+   censo que ja tinha sido rodado. Agora o censo vai para o motor e, feito
+   ele, o rotulo e o fato: "[PERDA EM 15 DE 2.225 CENAS (0,7%)]" - na tela,
+   no log do motor e no cartao. A cor continua a da classificacao.
+ - A LEGENDA DIZIA "NENHUM DEFEITO" AO LADO DE "1 FALHA". A frase do
+   EXCELENTE agora e "Pode assistir por esta legenda." O Reocr nao anuncia
+   mais o exemplo fixo "'INF TOL' -> 'Nao!'" em todo filme.
+ - SECONV SAI DO INSTALADOR (~91 MB a menos). O .iss recusa compilar se a
+   pasta fonte\tools\SubtitleEdit ainda existir, e a atualizacao apaga a
+   pasta antiga da instalacao. A janela mostra cinco ferramentas no topo.
+ - SECONV SAI DA FRENTE. Recusado em 7 de 7 filmes medidos (8% a 73% de
+   '*'), custando de 20 s a 1m26 por filme, e a legenda final era sempre a
+   do PgsToSrt. Agora so roda sem PgsToSrt na maquina; a "2a opiniao" do
+   Corretor (0 correcoes em todos os logs) tambem.
+ - CORRETOR 2.30: "da OnStar" virava "da onstar" com o dicionario real (ele
+   tem "onstar"); "Es la casa del chicas" virava "Es ia casa". Caixa so baixa
+   em palavra que o proprio arquivo escreve em minuscula; bloco com palavras
+   funcionais espanholas nao e portugues.
+ - CALIBRAGEM ENVENENADA: a pausa entrava no tempo do arquivo (GoT: +44,6%
+   gravado) e a etapa cancelada gravava fator (TROTF: 0,30). Nenhum dos dois
+   grava mais.
+ - MEDICAO RESSUSCITAVA ao trocar de pasta: a bandeira de parar era abaixada
+   pela leitura seguinte e a medicao velha seguia lendo a pasta anterior.
+   Agora ela para quando a rodada dela deixa de ser a viva.
+ - TITULO "v1.9.3" POR 25 BUILDS: o VERSAO.txt do instalador velho vencia.
+   Agora vale o maior numero.
+ - Cosmeticos do log: "[CANCELADO] [CANCELADO]"; "Nova Conversao ... ja esta
+   na saida" depois de cancelar; confirmacao de pausa chegando depois da
+   retomada sem aviso.
+
+
+================================================================================
+ INSTALADOR 2.0.6  -  23/09/2026      *** REVISAO GERAL ***
+================================================================================
+ Componentes: MOTOR 14.9 | JANELA 19.6 | CORRETOR 2.29 | REOCR 1.30 | BATERIA 4.5 | BANCADA 4.0
+ Depende do dovi_tool 2.3.3 (sem mudanca).
+
+ Revisao do codigo inteiro, pedida pelo usuario. So entrou o que foi
+ confirmado lendo o codigo; cada item tem teste na bateria (secao 54), e
+ onde deu o teste EXECUTA a regra.
+
+ 1. MOTOR 14.9
+ --------------------------------------------------------------------------
+ - Profile 5 usava a DURACAO do arquivo anterior da fila (a variavel era
+   lida antes de ser preenchida). Barra e cartao do P5 saiam errados.
+ - ESC durante o P5 nao parava o lote: o ramo terminava num "continue" que
+   pulava a parada. Agora o P5 pergunta antes de comecar e, cancelado,
+   apaga o .mp4 parcial e para a fila como qualquer outra etapa.
+ - Processo que nascia DEPOIS do ESC (entre duas etapas) nao era morto: o
+   laco de espera via o pedido, saia, e ficava esperando o processo
+   terminar sozinho. Agora e encerrado na hora.
+ - Falha do P5 era registrada como "FALHA" e o resumo so conta "FALHOU" -
+   a falha sumia do resumo.
+ - Cartao do P5 dizia "TrueHD -> E-AC-3 Atmos", "Legenda (OCR)" e
+   "Matroska". Agora: "Profile 5 -> MP4 [REMUXADO]", MPEG-4 e o que foi
+   feito de verdade com audio e legenda.
+ - Cancelado ou falho, o .srt copiado para a saida sai junto com o .mkv
+   (antes ficava orfao na pasta).
+
+ 2. JANELA 19.6
+ --------------------------------------------------------------------------
+ - F5 (Atualizar) durante a conversao relia a pasta e MATAVA o lote. O
+   botao ja ficava apagado; a tecla nao olhava. A guarda agora mora na
+   funcao que os dois chamam.
+ - Iniciar esvaziava a fila de mensagens sem olhar e podia jogar fora o
+   aviso de fim da medicao ou do censo - o mesmo defeito que a 18.08 tirou
+   da leitura. Agora essas mensagens sao guardadas.
+ - Um fim de medicao atrasado podia religar a medicao NO MEIO da conversao
+   (as duas lendo o mesmo disco). Agora a medicao nao comeca com a
+   conversao rodando.
+ - Cartao do P5 com selo e container proprios.
+
+ 3. CORRETOR 2.29 - QUATRO REGRAS QUE ESTRAGAVAM TEXTO CERTO
+ --------------------------------------------------------------------------
+ - Nome CamelCase que aparece uma vez ("OnStar") virava "onstar".
+ - "OS rumores" virava "os rumores" - a fala perdia a maiuscula. Agora "Os".
+ - Nome composto ("Muhammad Ali") tinha o segundo nome rebaixado.
+ - Fala curta de dialogo no meio de 3 linhas ("- Sam!") era APAGADA como
+   se fosse caco de aspas.
+
+ 4. TRADUCAO
+ --------------------------------------------------------------------------
+ Selos do cartao sem traducao (audio convertido, legenda reaproveitada /
+ descartada / erro), a recusa do censo, a pasta vazia explicada, e a regra
+ "Mantido a Pedido" em caixa alta que vinha depois de uma regra mais geral
+ e nunca casava. Doze entradas mortas e quatro duplicadas sairam da tabela.
+
+ 5. O QUE NAO FICOU PARA DEPOIS
+ --------------------------------------------------------------------------
+ - MOTOR: [F2] congelava so o programa chamado; o tesseract por baixo do
+   Corretor/Reocr seguia rodando com a tela dizendo PAUSADO. Agora a arvore
+   inteira pausa e retoma. O .mp4 do P5 ja existente e visto antes do
+   diagnostico. ESC durante o OCR diz "cancelado", nao "OCR falhou".
+ - JANELA: consultas de processo com teto de 3 s; a medida do disco e
+   guardada por arquivo (nao le 72 MB de novo a cada clique); motivo da
+   pasta vazia nao some mais; a dica do censo nao manda ligar a chave
+   quando o botao ja esta aceso; "A Seguir" traduz cada pedaco uma vez; o
+   Iniciar volta a acender se a espera da medicao terminar sem converter.
+ - CORRETOR: traco de dialogo solto conta como abertura de fala; bloco em
+   outra lingua nao recebe troca l/i na Regra C; nome de duas letras ("Al")
+   nao e apagado na reconstrucao de bloco quebrado.
+ - REOCR 1.30: linha orfa nao come mais o tempo do bloco seguinte; nome
+   curto decidido pela mesma lista do Corretor.
+ - DOCUMENTOS: COMO_USAR e HOW_TO_USE com [BL+RPU], .mp4 do P5, F5/F11/F12
+   e o censo ("informa, nunca muda a cor"); HOW_TO_USE com os rotulos em
+   ingles; FAQ EN igual ao PT na secao 4 (lista por MKV); FAQ com o censo e
+   a EULA.
+
+
+================================================================================
+ INSTALADOR 2.0.5  -  22/09/2026      *** UMA COR, UM SIGNIFICADO ***
+================================================================================
+ Componentes: MOTOR 14.8 | JANELA 19.5 | CORRETOR 2.28 | BATERIA 4.4 | BANCADA 4.0
+
+ 1. O GRADIENTE DA 2.0.2 FOI DESFEITO
+ --------------------------------------------------------------------------
+ A 2.0.2 fazia o Censo Completo descer um Complex FEL "isolado" de vermelho
+ para laranja. Laranja e a cor do Simple FEL. O usuario leu o que qualquer
+ um leria: que o programa tinha reclassificado o filme - "na primeira
+ analise acha que e FEL completo e depois analisa como FEL medio?". E o
+ cartao do fim da conversao continuava dizendo "Complex FEL - CONVERSAO NAO
+ RECOMENDADA". Tres partes da tela, tres respostas para o mesmo arquivo.
+
+ O erro foi de conceito: pus DOIS eixos numa cor so - o que a camada E
+ (classificacao) e o quanto ela pesa (frequencia). A cor e a unica coisa
+ que a pessoa le de relance, e ela tem que responder UMA pergunta.
+
+ Volta a regra que ja estava escrita no codigo desde a 18.x: o censo conta
+ cenas, nao reclassifica camada. Verde MEL, laranja Simple FEL, vermelho
+ Complex FEL. O censo acrescenta os NUMEROS a linha ("censo: 15 de 2.225
+ cenas do filme (1%) passam do master") - quem decide o peso e quem le.
+
+ 2. O GIRO DO CENSO MOSTRAVA "\\"
+ --------------------------------------------------------------------------
+ Em PowerShell "\\" sao DUAS barras - a barra invertida nao escapa nada ali.
+ O botao aparecia "[F11] Censo \\ 3%". Agora e uma so.
+
+
+================================================================================
+ INSTALADOR 2.0.4  -  22/09/2026    *** A PERGUNTA VEM ANTES DO TRABALHO ***
+================================================================================
+ Componentes: MOTOR 14.8 | JANELA 19.4 | CORRETOR 2.28 | BATERIA 4.4 | BANCADA 4.0
+
+ Duas coisas, as duas achadas no log e nas fotos da sessao de teste dele logo
+ depois da 2.0.3.
+
+ 1. O CANCELAMENTO NAO TRAVAVA A PASSAGEM ENTRE ETAPAS
+ --------------------------------------------------------------------------
+     18:19:10  TECLA: Escape
+     18:19:16  [CANCELANDO] Encerrando o Processo Atual...
+     18:19:16  > [5/5] Remontando MKV Final (mkvmerge):
+     18:20:59  [OK] Arquivo Finalizado - 19,05 GB
+     18:20:59  [CANCELADO] Removendo a Saida Parcial...
+     18:20:59  Motor encerrou 103,9s depois do pedido
+
+ Ele cancelou, e o motor foi montar o MKV INTEIRO - 19 GB, 1m42 - para em
+ seguida APAGAR o arquivo. Cento e quatro segundos de trabalho comecado
+ depois do [ESC].
+
+ E a guarda existia. Estava no FIM do episodio, com um comentario que dizia
+ exatamente o problema: "se o ESC for pressionado no intervalo entre duas
+ etapas, nenhuma delas falha - sem esta guarda o episodio seria registrado
+ como concluido". Ela protegia o REGISTRO, nao o TEMPO do usuario. Perguntar
+ "ainda valia?" depois de fazer e contabilidade, nao cancelamento.
+
+ A 2.0.3 pos a pergunta nas tres reservas do OCR porque foi o que aquele log
+ mostrou. NAO fui procurar as outras portas, e a porta seguinte era a maior
+ de todas. Licao 37 contra mim mesmo: padrao errado se conserta onde ele
+ MORA, nao so onde doeu.
+
+ Agora TODA etapa pergunta na entrada - [1/5], [2/5], [3/5], [4/5], [5/5] e a
+ conferencia do arquivo final - e o erro lancado e o mesmo de sempre, para
+ cair no mesmo catch que apaga a saida parcial e registra CANCELADO. A
+ bateria cobra a pergunta etapa por etapa, e cobra que ela venha ANTES do
+ anuncio de cada uma.
+
+ 2. O CENSO MUDAVA A COR DE BAIXO E DEIXAVA A DE CIMA
+ --------------------------------------------------------------------------
+ No Transformers, depois do censo: a LINHA do diagnostico virou laranja
+ ("levanta o brilho, mas em cenas isoladas") e a COLUNA DOLBY VISION da fila
+ continuou VERMELHA. A mesma tela dizendo duas coisas sobre o mesmo arquivo.
+
+ No log, entre o fim do censo (17:56:43) e a acao seguinte dele (17:57:57),
+ nao existe uma unica linha "FILA:". A fila nunca foi repintada.
+
+ A 2.0.2 pos a coluna e o diagnostico para perguntarem a cor a MESMA funcao,
+ e eu tratei isso como resolvido. Nao era: as duas perguntam igual, mas so
+ uma era perguntada DE NOVO. Um dono da regra nao adianta se metade da tela
+ nao volta a consultar.
+
+ E a licao ja estava escrita no arquivo, no ramo logo abaixo (17.20):
+ "Estado novo sem redesenho e tela mentindo." O ramo do censo nao a obedecia.
+
+ 3. O QUE FOI CONFERIDO E ESTAVA CERTO
+ --------------------------------------------------------------------------
+ * A LEGENDA DO GOT SAIU LIMPA. Conferidos os 37 nomes proprios do episodio
+   (Daenerys, Targaryen, Winterfell, Karstark, Randyll Tarly, Rhaegar,
+   Aegon, Strickland...): nenhum foi trocado. As tres guardas da 2.28
+   seguraram, e as correcoes legitimas continuaram acontecendo.
+ * NAO SAI RELATORIO DO CORRETOR quando a legenda fica EXCELENTE - o motor
+   apaga os arquivos de trabalho de proposito ("Removi os 4 Arquivo(s) de
+   Trabalho do Corretor e do Reocr"). Nao e falha: e a faxina.
+ * "A AMOSTRA DELE LEVOU 00m 06s" e real - seis segundos. A amostra do Ryan
+   mede entre 5 e 6 segundos em todos os logs.
+ * O CENSO FICOU 2,2x MAIS RAPIDO com a 2.0.3: o mesmo Transformers saiu de
+   196,0s para 89,5s, e a previsao errou 5% (94s previstos contra 89,5s).
+
+
+================================================================================
+ INSTALADOR 2.0.3  -  22/09/2026   *** CANCELAR E UM ESTADO, NAO UM EVENTO ***
+================================================================================
+ Componentes: MOTOR 14.7 | JANELA 19.3 | CORRETOR 2.28 | BATERIA 4.3 | BANCADA 4.0
+
+ Tudo desta versao saiu de UMA sessao de teste do usuario, em 22/09. Nenhum
+ item aqui foi procurado por nos: os quatro estavam no log e no relatorio que
+ ele mandou.
+
+ 1. O [ESC] NAO ERA LIDO PELA CADEIA DE RESERVA DO OCR
+ --------------------------------------------------------------------------
+ Quatro linhas do log dele contam a historia inteira:
+
+     11:57:31.281  ACAO: cancelar - flag gravada
+     11:57:31.613  [CANCELANDO] Encerrando o Processo Atual...
+     11:57:31.614  [AVISO] seconv Nao Gerou Legenda. Tentando PgsToSrt
+     11:59:01.092  [OK] Legenda Convertida com Sucesso (PgsToSrt)
+
+ O cancelamento MATOU o seconv - e a etapa leu a morte dele como "o seconv
+ falhou", que e a condicao exata que dispara a rede de seguranca. Entao ela
+ comecou o PgsToSrt do zero, rodou 90 segundos, e no fim chamou o
+ Corretor_Legenda, que por sua vez chama o seconv de novo para a segunda
+ opiniao. TRES programas iniciados depois de o usuario ter mandado parar. A
+ tela ficou "Cancelando - esperando a etapa atual terminar" por quatro
+ minutos e ele teve que fechar a janela na mao.
+
+ A causa nao e o matar - e a LEITURA do resultado. Para quem esta embaixo,
+ "eu matei a ferramenta" e "a ferramenta falhou" tem exatamente a mesma cara:
+ nao saiu arquivo. E a reacao honesta a uma falha e tentar a reserva. Faltava
+ a pergunta anterior a essa.
+
+ Agora existe UM lugar que responde "ainda vale comecar?" (Cancelado-AntesDe)
+ e as tres reservas perguntam antes: PgsToSrt, Corretor_Legenda e
+ Reocr_Legenda. E a pergunta vem antes do anuncio da sub-etapa - anunciar uma
+ etapa que nao vai rodar deixa a barra com etapa fantasma, que foi exatamente
+ o que ele ficou olhando.
+
+ > LICAO 50: CANCELAR E UM ESTADO, NAO UM EVENTO. Quem tem plano B tem que
+ > perguntar se ainda ha PARA QUE fazer, antes de perguntar se deu certo.
+
+ 2. "seconv NAO GEROU LEGENDA" QUANDO A VERDADE ERA "EU MATEI O SECONV"
+ --------------------------------------------------------------------------
+ Mesma familia, do lado do texto. Quando o encerramento foi o cancelamento, a
+ frase agora diz isso: "O seconv Foi Encerrado Porque Voce Cancelou - Nao Foi
+ Falha Dele." Terceiro estado precisa de nome (licao 19).
+
+ 3. O SEGUNDO [ESC] FOI RECUSADO COM "NAO SE APLICA AO ESTADO 'RODANDO'"
+ --------------------------------------------------------------------------
+ Ele apertou [ESC] de novo enquanto esperava, e o log respondeu isso. O
+ estado ERA rodando, e era verdade - e era inutil. E o mesmo defeito que o
+ F11 tinha antes da 18.22, voltando pela outra tecla (licao 46). Agora a
+ recusa diz o motivo real: ou o cancelamento ja foi pedido ha N segundos e
+ esta em curso, ou nao ha conversao para cancelar.
+
+ 4. O CORRETOR ESTAVA INVENTANDO NOME PROPRIO
+ --------------------------------------------------------------------------
+ Do relatorio do Corretor que ele mandou, no Transformers:
+
+     ANTES : 'da nossa raca estava no All Spark'
+     DEPOIS: 'da nossa raca estava no Ali Spark'      (5 vezes)
+     ANTES : 'Codigo "Tut", como Rei Tutankamon'
+     DEPOIS: 'Codigo "Tui", como Rei Tutankamon'
+     ANTES : 'Quem e o seu Autobotzinho?'
+     DEPOIS: 'Quem e o seu Autoboizinho?'
+
+ O OCR tinha ACERTADO nos tres. Fomos nos que estragamos - e boa parte dos
+ "13 erros de OCR" que a 2.0.1 contou naquela legenda era obra nossa.
+
+ A regra Repair-FamiliaBarraVertical (troca l/t/| por i) era a UNICA regra do
+ Corretor que nao recebia a lista de nomes proprios. E a lista nem teria
+ salvado, porque as duas pontas perguntavam com funcoes diferentes:
+
+     Get-NomesProprios usa Test-NoDicionario -> acha "all" no dicionario de
+         1,3M (ele carrega palavra de todo idioma) -> conclui "palavra
+         conhecida, nao precisa de protecao"
+     a regra usa Test-PalavraPtBr -> abaixo de 4 letras nem consulta esse
+         dicionario -> conclui "nunca vi" -> troca l por i -> acha "ali",
+         que e palavra portuguesa legitima -> candidato unico -> troca feita
+
+ Duas funcoes respondendo o CONTRARIO sobre a mesma palavra, com a protecao
+ dependendo de uma e o estrago dependendo da outra. Licao 41 num lugar novo.
+
+ TRES CONSERTOS, de proposito:
+   1. a regra passa a receber a lista de nomes, como todas as outras ja
+      recebiam;
+   2. o coletor de nomes passa a perguntar com a MESMA funcao das regras, para
+      nunca mais existirem duas respostas;
+   3. e duas guardas que nao dependem de dicionario nenhum: palavra
+      capitalizada colada em outra capitalizada e nome ("All Spark", "Rei
+      Tutankamon"), e palavra capitalizada no MEIO da frase nao tem letra
+      trocada.
+
+ O PRECO DA GUARDA 3, MEDIDO E ESCRITO NO CODIGO: no relatorio real dele, as
+ trocas desta regra em palavra capitalizada no meio da frase foram 1 acerto
+ ("Xangal" -> "Xangai") contra 7 estragos. Perder o acerto e o preco certo:
+ deixar de consertar e nao fazer nada; trocar nome proprio por outra palavra
+ e entregar o arquivo PIOR do que chegou, em silencio.
+ Quem abre a frase continua sendo consertado ("- Ol," -> "- Oi,") e minuscula
+ continua sendo consertada ("pal" -> "pai", "tr" -> "ir").
+
+ 5. O MINUTO DO CENSO QUE NAO APARECIA EM RELOGIO NENHUM
+ --------------------------------------------------------------------------
+ Queixa dele: "o censo e 1 minuto e pouco a mais quando chega a 100%". Os dois
+ relogios do censo paravam antes da leitura do L1_export.csv:
+
+     Ryan          243.760 quadros / 1.124 cenas  ->  53s fora de conta
+     Transformers  215.617 quadros / 2.225 cenas  -> 107s fora de conta
+
+ O Transformers tem MENOS quadros e levou o DOBRO - porque o custo era do
+ Select-Object -Unique, que compara cada linha com todas as unicas ja
+ guardadas (quadros x cenas: Ryan 274M, Transformers 480M). Trabalho
+ quadratico em PowerShell para responder uma pergunta de uma passada so.
+
+ Virou uma passada com HashSet, e o tempo dela ENTROU na conta - um tempo que
+ nenhum relogio mede nao entra no aprendizado da previsao, e era por isso que
+ a previsao errava sempre para menos por mais que se corrigisse (licao 43).
+ O mesmo padrao foi trocado na medicao por AMOSTRA, onde o CSV e pequeno e o
+ custo nao aparecia: padrao errado se conserta onde ele mora, nao so onde
+ doeu.
+
+ 6. A FRASE DO VEREDICTO DA LEGENDA, DE NOVO
+ --------------------------------------------------------------------------
+ A da 2.0.1 dizia a coisa certa e dizia mal - tres oracoes, primeira pessoa e
+ um "vale passar o olho" que soava a desculpa. O conteudo e o mesmo, em duas
+ oracoes e sem falar de si:
+     "Nenhum defeito detectavel. O contador nao pega nome proprio trocado."
+
+
+================================================================================
+ INSTALADOR 2.0.2  -  22/09/2026   *** O VERMELHO GANHOU UM DEGRAU ***
+================================================================================
+ Componentes: MOTOR 14.61  |  JANELA 19.2  |  BATERIA 4.2  |  BANCADA 4.0
+
+ 1. COMPLEX FEL DEIXOU DE SER UM SO VERMELHO
+ --------------------------------------------------------------------------
+ A regra que pintava o arquivo de vermelho era uma linha:
+
+     $res.Expande = ($res.MaxCLL -ge $res.MasterMax)
+
+ O pico da cena mais alta contra o pico do master. UMA cena passou, o arquivo
+ inteiro ficava vermelho - e vermelho, neste programa, quer dizer "este e o
+ caso que estraga a imagem".
+
+ Os dois casos que temos MEDIDOS:
+
+     Saving Private Ryan   216 de 1.124 cenas (19,22%)  pico 3.468 / master 1.000
+     Transformers ROTF      15 de 2.225 cenas ( 0,67%)  pico 1.555 / master 1.000
+
+ A planilha da comunidade mede o Transformers por outro caminho (madVR, na
+ imagem decodificada) e da 0,3% dos QUADROS acima de 1.000 nits - com a MESMA
+ contagem de quadros do nosso censo, 215.617. As duas medicoes concordam que
+ este filme mal encosta acima do master. E ele levava a mesma cor de um filme
+ que expande o tempo todo.
+
+ O comentario da 16.85 ja tinha escrito o que faltava - "um pico isolado numa
+ cena e outra coisa de metade do filme acima da regua" - e a 16.87 explicou
+ por que nao dava para usar a amostra: 3 a 4 cenas nao viram estatistica.
+ O CENSO COMPLETO e essa condicao cumprida: ele le o filme inteiro.
+
+ AGORA: com o censo na mao, o vermelho desce para LARANJA quando as DUAS
+ travas passam ao mesmo tempo -
+
+     1. FREQUENCIA      menos de 1% das cenas do filme
+     2. TAMANHO DO ESTOURO  o pico nao passa do DOBRO do master
+
+ Sao duas de proposito. Meia duzia de cenas pedindo 4.000 nits num master de
+ 1.000 e raro E grave - frequencia sozinha nao descreve isso. E vale o mesmo
+ piso de 20 cenas que a regua suspeita ja usava: porcentagem de 5 cenas nao e
+ porcentagem.
+
+ O QUE NAO MUDA, E ESTA ESCRITO NO LOG: a camada NAO e reclassificada. FEL
+ continua FEL, a EL continua sendo descartada, o residual continua sendo
+ perdido. O que muda e a GRAVIDADE, que e o que a cor comunica. Por isso o
+ destino e laranja - a cor de "converte, com ressalva" - e NUNCA verde.
+
+ Os numeros (1% e 2x) sao convencao ancorada em dois casos medidos, e estao
+ escritos no codigo de proposito, para poderem ser discutidos em vez de virar
+ folclore. Dois pontos nao sao uma curva: se um terceiro caso cair no meio, o
+ lugar de rever e aquele.
+
+ A cor da COLUNA e a do DIAGNOSTICO saem da mesma funcao (Get-NomeCorEL) -
+ duas partes da tela decidindo a mesma cor por regras diferentes ja foi
+ defeito aqui (16.84). E o cache guarda o resultado: reler a pasta nao
+ ressuscita o vermelho de um arquivo cujo censo ja provou o contrario.
+
+ 2. O MOTOR PASSOU A DIZER QUE A MEDIDA DELE E POR AMOSTRA
+ --------------------------------------------------------------------------
+ O motor mede de novo na hora de converter, por amostra: ele sabe que ALGUMA
+ cena passa do master, nao quantas. Entao a janela podia dizer laranja e o log
+ do motor dizer "CONVERSAO NAO RECOMENDADA" no mesmo arquivo. As duas nao
+ estao brigando - sao medidas de tamanhos diferentes - e agora o motor diz
+ isso, em vez de deixar o usuario descobrir sozinho que elas divergem.
+
+ 3. CONFERIDO POR SABOTAGEM
+ --------------------------------------------------------------------------
+ Dez sabotagens, dez reprovadas: soltar cada uma das travas, trocar o E por
+ OU, tirar o piso de 20 cenas, fazer o pico isolado abrir o verde, dar regra
+ propria para a coluna, fazer o cache esquecer, pre-traduzir a linha, por a
+ regra de traducao depois da generica, e calar o aviso do motor.
+ Bateria 1.187 testes, bancada 336 invariantes.
+
+ 4. A BATERIA PASSOU A CONFERIR O PROPRIO ENCODING
+ --------------------------------------------------------------------------
+ Ela cobra CRLF de tudo que esta em fonte\ e nao conferia o unico .ps1 que
+ nao alcanca: ela mesma, em _testes\. Tinha TRES LF soltos. Nenhum estrago -
+ ela roda igual - mas o contrato vale para ela tambem, e arquivo que cobra
+ dos outros o que nao cumpre e o pior lugar para abrir excecao (licao 10).
+
+
+================================================================================
+ INSTALADOR 2.0.1  -  22/09/2026     *** O NOME DIZ O QUE O ARQUIVO E ***
+================================================================================
+ Componentes: MOTOR 14.6  |  JANELA 19.1  |  BATERIA 4.1  |  BANCADA 4.0
+
+ A 2.0 fechou a honestidade dos numeros da tela. Esta fecha o resto do que
+ ficou em aberto na auditoria: o nome do arquivo entregue, a previsao do
+ censo, e as ferramentas que sairam do instalador.
+
+ 1. O SELO [BL+RPU] NO NOME DO ARQUIVO FINAL
+ --------------------------------------------------------------------------
+ Todo .mkv que sai deste motor e video de camada unica BL+RPU: ou o dovi_tool
+ converteu o Profile 7 (MEL/FEL) para 8.1, ou o arquivo ja era Profile 8.x sem
+ Enhancement Layer. Quem nao tem Dolby Vision e pulado no diagnostico, e o
+ Profile 5 sai por outra porta, em .mp4. Entao o selo vale para todo .mkv que
+ o motor produz - e agora ele esta no nome:
+
+     Filme.2009.2160p.REMUX-GRUPO [BL+RPU].mkv
+
+ A TRAVA "JA EXISTE NA PASTA DE SAIDA" OLHA OS DOIS NOMES. Tudo o que ja foi
+ convertido esta gravado com o nome ANTIGO, sem selo. Se a trava olhasse so o
+ nome novo, a biblioteca inteira seria reconvertida do zero na primeira fila
+ depois desta versao - e no fim sobrescreveria a saida boa. O motor testa o
+ nome novo E o nome antigo, e diz no log qual dos dois encontrou.
+ O selo nao e repetido: reconverter um arquivo ja selado nao gera
+ "Filme [BL+RPU] [BL+RPU]".
+ A copia solta da legenda (.srt) e a copia do log acompanham o nome novo -
+ senao o player nao casaria a legenda externa com o filme.
+
+ 2. A PREVISAO DO CENSO OLHAVA SO PARA A CPU
+ --------------------------------------------------------------------------
+ Queixa medida do usuario: "voce bate na tecla que e 1:46 e sempre e uns 2:20
+ ou mais", e "o censo levou 2:30 mas em menos de 30 segundos ja tinha dado
+ 100%". Estava certo, e a prova estava nos logs dele:
+
+     Saving Private Ryan   82 GB / 2h49  em SSD  ->  amostra x 4,7
+     Transformers ROTF     78 GB / 2h30  em HD   ->  amostra x 85,5
+
+ Dois filmes do MESMO tamanho, com fator 18 vezes diferente. Nao foi a CPU
+ que mudou - foi o DISCO. O censo le o filme INTEIRO; num HD mecanico quem
+ manda no relogio e a leitura, nao o processamento.
+ A previsao agora calcula os DOIS tempos - o do disco (tamanho do arquivo
+ dividido pela velocidade medida da origem) e o da CPU (duracao do filme
+ vezes o segundos-por-segundo aprendido) - e adota o MAIOR. O log diz qual
+ dos dois mandou. Conferida contra os logs reais: 1% de erro no Ryan e 22%
+ no Transformers, contra 1.700% do modelo antigo.
+ E o aprendizado ficou com trava: o segundos-por-segundo so e reajustado
+ quando quem mandou no relogio foi a CPU. Aprender "0,0711 s/s" de uma
+ leitura que foi presa pelo disco era ensinar a coisa errada ao proximo
+ filme, que pode estar num SSD.
+
+ 3. A FRASE DO VEREDICTO DA LEGENDA PROMETIA DEMAIS  (veio da 14.55)
+ --------------------------------------------------------------------------
+ "Nenhuma falha encontrada. Pode assistir por esta legenda." A conta estava
+ certa - 1 defeito em 1.832 blocos e 0,055%, abaixo do limite de 0,1% que
+ vale EXCELENTE. A FRASE e que estava errada. Medindo a .srt do Transformers
+ na bancada, achamos 13 erros visiveis que o contador NAO pega, porque sao
+ palavras validas no lugar errado: "Ali Spark" (5x, era "AllSpark"),
+ "waiffle", "Blim-blom", "firmeca", "azaracao", "cal no mundo". O contador
+ acha caractere impossivel e bloco quebrado; nome proprio trocado ele nao
+ acha e nunca vai achar.
+ A frase agora diz o que a medicao cobre:
+     "Nenhuma falha das que sei detectar. Nome proprio trocado eu nao pego -
+      vale passar o olho."
+
+ 4. FERRAMENTAS QUE SAIRAM DO INSTALADOR
+ --------------------------------------------------------------------------
+ O usuario apagou mkvextract.exe, LIBCURL.DLL, nvcuda.dll e nvcuvid.dll.
+ Conferido no codigo, arquivo por arquivo: NENHUM .ps1 do projeto chama
+ qualquer um dos quatro. O mkvextract deixou de ser usado na 14.16, quando o
+ video passou a ser copiado dentro do container em vez de extraido; as tres
+ DLLs eram carona do pacote do mkvtoolnix e nunca foram chamadas. Nada quebra.
+ As quatro sairam das arvores de arquivos da documentacao (COMO_USAR_PT.txt,
+ HOW_TO_USE_EN.txt, README.md e README.pt-BR.md), que eram os unicos lugares
+ onde ainda apareciam.
+
+ Ferramentas desta versao (as que o usuario atualizou):
+     mkvmerge    v102.0
+     ffmpeg / ffprobe  9.0.1-essentials
+     MediaInfo CLI     v26.05
+     dovi_tool         2.3.3  (minimo exigido desde a 1.8)
+
+ SOBRE "FICOU MAIS RAPIDO?" - A RESPOSTA HONESTA E: OS LOGS NAO PROVAM ISSO.
+ A leitura das mesmas 3 pastas, sempre a primeira leitura depois de abrir o
+ programa, deu 15,12s (19/09), 4,99s (20/09) e 5,28s (21/09). A queda
+ aconteceu no dia 20, ANTES da troca das ferramentas - foi a leitura em
+ runspace, do codigo, nao a versao do mkvmerge. A medicao de EL do Troy, o
+ mesmo arquivo com os mesmos 11 trechos, deu 27,06s / 2,71s / 7,56s nos tres
+ dias: a variacao e do cache do disco, nao da ferramenta. Atualizar era
+ certo por seguranca e por correcao de bugs; por velocidade, nao ha numero
+ que sustente a afirmacao.
+
+
+================================================================================
+ INSTALADOR 2.0 (primeira build de teste)  -  18/09/2026     *** A VERSAO QUE MEDE O QUE PROMETE ***
+================================================================================
+ Componentes: MOTOR 14.55  |  JANELA 19.0  |  BATERIA 4.0  |  BANCADA 4.0
+
+ Esta e a primeira versao em que o MOTOR muda desde a 1.9.2 - e muda pouco, de
+ proposito. O que muda de verdade e a honestidade dos numeros da tela.
+
+ 1. A CALIBRAGEM QUE SE ANULAVA (o defeito mais antigo que ja achamos)
+ --------------------------------------------------------------------------
+ Toda sessao, desde a 16.99, o programa escrevia esta linha:
+
+   CALIBRAGEM: as rodadas se espalham 44% entre si (0,0125 a 0,0180) ... a
+   estimativa vai continuar errando por arquivo ate os pesos serem revistos.
+
+ O diagnostico estava certo. A correcao nunca podia funcionar, porque desde a
+ 16.64 a constante de calibragem NAO TINHA EFEITO NENHUM. A algebra, com
+ k = SegPorGbPorPeso:
+
+   peso_i = round( s_i / (Gb * k) )
+   est    = Gb * k * SOMA(peso_i) = Gb * k * SOMA( s_i / (Gb * k) ) = SOMA(s_i)
+
+ O k cancela. Medido com os numeros reais do Saving Private Ryan (81,99 GB):
+
+   k = 0,0125  ->  estimativa 3.665,0s
+   k = 0,0153  ->  estimativa 3.664,2s
+   k = 0,0176  ->  estimativa 3.665,3s
+   k = 0,0400  ->  estimativa 3.666,6s
+
+ A constante varia 3,2x e a estimativa anda 1,6 SEGUNDO em 3.665 - que e o
+ arredondamento do peso para inteiro, mais nada. Cada linha gravada em
+ CALIBRAGEM.txt era k vezes o erro daquele arquivo, e o "44% de espalhamento"
+ era o erro por arquivo se espalhando 44%, relatado como se fosse calibragem.
+
+ Ou seja: o programa prometia, em toda sessao, uma auto-correcao que nao fazia.
+ Licao 2 na escala de um modelo inteiro.
+
+ O CONSERTO, E POR QUE ELE E POR ETAPA
+
+ A calibragem saiu de dentro da conta de peso e passou a multiplicar os
+ SEGUNDOS previstos - fora do laco, ela nao tem como se anular. E deixou de ser
+ UM numero para o arquivo inteiro: agora e UM POR ETAPA.
+
+ Esse era o motivo real dos 44%. Um filme TrueHD longo e pequeno e um filme DTS
+ curto e grande erram em direcoes OPOSTAS, e um escalar unico nao descreve as
+ duas formas ao mesmo tempo. Com fator por etapa, "esta maquina e 30% mais
+ lenta no audio" para de brigar com "este disco e 10% mais rapido na
+ remontagem".
+
+ O aprendizado COMPOE em vez de reaplicar: o previsto que viaja no lote ja vem
+ multiplicado pelo fator da vez, entao o que se grava e o fator ja composto.
+ Gravar a razao crua faria a correcao entrar de novo por cima na proxima fila, e
+ o numero divergiria mais a cada rodada. A bancada confere exatamente isso:
+ acertando a previsao, o fator FICA onde esta - nao vira 1,69.
+
+   LICAO 49: UM NUMERO QUE APARECE NOS DOIS LADOS DA MESMA CONTA NAO E UM
+             AJUSTE - E UMA TROCA DE UNIDADE. Antes de confiar numa constante
+             de calibragem, varie ela e veja o resultado mudar.
+
+ 2. O INSTALADOR PERGUNTA A LINGUA, E A LINGUA VALE PARA TUDO
+ --------------------------------------------------------------------------
+ Sao tres coisas amarradas numa escolha so: o assistente sai na lingua
+ escolhida, a LICENCA aparece nela, e o PROGRAMA abre nela - o instalador grava
+ IDIOMA.txt, que e exatamente o arquivo que a janela le no arranque desde a
+ 17.02. Um caminho, um formato, dois donos que concordam.
+
+ E uma varredura nova impede o defeito de voltar: toda mensagem do assistente
+ tem que existir NAS DUAS linguas. Mensagem sem par sai em portugues no meio de
+ um assistente em ingles - o mesmo defeito que a janela persegue desde a 17.01.
+
+ 3. EULA COM ACEITAR E RECUSAR
+ --------------------------------------------------------------------------
+ Em portugues e em ingles, na lingua escolhida. Ela diz o que o programa e (um
+ remux: nao recodifica, nao baixa nada, nao contorna protecao de disco e nao
+ acompanha filme nenhum), e o que o usuario declara ao aceitar: que os arquivos
+ sao de aquisicao propria e que o resultado e de uso pessoal.
+
+ O que ela NAO faz e afirmar que a copia privada e legal. As regras mudam de
+ pais para pais e, em varios lugares, contornar uma trava tecnica e proibido
+ mesmo quando a copia seria permitida. Prometer o contrario seria mensagem que
+ mente - a mesma regra que vale para a tela vale para a licenca.
+
+ 4. A BARRA, NA ORDEM DE QUEM USA
+ --------------------------------------------------------------------------
+   [F1] Iniciar  [F2] Pausar  [ESC] Cancelar |
+   [F3] Abrir Origem  [F4] Abrir Saida  [F5] Atualizar |
+   [F11] Censo Completo  [F12] Medir MEL x FEL
+
+ Origem e Saida sao um par e estavam com o Atualizar no meio. As teclas sairam
+ em ordem crescente sem ninguem forcar - foi so por os dois no lugar certo.
+
+ E o F3/F4 revelaram um buraco que existia desde que esses botoes existem: eles
+ nao tinham freio nenhum. 65 janelas do Explorer empilhadas em 20 segundos, na
+ foto dele. Agora a janela ja aberta vem para a frente em vez de nascer outra.
+
+   LICAO 48: DAR UM ATALHO A UMA ACAO MULTIPLICA QUANTAS VEZES ELA E PEDIDA.
+
+ 5. TRADUCOES FECHADAS
+ --------------------------------------------------------------------------
+ - A regra "^AUDIO PRINCIPAL: " vinha ANTES da regra "^AUDIO PRINCIPAL:
+   NENHUM$", e regras se aplicam na ordem do arquivo - entao a segunda nunca
+   disparava e a tela em ingles mostrava "MAIN AUDIO: NENHUM", meio traduzido.
+ - Seis textos de tela sem entrada na tabela, inclusive as duas dicas das
+   caixas de pasta e os rotulos Pausar/Retomar (a tabela tinha o formato antigo
+   "Pausar F2", morto desde a 18.18).
+ - 25 entradas mortas removidas, uma duplicata de regra, e acentos que faltavam
+   (FERRAMENTAS DISPONIVEIS, pasta de SAIDA).
+ - O botao "Entenda" virava "Learn" e abre um documento cujo titulo e
+   "UNDERSTAND THE CONVERSION". Agora e "Understand".
+
+ 6. MOTOR 14.55 - QUATRO CONSERTOS, UM DELES GRAVE
+ --------------------------------------------------------------------------
+ - GRAVE: a trava que impede um arquivo de comecar sem espaco em disco estava
+   inteira dentro de um catch VAZIO. Qualquer excecao ali fazia a protecao
+   sumir em silencio e o arquivo entrava na conversao como se houvesse espaco -
+   o caso exato que a 14.45 criou a trava para impedir.
+ - Em pasta de rede a medida de espaco nao funciona (e nao tem como funcionar),
+   mas ninguem era avisado de que a conferencia nao tinha rodado.
+ - O link do .NET Runtime fixava a correcao 8.0.30; no dia em que a Microsoft
+   tirar aquele arquivo do ar, a mensagem manda o usuario para um 404.
+ - A frase "OCR de Legenda Sera Desativado" era falsa quando o seconv esta
+   presente - ele e o caminho PREFERENCIAL desde a 14.2 e nao depende do .NET.
+   Quem fica desativada e a rede de seguranca.
+
+ 7. AS BATERIAS: 1.122 TESTES E 325 INVARIANTES
+ --------------------------------------------------------------------------
+ BATERIA 4.0: 1.122 testes (eram 941 na 1.10.0). BANCADA 4.0: 325 invariantes.
+
+ O cenario 27 existe porque este defeito passou por MIL testes verdes: o texto
+ da calibragem estava todo certo, e a conta se anulava. So RODANDO aparece -
+ e a bancada agora roda a prova algebrica junto com a conta nova.
+
+ Durante esta rodada eu tambem truncei o motor para zero byte por um erro de
+ encoding meu. Quem pegou foi a bateria, no teste que conta as 90 funcoes do
+ motor. Fica registrado porque e a melhor prova de para que ela serve.
+
+================================================================================
+ INSTALADOR 1.11.8  -  18/09/2026     *** 65 JANELAS DO EXPLORER ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 18.24  |  BATERIA 3.61  |  BANCADA 3.7
+
+ O MOTOR NAO MUDOU UMA LINHA.
+
+ O DEFEITO
+ --------------------------------------------------------------------------
+   "quebrou foi tudo, esses F3 e F4, ficou muito sensivel, parecia que nao
+    tava abrindo nada e eu apertando e clicando" (Diego, 18/09).
+
+ A foto dele conta melhor que o log: uma coluna com VINTE janelas
+ "00_Arquivos_Base - Explorador de Arquivos" e DOZE
+ "01_Arquivos_Finalizados", empilhadas. O log confirma - 65 aberturas em 20
+ segundos, algumas com 200ms entre si:
+
+   00:14:32,2  CLIQUE: Abrir Origem
+   00:14:32,4  CLIQUE: Abrir Origem
+   00:14:32,6  CLIQUE: Abrir Origem
+
+ E "parecia que nao estava abrindo nada" porque estava abrindo DEMAIS: cada
+ janela nova nasce exatamente sobre a anterior, no mesmo lugar e com o mesmo
+ conteudo. Sessenta e cinco janelas identicas empilhadas sao visualmente
+ indistinguiveis de nenhuma.
+
+ A CAUSA, QUE NAO E SENSIBILIDADE
+ --------------------------------------------------------------------------
+ O defeito e de desenho, e ele JA EXISTIA. Todo o resto desta barra tem regra
+ para o toque repetido: o censo ganhou freio de 2s na 18.21, a medicao tem a
+ trava do runspace, o F1 e o F2 dependem do estado do botao. Estes dois eram
+ os unicos sem nada.
+
+ Sem tecla isso nunca aparecia, porque ninguem clica sessenta vezes no mesmo
+ botao com o mouse. Dar a tecla nao criou o buraco - REVELOU um que estava
+ la desde que os botoes existem.
+
+   LICAO 48: DAR UM ATALHO A UMA ACAO MULTIPLICA QUANTAS VEZES ELA E PEDIDA.
+             Antes de por a tecla, pergunte o que acontece se ela for pedida
+             quarenta vezes em dez segundos.
+
+ O CONSERTO - E O QUE RESOLVE E O PRIMEIRO
+ --------------------------------------------------------------------------
+   1. REAPROVEITAR A JANELA. Se o Explorer ja esta com aquela pasta aberta,
+      ela vem para a frente em vez de nascer outra. E o que a pessoa quer
+      dizer com "abrir a pasta": ver a pasta, nao colecionar janelas dela.
+      Com isso, apertar quarenta vezes traz a MESMA janela quarenta vezes -
+      inofensivo. A bancada confere exatamente esse caso.
+   2. FREIO de 1,2s POR PASTA, para a rajada que chega antes de a primeira
+      janela existir (a checagem acima ainda nao teria o que achar). Por
+      pasta, nao global: um freio global faria o F4 logo depois do F3 nao
+      fazer nada, que seria defeito novo no lugar do velho. E a recusa FALA.
+
+ Se o Shell nao responder (COM indisponivel, Explorer reiniciando), tudo cai
+ no comportamento antigo - abrir a janela. Cosmetico nunca pode impedir a
+ acao.
+
+ A busca da janela virou funcao propria (Focar-PastaJaAberta) por um motivo
+ de teste: assim a bancada RODA a decisao de abrir ou reaproveitar sem
+ precisar de um Explorer de verdade do outro lado. Licao 45 aplicada antes de
+ o defeito acontecer, em vez de depois.
+
+ BATERIA 3.61: 1102 testes. BANCADA 3.7: 311 invariantes (eram 302), com o
+ cenario 26 - a rajada dele, o freio por pasta, e os quarenta toques com a
+ janela ja aberta. Tres sabotagens, todas pegas.
+
+================================================================================
+ INSTALADOR 1.11.7  -  18/09/2026     *** A BARRA NA ORDEM DELE ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 18.23  |  BATERIA 3.60  |  BANCADA 3.6
+
+ O MOTOR NAO MUDOU UMA LINHA.
+
+ O PEDIDO
+ --------------------------------------------------------------------------
+   "joga o botao Atualizar pra direita e traz o Abrir Saida pra esquerda, e
+    [F3] Abrir Origem [F4] Abrir Saida... padrao viu, nao comete os erros dos
+    outros botoes: errar traducao, errar se clicar e nao aparecer os F. E
+    muito simples, essa danca das cadeiras desses botoes e pra ficar uma
+    estetica top."
+
+ ORIGEM e SAIDA sao um par - de onde vem e para onde vai - e tinham o
+ Atualizar plantado no meio. Juntos, e na ordem em que o trabalho acontece:
+
+   [F1] [F2] [ESC] | [F3] Origem  [F4] Saida  [F5] Atualizar | [F11] [F12]
+
+ As teclas ficaram em ordem crescente da esquerda para a direita sem ninguem
+ forcar - foi so por os dois no lugar certo.
+
+ OS TRES ERROS QUE ELE CITOU, E COMO CADA UM FICOU FECHADO
+ --------------------------------------------------------------------------
+ Ele nao listou tres erros possiveis: listou tres erros que eu JA COMETI
+ nesta barra. Entao cada um virou teste, e cada teste foi sabotado.
+
+   "nao aparecer os F"    -> varredura, nao conferencia um a um: todo rotulo
+                             da barra tem que nascer com a tecla. E a mesma
+                             varredura que pegou o [F12] da medicao (3.58) e
+                             o [F11] do censo (3.59), agora aqui.
+   "errar se clicar"      -> uma acao, uma funcao: Invoke-AbrirOrigem e
+                             Invoke-AbrirSaida. O clique e a tecla chamam a
+                             MESMA funcao, e o teste conta as chamadas de
+                             Abrir-PastaNoExplorer: tem que haver exatamente
+                             tres no arquivo (a definicao e as duas funcoes).
+                             Uma quarta e uma segunda regra nascendo.
+   "errar traducao"       -> o rotulo com a tecla e uma entrada NOVA no
+                             IDIOMA_EN, diferente da antiga sem ela. Foi
+                             exatamente assim que o [F5] passou despercebido
+                             na 18.17.
+
+ E a ordem virou teste tambem: Origem antes de Saida, Saida antes de
+ Atualizar, Atualizar antes do Censo.
+
+ UM ERRO MEU, NO PROPRIO TESTE
+ --------------------------------------------------------------------------
+ O teste da traducao reprovou com as duas entradas presentes e corretas no
+ arquivo. Causa: "[" e curinga no -like do PowerShell, e "[F3]" vira uma
+ classe de caracteres. Comparacao exata do primeiro campo resolveu. Fica
+ anotado porque e uma armadilha que vai voltar: todo rotulo desta barra
+ comeca com "[".
+
+ O LOG DELE DE 23:45 CONFIRMOU A 1.11.6
+ --------------------------------------------------------------------------
+ Ele saiu clicando, como avisou que faria. O freio recusou os pedidos a 0,2s,
+ 0,4s, 0,6s, 0,9s e 1,4s do cancelamento e liberou depois dos 2s; as travas
+ do F12 e do F5 dispararam com o censo rodando; nenhum "F11 ignorada"; e
+ nenhum censo cancelado virou veredicto. Sessao inteira sem defeito novo.
+
+ BATERIA 3.60: 1102 testes (eram 1088). BANCADA 3.6: 302 invariantes.
+
+================================================================================
+ INSTALADOR 1.11.6  -  18/09/2026     *** O QUE EU QUEBREI NA 1.11.5 ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 18.22  |  BATERIA 3.59  |  BANCADA 3.6
+
+ O MOTOR NAO MUDOU UMA LINHA. Tudo aqui e tela.
+
+ TRES DOS QUATRO DEFEITOS DESTA VERSAO SAO DA VERSAO ANTERIOR - MEUS.
+
+ 1. O F11 TRAVOU PARA SEMPRE (o pior, e o mais instrutivo)
+ --------------------------------------------------------------------------
+   "APERTEI TANTO O F11 QUE TEVE UMA HORA QUE NAO FUNCIONOU NUNCA MAIS."
+
+ Log dele de 17/09, da linha 139 ate o fim da sessao, sem uma unica excecao:
+
+   22:26:00,8  TECLA: F11 (ignorada - nao se aplica ao estado 'inicial')
+   22:26:01,2  TECLA: F11 (ignorada - nao se aplica ao estado 'inicial')
+   ... mais de trinta vezes, ate ele fechar o programa.
+
+ O botao fica apagado enquanto o handle do censo anterior existe. Ate a 18.20
+ isso nao prendia ninguem: o F11 NAO passava pelo botao, chegava em
+ Start-Censo, e la dentro mora a saida de emergencia - passados 20s, se
+ nenhum processo do censo continua de pe, o handle e abandonado.
+
+ A 18.21 mandou o F11 conferir o botao. Isso acabou com o "clica nao
+ funciona, F11 funciona" - e, sem que eu visse, trancou a saida de
+ emergencia atras da porta que eu tinha acabado de fechar. Uma trava feita
+ para durar segundos passou a durar a sessao inteira.
+
+   LICAO 47: AO UNIFICAR DUAS PORTAS NUMA SO, CONFIRA O QUE SO A PORTA QUE
+             VOCE FECHOU SABIA FAZER.
+
+ Conserto em duas partes:
+   - a liberacao do handle saiu de dentro de Start-Censo, virou funcao
+     propria e passou a rodar TAMBEM no relogio da tela - o estado se desfaz
+     sozinho, sem depender de ninguem apertar nada. E ela NAO consulta
+     processos: pergunta ao proprio handle se o trabalho acabou, o que e de
+     graca e local (licao 40 continua valendo);
+   - a recusa do F11 passou a dizer o MOTIVO REAL. "(nao se aplica ao estado
+     'inicial')" era verdade sobre o estado e mentira sobre o problema: o
+     estado ERA inicial. A frase certa ja existia, escrita, na dica do botao.
+
+ 2. O [F11] SUMIA COM O CENSO RODANDO
+ --------------------------------------------------------------------------
+   "AGORA O CENSO QUANDO TA RODANDO NAO APARECE [F11]."
+
+ Na 1.11.5 eu varri TODAS as escritas do rotulo da MEDICAO e exigi a tecla em
+ cada uma - e nao fiz a mesma varredura no rotulo do CENSO, que tinha o mesmo
+ buraco, no mesmo estado ("em curso"), do outro lado da mesma barra. Tres
+ lugares escreviam nele e os dois de "em curso" nao punham a tecla.
+
+ 3. A DICA CONGELAVA ENQUANTO O CENSO RODAVA
+ --------------------------------------------------------------------------
+   "A DICA TAMBEM NAO TA LEGAL ENQUANTO RODA, NADA A VER, SEM SENTIDO."
+
+ Ele viu "Ligue 'Medir MEL x FEL' e releia a pasta" com o censo rodando. A
+ frase estava certa no instante em que foi escrita - e ninguem a apagou
+ depois. A dica so era recalculada quando ele TROCAVA DE LINHA na fila, e
+ comecar um censo nao troca linha nenhuma. Ela ficava parada os dois minutos
+ inteiros.
+
+ O CONSERTO DOS TRES: UM DONO, QUATRO COISAS
+ --------------------------------------------------------------------------
+ Rotulo, cor, DICA e IsEnabled do botao do censo saem agora todos de
+ Update-BotaoCenso, e o relogio da tela chama essa funcao uma vez por segundo
+ em vez de escrever por conta propria. E a bateria varre toda escrita no
+ rotulo exigindo o [F11], igual ja fazia com o da medicao.
+
+ E a 1.11.5 ACERTOU (medido no mesmo log)
+ --------------------------------------------------------------------------
+   22:22:39  MEDIR EL bloqueado (censo completo em curso...)   <- a trava
+   22:23:40  ATUALIZAR bloqueado (censo completo em curso...)  <- a trava
+   22:22:49  recusado: o censo foi cancelado ha 0,5s           <- o freio
+   22:22:36  CENSO: previsao de 01m 46s (a amostra levou 23s)  <- a previsao
+   22:25:32  o censo completo levou 104,9s                     <- errou 1,2s
+   22:22:42  cancelado por voce - nao ha numero novo           <- sem veredicto
+
+ A previsao errou por pouco mais de um segundo em 105, e o numero se
+ corrigiu sozinho depois (0,0103 s/s).
+
+ A BANCADA APRENDEU MAIS QUE A JANELA
+ --------------------------------------------------------------------------
+ Cinco sabotagens rodadas nesta versao. DUAS passaram verdes na primeira
+ tentativa, e as duas pelo mesmo motivo: o teste conferia TEXTO.
+
+   - pondo "return $false" na primeira linha da liberacao do handle, a
+     bateria continuou verde - o texto da funcao estava todo la;
+   - apagando a chamada dela no relogio, tambem: o COMENTARIO logo acima da
+     chamada cita o nome da funcao, e era o comentario que o teste achava.
+
+ Por isso o cenario 25 RODA a funcao, com um handle de mentira, nos quatro
+ estados que importam. E a busca no relogio passou a procurar a CHAMADA, nao
+ o nome. LICAO 45, que a 1.11.5 escreveu, cobrada na propria carne.
+
+ BATERIA 3.59: 1088 testes (eram 1076). BANCADA 3.6: 302 invariantes (eram
+ 285), com o cenario 25.
+
+================================================================================
+ INSTALADOR 1.11.5  -  18/09/2026     *** UMA PORTA SO, E UM FREIO ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 18.21  |  BATERIA 3.58  |  BANCADA 3.5
+
+ O MOTOR NAO MUDOU UMA LINHA. Tudo aqui e tela.
+
+ POR QUE ESTA VERSAO EXISTE
+ --------------------------------------------------------------------------
+ O recado do Diego, depois da 1.11.4:
+
+   "NOVAMENTE ENTRAMOS NUM LIMBO DE PROCURA E ACHA BUG AGORA DO CENSO E
+    ESQUECEMOS O RESTO DOS PROBLEMAS E ASSIM VAMOS INDO, JA SURGE OUTRO E
+    NAO VAMOS TERMINAR DE ARRUMAR O CENSO E VAI OUTRO E OUTRO."
+
+ Ele esta certo, e a resposta nao e "vou ter mais cuidado". Dez versoes
+ seguidas na mesma area, quatro delas consertando o que a anterior quebrou,
+ sao um sintoma com uma causa so, e desta vez eu fui atras dela em vez de
+ atras do defeito da vez.
+
+ A CAUSA: O BOTAO DO CENSO TINHA TRES DONOS
+ --------------------------------------------------------------------------
+ Tres lugares escreviam em $UI.btnCenso.IsEnabled, com regras diferentes:
+
+   Start-Censo (18.20)  ->  IsEnabled = $true
+   Update-Diagnostico   ->  IsEnabled = (... -and -not CensoRodando
+                                             -and -not CensoFeito ...)
+   Update-Diagnostico   ->  IsEnabled = $false  (sem linha selecionada)
+
+ Quem repintasse por ultimo ganhava. E o F11 nao passava por nenhum deles,
+ porque tecla nao passa por IsEnabled. Dai saem TRES das quatro cobrancas
+ dele, todas a mesma coisa vista de angulos diferentes:
+
+   "PQ O CENSO PODE RELER NOVAMENTE APERTA F11 E CLICANDO NAO?"
+   "click la nao funciona, so os F11"
+   "os F11 e tal as vezes some"
+
+ A 1.11.4 tentou consertar isso pondo MAIS UM DONO. Estava errado. Agora ha
+ um so - Update-BotaoCenso - e a regra cabe numa frase: O BOTAO ACENDE QUANDO
+ O CLIQUE VAI FAZER ALGUMA COISA. E o F11 passou a LER ESSE MESMO BOTAO, em
+ vez de repetir a regra por conta propria: duas copias da mesma regra sao
+ duas regras, e uma delas sempre fica para tras.
+
+ A bateria deixou de cobrar a regra e passou a CONTAR OS DONOS: fora de
+ Update-BotaoCenso, ninguem escreve nessa propriedade. Se alguem escrever,
+ reprova - inclusive eu, na proxima versao.
+
+ O FREIO E AS TRAVAS (pedido dele)
+ --------------------------------------------------------------------------
+   "quando o censo se tiver rodando vc tem q travar teclas q podem travar ele
+    nao e mais facil. tipo ligar e desligar fel nao eh uma logica melhor? sem
+    engessar o programa vc pode seguir essa logistica"
+
+ O log dele de 17/09 mostra o tamanho do buraco. Entre 21:55:33 e 21:56:30 -
+ 57 segundos - o censo foi COMECADO E MORTO VINTE VEZES:
+
+   21:56:29,172  CENSO COMPLETO pedido
+   21:56:29,330  cancelamento - 2 processo(s) encerrado(s)
+   21:56:29,698  CENSO COMPLETO pedido        <- 366ms depois de matar
+
+ Cada "pedido" abre ffmpeg + cmd + dovi_tool num arquivo de 82 GB. E no meio
+ disso, F12 seis vezes com o censo lendo o filme inteiro.
+
+ Tres travas, nenhuma delas engessando nada:
+
+   FREIO      depois de cancelar, o censo nao recomeca por 2 segundos - e
+              quem apertar nesse intervalo e RESPONDIDO, nao ignorado.
+   F12        com o censo rodando, ligar/desligar a medicao e recusado: ela
+              abre dovi_tool no mesmo disco que o censo esta lendo de ponta
+              a ponta. Era o que a 17.21 ja proibia para a conversao.
+   F5         com o censo rodando, reler a pasta e recusado: reler REFAZ a
+              lista, o arquivo contado pode sair dela, e dois minutos de
+              leitura viram "resultado descartado".
+
+ As duas recusas dizem COMO sair delas ("cancele o censo (F11)"). O proprio
+ censo continua cancelavel a qualquer momento - travar o que atrapalha nao e
+ travar o programa.
+
+ A PORCENTAGEM, QUE ERA A QUARTA COBRANCA
+ --------------------------------------------------------------------------
+   "a % nao conta do censo, fica 0%, como vou saber se chegou a 90%"
+   "vc continua errando feio a contagem do CENSO, PQ E TAO DIFICIL ACERTAR
+    +- O CALCULO DA %?"
+
+ Duas vezes a mesma cobranca, e eu tinha procurado no lugar errado as duas.
+ A conta estava certa; o que faltava era a conta ACONTECER. Ela dependia de
+ um numero so:
+
+     CensoPrev = ELsegundos (tempo da AMOSTRA daquele arquivo) x 4,7
+
+ ELsegundos so existe se a amostra tiver sido medida NESTA sessao. Com o
+ veredicto vindo do cache - arquivo ja medido ontem, ou pasta relida - ele
+ volta ZERO, e com zero nao ha porcentagem nenhuma para mostrar. Do lado de
+ fora isso e exatamente "fica 0%".
+
+ Agora ha um segundo caminho, que nao depende da amostra: a DURACAO DO FILME,
+ que todo arquivo da fila tem desde a leitura. O valor de partida saiu do
+ proprio log dele, medido no Saving Private Ryan:
+
+     2h49m = 10.140s de filme  ->  censo completo 106,1s  ->  0,0105 s/s
+
+ E, como os outros dois numeros desta tela, ele se corrige a cada censo que
+ termina. A amostra daquele arquivo continua ganhando quando existe; a
+ duracao entra quando ela nao existe. O que nao pode mais acontecer e nao
+ haver previsao nenhuma.
+
+ A TERCEIRA PORTA DO CENSO CANCELADO
+ --------------------------------------------------------------------------
+   "acho q o censo quebrou, aperte F11 duas vezes para cancelar e deu q ele
+    terminou de ler ja com resultado"
+
+ A 18.19 fechou a porta do Ok=true. O log dele mostra a que ficou aberta - a
+ do Ok=FALSE - passando CATORZE vezes:
+
+   21:55:33,965  cancelado de verdade
+   21:55:34,093  "encerrado a pedido - o dovi_tool foi parado"
+   21:55:34,093  "terminou... o RESULTADO VALE e esta na tela"
+
+ 180 milissegundos de censo, e a ultima linha afirmando que o que esta na
+ tela e o resultado DISSO. O numero na tela ate era o antigo e certo, mas a
+ frase afirma sem conferir - e frase que afirma sem conferir e mentira mesmo
+ quando acerta (licao 2). Agora a pergunta "este censo foi morto por nos?"
+ vem ANTES, e vale para qualquer Ok.
+
+ TAMBEM NESTA VERSAO
+ --------------------------------------------------------------------------
+ - "2/3 FOTOS MOSTRAM O FEL SEM O [F12]". Ele contou certo: os estados
+   Ligado e Desligado ganharam a tecla na 18.18 e o "Medindo MEL x FEL: N de
+   M" ficou de fora - justamente o que mais tempo fica na tela. A bateria
+   agora varre TODAS as escritas nesse rotulo e exige a tecla em todas, em
+   vez de conferir uma de cada vez.
+ - A dica do censo ja contado diz que da para contar de novo (o botao deixou
+   de apagar nesse estado).
+ - Um comentario da 18.17 dizia que a porcentagem vinha dos bytes de RPU.
+   Ela voltou a ser de tempo na 18.20 e o comentario nao voltou junto -
+   comentario que mente envelhece pior que codigo que mente.
+
+ AS BATERIAS
+ --------------------------------------------------------------------------
+ BATERIA 3.58: 1076 testes (eram 1051). BANCADA 3.5: 285 invariantes (eram
+ 251), com os cenarios 23 (o freio e as travas, rodando as funcoes de
+ verdade) e 24 (a porcentagem CALCULADA, segundo a segundo, contra os
+ numeros do log dele).
+
+ O cenario 24 existe por um motivo que vale escrever: este defeito passou
+ DUAS vezes por baterias verdes porque elas conferiam o TEXTO do fonte, e o
+ texto estava certo. Sabotar a previsao por duracao nao derrubava teste
+ nenhum. So derrubou quando a bancada passou a EXECUTAR a conta.
+
+ LICAO 45 - CONFERIR O TEXTO DA CONTA NAO E CONFERIR A CONTA.
+ LICAO 46 - QUANDO O MESMO DEFEITO VOLTA POR ANGULOS DIFERENTES, O DEFEITO
+            NAO E O DA VEZ: E O DONO DUPLICADO ATRAS DELE. Conserte contando
+            os donos, nao repetindo a regra.
+
+================================================================================
+ INSTALADOR 1.11.4  -  17/09/2026     *** OS TRES TRABALHOS, SEPARADOS ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 18.20  |  BATERIA 3.57  |  BANCADA 3.4
+
+ O MOTOR NAO MUDOU UMA LINHA desde a 1.9.2. Nada aqui muda o arquivo que sai
+ convertido, o veredicto MEL x FEL, o audio ou a legenda. Isto e tudo TELA - e
+ e a primeira vez, em dez versoes, que a tela muda de MODELO em vez de ganhar
+ mais um remendo.
+
+ POR QUE ESTA VERSAO EXISTE
+ --------------------------------------------------------------------------
+ Em 24 horas sairam quatro builds na mesma area (1.9.6, 1.9.7, 1.9.8, 1.9.9).
+ Duas delas consertavam o que a anterior tinha quebrado. O Diego cortou:
+
+   "nao ta legal as decisoes sobre isso ainda, voce tem q aprender mais e
+    pensar num modo melhor... vc vem com novas builds mto rapidas, mexe so um
+    negocinho e vem mais teste... mto lixo isso, vc nao se esforca."
+
+ Ele estava certo, e o sintoma dizia onde olhar: quando a mesma area precisa de
+ quatro correcoes em um dia, o defeito nao esta nos quatro lugares - esta no
+ MODELO que obriga os quatro.
+
+ A CAUSA RAIZ, UMA SO
+ --------------------------------------------------------------------------
+ A MEDICAO (fase B) morava DENTRO da leitura da pasta (fase A). Um runspace so,
+ fazendo duas coisas com tempos de vida e donos diferentes:
+
+   fase A - ler faixas, audio e DV    ~4s por arquivo    SEMPRE necessaria
+   fase B - medir MEL x FEL          14-26s por arquivo   so com a chave ligada
+
+ Disso saiam TODOS os defeitos que ele relatou, medidos nos logs de 16/09:
+
+   1. A JANELA CONGELAVA DE VERDADE, 1,5 a 2 SEGUNDOS.
+      Parar a medicao so tinha um caminho: matar o runspace. E Stop-Motor
+      esperava ele morrer com AsyncWaitHandle.WaitOne(1500) NA THREAD DA
+      INTERFACE. Medido quatro vezes no log dele: 1,52s / 1,93s / 2,01s /
+      1,91s de janela sem responder. Era o "quando desliga ele fica la medindo
+      ainda por um tempo" - a tela nao atualizava porque a thread que desenha
+      estava parada.
+
+   2. LIGAR A CHAVE RELIA A PASTA INTEIRA.
+      A unica forma de comecar a medir era comecar uma leitura. Numa sessao a
+      chave sozinha disparou 28 RELEITURAS, 254,5s de espera. E o comentario
+      que eu tinha escrito na 17.10 dizia "releitura e barata (a fase A e
+      instantanea)" - nunca medido: a fase A custa ~4s POR ARQUIVO.
+
+   3. LIGAR A CHAVE MATAVA O CENSO EM CURSO.
+      18:32:22 ele pediu o censo (105s de trabalho); 18:32:23,4 ligou a chave;
+      18:32:23,8 o censo morreu, porque releitura mata censo. Ele ficou
+      esperando um trabalho que ja tinha sido cancelado.
+
+   4. UM BOTAO, SEIS MENSAGENS.
+      A chave tinha seis saidas diferentes, cada uma um "if" que eu somei
+      quando um caso quebrou. Isso nao e modelo, e casuistica - e do lado de
+      fora vira comportamento imprevisivel.
+
+ O QUE MUDOU: TRES TRABALHOS, CADA UM COM UM DONO
+ --------------------------------------------------------------------------
+   LER A PASTA    comeca: trocar pasta, Atualizar, abrir o programa
+                  para:   Parar leitura, trocar pasta
+   MEDIR CAMADA   comeca: a chave ligada + existe arquivo sem veredicto
+                  para:   a chave desligada, comecar conversao, reler a pasta
+   CENSO COMPLETO comeca: o botao Censo
+                  para:   novo censo, comecar conversao
+
+ Nenhum derruba o outro. E cancelar a medicao virou ERGUER UMA FLAG E VOLTAR -
+ nao ha mais espera nenhuma na thread da interface.
+
+ A CHAVE VOLTOU A SER UMA CHAVE - de seis mensagens para duas regras:
+   LIGADA    -> se falta veredicto, mede. Senao, nada.
+   DESLIGADA -> para a medicao, se houver. O que ja foi medido continua
+                valendo: medida e fato, nao preferencia.
+ A leitura da pasta nao aparece em nenhuma das duas - e essa e a diferenca.
+
+ O NUMERO DE SERIE: o preco de nao esperar, pago
+ --------------------------------------------------------------------------
+ Nao esperar o runspace morrer e o que descongelou a janela, mas tem um custo:
+ uma medicao cancelada ainda pode ter mensagem no ar. Se a pasta for relida
+ nesse meio tempo, a fila e OUTRA - e um "el" atrasado, carregando o indice da
+ fila velha, gravaria veredicto certo no ARQUIVO ERRADO. Isso e pior que
+ veredicto nenhum.
+
+ Entao toda rodada (de medicao E de leitura) recebe um numero, toda mensagem
+ dela carrega esse numero, e a janela ignora o que vier de uma rodada que nao e
+ a de agora. O filtro fica num lugar so, no portao do laco de mensagens - tres
+ guardas espalhados divergem, um guarda no portao nao tem como.
+
+ "P7 MEDINDO" SAIU DA COLUNA (achado dele, no print)
+ --------------------------------------------------------------------------
+   "P7 MEDINDO sempre impresso em todos, e pra estar assim so no que estiver
+    fazendo, ne? Se o proximo ta na lista... outra palavra, muito ridiculo."
+
+ Certo em tres niveis: (1) era MENTIRA para quem so esperava a vez - no print
+ dele dois arquivos diziam "P7 medindo" e so um estava sendo medido; (2) era
+ REPETICAO, porque a coluna SITUACAO e o contador da barra ja dizem quem esta
+ medindo; (3) era A PALAVRA ERRADA NO LUGAR ERRADO - aquela coluna carrega o
+ VEREDICTO da camada, e "medindo" e atividade, nao veredicto.
+
+ Agora: enquanto nao ha veredicto a coluna mostra so o detectado ("P7 → P8.1")
+ e cala sobre a camada, porque ainda nao sabe. Calar e honesto; inventar
+ atividade em linha parada nao e. "EL nao medida" CONTINUA, porque aquilo e
+ veredicto de verdade - o terceiro estado honesto da 1.8.
+
+ O PREAMBULO EM UM LUGAR SO
+ --------------------------------------------------------------------------
+ Achar as ferramentas e abrir o motor pela AST e identico nos dois trabalhos.
+ Em vez de duas copias - que divergem, e divergencia silenciosa entre dois
+ lugares que deviam dizer a mesma coisa e a familia de defeito que este projeto
+ persegue desde a 16.79 - o preambulo mora numa string so, e cada trabalho
+ injeta e confere a flag $PreparoOk. Quem falhar avisa do SEU jeito: a leitura
+ manda "leitura_fim", a medicao manda "el_fim". O preambulo nao sabe quem o
+ chamou, e nao deve saber.
+
+ A LEITURA PAROU DE FINGIR QUE SABIA
+ --------------------------------------------------------------------------
+ Ate a 17.24 ela marcava MEDINDO em todo P7 com EL, sempre - ate com a chave
+ desligada. Dai saia, em TODA leitura com a chave desligada, a linha "Medicao
+ interrompida em 3 arquivo(s)" no log, falando de uma medicao que nunca tinha
+ comecado. A leitura nao sabe se vai haver medicao; quem sabe e a janela,
+ depois que a fila esta na tela. Agora ela diz o que apurou: tem camada EL e
+ ainda NAO TEM VEREDICTO.
+
+ COMO ISTO FOI VALIDADO (o que mudou no meu lado tambem)
+ --------------------------------------------------------------------------
+ BATERIA: 941 testes (eram 919). Familia nova e dura, a que teria pego tudo
+ isto: NENHUM CLIQUE PODE TRAVAR A TELA - os quatro blocos de runspace sao
+ separados do resto e o codigo da janela e conferido contra WaitOne,
+ Start-Sleep, .Wait(), .Join() e .EndInvoke(). A regra nao e "tire este
+ WaitOne", e "nao existe espera sincrona no codigo da janela".
+
+ BANCADA DE CLIQUES: 113 invariantes (eram 79), com duas PROVAS FUNCIONAIS
+ novas - o bloco da medicao e o da leitura sao extraidos do fonte, postos num
+ runspace de verdade e RODADOS contra um motor de mentira. Sem isso eu estaria
+ provando que o codigo esta bem escrito, e nao que ele funciona (lição 9).
+ Medido ali: o cancelamento leva 0,13s do pedido ate o trabalho parar.
+
+ EU MATEI O CENSO INTEIRO NA 18.19 - UMA LINHA QUE NAO FOI ESCRITA (18.20)
+ --------------------------------------------------------------------------
+
+ 1) TODO CENSO COMPLETO ESTAVA SENDO DESCARTADO
+
+      18:09:49,662  ... 243760 quadro(s), 1124 cena(s) ... RPU 86,66 MB
+      18:09:49,666  resultado DESCARTADO - o RPU saiu com 0,00 MB
+
+    O motor mediu 86,66 MB e a janela leu ZERO. A trava da 18.19 confere
+    $m.RpuMb, e eu NUNCA acrescentei RpuMb na mensagem que o trabalho envia -
+    a edicao falhou em silencio e eu nao conferi. O campo chegava vazio, valia
+    zero, e a trava que existia para proteger o veredicto passou a destruir
+    TODOS eles. Tres censos completos, de 105 segundos cada, jogados fora no
+    log dele.
+
+    O CONSERTO QUE IMPORTA NAO E A LINHA - E O TESTE. Agora a bateria descobre
+    no fonte os dois lados da conversa e cruza: TODO campo que a janela LE de
+    uma mensagem tem que ser ENVIADO por quem a monta. Nao ha lista digitada a
+    mao. Sabotagem: tirando o RpuMb do envio, a bateria reprova (era o unico
+    jeito de este defeito ter aparecido antes de chegar nele - a bancada monta
+    a mensagem na mao, entao ela nao podia ver).
+
+ 2) A PORCENTAGEM VOLTOU A SER DE TEMPO - A MEDIDA DERRUBOU A MINHA IDEIA
+
+    A 18.17 trocou tempo por bytes de RPU, com um argumento que parecia certo.
+    Os logs dele desmentiram tres vezes:
+
+      17:21:40  "o RPU parou de crescer (parado em 0,0 MB)"   <- ~100s assim
+      17:22:43  "voltou a crescer"
+      17:23:23  "parou de crescer (parado em 86,7 MB)"
+
+    O dovi_tool NAO grava o RPU aos poucos: ele junta tudo e escreve no fim. A
+    barra ficava em 0% o censo inteiro e pulava para 99% - "a % nao conta, fica
+    0%, como vou saber se chegou a 90%?". Aquilo nao era progresso, era um
+    interruptor com dois estados.
+
+    Volta a conta que ele mesmo tinha proposto: tempo contra o previsto, e o
+    previsto e a amostra DESTE arquivo vezes o fator medido nesta maquina (4,7x,
+    cinco vezes seguidas no log). Passou do previsto, "(+)", e continua.
+
+    O tamanho do RPU nao virou lixo: mudou de funcao. Nao serve de PROGRESSO,
+    serve de PROVA no fim - e continua sendo a segunda trava contra censo
+    truncado.
+
+ 3) "CLICK LA NAO FUNCIONA, SO OS F11" - e ele estava certo
+
+    A 18.16 fez o botao virar liga/desliga, mas a linha que APAGA o botao no
+    instante em que o censo comeca continuou la, de quando ele so comecava.
+    Botao apagado nao recebe clique; tecla nao passa pelo IsEnabled e chegava.
+    Duas portas para a mesma acao com regras diferentes - o defeito da 16.79,
+    agora entre o mouse e o teclado. O botao continua vivo enquanto conta.
+
+ 4) CANCELAMENTO QUE NAO ACHOU NADA FICAVA MUDO
+
+    17:56:37 no log dele: cancelou, nenhum processo foi encerrado, e o log nao
+    disse nada - dai o runspace ficou preso e o botao passou a repetir "o
+    anterior ainda esta encerrando". "Nao havia o que matar" e "eu nao achei o
+    que matar" sao coisas muito diferentes, e agora o log distingue as duas.
+
+ 5) E o "[F2]" fora de padrao: dois lugares escreviam esse rotulo, e um deles
+    ainda dizia "Pausar F2". O mesmo defeito do F5 da 18.18, no botao do lado.
+
+ LICAO 43: medida boa no lugar errado continua sendo medida errada. O tamanho
+ do RPU e um numero excelente - so nao e progresso.
+
+ LICAO 44: mensagem entre dois lados e um CONTRATO, e contrato tem que ser
+ conferido pelos dois lados. Um campo que um lado le e o outro nunca envia nao
+ da erro, nao aparece no log e nao reprova teste nenhum: ele so vale zero, em
+ silencio, e quebra a funcionalidade inteira.
+
+ CENSO CANCELADO ESCREVIA UM VEREDICTO FALSO NA TELA (janela 18.19)
+ --------------------------------------------------------------------------
+ O DEFEITO MAIS GRAVE QUE O CENSO JA TEVE, e ele e meu, de duas versoes atras.
+ Achado por ele em vinte segundos de teste:
+
+   17:39:23,6  CENSO COMPLETO pedido para o Saving Private Ryan
+   17:39:26,1  F11 - cancelado, 3 processo(s) encerrado(s)
+   17:39:26,4  "2953 quadro(s) no RPU, 11 cena(s), RPU 1,05 MB"
+   17:39:26,4  "1 de 11 cena(s) do FILME INTEIRO (9,09%)"
+
+ Esse filme tem 243.760 quadros, 1.124 cenas e 19,22% acima do master - numeros
+ medidos cinco vezes hoje. O censo cancelado DOIS SEGUNDOS depois de comecar
+ escreveu "11 cenas, 9,09%" na tela, como verdade medida, por cima do numero
+ certo. E o pior tipo de defeito que este programa pode ter: o censo existe
+ exatamente para dar um numero em que se pode confiar.
+
+ A CAUSA, e ela e da MINHA propria mudanca da 18.14
+
+ Ate a 18.13, cancelar era ABANDONAR: o trabalho seguia e terminava sozinho,
+ entao um resultado que chegasse depois era legitimo - e havia ate uma linha
+ dizendo isso ("terminou depois de o botao ter sido encerrado - o resultado
+ vale"). Da 18.14 em diante, cancelar MATA o dovi_tool no meio da escrita. O
+ que sobra no disco e um RPU PELA METADE, e o motor - que so confere "o arquivo
+ existe e nao esta vazio" - devolve Ok=true com os numeros do pedaco.
+
+ Eu mudei o significado de "cancelar" e deixei para tras a regra que dependia
+ do significado antigo. Licao 5, de tras para frente: nao basta consertar a
+ causa; e preciso procurar quem mais dependia do que foi mudado.
+
+ AS DUAS TRAVAS, porque uma so nao basta
+
+   1. Se ESTE censo foi morto por nos, o resultado e descartado sem discussao.
+      Nao existe censo parcial valido - e cancelar a 95% produz um arquivo que
+      PARECE completo, entao o tamanho sozinho nunca pegaria este caso.
+
+   2. E mesmo sem ter sido morto, um RPU muito menor que o previsto para a
+      duracao do filme e censo truncado. E a mesma desconfianca que a bancada
+      de 08/09 ja tinha documentado: o dovi_tool devolve "Done." em arquivo
+      cortado, e quem desconfia e o LaFirma.
+
+ Nos dois casos o log DIZ o que descartou e por que, e o veredicto anterior
+ continua valendo. A bancada roda o portao de verdade com a mensagem exata do
+ log dele, e mais duas: uma com RPU quase completo (que so a trava 1 pega) e
+ uma com o censo completo de verdade (que TEM que passar - trava que barra tudo
+ nao e trava, e defeito).
+
+ LICAO 42: quando o significado de uma acao muda, todas as regras que dependiam
+ do significado antigo viram bug em silencio. "Cancelar" deixou de ser
+ "abandonar" e virou "matar" - e a regra que dizia "o que chegar depois vale"
+ continuou de pe, escrevendo lixo como se fosse medida.
+
+ UM DONO POR BOTAO, A TECLA ANTES DO ROTULO, E NENHUMA RECUSA MUDA (18.18)
+ --------------------------------------------------------------------------
+ "TA TUDO QUEBRADO OS BOTOES, REVEJA TUDO, VEJA A LOGICA SENDO USADA - ALGO
+ SIMPLES VAI SURGIR" (Diego, 17/09). Ele esta certo nas tres coisas, e as tres
+ sao a mesma coisa por baixo: rotulo escrito em muitos lugares, com regras
+ diferentes.
+
+ 1) O F5 SUMIA DO BOTAO - E ERAM TRES DONOS
+
+    "o botao F5 la em cima so aparece quando voce da F5; antes nao."
+
+    TRES lugares escreviam o rotulo do Atualizar: o XAML, o Start-Leitura
+    ("Parar F5") e o leitura_fim - e ESTE ultimo escrevia so "Atualizar", porque
+    eu esqueci dele na 18.17. Como a pasta e lida ao abrir o programa, o F5
+    sumia da tela dois segundos depois de abrir, e so voltava quando outra coisa
+    reescrevia o rotulo. Era isso, e nao a tecla, que estava quebrado.
+
+    E o defeito da 16.79, que volta toda vez que eu escrevo num rotulo direto em
+    vez de deixar UMA funcao desenhar o botao. O Censo ja tinha dono
+    (Update-BotaoCenso), a medicao tambem (Update-BotaoMedirEL); o Atualizar nao
+    tinha. Agora tem, e a bateria conta as escritas: se aparecer uma terceira
+    fora do dono, ela reprova.
+
+    De quebra, o pedido dele: enquanto le, o botao fica AMBAR escrito
+    "[F5] Parar" - a cor de aviso da casa, que aqui quer dizer "da para parar".
+
+ 2) A TECLA VEM ANTES, ENTRE COLCHETES - EM TODOS
+
+      [F1] Iniciar   [F2] Pausar   [ESC] Cancelar
+      [F5] Atualizar   [F11] Censo Completo   [F12] Medir MEL x FEL
+
+    "uma logica simples de organizacao", nas palavras dele. Era isso mesmo: o
+    "Iniciar F1" que existia desde sempre lia como parte do nome do botao; a
+    tecla na frente, entre colchetes, le como tecla. A bateria confere os seis.
+
+ 3) "O CENSO QUEBROU" - ELE NAO QUEBROU, ELE RECUSOU CALADO
+
+      17:18:29,4  TECLA: F11
+      17:18:29,4  CLIQUE: Censo Completo      <- e mais nada. SETE vezes.
+
+    Start-Censo tinha dois "return" secos: sem arquivo selecionado, e arquivo
+    que nao e Complex FEL (era o caso dele, no meio de uma releitura da pasta).
+    Do lado de fora, recusa muda e indistinguivel de defeito - a tecla nao faz
+    nada e o programa nao diz por que. Licao 2, de novo, e ela e antiga.
+
+    Agora toda recusa fala, e com a MESMA frase que a dica do botao ja usava
+    (Get-MotivoCenso, um lugar so): "CENSO COMPLETO recusado para 'X': este
+    arquivo e MEL - nao ha o que contar".
+
+ 4) O AVISO DE "SEM RESPOSTA" SAIU DE VEZ
+
+    Ele deu alarme FALSO nas duas versoes que eu escrevi:
+
+      18.15 (CPU)      15:02:58 "o dovi_tool nao consome CPU ha 20s" - e o censo
+                       terminou normalmente 36 segundos depois
+      18.17 (arquivo)  17:21:40 "o RPU parou de crescer (0,0 MB)" e 17:23:23
+                       "(86,7 MB)" - o comeco e o fim do trabalho, que sao
+                       exatamente os dois momentos em que o arquivo NAO cresce
+                       (no inicio o ffmpeg ainda abre 82 GB; no fim o RPU ja
+                       esta escrito e o dovi_tool esta CONTANDO as cenas)
+
+    Duas tentativas, dois falsos. A licao 6 diz o que fazer com isso, e eu
+    demorei duas versoes para obedecer: alarme falso e pior que alarme nenhum.
+    O aviso sai. O que fica e o que e medida: o giro e a porcentagem. A bateria
+    agora GUARDA a ausencia dele - se voltar sem um sinal confiavel, reprova.
+
+ 5) TECLA SEGURADA NAO E VINTE CLIQUES
+
+    No log dele, segurar o F12 virou 20 "MEDIR EL: LIGADO/DESLIGADO" em dois
+    segundos - auto-repeat do Windows, nao intencao. A primeira batida vale; as
+    repeticoes sao descartadas.
+
+ LICAO 41: um botao, um dono. Rotulo, cor e estado de um botao saem de UMA
+ funcao que le o estado - e quem quiser mudar o botao chama essa funcao. Toda
+ vez que eu escrevi "so esta linhazinha aqui" direto no rotulo, a linhazinha
+ virou o proximo bug.
+
+ A TELA CONGELAVA POR MINHA CAUSA, E A PORCENTAGEM MEDIA A COISA ERRADA (18.17)
+ --------------------------------------------------------------------------
+
+ 1) CINQUENTA E CINCO SEGUNDOS DE TELA PARADA - E O CULPADO ERA MEU
+
+    Achado no log dele de 17/09, sem ele ter reclamado disso:
+
+      16:51:46,5  CENSO COMPLETO de 'Saving Private Ryan': lendo o RPU
+      16:54:28,0  ... RPU 105,4s + censo 1,1s = 106,5s
+
+    O relogio de parede diz 162 segundos. O cronometro do MOTOR, que mede o
+    trabalho de verdade, diz 106,5. O trabalho terminou na hora certa; quem
+    ficou 55 segundos para tras foi a JANELA.
+
+    A causa e o que EU coloquei aqui na 18.13/18.15: um Get-CimInstance
+    Win32_Process de poucos em poucos segundos, NA THREAD DA INTERFACE. WMI nao
+    e barato e nao tem hora para responder com o disco ocupado - cada consulta
+    segurava o tique, o tique segurava a fila de mensagens, e a tela inteira
+    ficava lenta. Dai tambem o "nao consigo cancelar o censo clicando" que ele
+    relatou: o clique esperava a mesma thread que eu tinha ocupado.
+
+    Duas regras minhas quebradas pela minha propria rede de seguranca: a licao 6
+    (alarme que atrapalha e pior que alarme nenhum) e a invariante da 18.00
+    (NENHUM clique pode travar a tela). A bateria agora tem um teste que le o
+    corpo do tique e REPROVA qualquer consulta WMI la dentro.
+
+ 2) "EM QUE SENTIDO VOCE CHEGA ATE 100%?" - A PERGUNTA CERTA
+
+    Ele apontou o numero: se o censo custa ~5x a amostra e a amostra do Ryan e
+    23s, o total seria ~115s, entao por que a barra virava (+) sem chegar perto?
+
+    Porque a conta era de TEMPO, e tempo nao e trabalho. Com a medicao rodando
+    ao lado, o mesmo censo levou 162s de relogio para 106s de trabalho - a
+    previsao de tempo estourou no meio do caminho sem que nada estivesse errado.
+
+    A conta agora e de TAMANHO. O censo escreve o RPU do filme num arquivo que
+    CRESCE, e o programa acompanha esse arquivo:
+
+      porcentagem = bytes ja escritos / bytes previstos
+      previstos   = duracao do filme x bytes de RPU por segundo de filme
+
+    A medida de partida saiu do log dele: 86,66 MB para 2h49m = 8,95 KB por
+    segundo de filme. E ela se corrige a cada censo que termina, com limite de
+    sanidade (2 a 40 KB/s), pelo mesmo principio do fator de tempo da 18.09.
+
+    A diferenca pratica e exatamente o que ele pediu: a porcentagem acompanha o
+    TRABALHO. Disco ocupado faz ela andar mais devagar, em vez de estourar - e
+    por isso ela chega perto de 100% em vez de virar (+) na metade. O (+)
+    continua existindo para o caso honesto: o arquivo passou do tamanho previsto.
+
+    De quebra, a prova de vida ficou trivial e gratuita: se o arquivo parou de
+    crescer por 40s, o trabalho travou. Sem WMI, sem CPU, sem palpite - e sem
+    encostar na thread da tela (ler o tamanho de um arquivo custa
+    microssegundos).
+
+ 3) A MEDICAO PROMETIA VOLTAR E NAO VOLTAVA
+
+      16:45:08,5  MEDICAO: a anterior ainda esta encerrando - a nova comeca
+                  assim que ela sair
+      16:45:15,8  (a mesma frase)
+      16:45:19,3  (a mesma frase)
+      16:45:27,8  MEDICAO: comecou ... - e so porque ele mexeu na chave DE NOVO
+
+    A frase era uma promessa que ninguem cumpria: quem religava a medicao era o
+    proximo clique dele, nao o fim da anterior. Licao 34 outra vez - estado que
+    espera por um evento trava quando o evento nao chega - agora fechada no
+    mesmo lugar onde a espera do Iniciar ja tinha sido fechada na 18.08: uma
+    decisao por segundo, olhando o ESTADO.
+
+ 4) A TECLA DIZIA "IGNORADA" E AGIA ASSIM MESMO
+
+      16:47:11,7  TECLA: F11 (ignorada - nao se aplica ao estado 'rodando')
+      16:47:11,7  CENSO COMPLETO: o anterior ainda esta encerrando ...
+
+    Duas linhas por tecla, uma delas mentira, mais de quarenta vezes no log. O
+    "ignorada" servia para F1/F2/ESC, onde quem manda e o botao - e eu o estendi
+    para F11/F12, onde quem manda e a regra dentro da funcao. Cada tecla agora
+    registra so o que e verdade.
+
+ 5) E O PEDIDO SIMPLES: F5 no Atualizar, e a tecla escrita no botao
+
+    "Atualizar F5", "Censo Completo F11", "Medir MEL x FEL F12" - no mesmo lugar
+    e no mesmo tom do "Iniciar F1" que ja existia. Durante o censo o rotulo fica
+    curto ("Censo / 47%") e a tecla sai da frente; a dica continua dizendo que
+    F11 tambem cancela.
+
+ LICAO 40: rede de seguranca que custa caro deixa de ser rede. Antes de medir
+ alguma coisa DE FORA (processo, WMI, disco), pergunte quanto custa a medida -
+ e se ela roda na thread da tela, o custo e a tela.
+
+ O BOTAO DO CENSO PASSOU A PARAR, E O ROTEIRO DE TESTE ERA IMPOSSIVEL (18.16)
+ --------------------------------------------------------------------------
+
+ PRIMEIRO O ERRO QUE ERA MEU, E ERA DE RACIOCINIO
+
+ "EU NAO SEI COMO VC QUER FAZER ISSO, SE NO MEIO DA CONVERSAO O CENSO NAO SE
+ PODE MEXER, E MUITO MENOS MUDAR DE PASTA" (Diego, 17/09).
+
+ Ele esta inteiramente certo, e a falha e grosseira: eu pedi um teste que o
+ proprio programa PROIBE. Com a conversao rodando, o botao do censo esta
+ desabilitado (17.21), a troca de pasta esta bloqueada e o Nova Conversao nem
+ existe - de proposito, desde a 16.x. O unico jeito de um censo morrer perto de
+ uma conversao e o que ja acontece sozinho: apertar Iniciar COM o censo em
+ curso, que foi exatamente o que o log dele das 15:24:43 provou funcionar.
+ Roteiro de teste tambem e afirmacao: se eu nao consigo executa-lo mentalmente
+ no programa que escrevi, ele nao vai para o LEIA-ME.
+
+ O BOTAO QUE COMECAVA E NAO PARAVA
+
+ "NUNCA VI UM BOTAO QUE COMECA E NAO PODE PARAR SEM SER FECHANDO O SISTEMA, OU
+ DANDO F1 PARA COMECAR, OU TROCANDO DE PASTA."
+
+ Desde a 18.14 o cancelamento do censo funciona de verdade - o que faltava era
+ um jeito de PEDIR o cancelamento sem fazer outra coisa junto. Agora o proprio
+ botao para: rodando, o clique cancela; parado, o clique comeca. Uma acao, um
+ lugar - o clique e a tecla batem na mesma funcao (Invoke-BotaoCenso), e a
+ bancada roda essa funcao de verdade nos dois estados.
+
+ F11 E F12, PEDIDO DELE
+
+   F11 - censo: liga e, com um censo em curso, CANCELA (igual ao clique)
+   F12 - medicao MEL x FEL: liga/desliga
+
+ As duas passam pela MESMA funcao dos botoes, e nao por um caminho paralelo -
+ atalho que nao passa pela regra do botao vira uma segunda regra para divergir
+ depois (o defeito que este projeto persegue desde a 16.79). As duas tambem
+ entram no log, com o mesmo "TECLA: X (ignorada - nao se aplica ao estado)" das
+ outras.
+
+ O ROTULO PERDEU O RELOGIO
+
+ "TIRA O TEMPO DO CENSO CONTANDO ALI, DEIXA SO O % E O - /".
+
+ O cronometro respondia "esta vivo?" - e o giro passou a responder isso melhor,
+ num caractere so. Entao o rotulo agora e "Censo / 47%", e o tempo decorrido foi
+ para a DICA (que passou a dizer tambem que da para cancelar ali mesmo) e para o
+ log. Nada foi perdido, mudou de lugar.
+
+ E A PERGUNTA DELE: "e normal passar dos 100% e continuar o tempo?"
+
+ E normal, sim, e o (+) existe por causa disso. A previsao nasce do tempo que a
+ AMOSTRA daquele arquivo levou vezes o fator medido NESTA maquina - uma media.
+ Cada rodada varia com o disco: no log dele o mesmo Ryan levou 106,6s, 107,0s,
+ 108,5s e 110,6s em quatro censos, com previsao de 108s. Passar do previsto e o
+ caso normal de qualquer estimativa honesta. O que seria defeito e o contrario:
+ mostrar "101%", ou travar em 99% fingindo que ainda esta no prazo.
+
+ O QUE O TESTE DELE ACHOU NA 18.14 - DOIS DEFEITOS MEUS (janela 18.15)
+ --------------------------------------------------------------------------
+ Primeiro o que DEU CERTO, porque tambem e medida: no log de 15:24:43 o censo
+ foi encerrado ao apertar Iniciar (ffmpeg pid 19252 e dovi_tool pid 35060), e a
+ conversao seguiu INTEIRA - etapa 1/5 em 38s, etapa 2/5 com o dovi_tool DA
+ CONVERSAO indo de 0 a 100% em 49s. O teste de seguranca passou na maquina dele,
+ que era a duvida que importava.
+
+ 1) O CMD QUE SEGURA O PIPE FICAVA DE PE - E ISSO PRENDIA TUDO
+
+      15:24:43,9  CENSO: ffmpeg (pid 19252) e dovi_tool (pid 35060) encerrados
+      15:27:10 a 15:27:21   "o anterior ainda esta encerrando" - QUINZE cliques
+
+    E as 15:12:44, no MESMO log, o mesmo cancelamento funcionou. Pior que
+    falhar sempre: parece sorte.
+
+    Nao e sorte. Quem monta o pipe e um cmd.exe - o PowerShell 5.1 estraga pipe
+    binario, e por isso o motor grava a linha num .cmd (Invoke-PipeExtractRpu).
+    Matando so os dois filhos, o cmd PODE continuar esperando a escrita fechar;
+    o "& cmd.exe /c" do motor nunca volta, o runspace fica preso e o censo nao
+    comeca nunca mais. Agora o cmd do pipe morre junto - ele tem assinatura
+    propria e unica (e o unico cmd que este programa executa, e carrega o nome
+    "pipe_rpu.cmd").
+
+    E COMO TRAVA NAO PODE EXISTIR, entrou uma rede: passados 20s do
+    encerramento, se NENHUM processo do censo estiver de pe, o handle e orfao -
+    ele e abandonado (sem Dispose, que esperaria e congelaria a tela) e o censo
+    novo comeca. Vazar um objeto e menos grave que perder o botao pelo resto da
+    sessao.
+
+ 2) A PROVA DE VIDA DEU ALARME FALSO - E ELA ERA MINHA, DE UMA HORA ATRAS
+
+      15:02:58  CENSO: o dovi_tool nao consome CPU ha mais de 20s (parado em
+                51,4s) - o botao passou a avisar
+      15:03:34  ... e o censo terminou normalmente, 110,6s, sem nenhum problema
+
+    A 18.13 vigiava SO o dovi_tool. Mas quem le os 82 GB do disco e o FFMPEG; o
+    dovi_tool recebe o que vem pelo cano e pode ficar dezenas de segundos sem
+    ganhar CPU nenhuma, esperando dados. Vigiar um dos dois e vigiar metade do
+    trabalho - e alarme falso na rede de seguranca e PIOR que nao ter rede
+    (licao 6, de volta).
+
+    Agora a conta soma os DOIS, o limite subiu de 20s para 40s, e quem acha
+    esses processos virou um lugar so: o cancelamento mata exatamente os mesmos
+    que a prova de vida observa. Duas listas para a mesma coisa e o defeito que
+    este projeto persegue desde a 16.79.
+
+ LICAO 39: matar o processo nao e matar o TRABALHO - a arvore inteira dele
+ precisa cair, e quem fica de pe segurando um cano invisivel prende o programa
+ sem aparecer em lugar nenhum.
+
+ CANCELAR O CENSO PASSOU A VALER NA HORA (janela 18.14)
+ --------------------------------------------------------------------------
+ "MAS COMO ASSIM, QUAL O RISCO DE VC QUEBRAR ALGO? E ESSA E A UNICA
+ ALTERNATIVA?" (Diego, 17/09). As duas perguntas estavam certas, e a segunda
+ derrubou a premissa da MINHA resposta anterior: eu disse que isto exigia mexer
+ no motor. NAO exige. Fui conferir o codigo em vez de repetir o que eu tinha
+ dito, e o motor nao mudou uma linha nesta versao.
+
+ O QUE ESTAVA ACONTECENDO, medido no log dele:
+
+   14:28:20,4  CENSO COMPLETO: encerrado - a conversao comecou
+   14:30:01,5  CENSO: o arquivo contado nao esta mais na lista - descartado
+
+ 101 segundos lendo o disco DEPOIS de cancelado, brigando pelo disco com a
+ conversao que acabara de comecar, e o resultado indo para o lixo no fim. A
+ 18.04 resolveu a TELA (abandonar o trabalho em vez de esperar por ele) e nao
+ resolveu o DISCO.
+
+ POR QUE DA PARA MATAR SEM RISCO
+
+ O censo e o UNICO lugar deste programa que roda o dovi_tool lendo da ENTRADA
+ PADRAO, num pipe montado pelo cmd:
+
+   ffmpeg ... -f hevc -  |  dovi_tool extract-rpu -i -  -o <tmp>\filme.bin
+
+ A conversao roda "dovi_tool -m 2 convert --discard -i <arquivo>"; a medicao por
+ amostra roda "extract-rpu -i "<trecho>"" - as duas com ARQUIVO no -i, nunca com
+ o tracinho. A assinatura separa os tres sem ambiguidade, e mesmo assim so morre
+ quem cumpre TODAS as condicoes: a assinatura, o caminho do filme que esta sendo
+ contado (no lado do ffmpeg) e o censo em curso. Na duvida, nao mata.
+
+ Depois do encerramento o "& cmd.exe /c" do motor desbloqueia, o censo nao acha
+ o RPU, devolve Ok=false e o finally DELE apaga a pasta temporaria - caminho que
+ ja existia e ja era testado. Nao sobra arquivo no disco dele.
+
+ E o motor, que so ve que o RPU nao saiu, escreveria "FALHOU" em vermelho por um
+ cancelamento que o proprio usuario pediu. Quem sabe que foi de proposito e a
+ janela, e agora o log diz "encerrado a pedido - nao houve falha". Mensagem que
+ mente e defeito tambem quando mente para o lado do alarme (licao 2).
+
+ COMO ISSO FOI PROVADO, ja que nao da para matar processo numa bateria
+
+ Quem decide QUEM morre virou uma funcao PURA (Test-EhProcessoDoCenso), separada
+ de quem sai matando. A bancada extrai essa funcao do fonte e roda contra as
+ linhas de comando REAIS dos tres usos do dovi_tool, mais dois ffmpeg. Nove
+ invariantes, e as que mais importam sao as negativas: o dovi_tool da CONVERSAO
+ nao e tocado, o da medicao por amostra nao e tocado, o ffmpeg de outro filme
+ nao e tocado. Sabotagem: tirando a protecao da conversao, a bancada reprova.
+
+ LICAO 38: "tem que mexer no X" merece a mesma prova que qualquer outra
+ afirmacao. Eu repeti duas vezes que isto exigia tocar no motor sem ter ido ler
+ como o censo chama o dovi_tool - e nao exigia. Palpite sobre o proprio codigo
+ e palpite igual (licao 32).
+
+ O CABECALHO E DA ABA, E O CENSO PASSOU A PROVAR QUE ESTA VIVO (janela 18.13)
+ --------------------------------------------------------------------------
+
+ 1) "VIDEO SELECIONADO E PEDINDO PRA SELECIONAR VIDEO - AI DE REPENTE SOME"
+
+    Print dele: aba FILA na frente, o Game of Thrones selecionado E marcado, e
+    o cabecalho dizendo "Selecione um video na aba Fila.". Depois sumia sozinho.
+
+    A 18.10 consertou METADE disto. Eu impedi que o NOME do arquivo fosse
+    escrito ali com a FILA na frente e deixei os outros DOIS ramos do
+    Fill-Faixas escrevendo sem olhar aba nenhuma - e Fill-Faixas roda por muito
+    mais coisa que trocar de aba (MODO, clique em faixa, repintura).
+
+    Pior: no meio de um repinte da fila o SelectedIndex fica -1 por um instante,
+    e e exatamente esse instante que cai no ramo "Selecione um video". O texto
+    absurdo vinha de um estado que durou milesimos, e sumia depois porque a
+    escrita seguinte vinha certa. Meio conserto e o mesmo que nenhum quando a
+    regra ficou em tres lugares em vez de um.
+
+    Agora existe UM portao (Set-DicaFaixas) e a regra mora nele: texto de
+    arquivo so aparece com a aba das FAIXAS na frente. O teste passou a cobrar o
+    modelo, e nao a linha: "Fill-Faixas nao escreve no cabecalho por fora do
+    portao".
+
+ 2) "O CENSO VOLTOU SO A TER UM TEMPO - NAO SE SABE SE TA FUNCIONANDO OU NAO"
+
+    Ele esta certo pela segunda vez, e as duas criticas sao opostas de
+    proposito: a 18.07 poluiu o botao com uma frase comprida, a 18.10 enxugou
+    demais e sobrou um cronometro que nao diz nada. Cronometro nao e progresso
+    (licao 35) - mas rotulo curto tambem nao pode ser mudo.
+
+    Agora sao TRES sinais, e cada um responde uma pergunta diferente:
+
+      giro (| / - \)    A TELA esta viva? Muda a cada segundo, sempre.
+      porcentagem       Quanto FALTA? Sai da relacao MEDIDA (a amostra deste
+                        arquivo x o fator desta maquina). Passando do previsto
+                        vira "(+)"; sem previsao medida nao existe porcentagem -
+                        nao se inventa numero.
+      "sem resposta"    O TRABALHO esta vivo? Esta e a unica que NAO e
+                        estimativa: e o tempo de CPU do dovi_tool, lido de tres
+                        em tres segundos. Parou de crescer por 20s, o botao fica
+                        AMBAR e diz. O log registra o instante e o valor.
+
+    E a diferenca que importa: ate aqui, censo travado e censo lento tinham
+    exatamente a mesma cara na tela. Agora nao tem.
+
+ TRES ACHADOS DE UMA VARREDURA NOS LOGS ANTIGOS (janela 18.12 / bateria 3.49)
+ --------------------------------------------------------------------------
+ "VAI ATRAS DE NOVO DE VARIOS LOGS ANTIGOS E VEJA O QUE VOCE NAO FEZ QUE EU NAO
+ PEDI" (Diego, 17/09). Foram lidos os logs de 04/09 a 17/09 de uma vez, contando
+ padrao em vez de caso.
+
+ 1) UM BURACO NA PROPRIA BATERIA - O PIOR DOS TRES.
+
+    O teste mais forte que existe aqui e "NENHUMA funcao da janela pode ser
+    chamada dentro de um runspace". Ele olhava DOIS blocos - motor e leitura -
+    com o numero da linha achado a mao. Acontece que a 18.00 criou mais DOIS
+    trabalhos, MEDICAO e CENSO, e ninguem os acrescentou. Ou seja: os runspaces
+    mais novos, justamente onde moraram todos os defeitos de 15 a 17/09, NAO
+    eram conferidos.
+
+    O que isso custa esta escrito nos logs dele:
+       "O termo 'Escrever-Log' nao e reconhecido..."      (3 arquivos)
+       "O termo 'Test-SaidaCompleta' nao e reconhecido..." (2 arquivos)
+    Cada um estourou a leitura de um filme.
+
+    Agora a lista de blocos e DESCOBERTA no fonte: todo "$script:Trabalho* = {"
+    entra sozinho. Trabalho novo ja nasce conferido. Validado por sabotagem:
+    um Escrever-Log plantado dentro do runspace da medicao agora reprova.
+
+ 2) FECHAR A JANELA PARAVA UM RELOGIO DE CINCO.
+
+       10/09 01:26:31,7  IDIOMA: reinicio pedido pelo usuario
+       10/09 01:26:31,8  ERRO: Nao sera possivel definir Visibility ... depois
+                         que uma Janela for fechada.
+
+    O add_Closed parava o TimerFila e mais nada. Os outros quatro
+    DispatcherTimer continuavam batendo numa janela morta, e o primeiro que
+    encostou nela estourou - bem na hora em que o processo novo ja estava
+    subindo. Agora todos param, e cada tique sai na hora se a janela ja fechou
+    (existe uma flag propria para o que nao e relogio: BeginInvoke agendado,
+    mensagem em voo, callback atrasado). O teste tambem DESCOBRE os relogios no
+    fonte - relogio novo ja nasce conferido.
+
+ 3) A FILA SE REPINTAVA IGUAL A SI MESMA.
+
+    MEDIDO: 1.588 linhas "FILA: N video(s)..." nos logs de 15 a 17/09, e 133
+    delas sao repinturas IDENTICAS a anterior, coladas - tres seguidas para uma
+    acao so (17/09 11:43:03,065 / ,072 / ,077). Cada repintura faz Clear() na
+    colecao inteira e monta tudo de novo, e e exatamente isso que dispara
+    evento de caixinha e de selecao sem ninguem ter clicado: o defeito da 18.06
+    (o programa desmarcando arquivo sozinho) e o da 18.11 (tabela de faixas em
+    dobro) nasceram os dois dai.
+
+    Agora as linhas sao montadas numa lista a parte e comparadas com o que ja
+    esta na tela. Igual, nao toca: zero Clear(), zero evento, zero pisca - o
+    log escreve "nada mudou na tela - repintura dispensada". Nao e economia de
+    processador: e tirar do programa a fonte de dois defeitos ja pagos.
+
+ LICAO 37: teste que enumera a mao envelhece calado. Toda lista que descreve o
+ PROGRAMA - blocos de runspace, relogios, arquivos do instalador - tem que ser
+ descoberta no fonte, senao ela protege o codigo de ontem.
+
+ DUAS COISAS QUE O LOG MOSTROU E NINGUEM TINHA PEDIDO (janela 18.11)
+ --------------------------------------------------------------------------
+ Nao vieram de queixa dele: vieram de ler o log de 17/09 linha por linha.
+
+ 1) A JANELA PROMETIA UMA MEDICAO QUE NAO EXISTIA.
+
+      11:54:22,7  EL: veredicto reaproveitado ... (os tres, do cache)
+      11:54:22,8  MEDICAO: a anterior ainda esta encerrando - a nova comeca
+                  assim que ela sair
+
+    Nao havia "nova": os tres arquivos ja tinham veredicto, a fila de pendentes
+    estava vazia. A trava do handle era conferida ANTES de olhar se havia o que
+    medir, entao a mensagem saia mesmo sem trabalho nenhum esperando - e quem
+    le o log fica esperando uma medicao que nunca vem. Agora a ordem e a
+    natural: primeiro ver se ha o que fazer, depois ver se da para fazer.
+    Licao 2 - mensagem que mente e defeito, mesmo com o programa se comportando
+    certo por baixo.
+
+ 2) A TABELA DE FAIXAS ERA REFEITA DUAS VEZES POR CLIQUE.
+
+      11:53:48,842  MODO: Bloodsport -> Manual
+      11:53:48,850  FAIXAS: 5 faixa(s) -> 11 linha(s)
+      11:53:48,865  FAIXAS: 5 faixa(s) -> 11 linha(s)
+
+    O primeiro e o do clique. O segundo nasce do Fill-Fila que vem logo depois:
+    repintar a lista dispara SelectionChanged, e o SelectionChanged refazia a
+    tabela inteira. E a MESMA FAMILIA do defeito da 18.06 (o programa
+    desmarcando arquivo sozinho): evento disparado pela repintura, nao pelo
+    usuario. Enquanto a fila esta sendo pintada ninguem trocou de video, e a
+    tabela ja foi refeita por quem mandou pintar.
+
+ O BOTAO DO CENSO PASSOU A FALAR A LINGUA DA CASA (janela 18.10)
+ --------------------------------------------------------------------------
+ "BOTAO DO CENSO LA EM CIMA MUITO POLUIDO, QUE LOUCURA. O CENSO DEPOIS DE
+ MEDIDO DEVE FICAR COM O BOTAO VERDE, NAO E? E QUANDO O ARQUIVO NAO PODE SER
+ LIDO PELO CENSO, QUE FIQUE CINZA DE INATIVO. EU CANSO DE TE PEDIR PRA FAZER
+ COISAS COM SENTIDO, COISAS QUE SEMPRE IMPLEMENTAMOS EM CADA FASE... JA EXISTE
+ UM PADRAO" (Diego, 17/09).
+
+ Ele esta certo e a cobranca e justa: este programa TEM um vocabulario de cor,
+ usado em todo o resto da tela - cinza nao se aplica, normal da para usar,
+ ciano em curso, verde ja feito. O botao do censo nasceu fora dele: cor unica
+ para qualquer estado, e um rotulo que a 18.09 encompridou ainda mais
+ ("Censo: contando... 00m 33s de ~01m 44s") dentro de um botao de barra.
+
+ Agora ele obedece a mesma regra dos outros:
+
+     ciano     - o censo esta rodando agora
+     verde     - "Censo Feito" (este arquivo ja foi contado)
+     normal    - da para pedir o censo deste arquivo
+     cinza     - nao se aplica (MEL, sem RPU, ou ja ha censo saindo)
+
+ E o rotulo voltou a ser curto: "Censo - 00m 45s". O total previsto e o aviso
+ de estouro nao sumiram - foram para a DICA, que e onde texto comprido nao
+ atrapalha ninguem; no botao, passar do previsto vira um "(+)" no fim. Nada
+ do que a 18.09 mediu foi jogado fora, so mudou de lugar.
+
+ E O NOME VELHO NO CABECALHO DA FILA (janela 18.10)
+ --------------------------------------------------------------------------
+ "NA FOTO 7 TEM ESSE BUG QUE HA MUITO TEMPO ME INCOMODA... EU SELECIONEI O
+ SEVEN E LA AINDA FICA COMO BLOOD. EU JA TINHA COMENTADO DE TIRAR ISSO DALI NA
+ PARTE DA FILA" (Diego, 17/09). No log dele, medido:
+
+   11:53:48,1  CLIQUE: MODO (automatico/manual) - Bloodsport
+   11:53:48,1  cabecalho da FILA escreveu "Bloodsport" (com o Se7en marcado)
+
+ A causa: Fill-Faixas escreve o nome do arquivo no cabecalho, e ela tambem roda
+ quando se troca Automatico/Manual - mesmo com a aba FILA na frente. Resultado:
+ o cabecalho da FILA, que nao e sobre um arquivo so, herdava o nome do ultimo
+ arquivo tocado na aba de FAIXAS. Clicar em outro lugar "arrumava" porque a
+ proxima escrita vinha certa - e por isso vinha e ia.
+
+ Conserto: so escreve nome de arquivo no cabecalho se a aba das FAIXAS for a
+ que esta aparecendo. Na FILA, o cabecalho fala da fila.
+
+ LICAO 36: ferramenta nova nao nasce fora do padrao. Se a casa ja tem um
+ vocabulario - de cor, de texto, de lugar - o botao novo entra falando ele,
+ e nao esperando uma reclamacao para ser alfabetizado depois.
+
+ O CONTADOR DO CENSO PASSOU A DIZER QUANTO FALTA (janela 18.09)
+ --------------------------------------------------------------------------
+ "E ESSE CONTADOR E DO QUE? SE CADA FILME TEM SEU TEMPO, ELE TA CONTANDO ATE
+ QUE TEMPO?" (Diego, 17/09).
+
+ Pergunta certa, e a 18.07 tinha respondido pela metade: um cronometro subindo
+ prova que o programa nao travou, mas nao diz QUANTO FALTA - que e a unica
+ coisa que ele queria saber. Pior: ele viu o contador rodando e, ao passar o
+ mouse, a dica dizia "ja existe um censo em andamento - espere ele terminar".
+ Duas frases sobre o mesmo estado, e a de baixo sem informacao nenhuma.
+
+ O censo nao tem barra de progresso de verdade porque quem le o RPU e o
+ dovi_tool, num processo so, sem contar quadros para fora. O que existe e uma
+ relacao MEDIDA - tres vezes, no log dele, no Saving Private Ryan:
+
+     amostra 22,1s -> censo 104,5s   (4,73x)
+     amostra 22,2s -> censo 106,5s   (4,80x)
+     amostra 22,3s -> censo 104,1s   (4,67x)
+
+ Entao:
+   - a previsao nasce do tempo que ESTE arquivo levou na AMOSTRA, vezes o
+     fator - e nao de um numero fixo igual para todo filme, que era exatamente
+     a ressalva dele;
+   - o rotulo mostra "Censo: contando... 00m 33s de ~01m 44s";
+   - quando passa do previsto, a tela DIZ "(passou do previsto)" em vez de
+     continuar mostrando um alvo que ja ficou para tras (licao 2);
+   - sem amostra medida nao ha previsao: mostra so o decorrido, sem inventar;
+   - e o fator se corrige sozinho - cada censo que termina grava a relacao real
+     daquela maquina, com limite de sanidade de 2x a 12x, porque um numero
+     solto (cache de disco, censo cortado no meio) nao pode envenenar a
+     previsao de todos os proximos. A licao 1 deste projeto e sobre isso.
+
+ A dica do botao agora responde a mesma pergunta: "O censo deste arquivo esta
+ rodando - leva cerca de 01m 44s no total (a amostra dele levou 00m 22s)".
+
+ E A COLUNA VOLTOU A DIZER ALGO SOBRE A CAMADA (janela 18.09)
+ --------------------------------------------------------------------------
+ Print dele: com a medicao rodando, a linha do Troy mostrava so "P7 -> P8.1",
+ sem uma palavra sobre a EL, do lado de outras dizendo "FEL" e "MEL". A 18.00
+ tirou "medindo" dali com razao - era atividade na coluna de VEREDICTO, e
+ aparecia ate em quem nem tinha vez - mas eu deixei o buraco: sem sigla, a
+ linha parece um Profile 7 comum.
+
+ A verdade e simples: quem esta sendo medido AINDA NAO TEM VEREDICTO, entao
+ mostra o mesmo que os outros sem veredicto - "EL nao medida". Quem avisa que o
+ trabalho esta acontecendo e a coluna SITUACAO, que e o lugar da atividade.
+
+ E O TESTE DISSO ESTAVA COBRANDO A FORMA, NAO O EFEITO (bateria 3.44)
+ --------------------------------------------------------------------------
+ O conserto acima foi REPROVADO pela minha propria bateria: eu tinha escrito
+ "nao pode existir um ramo MEDINDO" quando a regra e "a palavra MEDINDO nao
+ aparece na coluna". Licao 18 pela sexta vez. O teste agora confere o TEXTO QUE
+ SAI, e nao a forma do codigo.
+
+ LICAO 35: cronometro nao e progresso. Mostrar que o trabalho esta vivo resolve
+ metade do problema; a outra metade e dizer quanto falta - e quando nao da para
+ saber, dizer isso tambem, em vez de deixar o numero subindo sem referencia.
+
+ BATERIA 3.44 (994 testes) | BANCADA 2.8 (203 invariantes).
+
+ A MEDICAO MORRIA PARA SEMPRE (janela 18.08)
+ --------------------------------------------------------------------------
+ "TROQUEI DE PASTA, NAO LEU O FEL, TENTEI LIGAR DESLIGAR LER A PASTA DE NOVO E
+ NADA" (Diego, 17/09). E o log mostra o resto:
+
+   01:27:07,8  MEDICAO: encerrada - a conversao comecou
+   01:27:30,9  CLIQUE: Nova Conversao
+   01:29:05,1  MEDICAO: a anterior ainda esta encerrando
+   01:29:46,5  MEDICAO: a anterior ainda esta encerrando
+   01:30:11,0  MEDICAO: a anterior ainda esta encerrando
+   01:30:35,4  idem ... ate o fim da sessao.
+
+ A CAUSA, E ELA E MINHA, DE DUAS VERSOES ATRAS: Start-Leitura esvaziava a fila
+ de mensagens com um "while TryDequeue { }" - sem olhar o que estava nela. La
+ dentro estava o "el_fim" da medicao recem-cancelada, que e a UNICA mensagem
+ que fecha o handle do runspace. Ela ia para o lixo, $script:MedPS ficava
+ preenchido para sempre, e a trava que eu criei na 18.05 ("nao nasce outra
+ enquanto a anterior nao sair") passou a barrar TODAS as medicoes seguintes.
+
+ Esvaziar a fila era protecao da epoca em que nao existia numero de rodada -
+ hoje o portao ja descarta sobra velha sozinho. O que nunca pode ser
+ descartado e a NOTICIA DE MORTE de um trabalho.
+
+ Ele resumiu certo: "esse de mudar de pasta e salvar tava ate certo, vc quebra
+ tudo do nada". O cache de veredicto (18.04) estava funcionando; quem quebrou
+ foi a trava nova encontrando uma fila esvaziada.
+
+ A ESPERA DO INICIAR FICAVA PENDURADA (janela 18.08)
+ --------------------------------------------------------------------------
+ 01:24:08 ele clicou Iniciar e escolheu ESPERAR a medicao terminar; 01:24:10
+ desligou a chave e a medicao foi cancelada. O aviso "Esperando a medicao
+ terminar para comecar..." ficou na tela ate 01:27:04 - quase TRES MINUTOS -
+ com o botao Iniciar apagado. Ele so se livrou deixando tudo medir de novo:
+ "eu tive q deixar ver todo FEL pra sumir a msg de esperando pra iniciar".
+
+ A espera era desarmada DENTRO do tratador do "el_fim". Quando essa mensagem
+ nao chega - rodada cancelada com serie ja virada, fila esvaziada, trabalho
+ abandonado - a espera fica pendurada para sempre. Amarrar estado a um evento
+ que pode nao vir e a mesma familia de defeito.
+
+ Agora quem decide olha o ESTADO, uma vez por batida do relogio da fila: se ha
+ espera armada e nao ha mais medicao rodando, a espera acabou - por bem ou por
+ mal - e a conversao comeca.
+
+ LICAO 33: fila de mensagens nao se esvazia no escuro. Sobra de rodada velha se
+ descarta pelo numero de serie; noticia de FIM de trabalho se OUVE, sempre -
+ ela e o unico jeito de saber que um runspace pode ser fechado.
+ LICAO 34: estado que depende de um evento chegar fica preso quando o evento
+ nao vem. Quem decide "ja posso comecar?" tem que olhar o ESTADO, nao esperar
+ um recado.
+
+ BATERIA 3.43 (986 testes) | BANCADA 2.7 (193 invariantes).
+
+ O CENSO MOSTRA QUE ESTA VIVO (janela 18.07)
+ --------------------------------------------------------------------------
+ "o censo tem q so imaginar q ele ta fazendo algo ne? demora pra kralho e so
+ deixa o mouse em cima e DIZ q ta fazendo algo... tem q ter um segundo aviso,
+ uma contagem, sei la, algo pra falar q ta tendo algo" (Diego, 17/09).
+
+ Ele esta certo, e e a licao 2 deste projeto: 104 segundos sem sinal na tela e
+ indistinguivel de programa travado. O tooltip nao conta - ele so aparece se a
+ pessoa desconfiar e for procurar.
+
+ Agora o rotulo do botao CONTA: "Censo: contando... 01m 12s", e o botao fica na
+ mesma cor de "em curso" que a medicao usa. A escrita acontece quando o segundo
+ VIRA, nao a cada batida do relogio da fila (que bate 10x por segundo). Quando
+ acaba, rotulo e cor voltam juntos - e o numero do censo ja entra na linha do
+ diagnostico, como desde a 18.05.
+
+ A MESMA CONDICAO NAO PODE TER DUAS CORES (janela 18.07)
+ --------------------------------------------------------------------------
+ "essa ultima imagem e igual sempre quando ta cheio o disco? amarelo? to vendo
+ inconsistencia" (Diego). Estava mesmo: o painel de ESPACO EM DISCO pinta
+ "Espaco Insuficiente" de VERMELHO, e o cartao do resumo pintava o MESMO fato
+ de ambar - porque olhava so o status "PULADO", que cobre dois casos opostos:
+
+   ja existia na saida  -> informacao, nada a fazer          -> ambar
+   nao coube no disco   -> IMPEDIMENTO, o arquivo nao saiu   -> VERMELHO
+
+ Cor e vocabulario neste programa: ambar avisa, vermelho impede. Agora o cartao
+ e a frase seguem o motivo, nao o rotulo generico.
+
+ NUMERACAO: O INSTALADOR VOLTA A SUBIR A CADA ENTREGA
+ --------------------------------------------------------------------------
+ Ordem dele: "EU QUERO Q SUBA ESSA MERDA DE 1.10.0 PARA 1.10.1... E
+ SUCESSIVAMENTE, VC TA MUDANDO COISAS E NAO ALTERA ISSO, TA VINDO ZIPS TODOS
+ IGUAIS". Ele tem razao no efeito pratico: entrega diferente com nome de
+ arquivo igual e convite a instalar a errada. Deste ponto em diante, cada
+ entrega sobe o numero do instalador - 1.10.1, 1.10.2, e assim por diante.
+
+ BATERIA 3.42 (982 testes) | BANCADA 2.6 (187 invariantes).
+
+ O PROGRAMA DESMARCAVA ARQUIVO SOZINHO (janela 18.06)
+ --------------------------------------------------------------------------
+ Isto explica os prints impossiveis dele: o Ryan com a caixinha MARCADA
+ dizendo "Fora da Fila - Nao Sera Convertido", e o Troy com a caixinha VAZIA
+ dizendo "Proximo a Converter". A caixinha mostrando uma coisa e o estado
+ sendo outro.
+
+ Esta no log dele, sem clique nenhum:
+
+   00:56:25,482  EL: veredicto reaproveitado - Game.of.Thrones (FEL)
+   00:56:26,436  SELECAO: Game.of.Thrones -> desmarcado
+   00:56:29,573  EL: veredicto reaproveitado - Saving.Private.Ryan
+   00:56:30,250  SELECAO: Saving.Private.Ryan -> desmarcado
+   00:56:35,526  EL: veredicto reaproveitado - Troy
+   00:56:37,498  SELECAO: Troy -> desmarcado
+
+ Um segundo depois de CADA linha ser desenhada, o proprio programa desmarcava
+ o arquivo. Nao era a tela mentindo: o estado mudava mesmo.
+
+ A CAUSA, e o comentario que estava no codigo era a minha suposicao errada. Eu
+ tinha escrito ali, com todas as letras, que o disparo sintetico do WPF "SEMPRE
+ bate com o modelo". Nao bate. A lista RECICLAVA os containers das linhas, e o
+ WPF aplica o Tag (que era o INDICE) e o IsChecked em momentos diferentes:
+ chegava evento com o indice de UMA linha e o estado de OUTRA. Como os dois
+ diferiam, o tratador achava que era clique de gente e GRAVAVA.
+
+ O CONSERTO, em tres partes:
+   1. a caixinha se identifica pelo CAMINHO DO ARQUIVO, nao pelo indice
+      (licao 30 de novo, agora no clique);
+   2. a lista da fila parou de reciclar linha - sao dezenas, nao milhares;
+   3. enquanto a fila esta sendo repintada, evento de caixinha nao e clique: e
+      eco do desenho, e e ignorado. A porta fecha no comeco do redesenho e
+      reabre pelo proprio Dispatcher quando ele acaba, sem esperar nada.
+
+ A BANCADA AGORA RODA O TRATADOR DE VERDADE (cenario 14), extraido do fonte.
+ So uma linha e trocada, e esta declarada la: o "-is [CheckBox]" precisa do
+ WPF, que nao existe no Linux. Sabotado nas duas pontas: tirar o portao do
+ repinte reprova 2 invariantes; trocar a busca por caminho de volta por indice
+ reprova outra.
+
+ LICAO 32: comentario que afirma "isto SEMPRE acontece" sem medicao e uma
+ suposicao com cara de prova. Este aqui sobreviveu duas versoes e escondia o
+ defeito que mais irritou o Diego.
+
+ BATERIA 3.41 (974 testes) | BANCADA 2.6 (187 invariantes).
+
+ A CONTRADICAO DA FOTO 8, E ELA ERA MINHA (janela 18.05)
+ --------------------------------------------------------------------------
+ Print dele, 17/09, UMA LINHA dizendo duas coisas opostas:
+
+   "Dolby VISION: Profile 7 [BL+EL+RPU] [EL: MEL] [DETECTADO]
+        -> [SERA CONVERTIDO] Profile 8.1 - EL NAO MEDIDA"
+
+ A ESQUERDA (o que foi detectado) dizia MEL. A DIREITA (o que sera feito)
+ dizia que nao mediu. "A foto 8 e uma contradicao total, nao e?" - e.
+
+ Causa: na 18.04 eu guardei no cache o VEREDICTO (ELtipo, numeros) e esqueci a
+ RESPOSTA (DiagDVres/DiagDVcor). Relendo a pasta, a esquerda e a coluna
+ voltavam medidas e a direita ficava a frase que a leitura tinha acabado de
+ escrever, porque Update-TextosDV so preenche a resposta quando ela esta
+ VAZIA - e ela nao estava. Guardar meia verdade e pior que nao guardar nada:
+ e a regra do projeto (esquerda detecta, direita diz o que sera feito) virando
+ mentira dentro da mesma linha.
+
+ "TROQUEI DE PASTA E VOLTEI, UMA PARTE TAVA MEDIDO OUTRA FALOU QUE NAO"
+ --------------------------------------------------------------------------
+ Mesmo defeito, visto de outro angulo. Corrigido junto.
+
+ O CENSO QUE "NUNCA ACABA" (janela 18.05)
+ --------------------------------------------------------------------------
+ No log dele: 00:22:43 pediu o censo; depois apertou Iniciar, e o censo foi
+ encerrado NA TELA (o congelamento de 92s ja tinha sido resolvido na 18.04 -
+ medido aqui: 1,1s e 0,2s do clique ate a conversao comecar). As 00:23:12 o
+ resultado chegou, 104 segundos de trabalho ja feito - e eu JOGAVA FORA, por
+ a rodada ter virado. Ele viu o botao voltar e nunca viu numero nenhum. Duas
+ vezes na mesma sessao.
+
+ A CORRECAO E DE MODELO, NAO DE REMENDO: quem acha a linha e o CAMINHO DO
+ ARQUIVO, nao o indice. O indice e a posicao numa lista que muda debaixo do
+ trabalho - foi assim que o veredicto do Ryan foi parar na linha do House of
+ the Dragon na 18.03. O caminho nao muda de dono:
+
+   - o "el" (veredicto) e o "censo_fim" agora carregam o caminho do arquivo;
+   - a janela procura a linha por ele, usando o indice so como atalho;
+   - se o arquivo nao esta mais na lista, a mensagem morre sem escrever em
+     ninguem;
+   - e o resultado de um censo abandonado VALE, se o arquivo continua ali -
+     ele foi medido NELE, nao na posicao dele.
+
+ E o botao do censo parou de mentir de cinza: quando o anterior ainda esta
+ encerrando, ele diz isso em vez de ficar apagado calado. Uma trava mecanica
+ impede dois dovi_tool lendo o mesmo disco.
+
+ LICAO 30: indice e endereco temporario; identidade e o caminho do arquivo.
+ Mensagem que volta de um trabalho demorado tem que dizer DE QUEM ela e, nao
+ so onde a linha estava quando ela saiu.
+ LICAO 31: guardar metade de um estado e criar uma contradicao, nao uma
+ economia. Ou guarda o que a tela precisa inteiro, ou nao guarda.
+
+ BATERIA 3.40 (967 testes) | BANCADA 2.5 (179 invariantes).
+
+ O CENSO CONGELAVA A JANELA POR 92 SEGUNDOS (janela 18.04)
+ --------------------------------------------------------------------------
+ Ele: "quando da F1 e o censo ta medindo ainda congela pa kraio". Medido no
+ log dele, DUAS vezes:
+
+   23:55:13,5  CLIQUE: Iniciar      ->  ESTADO rodando so as 23:56:35,3   81,8s
+   23:58:38,4  Iniciar confirmado   ->  ESTADO rodando as 00:00:10,8      92,4s
+
+ Os dois casam com o tempo que FALTAVA do censo (106,5s de dovi_tool lendo o
+ RPU inteiro). Causa: Stop-Censo chamava $CensoPS.Dispose() NA THREAD DA
+ INTERFACE, e Dispose() em pipeline que esta rodando nao retorna - ele espera
+ o pipeline parar.
+
+ E a mesma familia do WaitOne que eu tirei do Stop-Motor na 18.00 - e a regra
+ que eu escrevi LA, "nenhuma espera sincrona no codigo da janela", listava
+ WaitOne, Start-Sleep, .Wait(, .Join( e .EndInvoke( e NAO listava
+ Dispose/Stop/Close. Regra incompleta nao pega o proximo caso.
+
+ O CONSERTO: quem PARA nao descarta nada. Stop-Censo fecha o estado na tela,
+ vira a rodada do censo e abandona o trabalho, que morre sozinho. Quem descarta
+ o runspace e Fechar-Runspace-Censo, chamada pelo motor de mensagens quando o
+ censo_fim chega - ai o trabalho ja terminou e descartar nao espera. O censo
+ tambem ganhou numero de rodada: resultado de 106s atras nao cai mais na lista
+ de outra pasta.
+
+ A REGRA NOVA (bateria 3.39): as funcoes de PARAR - Stop-Censo e Stop-Medicao,
+ as duas chamadas por clique - nao podem conter Dispose(, .Stop() nem .Close().
+ Nao da para proibir no arquivo inteiro (alguem precisa descartar); a regra e
+ sobre QUEM e QUANDO.
+
+ A MEDIDA NAO VOLTA MAIS A ESTACA ZERO (janela 18.04)
+ --------------------------------------------------------------------------
+ Ele: "eu cancelo a conversao e volta a estaca zero as medicoes... esse modo
+ seu de trabalhar nao guarda informacao".
+
+ Estava certo, e o log mede o desperdicio: 62,4s medindo os tres arquivos, e um
+ "Nova Conversao" - que rele a pasta - jogava os tres veredictos fora. Com a
+ chave desligada voltavam todos para "EL nao medida", e na proxima vez eram
+ outros 62,4s para chegar ao MESMO numero.
+
+ Agora o veredicto medido fica guardado na sessao, por CAMINHO + TAMANHO +
+ DATA DE MODIFICACAO. Relendo a mesma pasta, ele volta na hora, e o log diz de
+ onde veio ("veredicto reaproveitado da medicao desta sessao"). Mudou tamanho
+ ou data, o arquivo e outro e a medida velha NAO vale - reaproveitar por nome
+ seria inventar veredicto, que e o pecado que este programa persegue desde a
+ 1.8. Medicao em curso nunca entra no cache, porque MEDINDO nao e veredicto.
+ O cache morre com a sessao: ele existe para a pasta relida dez vezes em dez
+ minutos, nao para afirmar amanha o que foi medido hoje.
+
+ LICAO 28: lista de proibicao so protege o que esta escrita nela. Quando a
+ regra e "nada que bloqueie a tela", a lista tem que ser revista a cada forma
+ nova de bloquear - ou a regra vira decoracao.
+ LICAO 29: trabalho caro que o usuario ja pagou uma vez nao se joga fora por
+ comodidade de codigo. Se o resultado nao mudou, ele tem que voltar.
+
+ BATERIA 3.39 (962 testes) | BANCADA 2.4 (169 invariantes).
+
+ O PIOR DEFEITO DE TELA QUE ESTE PROGRAMA JA TEVE (janela 18.03)
+ --------------------------------------------------------------------------
+ Log dele de 16/09, 23:26, com a medicao finalmente funcionando:
+
+   23:26:30,3  PASTA origem trocada -> House of the Dragon (2 arquivos)
+   23:26:53,3  EL de 'Saving.Private.Ryan...': FEL | 1.608,29 nits
+               ... com a FILA JA MOSTRANDO OS 2 VIDEOS NOVOS.
+   23:27:19,4  EL de 'Troy...': MEL      (idem)
+
+ O veredicto do Ryan foi gravado na linha 2 da lista NOVA - o
+ House.of.the.Dragon.S03E08, que e Profile 8 e NAO TEM camada extra. Dai o
+ print dele: "P8 FEL" e "[CONVERSAO NAO RECOMENDADA] o arquivo pede 1.608 nits"
+ num arquivo que nunca foi medido. O mesmo aconteceu no Fallout: "P8 MEL" no
+ S02E03 era o veredicto do Troy chegando atrasado.
+
+ VEREDICTO CERTO NO ARQUIVO ERRADO. E a licao 25 inteira - a que eu escrevi na
+ 18.00 dizendo que o numero de serie existia exatamente para impedir isto.
+
+ POR QUE O NUMERO DE SERIE NAO IMPEDIU: eu so virava a serie quando uma medicao
+ NOVA comecava (Start-Medicao). CANCELAR nao virava nada. Entao a mensagem
+ atrasada do trabalho que estava morrendo chegava com a MESMA serie que a
+ janela ainda tinha, passava pelo portao como se fosse de agora, e escrevia
+ pelo INDICE - que na lista nova aponta outro filme.
+
+ O CONSERTO, em duas partes:
+   1. Stop-Medicao VIRA A RODADA. Depois do cancelamento nao existe mais
+      mensagem "de agora" vinda do trabalho que morre: tudo que ele enviar e,
+      por definicao, velho.
+   2. O "el_fim" de rodada velha volta a ser OUVIDO (sem aproveitar veredicto
+      nenhum): ele fecha o handle do runspace. Sem isso a proxima medicao
+      ficava presa em "a anterior ainda esta encerrando" - o que tambem aparece
+      no log dele, as 23:22:29 e 23:26:38.
+
+ A BANCADA NAO PEGOU PORQUE EU NUNCA TINHA RODADO O PORTAO. Eu testava que
+ Start-Medicao troca o numero - nao que o portao descarta a sobra. Agora o
+ portao e EXTRAIDO DO FONTE e roda (cenario 9), com a sequencia exata do log
+ dele. Sabotado: desfazer o conserto reprova 3 invariantes.
+
+ E A TRADUCAO - A VARREDURA VIROU MAQUINA (bateria 3.38)
+ --------------------------------------------------------------------------
+ Print dele, tela em ingles: o painel DISK SPACE dizia "Nenhum vídeo
+ selecionado." e a coluna PT-BR SUBTITLE dizia "Sem PT-BR (só pt-PT)". Ele
+ cobrou: "voce jura de pe junto q leu todas as linhas onde deveria ter traducao
+ e tem erros toda hora". Estava certo - ler na mao ja falhou quatro vezes.
+
+ Agora a bateria EXTRAI do fonte todo texto de tela com acento portugues
+ (.Text, coluna, linha de diagnostico, selo do cartao final) e exige regra no
+ IDIOMA_EN.txt para cada um. Ela achou, alem dos dois do print, mais SEIS que
+ ninguem tinha visto: o selo de "SEM DOLBY VISION", os dois de audio
+ reaproveitado e os tres de "audios/legendas mantidos". Todos traduzidos.
+ A lista de excecoes tem 10 linhas, cada uma com motivo declarado (frase que ja
+ nasce nas duas linguas no proprio codigo, log, e o nome do idioma).
+
+ E a bateria pegou um defeito NELA MESMA na mesma rodada: a armadilha da
+ virgula dentro de @( ) partiu um dos regexes ao meio. Quem viu foi a familia
+ "a propria bateria nao pode ter erro de execucao".
+
+ LICAO 27: numero de serie so vale se QUEM CANCELA virar o numero. Rodada que
+ termina sem virar a serie continua "atual" para todas as mensagens que ainda
+ estao no ar.
+
+ BATERIA 3.38 (946 testes) | BANCADA 2.3 (152 invariantes).
+
+ O DEFEITO QUE A 18.00 CRIOU E O LOG DELE ENTREGOU (janela 18.02)
+ --------------------------------------------------------------------------
+ Log de 16/09 19:51 e 19:53, na maquina dele, com a 18.01 instalada:
+
+   19:53:27,569  Medindo a camada de melhoria de 3 arquivo(s) em segundo plano
+   19:53:27,580  Medicao interrompida em 3 arquivo(s)
+   19:53:27,591  Camada de melhoria medida em 0 de 3 arquivo(s) - 0,00s
+
+ ONZE MILISSEGUNDOS. Em TODAS as vezes, nas duas sessoes, com pasta trocada e
+ releitura no meio: ZERO arquivos medidos, 0,00s, 0,00 s/GB. A medicao nunca
+ rodou. Era isso que ele estava vendo: "o FEL ele chama azul ciano e some
+ rapidinho, nao importa o que eu faca" - o ciano era a medicao nascendo e
+ morrendo, e o "nao importa o que eu faca" e a assinatura de defeito que nao
+ depende do clique.
+
+ A CAUSA, E ELA NASCEU NA 18.00: o laco da medicao consultava
+ $Controle.Cancelar. Esse campo e a bandeira da LEITURA e da CONVERSAO, e quem
+ a levanta e Stop-Motor, para matar o runspace da leitura. Enquanto a medicao
+ morava DENTRO da leitura ela terminava antes disso. Ao separar os trabalhos, a
+ ordem virou leitura_fim -> Stop-Motor -> Start-Medicao: a medicao passou a
+ nascer com a bandeira de outro dono ja em pe, e parava no primeiro arquivo.
+
+ O CONSERTO: a medicao obedece a PararMedicao, e so. Separar trabalhos e
+ separar TAMBEM as bandeiras.
+
+ POR QUE NEM A BATERIA NEM A BANCADA PEGARAM (o que mais importa aqui)
+ --------------------------------------------------------------------------
+ A prova funcional da bancada (cenario 4e) montava o mundo com Cancelar=$false
+ - um estado que NAO EXISTE na maquina dele depois de uma leitura. Eu testei um
+ mundo que so existia na bancada, e ela passou verde enquanto o programa media
+ zero. Corrigido: o 4e agora nasce com Cancelar EM PE, como a vida nasce, e
+ reprova em 5 invariantes se o defeito voltar (conferido por sabotagem).
+
+ E entrou a regra estrutural que fecha a familia: CADA TRABALHO OBEDECE A
+ BANDEIRA DO SEU DONO - o bloco da medicao nao pode citar Controle.Cancelar.
+ Bandeira compartilhada entre dois donos e a mesma familia do runspace
+ compartilhado, com o agravante de mudar em silencio.
+
+ LICAO 26: teste que monta o mundo tem que montar o mundo QUE EXISTE. O estado
+ inicial de um teste e uma afirmacao sobre a realidade - e uma afirmacao errada
+ ali nao reprova nada, so esconde.
+
+ BATERIA 3.37 (944 testes) | BANCADA 2.2.
+
+ ACHADO DA PROPRIA BANCADA, DEPOIS DE A 18.00 ESTAR PRONTA (janela 18.01)
+ --------------------------------------------------------------------------
+ O Diego cobrou: "esses testes q vc manda - eu clica, comeca, aperta censo,
+ desliga, liga MEL FEL, rastreia, muda pasta - como vc nao simula isso?"
+
+ Ele tinha razao, e a bancada ganhou o CENARIO 8: o roteiro do LEIA-ME inteiro,
+ os oito itens em sequencia, numa sessao so, sem reiniciar o mundo entre um e
+ outro - que e onde mora o estado pendurado. Rodou, e reprovou DOIS itens meus:
+
+   ITEM 6 - com a medicao rodando, INICIAR deixava o rotulo em ciano dizendo
+   "Medindo MEL x FEL: 2 de 3" ate o el_fim chegar, o que leva o tempo do
+   arquivo em curso (ate 26s). Eu tinha separado a decisao do mecanismo e
+   deixado a TELA amarrada ao fim mecanico - ou seja, troquei "congela 2s"
+   por "mente por 26s", que era EXATAMENTE a queixa dele ("quando desliga ele
+   fica la medindo ainda por um tempo"). Conserto: Stop-Medicao fecha o estado
+   visivel na hora (Fechar-MedicaoPendente + Update-BotaoMedirEL + Fill-Fila),
+   e o encerramento mecanico continua chegando sozinho no el_fim.
+
+   A trava que isso exigiu: com o estado visivel fechando antes, uma segunda
+   medicao poderia nascer por cima da que ainda morre - duas lendo o mesmo
+   disco. Agora quem responde e o handle do runspace: enquanto $script:MedPS
+   existe, Start-Medicao nao dispara e diz no log por que.
+
+   ITEM 8 - o teste que eu escrevi cobrava traducao das frases de LOG. O log e
+   registro tecnico, em portugues por decisao do projeto (nao ha uma linha de
+   log na tabela de traducao). Cobrar decisao que nao existe reprova o codigo
+   certo - licao 18. O teste foi reescrito para conferir o que o usuario LE NA
+   TELA.
+
+ BANCADA 2.1: 145 invariantes (eram 113).
+
+ BURACO FECHADO NA PROPRIA BATERIA (3.36): a regra de encoding conferia CRLF
+ puro em todos os .ps1 MENOS no LaFirma_JANELA.ps1 - a tabela dizia
+ Crlf = $false para ele. Resultado: um LF solto entrou na linha 43 do cabecalho
+ nesta mesma edicao e a bateria passou verde. Achado na conferencia final do
+ pacote, com o arquivo ja pronto. Corrigido nos dois lados: o LF foi removido e
+ a janela agora e conferida como todos os outros - 941 testes. Validado por
+ sabotagem (plantar um LF solto reprova). E de novo a licao 10: teste que nao
+ pode falhar nao e teste - e uma excecao numa tabela desliga um teste em
+ silencio.
+
+ SABOTAGEM: as seis correcoes foram desfeitas uma a uma e conferido que a
+ bateria ou a bancada ficam vermelhas em cada caso. Duas nao ficaram na
+ primeira tentativa - o teste do numero de serie usava "pelo menos N" (que
+ continua verde com uma mensagem a menos) e nao havia teste nenhum proibindo
+ "medindo" na coluna. Os dois foram refeitos ate reprovarem de verdade.
+
+ LIÇAO 24, a que este dia inteiro escreveu
+ --------------------------------------------------------------------------
+ Quando a mesma area precisa de quatro correcoes em um dia, o defeito nao esta
+ nos quatro lugares - esta no modelo que obriga os quatro. Os sinais que eu
+ ignorei: seis mensagens para um botao, duas builds seguidas consertando a
+ anterior, e um comentario meu afirmando "releitura e barata" que nunca tinha
+ sido medido. Os tres diziam a mesma coisa.
+
+ LIÇAO 25: nao esperar tem preco, e o preco se paga com identidade de rodada.
+ Trocar "congela" por "veredicto no arquivo errado" seria piorar.
+
+================================================================================
+ INSTALADOR 1.9.9  -  16/09/2026     *** EU QUEBREI A JANELA NA 17.23 ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.24  |  BATERIA 3.34  |  BANCADA 1.2
+
+ 1. O BUG SINISTRO, E ELE E MEU, DE HOJE
+ --------------------------------------------------------------------------
+ MEDIDO no log do Diego, 16/09 18:06:41 -> 18:08:27:
+
+   18:06:41.588  ligou a chave -> comecou a LER a pasta
+   18:06:41.655  desligou a chave 67ms depois
+   18:06:43.581  a 17.23 matou o runspace no meio da fase A
+
+ O "leitura_fim" nunca chegou - e ele e o UNICO lugar que devolve
+ $script:Lendo para $false. A janela ficou achando que lia, para sempre:
+
+   - o botao Atualizar travou em "Parar leitura". Ele clicou QUINZE vezes
+     (18:07:16 a 18:08:27) e nada acontecia: o clique so escreve Cancelar num
+     runspace que ja tinha morrido.
+   - Start-Leitura comeca com "if ($script:Lendo) { reagenda; return }", entao
+     TROCAR DE PASTA parou de funcionar. Ele trocou tres vezes e a fila nunca
+     recarregou - acabou mostrando 0 videos.
+
+ DUAS CORRECOES, uma estrutural e uma de comportamento:
+
+   a) Stop-Motor passou a desfazer o estado que o nascimento do runspace
+      criou: se estava lendo, volta a nao-lendo e devolve o rotulo
+      "Atualizar". AQUI, e nao no chamador - chamador novo esquece, e este e o
+      ponto unico por onde todo encerramento passa. Mesma licao da 17.21, um
+      nivel acima: matar o runspace nao apaga variavel nenhuma.
+
+   b) Desligar a chave NUNCA MAIS derruba a leitura. A fase A (ler faixas,
+      audio, DV) e necessaria com a chave ligada ou desligada - ela nao mede
+      nada. Agora, se a leitura esta em curso, ela TERMINA e o que se cancela
+      e so a medicao, por um canal vivo novo ($Controle.PararMedicao, irmao do
+      Cancelar mas que nao derruba a leitura). Religar antes de a leitura
+      acabar desfaz o cancelamento.
+
+ 2. O CENSO COMPLETO PASSOU A APARECER NA TELA
+ --------------------------------------------------------------------------
+ "esse censo nao serve pra nada eu acho. nem sei onde ele vai" (Diego, 16/09).
+
+ Certo do lugar dele: o numero ia SO para o log, o campo CensoResumo era
+ escrito e NUNCA LIDO por ninguem, e na tela o unico sinal era o botao
+ apagando. Ele esperou 105 segundos e nao viu nada mudar.
+
+ E o numero importava. No teste dele, no Saving Private Ryan:
+   AMOSTRA (9 trechos) : 1 de 11 cenas acima do master, pico 1.608 nits
+   CENSO (filme inteiro): 216 de 1.124 cenas (19,22%), pico 3.468 nits
+ A amostra subestimou o pico em mais de DUAS VEZES.
+
+ Agora a linha do diagnostico carrega isso:
+   " · censo: 216 de 1.124 cenas do filme (19%) passam do master, pico 3.468
+   nits"
+
+ Isto NAO quebra a regra da 16.87, que tirou a contagem da AMOSTRA da tela. Ela
+ saiu por ser pequena demais para virar estatistica, e o comentario dela mesma
+ diz que volta "ate a amostra ser grande o bastante para a conta significar
+ alguma coisa". O censo E essa condicao cumprida: ele le o filme inteiro.
+
+ A frase SUBSTITUI a anterior, nunca se soma - rodar o censo duas vezes nao
+ empilha duas contagens na mesma linha. E se o censo contradiz a amostra
+ (achou cena acima do master onde a amostra nao viu), a COR sobe para ambar:
+ entre os dois, o censo e a prova mais forte. O contrario nao vale - censo
+ conta cenas, nao reclassifica camada.
+
+ BANCADA: 94 invariantes (eram 79). O roteiro 4c executa a sequencia exata do
+ log dele, inclusive o botao travado e a troca de pasta que nao funcionava.
+ Sabotagem conferida nas duas correcoes.
+ BATERIA: 919 testes (eram 913).
+
+================================================================================
+ INSTALADOR 1.9.8  -  16/09/2026   *** A CHAVE RELIA A PASTA 28 VEZES A TOA ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.23  |  BATERIA 3.33  |  BANCADA 1.1
+
+ PERGUNTA DO DIEGO (16/09): "quando desligar a leitura de FEL pq tem q reler
+ novamente a pasta? tem hora q e meio engessado, tudo que faco fica relendo."
+
+ ELE ESTAVA CERTO, E O LOG DELE PROVA COM NUMERO
+ --------------------------------------------------------------------------
+ Na sessao de 15/09 a CHAVE sozinha disparou 28 RELEITURAS, somando 254,5s de
+ leitura - mais de quatro minutos parado. E o comentario que eu mesmo escrevi
+ na 17.10 dizia: "releitura e barata (a fase A e instantanea)".
+
+ NUNCA FOI MEDIDO. A fase A custa ~4s POR ARQUIVO: 12,93s para tres arquivos
+ no log de hoje. Afirmacao minha sem medida - exatamente o que este projeto
+ persegue desde a licao 1.
+
+ E TEM PIOR: RELER COM A CHAVE DESLIGADA NAO PRODUZIA NADA
+ --------------------------------------------------------------------------
+ A fase A marca todo P7+EL como MEDINDO de qualquer jeito. Quem decide e a
+ linha 2658, que com a chave desligada pula a fase B e manda "el_fim
+ Desligada" - e dai Fechar-MedicaoPendente vira todos em "EL nao medida", que
+ e EXATAMENTE o estado em que eles ja estariam se ninguem tivesse lido nada.
+ Quatro minutos de leitura para chegar na mesma tela.
+
+ E a releitura ainda JOGAVA FORA veredicto ja pago: Start-Leitura faz
+ $script:Videos.Clear(), entao o FEL do GOT - 14,8s para medir - morria porque
+ ele desligou a chave. Ligar de novo cobrava os 14,8s outra vez.
+
+ A REGRA NOVA, EM UMA FRASE
+ --------------------------------------------------------------------------
+ A chave decide se MEDE DAQUI PRA FRENTE. Ela nao manda esquecer o que ja foi
+ medido - medida e fato, nao preferencia.
+
+   DESLIGAR -> nao le nada. Encerra a medicao em curso (quem estava no meio
+     vira "EL nao medida", como sempre) e mantem o veredicto de quem ja foi
+     medido.
+   LIGAR    -> se todo mundo da fila ja tem veredicto, nao ha o que medir e
+     nao se le nada. So le quando falta veredicto.
+
+ O QUE NAO FOI FEITO, E POR QUE: ligar com arquivo faltando veredicto ainda
+ rele a pasta inteira, porque hoje a fase B mora DENTRO da leitura (linha
+ 2658) e nao sabe nascer sozinha. Separar as duas e o passo seguinte; nao
+ entra junto com uma correcao, entra sozinho e medido.
+
+ As outras releituras continuam iguais e sao legitimas: troca de pasta,
+ Atualizar, Nova Conversao e a partida do programa.
+
+ BANCADA: 79 invariantes (eram 67). O roteiro 4b executa a queixa dele:
+ desliga com todos medidos, liga de novo, liga faltando um, e desliga no meio
+ de uma medicao. Sabotagem conferida: devolvendo o Start-Leitura ao desligar,
+ tres invariantes ficam vermelhas.
+ BATERIA: 913 testes (eram 909).
+
+================================================================================
+ INSTALADOR 1.9.7  -  16/09/2026      *** A FAIXA DE PAUSADO EM PORTUGUES ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.22  |  BATERIA 3.32  |  BANCADA 1.0
+
+ ACHADO DO DIEGO (print, 16/09): tela inteira em ingles, e a faixa amarela do
+ meio escrita ">>> PAUSADO (sem consumir CPU/disco) - [F2] Retomar [ESC]
+ Cancelar <<<".
+
+ NAO ERA BUG DE CODIGO. O texto esta DECLARADO no XAML, entao a varredura da
+ traducao alcancava ele sem problema - o que faltava era a LINHA no
+ IDIOMA_EN.txt. E o que nao tem entrada sai no original, por regra (essa parte
+ funcionou certo). Era divida de dicionario, nao defeito de mecanismo.
+
+ POR QUE A BATERIA NAO PEGOU, E O QUE MUDOU
+ --------------------------------------------------------------------------
+ Ela conferia que a varredura FUNCIONA e nunca que o dicionario esta COMPLETO
+ - a mesma distincao da licao 9 (testar a deteccao nao e testar o efeito).
+ Agora existe uma familia que varre TODOS os literais Text="..." do XAML e
+ cobra entrada para cada um com cara de portugues. As duas excecoes legitimas
+ estao declaradas no teste COM o motivo (lblIdioma mostra a lingua atual;
+ lblNovaConversao e reescrito na partida) - excecao sem motivo escrito e so
+ conveniencia disfarcada.
+
+ Sabotagem conferida: tirando a linha nova do dicionario, o teste fica
+ vermelho e diz qual texto ficou sem entrada.
+
+ BATERIA: 909 testes (eram 908).
+
+================================================================================
+ INSTALADOR 1.9.6  -  16/09/2026   *** OS BOTOES PARARAM DE MENTIR ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.21  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.31  |  BANCADA_CLIQUES 1.0
+              AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ Depende do dovi_tool 2.3.3 (o mesmo da 1.9.2 em diante). O MOTOR nao mudou
+ uma linha desde a 1.9.2: nada aqui muda o que sai convertido, o veredicto
+ MEL x FEL, o audio ou a legenda. Isto e tudo TELA.
+
+ DE ONDE VEIO: o Diego passou 15 minutos clicando em tudo de proposito e
+ mandou o log inteiro (15/09, 20:21 as 20:40) com 11 prints. Cada defeito
+ abaixo tem hora no log dele.
+
+   1. "TA ROLANDO A CONVERSAO E TA FALANDO Q TA MEDINDO EM CIANO" (20:33)
+      Ele apertou Iniciar com a medicao rodando e escolheu comecar agora. A
+      barra de cima ficou escrita "Medindo MEL x FEL: 2 de 3", em ciano, a
+      conversao inteira - com a medicao morta ha minutos.
+      CAUSA: matar o runspace nao apaga variavel nenhuma. Eu apagava quem
+      estava NA VEZ e deixava de pe o estado de que EXISTE uma medicao, que e
+      quem manda no rotulo, na cor e na barrinha. Quem zerava isso era o
+      "el_fim" - que nunca chega quando a medicao morre no meio.
+      AGORA: o fechamento de emergencia mata o estado inteiro e redesenha.
+
+   2. "DAVA START E NAO PODIA MEXER EM NADA; SE DESELECIONAVA UM ARQUIVO AI
+      PODIA DAR F1 DE NOVO" (20:32)
+      Com a espera armada, mexer nas marcacoes reacendia o Iniciar - e a
+      MESMA pergunta sobre a MESMA medicao aparecia pela segunda vez.
+      CAUSA: tres lugares escreviam no botao com regras diferentes e nenhum
+      sabia da espera. AGORA existe um lugar so (Set-BotaoIniciar), e nele a
+      espera tem prioridade sobre qualquer outro criterio.
+
+   3. O LOG INVENTAVA UM CLIQUE QUE NAO EXISTIU (20:32:59 e 20:36:35)
+      Quando a espera disparava sozinha, saiam tres linhas: a razao certa,
+      um "CLIQUE: Iniciar" que ninguem clicou, e um "a medicao que sobrou e
+      de arquivo(s) que nao estao na fila" que era a pergunta da espera sendo
+      feita PELA SEGUNDA VEZ. Dai o "falando nao esperar e esperando tbm".
+      AGORA a partida automatica e um caminho proprio: nao finge clique e nao
+      repergunta o que ele ja respondeu. So reconfere o disco, que e a unica
+      coisa que pode ter mudado enquanto a medicao rodava.
+
+   4. "BOTAO CENSO FUNCIONANDO EM CONVERSAO E NUNCA TERMINA" (20:36:56)
+      Pergunta dele: "o botao censo pode ser apertado depois de uma F1?".
+      Nao pode. Ele le o RPU do FILME INTEIRO; a conversao estava lendo outro
+      arquivo de 82 GB no mesmo disco mecanico. Os dois se estrangularam: a
+      etapa 1/5 ficou em 1% por mais de um minuto.
+      A 17.08 escreveu que "a fila e a conversao continuam livres" - livres de
+      TRAVA, nunca de disco. Custo de I/O nao aparece em flag nenhuma.
+      AGORA: o botao apaga fora do estado parado, a porta de entrada barra do
+      mesmo jeito, a dica diz o motivo, e comecar uma conversao encerra um
+      censo que ja estivesse rodando.
+
+   5. A TELA PISCAVA NA CHAVE DE MEDICAO (20:31:26 a 20:31:35)
+      Oito trocas em nove segundos viraram OITO releituras da pasta, cada uma
+      cancelando a anterior - por isso o log alterna "1 de 1" e "0 de 0".
+      AGORA a chave responde na hora e a releitura espera 400ms de silencio:
+      quem clica seis vezes le a pasta UMA. Mesmo freio da barra de titulo.
+
+   6. "7.6 -> 8.1" NO MEIO DE COLUNAS "P7 FEL -> P8.1" (print)
+      Eram as linhas cuja medicao foi interrompida: so elas passavam por um
+      trecho onde eu montava os textos A MAO, com os campos crus, em vez de
+      chamar quem sabe formatar. AGORA o fechamento so troca o veredicto e
+      manda o lugar unico (Update-TextosDV) reescrever.
+
+ NOVO: BANCADA DE CLIQUES (_testes\Bancada_Cliques.bat)
+ --------------------------------------------------------------------------
+ Pedido do Diego: "faca varios testes de click e selecoes, isso e bem melhor
+ que eu ficar aqui clicando e simulando hipoteses de bug".
+ Ela NAO abre a janela. Extrai as funcoes de verdade do LaFirma_JANELA.ps1
+ pela AST, carrega numa tela de faz-de-conta e EXECUTA as sequencias que ele
+ fez, conferindo depois de CADA passo as frases que nunca podem ser falsas -
+ "com a conversao rodando o censo esta apagado", "sem medicao nenhuma nada
+ pode estar escrito Medindo". Sao 67 invariantes, incluindo um roteiro de
+ 200 cliques em ordem aleatoria.
+ A diferenca para a bateria: a bateria confere o DESENHO do codigo ("existe
+ a linha X"); a bancada confere o COMPORTAMENTO depois de uma sequencia.
+ Prova de que ela vale: desfazendo a correcao do defeito 1, ela fica vermelha
+ em dois pontos - o roteiro do 20:26 e o de 200 cliques.
+
+ BATERIA: 906 testes (eram 876). As familias novas cobram a REGRA, nao a
+ linha: censo apagado fora do estado parado, partida automatica sem clique
+ falso, um lugar so decidindo o Iniciar, o fechamento apagando o estado
+ inteiro. Cinco testes meus que liam o codigo por janela de regex quebraram
+ quando as funcoes cresceram (lição 18, de novo) e foram convertidos para
+ leitura por AST.
+
+================================================================================
+ INSTALADOR 1.9.5  -  15/09/2026   *** TRES DEFEITOS DA 17.19, EM 15 MINUTOS ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.20  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.30  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ O DIEGO RODOU A 17.19 E ACHOU TRES COISAS. AS TRES ERAM A MESMA.
+ --------------------------------------------------------------------------
+   1. "TERMINOU DE MEDIR E FICOU MOSTRANDO AINDA."
+      A fila continuou com "Medindo Camada - 3 de 3" depois de os tres
+      arquivos ja terem veredicto. Ele leu aquilo como o programa TRAVADO e
+      comecou a clicar em coisas para destravar - o que explica o "teve uma
+      hora que o programa travou" do mesmo teste. Nao travou: a tela e que
+      estava dizendo uma coisa que nao era mais verdade.
+
+   2. O "PROXIMO A CONVERTER" CAIA NA LINHA DE BAIXO.
+      Com o arquivo 1 sendo medido, o rotulo verde aparecia no arquivo 2. O
+      proximo a converter e o 1; ele so esta, tambem, sendo medido agora.
+
+   3. ARQUIVO DESMARCADO SENDO MEDIDO NAO ACENDIA.
+      A fase B mede marcados e desmarcados. O ramo do "Fora da Fila" vinha
+      antes do ramo do medindo, entao um arquivo fora da fila sendo medido
+      ficava cinza - e o botao dizia "Medindo 2 de 3" sem nenhuma linha acesa.
+      Exatamente o defeito que a 17.18 veio consertar, de volta por outro
+      caminho.
+
+ A CAUSA COMUM, QUE E A LICAO
+ --------------------------------------------------------------------------
+   A 17.18 DEDUZIA quem estava sendo medido. Deducao tem um efeito colateral
+   bom que eu nao tinha percebido: ela se corrige sozinha a cada redesenho,
+   porque e recalculada do zero toda vez.
+
+   A 17.19 trocou deducao por ESTADO - que e o certo, e resolveu o defeito de
+   verdade. Mas estado precisa de quem o APAGUE, e eu apaguei a variavel sem
+   redesenhar a lista. A tela ficou pintada do jeito que estava.
+
+   > Trocar deducao por estado nao e so guardar o valor: e assumir tambem a
+   > responsabilidade de apagar, e de REDESENHAR quem mostrava o valor velho.
+
+   E a mesma classe da 16.79 ("a tela travada numa frase que nao era mais
+   verdade"), que ja tinha sido fechada uma vez do outro lado - por isso a
+   Fechar-MedicaoPendente existe. Agora ela tambem limpa quem estava na vez:
+   e o ponto unico por onde toda saida da fase B passa.
+
+ OS QUATRO CONSERTOS
+ --------------------------------------------------------------------------
+   - O veredicto de um arquivo apaga o ciano DELE na hora, sem esperar o fim
+     da medicao (senao o ultimo arquivo fica aceso para sempre: depois dele
+     ninguem redesenha).
+   - O fim da medicao REDESENHA a fila, nao so apaga a variavel.
+   - Fechar-MedicaoPendente limpa o indice - vale para Iniciar no meio, troca
+     de pasta, chave desligada, qualquer saida.
+   - O ramo do MEDINDO subiu para cima do "Fora da Fila", e ocupa a vaga do
+     "Proximo a Converter" quando ela ainda esta livre. Medindo ganha dos dois
+     porque uma coisa esta ACONTECENDO e as outras descrevem - e assim que a
+     medicao daquele arquivo acaba, a linha volta ao que era.
+
+ MAIS DOIS, DO LOG DAS 19:42  (17.20)
+ --------------------------------------------------------------------------
+   O ESC NAO DESISTIA DA ESPERA PELA MEDICAO.
+     Ele clicou Iniciar com a medicao rodando, escolheu ESPERAR, mudou de
+     ideia e apertou ESC. O log respondeu "ignorada - nao se aplica ao estado
+     'inicial'". Estava certo sobre o Cancelar (nao ha conversao para
+     cancelar) e errado sobre o usuario: existe UMA coisa pendente, e ESC e a
+     tecla de desistir dela. Ele so conseguiu sair desligando a chave de
+     medicao - caminho que ninguem adivinha.
+     Agora ESC desiste da espera. NAO para a medicao: ela segue em segundo
+     plano e os arquivos continuam ganhando veredicto. O que se cancela e a
+     promessa de comecar sozinho quando ela acabar - e o Iniciar volta a
+     acender.
+
+   FILA CANCELADA VIRAVA "ERRO DE -99,7%".
+     Depois de cancelar no segundo arquivo, o log escreveu:
+
+       PREVISAO DA FILA: previsto 6.209s (1h43m) | real 21s | erro -99,7%
+
+     A fila nao errou a previsao: ela nao aconteceu. E esse numero mora
+     justamente na linha que existe para responder "disse 1h25, foi isso
+     mesmo?" - a pergunta que a gente le depois para saber se a estimativa
+     esta boa. A calibragem nunca foi afetada (ela grava por arquivo
+     concluido), mas o log era lido por nos dois.
+     Cancelou, a linha diz que nao ha comparacao - e registra o previsto, que
+     continua sendo informacao.
+
+ BATERIA 3.29 -> 3.30
+ --------------------------------------------------------------------------
+   Doze testes novos. Um deles executa a ORDEM dos ramos em vez de le-la: se
+   "Fora da Fila" voltar a vir antes do medindo, reprova. Outro cobra que
+   desistir da espera NAO chame Stop-Motor nem levante a flag de cancelamento
+   - a medicao tem que sobreviver ao ESC.
+
+   E mais dois testes meus que estouraram por janela de regex quando a funcao
+   cresceu (licao 18, terceira vez nesta rodada): os dois passaram a ler
+   POSICAO em vez de casar um trecho de tamanho fixo.
+
+
+================================================================================
+ INSTALADOR 1.9.4  -  15/09/2026   *** A DEDUCAO DA 17.18 ESTAVA ERRADA ***
+================================================================================
+ Componentes: MOTOR 14.54  |  JANELA 17.19  |  CORRETOR 2.27  |  REOCR 1.29
+              AUDITOR_OCR 1.1.10  |  LIMPAR_TESTES 1.9
+              TESTAR_LAFIRMA 3.29  |  AUDITAR_SRT 1.3  |  MEDIR_LEGENDAS 1.0
+
+ O QUE O DIEGO VIU  (17.19)
+ --------------------------------------------------------------------------
+   "Ainda vi erros de leitura do FEL, la a coluna mostrava 1-2 sendo que tinha
+   lido o 1-1 e ficou como proxima da lista... ai depois 1-2 e no ultimo
+   falando 1-1."
+
+   A coluna SITUACAO dizia um numero e o botao dizia outro, e a posicao andava
+   para tras. O log de 18:19 tem a reproducao: ele desmarcou os tres arquivos
+   e remarcou DURANTE a medicao.
+
+ A CAUSA: EU DEDUZI O QUE PODIA TER PERGUNTADO
+ --------------------------------------------------------------------------
+   A 17.18 resolveu "quem esta sendo medido" com uma regra deduzida - "e o
+   primeiro arquivo MARCADO que ainda esta em MEDINDO" - e a conta saia de
+   $ELtotalFila, tirado dos marcados. Dois furos:
+
+     1. O runspace mede TODOS os pendentes, marcados ou nao. Com um arquivo
+        desmarcado sendo medido, a deducao apontava para a proxima linha
+        marcada - linha errada acesa, e o numero fora do lugar.
+
+     2. $ELtotalFila era fotografado uma vez, quando a medicao comecava.
+        Marcar ou desmarcar no meio mudava o total DEBAIXO da formula, e a
+        posicao pulava.
+
+   E o pior, que e o que interessa guardar: a 17.18 criou a TERCEIRA contagem
+   da mesma coisa na mesma tela. O botao contava pelo runspace (certo), o
+   aviso de espera contava pelos marcados, e eu somei uma deducao. E a licao
+   mais antiga deste projeto - regra escrita em dois lugares, e um dos dois
+   desatualizado - repetida por mim na mesma semana em que a bateria passou a
+   reprovar funcao duplicada.
+
+ O CONSERTO: QUEM FAZ O TRABALHO E QUEM FALA
+ --------------------------------------------------------------------------
+   O laco que mede manda um "el_ini" com INDICE, POSICAO e TOTAL antes de cada
+   arquivo. A linha da fila, o rotulo do botao e a barrinha leem os mesmos
+   numeros, vindos de quem esta lendo o RPU naquele instante.
+
+   Marcar e desmarcar no meio da medicao nao muda mais nada: nao e assunto de
+   quem mede.
+
+   A linha tambem passou a casar por INDICE e nao por nome - casar por nome
+   erra em dois arquivos de mesmo nome, e o indice ja viajava na mensagem
+   desde a 16.77.
+
+ O AVISO DE ESPERA PAROU DE COMPETIR COM O BOTAO  (17.19)
+ --------------------------------------------------------------------------
+   Os dois numeros eram legitimamente diferentes - o botao conta os arquivos
+   que estao sendo MEDIDOS, o aviso conta os que estao na FILA DELE (regra da
+   17.15, e ela continua certa). Escritos os dois como "X de Y", pareciam o
+   mesmo contador se contradizendo.
+
+   Agora cada um tem a forma da sua pergunta:
+     botao  ->  "Medindo MEL x FEL: 2 de 3"     (progresso)
+     aviso  ->  "...(faltam 2 arquivos da sua fila)"  (o que falta para voce)
+
+ A VARREDURA DE 15/09 - O QUE ELA ACHOU ALEM DISSO  (17.19)
+ --------------------------------------------------------------------------
+   Pedido do Diego: "revise tudo, cada linha, bugs, solucoes, melhorias,
+   falta de traducoes". O que saiu:
+
+   CINCO CAIXAS DE DIALOGO EM PORTUGUES NA TELA EM INGLES.
+     A varredura da 17.15 alcancou o texto da JANELA. As caixas de dialogo
+     nascem fora dela, no MessageBox, e por isso escaparam inteiras:
+
+       - cancelar a conversao            - falha ao iniciar
+       - fechar com conversao rodando    - pasta que nao existe
+       - FALTA DE ESPACO EM DISCO  (esta era a pior - ver abaixo)
+
+     As duas primeiras sao as unicas caixas do programa em que responder
+     errado custa uma conversao inteira. Quem nao le portugues estava sendo
+     perguntado, em portugues, se queria jogar fora meia hora de trabalho.
+
+   A CAIXA DO DISCO ESTAVA MEIO TRADUZIDA, QUE E PIOR QUE NAO ESTAR.
+     Ela chamava Traduzir em UM pedaco ("nada agora - a conta aperta no meio
+     da fila") e deixava o resto em portugues fixo. Com a tela em ingles saia
+     uma caixa em portugues com uma expressao em ingles no meio. Meio
+     traduzido engana mais: quem ve uma palavra na sua lingua assume que o
+     resto tambem esta - e esta caixa termina num Sim/Nao.
+
+   E A TRAVA PARA A FAMILIA: a bateria agora reprova funcao que abre
+   MessageBox com frase acentuada sem decidir a lingua. Conferido pela AST,
+   porque o texto e montado varias linhas acima da chamada. Uma excecao, com
+   motivo escrito: Offer-ReinicioIdioma decide por $Novo, e nao por
+   $script:Lang, porque pergunta na lingua para a qual voce ACABOU de trocar.
+
+   DOIS COMENTARIOS DESCREVIAM O QUE O CODIGO NAO FAZ.
+     Diziam que a calibragem usa a MEDIANA das ultimas cinco rodadas. O
+     codigo chama Get-Percentil 0.75 desde a 16.99, e o log escreve "p75".
+     E a licao 2 virada para dentro: quem ler o comentario primeiro
+     "conserta" o codigo certo para bater com o texto errado - que e
+     exatamente a licao 18 do lado dos testes. A bateria agora amarra os
+     tres: o percentil calculado, o nome que o log da a ele, e a proibicao de
+     afirmar "mediana" como o que a funcao faz.
+
+   A SESSAO INTEIRA SEM LOG, EM SILENCIO.
+     O log tentava _logs\ e, se falhasse, a raiz do programa. As duas ficam
+     DENTRO da pasta de instalacao: em Program Files as duas falham, o
+     StreamWriter estoura num catch vazio e o programa roda sem gravar uma
+     linha. E justamente quem tem o problema fica sem a prova dele.
+     A licao 23 ja existia para isso (Get-PastaDados decide ESCREVENDO, nao
+     olhando o caminho) e o log era a UNICA escrita do programa que ainda nao
+     a usava. Agora usa, e quando cai para %LOCALAPPDATA% a primeira linha do
+     log diz o caminho novo. Sem nenhum arquivo possivel, o painel Log avisa
+     que e tudo que existe.
+     Get-PastaDados foi MOVIDA para antes do bloco do log, nao copiada - e a
+     bateria confere que existe uma so e que ela nasce antes.
+
+   OS FATORES DE ESPACO VIVEM EM TRES LUGARES.
+     O motor tem dois ($fatorPre e $fatorEspaco) e a janela tem um
+     (Get-FatorEspacoDisco). Nao podem virar funcao unica - o motor roda
+     tambem em modo console - mas agora estao AMARRADOS por teste: se
+     discordarem, ou a tela promete espaco que o motor recusa, ou assusta com
+     espaco que ele nem ia usar (ja aconteceu, com o P5, na 16.95). O numero
+     tambem esta escrito por extenso na caixa, nas duas linguas, e o teste
+     cobra os dois.
+
+   O QUE FOI CONFERIDO E JA ESTAVA CERTO (licao 21 - item de fila envelhece):
+     - as escritas de estado (idioma, calibragem, chave da medicao, copia do
+       log) ja registram a falha no log; nenhuma engole escrita em silencio;
+     - o aproveitamento PARCIAL da segunda opiniao do seconv ja esta feito -
+       ele avisa a porcentagem de "*" e filtra por bloco, em vez de descartar
+       tudo;
+     - "SANITIZANTE" e "mexar-se" ja tem tratamento, com a medida no proprio
+       comentario (216 de 218 no corpus);
+     - o fator de VELOCIDADE do disco ja escala sozinho (preso entre 1x e 8x)
+       e a calibragem p75 aprende a maquina - e o que responde o item "testar
+       em HD mecanico" sem precisar de um HD mecanico.
+
+
+ BATERIA 3.28 -> 3.29
+ --------------------------------------------------------------------------
+   A secao 47 foi REFEITA, nao remendada: os testes antigos validavam a
+   deducao errada. Agora ela executa o contrato novo (el_ini com indice,
+   posicao e total), reproduz o caso do Diego - desmarcar tudo no meio da
+   medicao nao pode mudar quem esta na vez nem a conta - e prova que um
+   arquivo DESMARCADO sendo medido acende a linha DELE.
+
+   Duas travas novas guardam a regra, nao o sintoma:
+     - Get-MedicaoEmCurso nao pode consultar a lista de marcados (conferido no
+       CORPO da funcao, pela AST);
+     - a variavel da deducao nao pode existir no codigo (conferido token a
+       token: comentario que explica o defeito continua valendo).
+
+   Cinco testes meus tambem estavam errados e foram consertados: quatro usavam
+   janela de regex e reprovaram quando a funcao cresceu para carregar as duas
+   linguas (licao 18 - teste frouxo reprova codigo certo; os quatro passaram a
+   ler a funcao pela AST, e o tamanho dela deixou de ser assunto do teste), e um
+   tinha um "fim de comentario" literal dentro de uma string, que a propria
+   bateria reprova.
+
+
+================================================================================
  INSTALADOR 1.9.3  -  15/09/2026   *** A FILA NAO DIZIA QUEM ESTAVA MEDINDO ***
 ================================================================================
  Componentes: MOTOR 14.54  |  JANELA 17.18  |  CORRETOR 2.27  |  REOCR 1.29

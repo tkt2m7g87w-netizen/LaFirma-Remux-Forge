@@ -18,7 +18,7 @@
 | | Where |
 |---|---|
 | **Installer** | [Releases](../../releases/latest) |
-| Mirror | [Proton Drive](https://drive.proton.me/urls/6DYE4H7M0G#pwvdUdFvgfaU) · [MEGA](https://mega.nz/file/SC4CkTgD#_5z5HJ6QbQm-ruFXr28uMdZjk7Xlgw4yYlYqw19KTCI) |
+| Mirror | [Proton Drive](https://drive.proton.me/urls/YY97JR92X4#jqGcuhqe5EVu) · [MEGA](https://mega.nz/file/KDpHkBCT#47nNVCfHuWM6TbcZ-zlqx50NKFwSi8Dq7YSZG_Kk_Rc) |
 
 Download, install and run. **The tools ship inside the installer** — nothing else to download.
 
@@ -28,8 +28,8 @@ Then you need the `tools` folder, which cannot live in this repo (the reason is 
 
 | | Where |
 |---|---|
-| **`tools` folder** | [Proton Drive](https://drive.proton.me/urls/ENVFS0JVY4#LkoRfX5WzjzI) · [MEGA](https://mega.nz/folder/yOoiBRjC#UDsfFm1dxky7nPtT1yFZfQ) |
-| **`tools` as .rar** | [Proton Drive](https://drive.proton.me/urls/8GFBM9P074#qK16EIrndB4D) · [MEGA](https://mega.nz/file/vCo2WDqC#T3IGsESlfBfPU-fiof2ECnJAkRqQ5oKl8KssomkQIxI) |
+| **`tools` folder** | [Proton Drive](https://drive.proton.me/urls/5Y8AZ9QZ6C#YnOKpcuVRXUk) · [MEGA](https://mega.nz/folder/HbwiFAab#4-tWrGlGfoEN0xRopn_8IQ) |
+| **`tools` as .rar** | [Proton Drive](https://drive.proton.me/urls/REAQGVN7D4#RXvf7kjVeJ1I) · [MEGA](https://mega.nz/file/OGB3Xb7I#9MsNg8kaJD4R0f0xnHdnPnEjaKwlqKJpDFss1KOaNCo) |
 
 **Installer compilation guide:** [README_INSTALLER[ENGLISH].txt](./README_INSTALLER%5BENGLISH%5D.txt)
 
@@ -46,24 +46,22 @@ Then you need the `tools` folder, which cannot live in this repo (the reason is 
 fonte\tools\
 ├── dovi_tool.exe          ├── DeeZy\
 ├── ffmpeg.exe             ├── PgsToSrt\
-├── ffprobe.exe            ├── SubtitleEdit\
-├── mkvmerge.exe           └── Tesseract\
-├── mkvextract.exe
-├── MediaInfo.exe
-├── LIBCURL.DLL
-├── nvcuda.dll
-└── nvcuvid.dll
+├── ffprobe.exe            └── Tesseract\
+├── mkvmerge.exe
+└── MediaInfo.exe
 ```
 
 **3.** The `.txt` files that already ship in the repo (`COMO_USAR_TOOLS_PT.txt` and `HOW_TO_USE_TOOLS_EN.txt`) stay there — they say where each tool came from and what it is for. Do not delete them.
 
 **4.** Check without guessing: open the program. In the strip above the queue, each tool shows a tick:
 
-`✔ dovi_tool  ✔ DeeZy  ✔ seconv  ✔ PgsToSrt  ✔ Tesseract  ✔ mkvmerge`
+`✔ dovi_tool  ✔ DeeZy  ✔ PgsToSrt  ✔ Tesseract  ✔ mkvmerge`
 
 If one of them is not green, that is the one missing or in the wrong place.
 
 **Minimum version:** `dovi_tool` **2.3.3**. Earlier ones lack `export --levels`, and without it the program cannot measure MEL × FEL.
+
+**Versions this release was tested with:** `mkvmerge` v102.0 · `ffmpeg` / `ffprobe` 9.0.1 · `MediaInfo` CLI v26.05 · `dovi_tool` 2.3.3.
 
 </details>
 
@@ -80,7 +78,7 @@ The `tools\` folder holds hundreds of MB of **other people's** programs, each un
 
 **LaFirma Remux Forge** was designed to eliminate media playback incompatibility on Smart TVs (LG, Samsung), players (Shield, Apple TV, Zidoo) and media servers (**Plex**, **Jellyfin**, **Emby**).
 
-It is an orchestration bridge: we built the GUI, the decision logic and the PowerShell engine that connect and automate established community utilities (`ffmpeg`, `mkvmerge`, `dovi_tool`, `DDVT`, `PgsToSrt`, `Tesseract`, `DeeZy`, `seconv`). Works on single files or whole TV seasons.
+It is an orchestration bridge: we built the GUI, the decision logic and the PowerShell engine that connect and automate established community utilities (`ffmpeg`, `mkvmerge`, `dovi_tool`, `PgsToSrt`, `Tesseract`, `DeeZy`). Works on single files or whole TV seasons.
 
 ---
 
@@ -164,31 +162,35 @@ A file that does not fit **never even starts** — no temporary folder, no 20 mi
 
 Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**.
 
+### 🏷️ The name says what the file is
+
+Every `.mkv` this program writes is single-layer **BL+RPU** video, and the file name says so: `Movie.2009.2160p.REMUX-GROUP [BL+RPU].mkv`. The "already exists in the output folder" guard checks **both** the stamped and the unstamped name, so nothing converted with an earlier version is ever reconverted from scratch.
+
 ### 🌍 Two languages
 
-Portuguese and English, switched by a flag next to the Learn button. The choice is remembered between sessions.
+Portuguese and English, switched by a flag next to the Understand button. The choice is remembered between sessions. **The installer asks first**: pick Portuguese or English when installing and the program opens in that language, with the licence shown in the same language.
 
 ---
 
 ## 📖 Understand the conversion
 
-The program has a **Learn** button with 14 sections explaining what the conversion does — and what it does **not** do. The text lives in [`fonte/FAQ_EN.txt`](./fonte/FAQ_EN.txt) and can be read here without installing anything.
+The program has an **Understand** button with 14 sections explaining what the conversion does — and what it does **not** do. The text lives in [`fonte/FAQ_EN.txt`](./fonte/FAQ_EN.txt) and can be read here without installing anything.
 
 | # | Section |
 |---|---|
-| 1 | What BL, EL and RPU are |
-| 2 | Profile 7, 8.1 and 5 — what changes |
-| 3 | MEL, Simple FEL and Complex FEL |
-| 4 | **Who actually loses when the EL is dropped** |
-| 5 | Why the caveat exists (L1 is not recomputed) |
-| 6 | Red does not mean it ruins anything |
-| 7 | The sample is not the whole film |
-| 8 | Profile 5 → MP4 |
-| 9 | Audio: TrueHD, DTS and what keeps Atmos |
-| 10 | PGS → SRT subtitles, PT-BR only |
-| 11 | Disk space and the queue |
-| 12 | Active area (L5) |
-| 13 | Tool credits |
+| 1 | The problem the program solves |
+| 2 | The pieces: BL, EL and RPU |
+| 3 | MEL, Simple FEL and Complex FEL — what the program measures |
+| 4 | **Red does not mean the conversion ruins the file** |
+| 5 | How the measurement is done, and how far it goes |
+| 6 | Audio |
+| 7 | Subtitles |
+| 8 | Profile 5 — its path is the container, not the profile |
+| 9 | Borders (L5) |
+| 10 | What the program does not do |
+| 11 | Where what we know came from |
+| 12 | Why the tools are not on GitHub |
+| 13 | Credits |
 | 14 | **Where to check and learn more** — the sources |
 
 ---
@@ -196,7 +198,7 @@ The program has a **Learn** button with 14 sections explaining what the conversi
 ## 🛠️ Installation & requirements
 
 * **Installer:** installs natively with standard Windows integration and Start Menu / Desktop shortcuts.
-* **Dependencies (optional):** self-contained toolset. **.NET Desktop Runtime 8.0** is only required for the fallback OCR engine (`PgsToSrt`) and can be downloaded automatically during installation if missing.
+* **Dependencies (optional):** self-contained toolset. **.NET Desktop Runtime 8.0** is required for subtitle OCR (`PgsToSrt`) and can be downloaded automatically during installation if missing; without it there is no subtitle OCR (video and audio are unaffected).
 * **`dovi_tool` 2.3.3 or newer.** Earlier versions lack `export --levels`, and without it the program cannot measure MEL vs FEL.
 * **Subtitle OCR note:** accuracy depends on font styling and source release quality; an automated evaluation report is shown at the end. Video processing avoids re-encoding entirely, always.
 
@@ -204,37 +206,25 @@ The program has a **Learn** button with 14 sections explaining what the conversi
 
 ## 🖼️ Screenshots
 
-**1. Initial analysis, measurement ON** — the queue is read and each file gets its verdict (MEL, Simple FEL, Complex FEL). The row being measured says so while it happens.
+**1. Initial analysis** — queue reading, disk-space calculation and per-file diagnosis.
 
-[![Initial analysis, measurement ON](https://i.ibb.co/GfrSfP7R/01-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-LIGADO-INGLES.jpg)](https://ibb.co/cKsnKTJQ)
+[![Initial analysis](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
 
-**2. The same screen, measurement OFF** — reading is immediate and the layer column says `EL not measured` instead of guessing. Nothing is painted green without a reading behind it.
+**2. Auto mode** — detailed track mapping decided by the program.
 
-[![The same screen, measurement OFF](https://i.ibb.co/BD0ZRG6/02-PRIMEIRA-PAGINA-DO-PROGRAMA-ANALISAR-MELXFEL-DESLIGADO-INGLES.jpg)](https://ibb.co/fRjp79N)
+[![Auto mode](https://i.ibb.co/h1V3dKRK/image.png)](https://ibb.co/h1V3dKRK)
 
-**3. The same screen in Portuguese** — the whole interface switches by a flag next to the Learn button, and the choice survives between sessions.
+**3. Manual mode** — full control to keep, convert or drop each audio and subtitle.
 
-[![The same screen in Portuguese](https://i.ibb.co/hRmh32c5/03-PRIMEIRA-PAGINA-DO-PROGRAMA-PORTUGUES.jpg)](https://ibb.co/bgKqcNFh)
+[![Manual mode](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
 
-**4. Auto mode** — the decision engine maps every track and writes, side by side, what it found on the left and what it will do on the right.
+**4. Conversion progress** — real-time per-step tracking with performance metrics.
 
-[![Auto mode](https://i.ibb.co/zh3fzqgr/04-MODOS-AUTOMATICO-INGLES.jpg)](https://ibb.co/pvHXSYTx)
+[![Conversion progress](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
 
-**5. Manual mode** — track by track: keep, convert or drop. Manual overrides automatic, with one limit — a subtitle that is not pt-BR is never offered the convert option.
+**5. Summary & quality evaluation** — final report with integrity check and subtitle grade.
 
-[![Manual mode](https://i.ibb.co/jPL8m6Zd/05-MODOS-MANUAL-INGLES.jpg)](https://ibb.co/dwQfFWJS)
-
-**6. Conversion in progress** — step by step, with real percentages, the tool that is running and how much time is left.
-
-[![Conversion in progress](https://i.ibb.co/3xps97h/06-DURANTE-A-CONVERSAO-PROGRESSO-INGLES.jpg)](https://ibb.co/N093dsY)
-
-**7. Conversion in progress, later on** — the queue keeps the converting row marked, so you never have to guess which file is being processed.
-
-[![Conversion in progress, later on](https://i.ibb.co/Kx3frPc8/07-DURANTE-A-CONVERSAO-PROGRESSO-INGLES-2.jpg)](https://ibb.co/Ld2cZFDs)
-
-**8. Final report** — what was done to each file, the integrity check on the finished MKV and the grade of the subtitle the program generated.
-
-[![Final report](https://i.ibb.co/v62nXZJC/08-RELATORIO-FINAL-INGLES.jpg)](https://ibb.co/xtVTFJMK)
+[![Summary](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
 
 ---
 
@@ -247,7 +237,7 @@ This program is a shell around other people's work. Each of them solved a hard p
 * **dovi_tool (by `quietvoid`)** — reading and converting Dolby Vision metadata. It identifies the profile, says whether the layer is MEL or FEL, exports L1 and L5, and performs the Profile 7-to-8.1 conversion. **None of it is reimplemented here** — LaFirma organises the work around it and shows the result in a way you can decide from.
 * **DDVT (by `DonaldFaQ`)** — RPU work and crop correction. **It is the tool that taught this project how to exist:** before LaFirma, it was what we converted with, and it was by using it that we came to understand what an RPU is, what an enhancement layer is, what changes between profiles, and why Profile 7 is troublesome. The idea of automating this conversion was born there.
 * **DeeZy** — Dolby Digital Plus encoding with spatial Dolby Atmos metadata preserved. It is what lets a TrueHD Atmos track come out the other side still carrying Atmos.
-* **PgsToSrt, Tesseract OCR & seconv** — the OCR ecosystem behind extracting, rendering and converting PGS subtitles into `.SRT` text.
+* **PgsToSrt & Tesseract OCR** — the OCR ecosystem behind extracting, rendering and converting PGS subtitles into `.SRT` text.
 
 And two acknowledgments that are not about code:
 

@@ -218,23 +218,25 @@ The program has an **Understand** button with 14 sections explaining what the co
 
 **1. Initial analysis** — queue reading, disk-space calculation and per-file diagnosis.
 
-[![Initial analysis](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
+[![Initial analysis](https://i.ibb.co/fzkSGxWB/SELECIONANDO-O-ARQUIVO.png)](https://ibb.co/DH9bgRFs)
 
 **2. Auto mode** — detailed track mapping decided by the program.
 
-[![Auto mode](https://i.ibb.co/h1V3dKRK/image.png)](https://ibb.co/h1V3dKRK)
+[![Auto mode](https://i.ibb.co/wxRytBM/SELECIONAR-AUTOMATICO.png)](https://ibb.co/b8P1tQz)
 
 **3. Manual mode** — full control to keep, convert or drop each audio and subtitle.
 
-[![Manual mode](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
+[![Manual mode](https://i.ibb.co/RGsXbyTd/SELECIONAR-MANUAL.png)](https://ibb.co/dsVNMg4x)
 
 **4. Conversion progress** — real-time per-step tracking with performance metrics.
 
-[![Conversion progress](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
+[![Conversion progress](https://i.ibb.co/9m9RW1C6/DURANTE-O-PROCESSO-1.png)](https://ibb.co/qLMbpcPK)
+
+[![Conversion progress](https://i.ibb.co/hJPvBWLY/DURANTE-O-PROCESSO-2.png)](https://ibb.co/jPcFyMbJ)
 
 **5. Summary & quality evaluation** — final report with integrity check and subtitle grade.
 
-[![Summary](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
+[![Summary](https://i.ibb.co/hx6nVHxF/CONVERSAO-FINAL.png)](https://ibb.co/TDfntRDM)
 
 ---
 

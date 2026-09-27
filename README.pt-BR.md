@@ -218,23 +218,25 @@ O programa traz um botão **Entenda** com 14 seções que explicam o que a conve
 
 **1. Análise inicial** — leitura da fila, cálculo de espaço em disco e diagnóstico de cada arquivo.
 
-[![Análise inicial](https://i.ibb.co/NdBdGZ42/image.png)](https://ibb.co/NdBdGZ42)
+[![Análise inicial](https://i.ibb.co/fzkSGxWB/SELECIONANDO-O-ARQUIVO.png)](https://ibb.co/DH9bgRFs)
 
 **2. Modo automático** — o mapeamento de faixas que o programa decidiu.
 
-[![Modo automático](https://i.ibb.co/h1V3dKRK/image.png)](https://ibb.co/h1V3dKRK)
+[![Modo automático](https://i.ibb.co/wxRytBM/SELECIONAR-AUTOMATICO.png)](https://ibb.co/b8P1tQz)
 
 **3. Modo manual** — controle total para manter, converter ou excluir cada áudio e legenda.
 
-[![Modo manual](https://i.ibb.co/G3r5TRrc/image.png)](https://ibb.co/G3r5TRrc)
+[![Modo manual](https://i.ibb.co/RGsXbyTd/SELECIONAR-MANUAL.png)](https://ibb.co/dsVNMg4x)
 
 **4. Conversão em andamento** — acompanhamento por etapas, em tempo real.
 
-[![Conversão em andamento](https://i.ibb.co/G4crhCS1/image.png)](https://ibb.co/G4crhCS1)
+[![Conversão em andamento](https://i.ibb.co/9m9RW1C6/DURANTE-O-PROCESSO-1.png)](https://ibb.co/qLMbpcPK)
+
+[![Conversão em andamento](https://i.ibb.co/hJPvBWLY/DURANTE-O-PROCESSO-2.png)](https://ibb.co/jPcFyMbJ)
 
 **5. Resumo final** — relatório com verificação de integridade e a nota da legenda.
 
-[![Resumo final](https://i.ibb.co/LhHmtqWZ/image.png)](https://ibb.co/LhHmtqWZ)
+[![Resumo final](https://i.ibb.co/hx6nVHxF/CONVERSAO-FINAL.png)](https://ibb.co/TDfntRDM)
 
 ---
 

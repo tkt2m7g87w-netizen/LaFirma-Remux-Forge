@@ -3,8 +3,8 @@
            + Conversor de AUDIO [Dolby TrueHD / DTS:HD / DTS:X -> E-AC-3]
  Profile 7/5/8 para Profile 8.1  (com OCR automático de legenda PT-BR em PGS)
  --------------------------------------------------------------------------
- JANELA (GUI) 19.15  ·  MOTOR 14.14  ·  CORRETOR 2.34  ·  REOCR 1.30
- Instalador 2.0                                   -   "LaFirma"
+ JANELA (GUI) 19.16  ·  MOTOR 14.15  ·  CORRETOR 2.35  ·  REOCR 1.30
+ Instalador 2.0.1                                 -   "LaFirma"
 ================================================================================
 
 COMO ABRIR
@@ -245,14 +245,19 @@ resultado de um episódio específico:
 1. Marque a caixinha do vídeo na aba Fila. O botão de modo, que até então
    dizia "Marque o vídeo p/ editar" (apagado), passa a mostrar
    "Modo: Automático" - clique nele para trocar para Manual.
-2. Na aba Faixas do Vídeo, cada linha de áudio e legenda ganha um seletor
-   com três opções:
-     CONVERTER - força a conversão mesmo que já exista uma faixa pronta
-                 pra reaproveitar.
+2. Na aba Faixas do Vídeo, cada linha de áudio e legenda ganha um seletor.
+   Ele só oferece o que o motor sabe fazer com aquela faixa:
+     CONVERTER - só no áudio principal e na legenda PT-BR: força a
+                 conversão mesmo que já exista uma faixa pronta pra
+                 reaproveitar.
      MANTER    - mantém a faixa como está no arquivo original, sem
                  converter (ex: guardar uma dublagem que o automático
                  descartaria).
-     EXCLUIR   - remove a faixa do arquivo final.
+     EXCLUIR   - remove a faixa do arquivo final (o áudio principal não
+                 tem esta opção: ele sempre fica).
+   Se você excluir a faixa E-AC-3 que já vinha pronta e não mexer no áudio
+   principal, o principal é convertido - senão o arquivo sairia sem uma
+   faixa que a TV toque.
 3. Se você não mexer em nenhum verbo, o episódio segue pelo automático
    normalmente - o Manual só entra onde você escolheu algo diferente.
 

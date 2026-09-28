@@ -307,8 +307,8 @@ A camada de melhoria está sendo medida agora. A fila fica livre - isto roda em 
 # A nota da legenda ja tinha suas frases na tabela (bloco do cartao final);
 # o que faltava eram os NUMEROS entre parenteses, que sao colagem.
 ~ \((\d+) legendas conferidas\)	 ($1 subtitles checked)
-~ \(1 falha em (\d+) legendas\)	 (1 problem in $1 subtitles)
-~ \((\d+) falhas em (\d+) legendas\)	 ($1 problems in $2 subtitles)
+~ \(1 bloco ilegível em (\d+)\)	 (1 unreadable block in $1)
+~ \((\d+) blocos ilegíveis em (\d+)\)	 ($1 unreadable blocks in $2)
 
 # 17.16: o aviso do disco que enxerga a fila inteira, na ordem.
 ~Cabe Agora, Mas Não Até o Fim: (\d+) de (\d+) Arquivo\(s\) da Fila Não Vão Começar\.	Fits Now, But Not to the End: $1 of $2 File(s) in the Queue Will Not Start.
@@ -387,6 +387,7 @@ Cancelados pelo Usuário	Cancelled by User
 Tempo Total	Total Time
 Dolby Vision Convertido para Profile 8.1	Dolby Vision Converted to Profile 8.1
 Áudio Convertido para E-AC-3[ATMOS]	Audio Converted to E-AC-3[ATMOS]
+Áudio DTS Convertido para E-AC-3	DTS Audio Converted to E-AC-3
 Áudio E-AC-3[ATMOS] Reaproveitado	E-AC-3[ATMOS] Audio Reused
 Áudio E-AC-3/AC-3 Reaproveitado	E-AC-3/AC-3 Audio Reused
 Áudio Mantido a Pedido (sem converter)	Audio Kept on Request (not converted)

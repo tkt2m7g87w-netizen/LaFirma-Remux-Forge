@@ -19,6 +19,68 @@
 
 
 ================================================================================
+ INSTALADOR 2.0.1  -  27/09/2026      *** A AUDITORIA DA 2.0 PUBLICADA ***
+================================================================================
+ Componentes: MOTOR 14.15 | JANELA 19.16 | CORRETOR 2.35 | REOCR 1.30 | BATERIA 4.8 (1.381 testes) | BANCADA 4.1 (352 invariantes)
+ Depende do dovi_tool 2.3.3.
+
+ Auditoria da 2.0 instalada: conversao real de GoT (Simple FEL), Ryan
+ (Complex FEL) e Troy (MEL) em 26/09, e a legenda oficial do Ryan como
+ gabarito. Os 3 MKV ja saiam bons para assistir; esta versao fecha o que a
+ auditoria achou na tela, no log e na legenda. A dublagem PT-BR continua
+ fora do Automatico (decisao do Diego, 27/09); no Manual ela pode ficar.
+
+ 1. MODO MANUAL
+    - A escolha manual mandava ao motor "converter principal = NAO" quando
+      o usuario mexia em QUALQUER faixa de um arquivo que ja tinha E-AC-3
+      pronta: o verbo automatico da principal ia como se fosse ordem. O
+      motor pulava a faixa pronta e deixava o TrueHD/DTS como padrao (log
+      de 25/09, Fallout). Agora so vai a ordem que existe: o verbo escolhido
+      na principal, ou CONVERTER quando a faixa pronta foi excluida - e o
+      painel DIAGNOSTICO diz isso, em vez de "[REAPROVEITADO]".
+    - CONVERTER nao aparece mais em audio que nao e o principal. O motor so
+      converte o principal; a tela mostrava "E-AC-3 -> E-AC-3" e somava uma
+      faixa fantasma na estimativa.
+
+ 2. TELA E LOG
+    - O resumo final separa "Audio Convertido para E-AC-3[ATMOS]" (TrueHD)
+      de "Audio DTS Convertido para E-AC-3". O Troy entrava como Atmos.
+    - A nota da legenda diz "1 bloco ilegivel em N" (dizia "1 falha em N").
+      O contador pega bloco que o OCR nao leu, nao palavra lida errada.
+    - "Contexto do brilho" diz o L1 e a folga: "L1 216 nits, 784 abaixo do
+      pico do master". Dizia "L1 784 nits ABAIXO", e 784 era a folga.
+    - O log diz quantos blocos o Corretor corrigiu, como o Reocr ja fazia.
+    - Log da medicao: quando o RPU nao traz L5, a linha diz isso.
+    - As dicas da aba Faixas saem em ingles com a tela em ingles.
+    - ESC fecha as janelas de Log, Ferramentas e Entenda.
+
+ 3. ESTIMATIVAS
+    - Tamanho: no FEL a conta desconta 6% do video (a EL que sai). Estava
+      +6,2% no GoT e +9,7% no Ryan; agora fica perto do real e continua do
+      lado seguro. MEL, MEL+FEL e EL nao medida ficam como estavam.
+    - Tempo: a calibragem do audio separa TrueHD (DeeZy) de DTS (ffmpeg).
+      Misturados, o fator do TrueHD dobrava a previsao do DTS. O historico
+      "audio" antigo nao e mais lido; os dois recomecam do zero.
+
+ 4. ARQUIVO FINAL
+    - A faixa SRT sai com idioma "pt-BR" (era "por"), igual a PGS de origem.
+
+ 5. LEGENDA (CORRETOR 2.35)
+    - Conferida bloco a bloco contra a legenda oficial do Ryan: 23 blocos
+      errados em 1385 (1,7%). Entraram so as familias de mais de um filme:
+      minuscula lida como maiuscula no comeco da 2a linha ("Principalmente /
+      se eu" - Ryan; "sob o meu comando" - Transformers) e aspa de fechar
+      curva num arquivo de aspas retas (Ryan, Se7en, Homem-Aranha).
+    - Rodado nas 20 SRT que temos, 2.34 contra 2.35: mudaram 11 linhas em
+      4 filmes (Ryan 3, Transformers 1, Se7en 3, Homem-Aranha 4), todas as
+      previstas. GoT e Troy saem identicos. Nenhuma linha fora do previsto.
+    - "ToFu" e "TuFo" do Ryan estao CERTOS (a oficial escreve igual). A
+      regra proposta na auditoria para "consertar" isso nao entrou.
+    - Caso de um filme so nao virou regra: "lowa" (Iowa), "E grave?" e
+      "sutia" continuam como estao.
+
+
+================================================================================
  INSTALADOR 2.0  -  23/09/2026      *** VERSAO PUBLICA ***
 ================================================================================
  Componentes: MOTOR 14.14 | JANELA 19.15 | CORRETOR 2.34 | REOCR 1.30 | BATERIA 4.7 (1.334 testes) | BANCADA 4.0 (336 invariantes)

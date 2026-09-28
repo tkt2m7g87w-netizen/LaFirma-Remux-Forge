@@ -43,7 +43,7 @@ $ErrorActionPreference = "Continue"
     bateria que reprova: ela ensina a ignorar vermelho. Agora ela zera o
     historico de erros no comeco e, no fim, reprova se apareceu qualquer um. #>
 $Error.Clear()
-$Versao = "4.7"
+$Versao = "4.8"
 <#  OS CONTADORES TEM NOME ESQUISITO DE PROPOSITO.
     Eles ja se chamaram $script:Passou e $script:Falhou. Na secao 5 havia um
     $falhou local - e $falhou E $Falhou, porque nome de variavel no PowerShell
@@ -137,6 +137,10 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      Set-Idioma - 16.92).
 # 3.1: janela 131 -> 135 (Get-NomeCorEL, Get-CorEL, Get-ChipEL - a escala de
 #      cor num lugar so - e Traduzir-Frase, para o texto montado - 16.94).
+# 4.8: janela 212 -> 213 (Get-ChaveCalibAudio - a calibragem do audio
+#      separada em TrueHD x DTS, 19.16); corretor 25 -> 27
+#      (Repair-MinusculaNaSegundaLinha e Repair-AspaCurvaNumArquivoReto -
+#      2.35, funcoes proprias para a bateria rodar as duas isoladas).
 # 3.27: janela 172 -> 173 (Get-PlanoDoDisco, extraida para poder ser
 #       executada pela bateria - 17.17).
 # 3.26: motor 89 -> 90 (Test-EhLegendaPtBrCandidata - 14.54);
@@ -153,8 +157,8 @@ Titulo "1. SINTAXE E ESTRUTURA (o parser oficial do PowerShell)"
 #      estimativa de tempo passou a se calibrar sozinha, 16.99).
 # 3.2: janela 135 -> 136 (Get-FatorEspacoDisco - o fator 1,6x/3,15x num lugar so,
 #      porque o P5 tem seta na coluna e mesmo assim nao usa 3,15x - 16.95).
-$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 97; "LaFirma_JANELA.ps1" = 212
-               "Corretor_Legenda.ps1" = 25; "Reocr_Legenda.ps1" = 20
+$esperado = @{ "Converter_AUTO_DIRETO.ps1" = 97; "LaFirma_JANELA.ps1" = 213
+               "Corretor_Legenda.ps1" = 27; "Reocr_Legenda.ps1" = 20
                "Auditor_OCR.ps1" = 22; "Limpar_Testes.ps1" = 3 }
 # Estas duas nao sao entregues ao usuario - ver o comentario do PULADO.
 $soDesenvolvimento = @("Auditor_OCR.ps1", "Limpar_Testes.ps1")
@@ -4575,8 +4579,11 @@ Titulo "45. UMA LEGENDA INGLESA CARIMBADA DE BRASILEIRA (14.54 / 17.16)"
     DUAS trancas, porque esta estraga arquivo: a janela nao oferece o verbo,
     e o motor recusa a ordem se ela chegar assim mesmo. #>
 
+# 4.8: a 19.16 inverteu a pergunta - CONVERTER so existe onde o motor converte
+# (audio principal e legenda pt-BR); todo o resto cai em MANTER/EXCLUIR. O
+# teste que RODA a funcao (secao GOT real e secao 60) prova o comportamento.
 Checar "Janela: o dropdown de legenda nao-ptBR nao oferece CONVERTER" `
-    ([bool]($jan -match '(?s)function Get-OpcoesVerbo.{0,2200}-not \(Test-EhLegendaPtBr \$f\).{0,90}"MANTER", "EXCLUIR"'))
+    ([bool]($jan -match '(?s)function Get-OpcoesVerbo.{0,700}elseif \(\$f\.Tipo -eq "subtitles" -and \(Test-EhLegendaPtBr \$f\)\) \{ @\("MANTER", "CONVERTER", "EXCLUIR"\) \}\s*else \{ @\("MANTER", "EXCLUIR"\) \}'))
 Checar "Janela: e quem GRAVA o verbo confere de novo (desenho nao e regra)" `
     ([bool]($jan -match '(?s)\$novo -eq "CONVERTER" -and \$f\.Tipo -eq "subtitles" -and -not \(Test-EhLegendaPtBr'))
 Checar "Janela: o criterio de 'e pt-BR' pergunta ao PAPEL, nao refaz regra" `
@@ -6521,6 +6528,227 @@ Checar "Teclas: o F11 recusado diz o MOTIVO REAL, nunca 'nao se aplica ao estado
     "o estado ERA 'inicial' - a frase apontava para onde o problema nao estava"
 Checar "Teclas: e o motivo sai da MESMA frase da dica do botao (um lugar so)" `
     ([bool]($jan -match '(?s)TECLA: F11 recusada.{0,200}Get-MotivoCenso'))
+
+# ============================================================================
+Titulo "60. 2.0.1 - A AUDITORIA DE 27/09 (JANELA 19.16 / MOTOR 14.15 / CORRETOR 2.35)"
+# ============================================================================
+<#  Cada conserto da 2.0.1 tem aqui um teste que RODA a funcao de verdade,
+    extraida do fonte, quando ela pode ser isolada - e so confere texto
+    quando o que mudou e uma linha de log ou um argumento de programa. #>
+$fn601 = @("Build-EscolhasManuais","Get-VerboEfetivo","Test-VerboBloqueado","Get-OpcoesVerbo",
+           "Get-VerboExibido","Get-VerboCanonico","Test-EhLegendaPtBr","Get-TamanhoEstimadoVideo",
+           "Get-TamanhoEstimadoFaixa","Traduzir","Set-AbaDica","Restaurar-AbaDica",
+           "Get-DiagAudioComEscolha","Test-TemEscolha","Get-CodecCurto","Get-DestinoConversao")
+$carregou601 = $true; $erro601 = ""
+try {
+    $ast601 = [System.Management.Automation.Language.Parser]::ParseInput($jan, [ref]$null, [ref]$null)
+    foreach ($nf in $fn601) {
+        $fd = @($ast601.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq $nf }, $true))
+        if ($fd.Count -eq 0) { throw "nao achei $nf na janela" }
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+} catch { $carregou601 = $false; $erro601 = $_.Exception.Message }
+Checar "2.0.1: as funcoes da janela carregam do fonte" $carregou601 $erro601
+
+if ($carregou601) {
+    $script:Lang = "PT"
+    # ---- A1: a escolha manual so manda a ordem que existe -----------------
+    <#  Log de 25/09 23:17 (Fallout S02E01 ja convertido): o Diego mexeu numa
+        faixa que nao era a principal, e a janela mandou "converter principal
+        = NAO" - o verbo AUTOMATICO da principal (MANTER, porque havia E-AC-3
+        pronta) indo como se fosse ordem dele. O motor pulou a faixa pronta e
+        marcou o TrueHD como padrao. #>
+    function Faixas601 {
+        $fx = @(
+            (NovaFaixa 0 "video"     "HEVC"         ""          "und" ""),
+            (NovaFaixa 1 "audio"     "TrueHD Atmos" "Surround"  "eng" "en"),
+            (NovaFaixa 2 "audio"     "E-AC-3"       "E-AC-3 Atmos" "eng" "en"),
+            (NovaFaixa 3 "audio"     "AC-3"         "Dublado"   "por" "pt-BR"),
+            (NovaFaixa 4 "subtitles" "SubRip/SRT"   "PT-BR"     "por" "pt-BR"))
+        $fx[1].Papel = "audio-principal"; $fx[1].VerboAuto = "MANTER"
+        $fx[2].Papel = "audio-joc";       $fx[2].VerboAuto = "MANTER"
+        $fx[3].Papel = "extra";           $fx[3].VerboAuto = "EXCLUIR"
+        $fx[4].Papel = "leg-ptbr";        $fx[4].VerboAuto = "MANTER"
+        return ,$fx
+    }
+    function Video601($fx) { return [pscustomobject]@{ Nome = "Fallout S02E01"; Caminho = "C:\x\Fallout.mkv"; Modo = "Manual"; Faixas = $fx } }
+    $script:Log601 = New-Object System.Collections.ArrayList
+    function Escrever-Log { param($Texto, $Tipo = "") ; [void]$script:Log601.Add("$Texto") }
+    function Rodar601($v) { $script:Marcados601 = @($v); $script:EscolhasAtuais = $null; Build-EscolhasManuais; return $script:EscolhasAtuais["C:\x\Fallout.mkv"] }
+    function Get-Marcados { return @($script:Marcados601) }
+
+    # caso 1: ele MANTEVE a dublagem (mexeu so nela)
+    $fx = Faixas601; $fx[3].VerboUsuario = "MANTER"
+    $e1 = Rodar601 (Video601 $fx)
+    Checar "A1 EXECUTADO: mexer so na dublagem NAO manda 'converter principal'" `
+        ($null -ne $e1 -and -not $e1.ContainsKey("ConverterPrincipal")) `
+        "era o defeito do Fallout: a ordem 'NAO' que ninguem deu"
+    Checar "A1 EXECUTADO: e as tres faixas de audio vao para o remux" `
+        ($null -ne $e1 -and ((@($e1["AudioManter"]) -join ",") -eq "1,2,3")) ("saiu: " + (@($e1["AudioManter"]) -join ","))
+    Checar "A1 EXECUTADO: o log diz que o motor decide" `
+        ([bool](@($script:Log601 | Where-Object { $_ -match 'converter principal = \(o motor decide\)' }).Count -gt 0))
+    # caso 2: EXCLUIU a E-AC-3 pronta e nao tocou na principal
+    $fx = Faixas601; $fx[2].VerboUsuario = "EXCLUIR"
+    $e2 = Rodar601 (Video601 $fx)
+    Checar "A1 EXECUTADO: excluir a faixa pronta manda CONVERTER (o que a coluna ja mostra)" `
+        ($null -ne $e2 -and $e2.ContainsKey("ConverterPrincipal") -and $e2["ConverterPrincipal"] -eq $true) `
+        "sem isso o arquivo saia so com TrueHD, sem faixa que a TV toque"
+    # e o PAINEL do diagnostico diz a mesma coisa que o motor vai fazer
+    $d2 = Get-DiagAudioComEscolha (Video601 $fx)
+    Checar "A1 EXECUTADO: o painel diz que o TrueHD vai ser convertido (nao '[REAPROVEITADO]')" `
+        ($null -ne $d2 -and "$($d2[0])" -eq "→ [ESCOLHA MANUAL] TrueHD → E-AC-3[ATMOS] a Pedido") ("saiu: " + "$($d2[0])")
+    # caso 3: escolheu CONVERTER na principal
+    $fx = Faixas601; $fx[1].VerboUsuario = "CONVERTER"
+    $e3 = Rodar601 (Video601 $fx)
+    Checar "A1 EXECUTADO: CONVERTER escolhido na principal vai como SIM" `
+        ($null -ne $e3 -and $e3["ConverterPrincipal"] -eq $true)
+    # caso 4: TrueHD sem faixa pronta (auto CONVERTER) e ele escolheu MANTER
+    $fx = Faixas601; $fx[1].VerboAuto = "CONVERTER"; $fx[2].Papel = "extra"; $fx[2].VerboAuto = "EXCLUIR"; $fx[1].VerboUsuario = "MANTER"
+    $e4 = Rodar601 (Video601 $fx)
+    Checar "A1 EXECUTADO: MANTER escolhido na principal vai como NAO" `
+        ($null -ne $e4 -and $e4.ContainsKey("ConverterPrincipal") -and $e4["ConverterPrincipal"] -eq $false)
+    # caso 5: mexeu so na legenda
+    $fx = Faixas601; $fx[4].VerboUsuario = "EXCLUIR"
+    $e5 = Rodar601 (Video601 $fx)
+    Checar "A1 EXECUTADO: mexer so na legenda nao fala do audio" `
+        ($null -ne $e5 -and -not $e5.ContainsKey("ConverterPrincipal"))
+
+    # ---- M4: audio que nao e o principal nao oferece CONVERTER -------------
+    $fx = Faixas601
+    $opsJoc = @(Get-OpcoesVerbo $fx[2]); $opsDub = @(Get-OpcoesVerbo $fx[3]); $opsPri = @(Get-OpcoesVerbo $fx[1])
+    Checar "M4 EXECUTADO: a E-AC-3 pronta oferece so MANTER e EXCLUIR" `
+        ((($opsJoc -join "/") -eq "MANTER/EXCLUIR")) ("saiu: " + ($opsJoc -join "/"))
+    Checar "M4 EXECUTADO: a dublagem tambem" ((($opsDub -join "/") -eq "MANTER/EXCLUIR")) ("saiu: " + ($opsDub -join "/"))
+    Checar "M4 EXECUTADO: e a principal continua MANTER/CONVERTER" ((($opsPri -join "/") -eq "MANTER/CONVERTER")) ("saiu: " + ($opsPri -join "/"))
+    Checar "M4: quem grava o clique tambem recusa CONVERTER em audio nao-principal" `
+        ([bool]($jan -match '\$novo -eq "CONVERTER" -and \$f\.Tipo -eq "audio" -and "\$\(\$f\.Papel\)" -ne "audio-principal"'))
+
+    # ---- M1: a estimativa desconta a EL no FEL ------------------------------
+    function Video601M1($el, $dv) {
+        $fv = NovaFaixa 0 "video" "HEVC" "" "und" ""; $fv.Bytes = 100GB; $fv.Relevante = $true
+        return [pscustomobject]@{ Modo = "Automatico"; Faixas = @($fv); DVprecisa = $dv; ELtipo = $el; DurSeg = 0 }
+    }
+    $gFel = (Get-TamanhoEstimadoVideo (Video601M1 "FEL" $true)) / 1GB
+    $gMel = (Get-TamanhoEstimadoVideo (Video601M1 "MEL" $true)) / 1GB
+    $gNao = (Get-TamanhoEstimadoVideo (Video601M1 "NAO_MEDIDO" $true)) / 1GB
+    $gMis = (Get-TamanhoEstimadoVideo (Video601M1 "MISTO" $true)) / 1GB
+    $g81  = (Get-TamanhoEstimadoVideo (Video601M1 "FEL" $false)) / 1GB
+    Checar "M1 EXECUTADO: FEL convertido tira 6% do video (100 -> 94 GB)" ([math]::Abs($gFel - 94.0) -lt 0.001) ("deu {0:N3}" -f $gFel)
+    Checar "M1 EXECUTADO: MEL, MEL+FEL e EL nao medida ficam com o video inteiro (lado seguro)" `
+        (([math]::Abs($gMel - 100) -lt 0.001) -and ([math]::Abs($gNao - 100) -lt 0.001) -and ([math]::Abs($gMis - 100) -lt 0.001)) `
+        ("MEL {0:N2} / nao medida {1:N2} / misto {2:N2}" -f $gMel, $gNao, $gMis)
+    Checar "M1 EXECUTADO: sem conversao de DV nao ha EL descartada, nao ha desconto" ([math]::Abs($g81 - 100) -lt 0.001) ("deu {0:N3}" -f $g81)
+    <#  Os numeros de 26/09: fatia da EL no video medida em 6,5% (GoT), 10,0%
+        (Ryan) e 10,3% (Transformers). O desconto tem que ficar ABAIXO da menor,
+        senao a estimativa passa a prometer menos do que sai. #>
+    Checar "M1: o desconto fica abaixo da menor fatia medida (6,5%)" ([bool]($jan -match '\$fatiaELDescontada = 0\.06\b'))
+
+    # ---- B1: as dicas da aba Faixas passam pela traducao --------------------
+    $UI = [pscustomobject]@{ lblAbaDica = [pscustomobject]@{ Text = "" } }
+    $script:MapaEN = @{ "Selecione um vídeo na aba Fila." = "Select a video on the Queue tab." }
+    $script:MapaENi = @{}
+    $script:IniciarAposMedir = $false
+    $script:Lang = "EN"
+    Set-AbaDica "Selecione um vídeo na aba Fila."
+    Checar "B1 EXECUTADO: com a tela em ingles a dica sai em ingles" ($UI.lblAbaDica.Text -eq "Select a video on the Queue tab.") ("saiu: " + $UI.lblAbaDica.Text)
+    Checar "B1 EXECUTADO: e o que fica guardado e o portugues (a chave da tabela)" ($script:DicaAntesDaEspera -eq "Selecione um vídeo na aba Fila.")
+    $UI.lblAbaDica.Text = ""
+    Restaurar-AbaDica
+    Checar "B1 EXECUTADO: a dica restaurada depois da espera tambem sai traduzida" ($UI.lblAbaDica.Text -eq "Select a video on the Queue tab.") ("saiu: " + $UI.lblAbaDica.Text)
+    Set-AbaDica "Saving Private Ryan"
+    Checar "B1 EXECUTADO: nome de arquivo passa intacto" ($UI.lblAbaDica.Text -eq "Saving Private Ryan")
+    $script:Lang = "PT"
+    Remove-Variable -Name UI -ErrorAction SilentlyContinue
+}
+
+# ---- M2: o resumo separa Atmos de DTS -----------------------------------------
+Checar "M2: o contador Atmos conta so TRUEHD" `
+    ([bool]($jan -match '\$comAu  = @\(\$res \| Where-Object \{ "\$\(\$_\.StatusAudio\)" -eq "OK" -and "\$\(\$_\.TipoConvAudio\)" -eq "TRUEHD" \}\)\.Count')) `
+    "o Troy (DTS -> E-AC-3 640k) entrava como E-AC-3[ATMOS]"
+Checar "M2: e o DTS tem linha propria, com traducao" `
+    ([bool]($jan -match '"Áudio DTS Convertido para E-AC-3          : \{0\}" -f \$comDts') -and
+     [bool]($idi -match "(?m)^Áudio DTS Convertido para E-AC-3`tDTS Audio Converted to E-AC-3"))
+
+# ---- B3: a calibragem do audio separada -----------------------------------------
+Checar "B3: existe a chave por trabalho de audio (TrueHD x DTS)" `
+    ([bool]($jan -match 'function Get-ChaveCalibAudio') -and [bool]($jan -match '\$script:FatorAudio = @\{ "audio-truehd" = 1\.0; "audio-dts" = 1\.0 \}'))
+Checar "B3: o lote leva a chave e o registro grava no nome dela" `
+    ([bool]($jan -match 'ChaveAudio = \(Get-ChaveCalibAudio \$v \$null\)') -and
+     [bool]($jan -match '(?s)function Registrar-FatorDaEtapa.{0,2500}\$nome = \$chaveAudio'))
+Checar "B3: a leitura do historico nao usa mais a mistura 'audio'" `
+    ([bool]($jan -match '(?s)function Carregar-CalibragemEtapas.{0,1500}if \(\$i -eq 2\) \{ continue \}') -and
+     [bool]($jan -match '(?s)function Carregar-CalibragemEtapas.{0,3000}foreach \(\$ch in @\("audio-truehd", "audio-dts"\)\)'))
+
+# ---- B9 e B7 -------------------------------------------------------------------
+Checar "B9: ESC fecha a janela de texto (Log, Ferramentas, Entenda)" `
+    ([bool]($jan -match '(?s)function Show-JanelaTexto.{0,9000}add_PreviewKeyDown.{0,200}"Escape".{0,80}Close\(\)'))
+Checar "B7: RPU lido sem L5 diz isso no log, em vez de calar" `
+    ([bool]($jan -match '(?s)\} elseif \(\[int\]\$el\.PontosLidos -gt 0\) \{.{0,400}Área ativa \(L5\): não declarada no RPU'))
+
+# ---- A nota da legenda diz o que mede -------------------------------------------
+Checar "Nota: o cartao diz 'bloco ilegivel', nao 'falha'" `
+    ([bool]($jan -match '\(1 bloco ilegível em \{0\}\)') -and [bool]($jan -match '\(\{0\} blocos ilegíveis em \{1\}\)') -and
+     -not ($jan -match '"     \(1 falha em \{0\} legendas\)"'))
+$trN1 = Aplicar-RegrasT "     (1 bloco ilegível em 1385)"
+$trN2 = Aplicar-RegrasT "     (3 blocos ilegíveis em 1832)"
+Checar "Nota: EXECUTADO - a traducao das duas formas" `
+    (($trN1 -eq "     (1 unreadable block in 1385)") -and ($trN2 -eq "     (3 unreadable blocks in 1832)")) ("saiu: '$trN1' / '$trN2'")
+Checar "Nota: o log do motor diz o mesmo (nas duas linhas)" `
+    ([bool]($mot -match '\+ " bloco\(s\) ilegivel\(is\), " \+') -and [bool]($mot -match 'de \{1\} bloco\(s\) ilegivel\(is\) \(\{2\}%\)') -and
+     -not ($mot -match '\+ " bloco\(s\) com defeito, "') -and -not ($mot -match 'de \{1\} bloco\(s\) com defeito'))
+
+# ---- Motor ------------------------------------------------------------------------
+Checar "B2: a faixa SRT sai como pt-BR (IETF), igual a PGS de origem" `
+    ([bool]($mot -match '"--language", "0:pt-BR", "--track-name", \("0:Portugu"') -and -not ($mot -match '"--language", "0:por"'))
+Checar "B5: 'Contexto do brilho' diz o L1 e a folga, nessa ordem" `
+    ([bool]($mot -match '"L1 \{0\} nits, \{1\} abaixo do pico do master" -f `\r?\n\s*\(\[double\]\$diagEL\.MaxCLL\)') -and
+     -not ($mot -match 'nits ABAIXO do pico do master')) `
+    "'L1 784 nits ABAIXO do pico' parecia dizer que o L1 era 784 - era a folga"
+Checar "B6: o motor le do Corretor a MESMA frase que o Corretor escreve" `
+    ([bool]($corr -match 'Diz \("Blocos corrigidos nesta rodada: " \+ \$totalCorrigido\)') -and
+     [bool]($mot -match "Blocos corrigidos nesta rodada: \(\\d\+\)") -and
+     [bool]($mot -match 'Corretor_Legenda Revisou e Corrigiu \{0\} Bloco\(s\) do OCR')) `
+    "contrato por texto entre dois arquivos: mudar a frase de um lado quebra o numero do outro"
+
+# ---- Corretor 2.35: Regras S e Q, RODADAS ---------------------------------------
+$okSQ = $true; $erroSQ = ""
+try {
+    $astC = [System.Management.Automation.Language.Parser]::ParseInput($corr, [ref]$null, [ref]$null)
+    foreach ($nf in @("Repair-MinusculaNaSegundaLinha","Repair-AspaCurvaNumArquivoReto")) {
+        $fd = @($astC.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq $nf }, $true))
+        if ($fd.Count -eq 0) { throw "nao achei $nf no Corretor" }
+        . ([scriptblock]::Create($fd[0].Extent.Text))
+    }
+} catch { $okSQ = $false; $erroSQ = $_.Exception.Message }
+Checar "Corretor 2.35: as regras S e Q carregam do fonte" $okSQ $erroSQ
+if ($okSQ) {
+    $casosS = @(
+        @("Portanto, não faça. Principalmente`nSe eu estiver perto dele. Capisce?", "Portanto, não faça. Principalmente`nse eu estiver perto dele. Capisce?", "Ryan 305"),
+        @("se refugiou aqui`nSob o meu comando.", "se refugiou aqui`nsob o meu comando.", "Transformers 25"),
+        @("Vamos ver`nSem Lei e Sem Alma", "Vamos ver`nSem Lei e Sem Alma", "titulo fica"),
+        @("- Foi ele.`n- Se eu soubesse...", "- Foi ele.`n- Se eu soubesse...", "dialogo fica"),
+        @("Ele disse.`nSe eu quiser, vou.", "Ele disse.`nSe eu quiser, vou.", "frase fechada fica"),
+        @("ELE BUSCA A PAZ COM TRÓIA,`nO MAIS PODEROSO RIVAL", "ELE BUSCA A PAZ COM TRÓIA,`nO MAIS PODEROSO RIVAL", "letreiro fica"),
+        @("Se eu fosse você", "Se eu fosse você", "1a linha fica"))
+    foreach ($c in $casosS) {
+        $r = Repair-MinusculaNaSegundaLinha $c[0]
+        Checar ("Corretor 2.35 EXECUTADO: Regra S - " + $c[2]) ($r -ceq $c[1]) ("saiu: " + ($r -replace "`n", " / "))
+    }
+    $casosQ = @(
+        @(("eles pensam: `"Faz sentido" + [char]0x201D + "."), "eles pensam: `"Faz sentido`".", "Ryan 973"),
+        @(("`"TuFo" + [char]0x201D + "`"."), "`"TuFo`".", "Ryan 1164 (aspa lida duas vezes)"),
+        @(("`"O Marquês de Sade." + [char]0x201D), "`"O Marquês de Sade.`"", "Se7en"))
+    foreach ($c in $casosQ) {
+        $r = Repair-AspaCurvaNumArquivoReto $c[0]
+        Checar ("Corretor 2.35 EXECUTADO: Regra Q - " + $c[2]) ($r -ceq $c[1]) ("saiu: " + $r)
+    }
+}
+Checar "Corretor 2.35: a Regra Q so roda em arquivo de aspas retas (contado uma vez)" `
+    ([bool]($corr -match '\$script:ArquivoAspasRetas = \(\$nAspaReta -gt \$nAspaCurva\)') -and
+     [bool]($corr -match '(?s)if \(\$script:ArquivoAspasRetas\) \{\s*\$novoQ = Repair-AspaCurvaNumArquivoReto'))
+Checar "Corretor 2.35: a Regra S e chamada por Repair-ErrosClassicos" `
+    ([bool]($corr -match '\$novoS = Repair-MinusculaNaSegundaLinha \$resultado'))
+
 
 Write-Host ""
 Write-Host "==============================================================================" -ForegroundColor Cyan

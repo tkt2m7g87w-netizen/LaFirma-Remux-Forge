@@ -71,10 +71,10 @@
 ; sintaxe de PowerShell - o Inno le como texto solto e aborta com
 ; "Text is not inside a section" (aconteceu em 26/08, linha 42).
 ; ============================================================================
-#define Versao      "2.0"
-#define VersaoGui   "19.15"
-#define VersaoMotor "14.14"
-#define VersaoCorretor "2.34"
+#define Versao      "2.0.1"
+#define VersaoGui   "19.16"
+#define VersaoMotor "14.15"
+#define VersaoCorretor "2.35"
 #define VersaoReocr "1.30"
 #define Publicador  "Diego"
 #define Janela      "LaFirma_JANELA.ps1"
@@ -186,7 +186,7 @@ AppName={#NomeCompleto}
 AppVersion={#Versao}
 AppVerName={#NomeCompleto} {#Versao}
 AppPublisher={#Publicador}
-VersionInfoVersion=2.0.0.0
+VersionInfoVersion=2.0.1.0
 VersionInfoDescription={#NomeCompleto} - conversor Dolby Vision Perfil 8.1
 
 ; C:\LaFirma - caminho CURTO e SEM ESPACO, e fora de Program Files de proposito:

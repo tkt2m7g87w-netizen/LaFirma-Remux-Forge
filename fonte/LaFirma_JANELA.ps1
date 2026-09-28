@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  LaFirma - JANELA 19.15
+#  LaFirma - JANELA 19.16
 #  [DDVT] Interface Grafica WPF do Conversor de PERFIL Dolby Vision 8.1
 # ============================================================================
 #
@@ -40,6 +40,15 @@
 #    era preciso varrer 5.000 linhas. As entradas abaixo comecam na 16.58;
 #    o que veio antes continua documentado ao lado do codigo que mudou.
 #
+#    19.16  27/09/2026  2.0.1 (auditoria de 27/09): escolha manual so manda a
+#                       ordem que a tela mostra, e o painel do diagnostico
+#                       acompanha (A1); audio nao-principal sem
+#                       CONVERTER (M4); resumo separa Atmos de DTS (M2);
+#                       estimativa desconta a EL no FEL (M1); dicas da aba
+#                       Faixas traduzidas (B1); ESC fecha Log/Ferramentas/
+#                       Entenda (B9); calibragem do audio separada TrueHD x DTS
+#                       (B3); nota da legenda diz "bloco ilegivel"; log diz
+#                       quando o RPU nao traz L5 (B7)
 #    19.15  23/09/2026  Remontagem com video extraido: 8s + 4,5 s/GB (era 51 + 3,6)
 #    19.14  23/09/2026  Pasta de saida so com .mkv + .srt (sem copia do log)
 #    19.13  23/09/2026  Arquivo pulado nao vira 'erro -100%' na previsao
@@ -896,7 +905,7 @@
     nao tinha atualizado o arquivo - ele tinha. A tela mentiu e eu usei a
     mentira como prova contra ele.
     Ao subir a versao, trocar AQUI e no comentario do topo. #>
-$SCRIPT_VERSION = "19.15"
+$SCRIPT_VERSION = "19.16"
 
 # 16.30: BUG CORRIGIDO na estimativa de tamanho de saida (aba Faixas e log
 # FAIXAS). $bytesFaixa de cada faixa vinha SO da tag "number_of_bytes" do
@@ -927,7 +936,7 @@ $SCRIPT_VERSION = "19.15"
 
     Sem o arquivo (rodando direto da pasta de desenvolvimento, sem instalar)
     cai no valor abaixo - que e so um piso, nao a verdade. #>
-$APP_VERSAO = "2.0"
+$APP_VERSAO = "2.0.1"
 try {
     <#  $script:PastaScript so nasce la na linha ~185; aqui em cima ele ainda
         e $null e o Join-Path devolveria caminho errado. Por isso a pasta e
@@ -1484,6 +1493,23 @@ $script:CalibEtapaArquivo = "CALIBRAGEM_ETAPAS.txt"
 # 19.15: "remontagem2" - a base da etapa 5 mudou; o historico antigo foi medido
 # contra a reta velha e aplicado na nova daria +9%. Recomeca do zero.
 $script:NomeEtapaCalib = @("extracao", "dovi", "audio", "legenda", "remontagem2")
+<#  19.16 - O AUDIO SAO DOIS TRABALHOS, E A CALIBRAGEM MISTURAVA OS DOIS.
+    A etapa 3 e o DeeZy quando a principal e TrueHD e o ffmpeg quando e DTS.
+    Na fila de 26/09 a chave "audio" recebeu 1,13 (GoT, TrueHD), 1,24 (Ryan,
+    TrueHD) e 0,58 (Troy, DTS): o P75 dessa mistura aplicado a um DTS dobra a
+    etapa, e o numero oscila conforme a ordem da fila. Agora cada trabalho
+    aprende o seu: "audio-truehd" e "audio-dts". O historico "audio" antigo
+    e a mistura - fica no arquivo e nao e mais lido (o mesmo recomeco da
+    "remontagem2" na 19.15). #>
+$script:FatorAudio = @{ "audio-truehd" = 1.0; "audio-dts" = 1.0 }
+function Get-ChaveCalibAudio($v, $pl) {
+    if ($null -eq $pl) { $pl = Get-TrabalhoDoVideo $v }
+    if ("$($pl.ModoAudio)" -eq "truehd") { return "audio-truehd" }
+    # Manual: CONVERTER na principal com faixa pronta ao lado (modo "joc") e
+    # o DeeZy do mesmo jeito - quem diz e o codec da principal, nao o modo.
+    if ($null -ne $v -and [bool]$v.PrincipalTrueHD) { return "audio-truehd" }
+    return "audio-dts"
+}
 
 # --- pesos antigos, guardados so pra nao perder a referencia do Fallout ---
 $script:PesosComAudio  = @(1, 60, 65, 921, 1, 143, 1)
@@ -3056,6 +3082,11 @@ $script:TrabalhoMedicao = {
                     } else {
                         Avisar ("   Área ativa (L5): bordas {0}" -f "$($el.L5Bordas)")
                     }
+                } elseif ([int]$el.PontosLidos -gt 0) {
+                    <#  19.16: o RPU foi lido (o L1 acima veio dele) e nao trouxe L5
+                        - caso do Ryan. A linha sumia calada, e linha que some
+                        parece esquecimento; agora ela diz o fato. #>
+                    Avisar "   Área ativa (L5): não declarada no RPU"
                 }
                 Enviar @{ T = "el"; Serie = $Serie; Idx = $pe.Idx; Caminho = "$($pe.Path)"
                           Tipo = "$($el.Tipo)"; Selo = "$($el.Selo)"; Motivo = "$($el.Motivo)"
@@ -4733,11 +4764,13 @@ function Registrar-FatorDaEtapa([int]$Idx, [double]$SegReais) {
     if ($Idx -lt 0 -or $Idx -ge 5) { return }
     if ($SegReais -le 0) { return }
     $prev = 0.0
+    $chaveAudio = ""
     try {
         $iv = [int]$Motor.VideoIdx
         if ($iv -ge 0 -and $iv -lt @($script:LoteAtual).Count) {
             $se = @($script:LoteAtual[$iv].SegEtapas)
             if ($Idx -lt $se.Count) { $prev = [double]$se[$Idx] }
+            $chaveAudio = "$($script:LoteAtual[$iv].ChaveAudio)"
         }
     } catch { $prev = 0.0 }
     if ($prev -le 0) { return }
@@ -4748,10 +4781,16 @@ function Registrar-FatorDaEtapa([int]$Idx, [double]$SegReais) {
         conversao, e o numero divergiria um pouco mais a cada rodada. #>
     $fAtual = 1.0
     if ($Idx -lt @($script:FatorEtapa).Count) { $fAtual = [double]$script:FatorEtapa[$Idx] }
-    if ($fAtual -le 0) { $fAtual = 1.0 }
-    $fNovo = ($SegReais / $prev) * $fAtual
     $nome = "etapa$($Idx + 1)"
     if ($Idx -lt @($script:NomeEtapaCalib).Count) { $nome = $script:NomeEtapaCalib[$Idx] }
+    # 19.16: o audio grava no nome do trabalho que rodou, e compoe com o
+    # fator DELE - o mesmo que a estimativa desta fila usou.
+    if ($Idx -eq 2 -and $chaveAudio -ne "") {
+        $nome = $chaveAudio
+        if ($script:FatorAudio -and $script:FatorAudio.ContainsKey($chaveAudio)) { $fAtual = [double]$script:FatorAudio[$chaveAudio] }
+    }
+    if ($fAtual -le 0) { $fAtual = 1.0 }
+    $fNovo = ($SegReais / $prev) * $fAtual
     if ($fNovo -lt $script:FatorEtapaMin -or $fNovo -gt $script:FatorEtapaMax) {
         Escrever-Log ("CALIBRAGEM {0}: previsto {1:N0}s, real {2:N0}s -> fator {3:N2} fora dos limites ({4:N2} a {5:N2}), NAO gravado" -f `
                       $nome, $prev, $SegReais, $fNovo, $script:FatorEtapaMin, $script:FatorEtapaMax) "AVISO"
@@ -4795,6 +4834,9 @@ function Carregar-CalibragemEtapas {
     }
     $ditos = @()
     for ($i = 0; $i -lt 5; $i++) {
+        # 19.16: a etapa 3 nao se le mais por "audio" (era a mistura TrueHD +
+        # DTS) - ela se le logo abaixo, uma chave por trabalho.
+        if ($i -eq 2) { continue }
         $nome = $script:NomeEtapaCalib[$i]
         if (-not $porEtapa.ContainsKey($nome)) { continue }
         $ult = @($porEtapa[$nome] | Select-Object -Last 5)
@@ -4803,6 +4845,15 @@ function Carregar-CalibragemEtapas {
         if ($f -lt $script:FatorEtapaMin -or $f -gt $script:FatorEtapaMax) { continue }
         $script:FatorEtapa[$i] = $f
         $ditos += ("{0} {1:N2}x ({2} medida(s))" -f $nome, $f, $ult.Count)
+    }
+    foreach ($ch in @("audio-truehd", "audio-dts")) {
+        if (-not $porEtapa.ContainsKey($ch)) { continue }
+        $ult = @($porEtapa[$ch] | Select-Object -Last 5)
+        if ($ult.Count -lt 1) { continue }
+        $f = Get-Percentil ([double[]]$ult) 0.75
+        if ($f -lt $script:FatorEtapaMin -or $f -gt $script:FatorEtapaMax) { continue }
+        $script:FatorAudio[$ch] = $f
+        $ditos += ("{0} {1:N2}x ({2} medida(s))" -f $ch, $f, $ult.Count)
     }
     if ($ditos.Count -gt 0) {
         Escrever-Log ("CALIBRAGEM por etapa: {0}" -f ($ditos -join " | ")) "PROVA"
@@ -5126,8 +5177,9 @@ function Get-SegundosDasEtapas($v, [double]$Gb, [double]$Min) {
     # aqui - medido 1,2x no HD contra 6,5x da extracao - e a sensibilidade de
     # 0,04 e exatamente isso.
     $s3 = 0.0
+    $chaveAudio = Get-ChaveCalibAudio $v $pl
     if ($pl.Audio) {
-        $porMin = if ($pl.ModoAudio -eq "truehd") { $T.AudioTrueHDSegPorMin } else { $T.AudioOutroSegPorMin }
+        $porMin = if ($chaveAudio -eq "audio-truehd") { $T.AudioTrueHDSegPorMin } else { $T.AudioOutroSegPorMin }
         $s3 = $Min * $porMin * (Get-FatorDaEtapa "Audio")
     }
 
@@ -5162,6 +5214,10 @@ function Get-SegundosDasEtapas($v, [double]$Gb, [double]$Min) {
     for ($i = 0; $i -lt $bruto.Count; $i++) {
         $f = 1.0
         if ($i -lt @($script:FatorEtapa).Count) { $f = [double]$script:FatorEtapa[$i] }
+        # 19.16: a etapa 3 usa o fator do trabalho que vai rodar de verdade.
+        if ($i -eq 2 -and $script:FatorAudio -and $script:FatorAudio.ContainsKey($chaveAudio)) {
+            $f = [double]$script:FatorAudio[$chaveAudio]
+        }
         if ($f -le 0) { $f = 1.0 }
         $saida += ([double]$bruto[$i] * $f)
     }
@@ -5268,7 +5324,8 @@ function Set-LoteParaConverter {
         # teria que ser refeita do zero na hora do fim - e refazer conta e
         # como as duas contas do disco divergiram.
         $lote += @{ Caminho = $v.Caminho; Nome = $v.Nome; Pesos = $pesos; SegEstimado = $est
-                    SegEtapas = @($segs); Gb = $gb; SomaPesos = $soma }
+                    SegEtapas = @($segs); Gb = $gb; SomaPesos = $soma
+                    ChaveAudio = (Get-ChaveCalibAudio $v $null) }
     }
     # Sem return: a atribuicao direta nao passa pelo pipeline, entao nao ha
     # desmonte (o problema da 16.3) nem aninhamento (o problema da 16.4).
@@ -6653,6 +6710,13 @@ function Get-DiagAudioComEscolha($v) {
     if ((Test-TemEscolha $joc) -and "$($joc.VerboUsuario)" -eq "EXCLUIR") {
         if (-not $pri) { return @("→ [ESCOLHA MANUAL] Todas as Faixas de Áudio Excluídas por Você", "vermelho") }
         $alvo = $pri
+        <#  19.16 (A1): faixa pronta excluida e principal sem escolha = o motor
+            CONVERTE a principal (e o que a coluna ja mostrava). O painel caia
+            no texto do motor, "[REAPROVEITADO]", de uma faixa que nao ia
+            existir. Mesma frase do CONVERTER escolhido - o resultado e o mesmo. #>
+        if (-not (Test-TemEscolha $pri)) {
+            return @("→ [ESCOLHA MANUAL] $(Get-CodecCurto $pri) → $(Get-DestinoConversao $pri) a Pedido", "verde")
+        }
     } elseif (Test-TemEscolha $pri) {
         $alvo = $pri
     }
@@ -7503,12 +7567,18 @@ function Test-VerboBloqueado($f) { return ($f.Tipo -eq "video") }
     que nao e a pt-BR escolhida oferece MANTER e EXCLUIR - que e tudo que o
     motor sabe fazer com ela. O motor tambem passou a recusar a ordem
     (14.54): duas trancas, porque esta e do tipo que estraga arquivo. #>
+<#  19.16 - CONVERTER NUM AUDIO QUE O MOTOR NAO CONVERTE.
+    O motor so converte a faixa PRINCIPAL. Marcar CONVERTER na E-AC-3 pronta
+    ou numa dublagem virava MANTER em silencio - e a tela mentia duas vezes:
+    a coluna escrevia "E-AC-3 -> E-AC-3" e a estimativa somava uma faixa
+    fantasma (+0,45 GB no Fallout). Mesma regra da legenda que nao e a pt-BR
+    (17.16): o verbo que o motor nao executa nao e oferecido. #>
 function Get-OpcoesVerbo($f) {
     # 17.03: o dropdown mostra na lingua da tela; quem le de volta e
     # Get-VerboCanonico, no TrocaVerbo.
     $ops = if ($f.Papel -eq "audio-principal") { @("MANTER", "CONVERTER") }
-           elseif ($f.Tipo -eq "subtitles" -and -not (Test-EhLegendaPtBr $f)) { @("MANTER", "EXCLUIR") }
-           else { @("MANTER", "CONVERTER", "EXCLUIR") }
+           elseif ($f.Tipo -eq "subtitles" -and (Test-EhLegendaPtBr $f)) { @("MANTER", "CONVERTER", "EXCLUIR") }
+           else { @("MANTER", "EXCLUIR") }
     return @($ops | ForEach-Object { Get-VerboExibido $_ })
 }
 
@@ -7548,12 +7618,29 @@ function Get-TamanhoEstimadoFaixa($f, $v) {
     }
     return [double]$f.Bytes
 }
+<#  19.16 - A CAMADA EL SAI DO ARQUIVO, E A CONTA NAO SABIA.
+    O video nunca recodifica, mas a conversao para 8.1 descarta a EL
+    (dovi_tool --discard). Num FEL ela pesa: medido nos arquivos do Diego,
+    6,5% do video no GoT, 10,0% no Ryan e 10,3% no Transformers (no MEL,
+    ~0,1%). Somando o video inteiro, a estimativa saia +6,2% no GoT e +9,7%
+    no Ryan (26/09) - do lado seguro, mas capaz de acusar "nao cabe" sem
+    motivo.
+    Desconto de 6%, um pouco ABAIXO da menor fatia medida: a conta chega
+    perto do real (GoT +0,4%, Ryan +3,8%) e continua sem nunca prometer
+    menos do que sai. So com veredicto FEL: MEL+FEL, EL nao medida e MEL
+    ficam com o video inteiro, que e o lado seguro. #>
 function Get-TamanhoEstimadoVideo($v) {
     $total = 0.0
     $manual = ($v.Modo -eq "Manual")
+    $fatiaELDescontada = 0.06
+    $descontaEL = ([bool]$v.DVprecisa -and "$($v.ELtipo)" -eq "FEL")
     foreach ($f in @($v.Faixas)) {
         if (-not $f.Relevante) { continue }   # nao usada pelo motor, nao entra na saida de qualquer jeito
-        if ($f.Tipo -eq "video") { $total += [double]$f.Bytes; continue }   # video nunca recodifica
+        if ($f.Tipo -eq "video") {   # video nunca recodifica
+            $bv = [double]$f.Bytes
+            if ($descontaEL) { $bv = $bv * (1.0 - $fatiaELDescontada) }
+            $total += $bv; continue
+        }
         $bloq = Test-VerboBloqueado $f
         $usaManual = ($manual -and -not $bloq -and $null -ne $f.VerboUsuario)
         $vb = if ($usaManual) { "$($f.VerboUsuario)" } else { "$($f.VerboAuto)" }
@@ -11745,9 +11832,16 @@ function New-CartaoResultado($R) {
                 if ($R.NotaLegendaDefeitos -eq 0) {
                     $det = ("     ({0} legendas conferidas)" -f $R.NotaLegendaBlocos)
                 } elseif ($R.NotaLegendaDefeitos -eq 1) {
-                    $det = ("     (1 falha em {0} legendas)" -f $R.NotaLegendaBlocos)
+                    <#  19.16 - A NOTA DIZ O QUE ELA MEDE (proposta de 23/09,
+                        aprovada pelo Diego em 27/09). "1 falha em 1385" soava
+                        como "so um erro no filme inteiro" - e o Ryan, conferido
+                        contra a legenda oficial, tem 23 blocos com texto errado.
+                        O contador pega bloco que o OCR nao conseguiu ler (o
+                        "NEL"); palavra lida errada com cara de palavra passa.
+                        Entao o numero passa a dizer isso: bloco ilegivel. #>
+                    $det = ("     (1 bloco ilegível em {0})" -f $R.NotaLegendaBlocos)
                 } else {
-                    $det = ("     ({0} falhas em {1} legendas)" -f $R.NotaLegendaDefeitos, $R.NotaLegendaBlocos)
+                    $det = ("     ({0} blocos ilegíveis em {1})" -f $R.NotaLegendaDefeitos, $R.NotaLegendaBlocos)
                 }
             }
             <#  16.59: A LINHA DA QUALIDADE GANHA COR.
@@ -12051,7 +12145,14 @@ function Show-Resumo([string]$Como, [switch]$Redesenho) {
     # Detalhamento: conta o que REALMENTE aconteceu, sem repetir o numero de
     # sucessos como se tudo tivesse acontecido em todos.
     $comDV  = @($res | Where-Object { "$($_.StatusDV)" -eq "OK" }).Count
-    $comAu  = @($res | Where-Object { "$($_.StatusAudio)" -eq "OK" }).Count
+    <#  19.16 - A MESMA MENTIRA DO RESUMO DO TROY, AGORA NO CONTADOR.
+        "Audio Convertido para E-AC-3[ATMOS] : 3" numa fila em que o Troy
+        saiu E-AC-3 5.1 640k, sem Atmos (26/09). A coluna e o cartao ja
+        separavam pelo TipoConvAudio do motor; so o DETALHAMENTO contava
+        qualquer audio convertido como Atmos. Agora sao dois contadores,
+        pelo mesmo campo que o cartao usa. #>
+    $comAu  = @($res | Where-Object { "$($_.StatusAudio)" -eq "OK" -and "$($_.TipoConvAudio)" -eq "TRUEHD" }).Count
+    $comDts = @($res | Where-Object { "$($_.StatusAudio)" -eq "OK" -and "$($_.TipoConvAudio)" -eq "DTS" }).Count
     $reapAu = @($res | Where-Object { "$($_.StatusAudio)" -eq "JA_OTIMO" -and "$($_.MotivoAudio)" -match "Atmos/JOC" }).Count
     # 16.59: "mantido a pedido" nao e "reaproveitado" - ver Get-SelosResultado.
     # Sem esta separacao o resumo de 27/08 contou 1 em "E-AC-3/AC-3
@@ -12065,6 +12166,7 @@ function Show-Resumo([string]$Como, [switch]$Redesenho) {
     $det = @()
     $det += "Dolby Vision Convertido para Profile 8.1  : {0}" -f $comDV
     $det += "Áudio Convertido para E-AC-3[ATMOS]       : {0}" -f $comAu
+    if ($comDts -gt 0) { $det += "Áudio DTS Convertido para E-AC-3          : {0}" -f $comDts }
     if ($reapAu -gt 0) { $det += "Áudio E-AC-3[ATMOS] Reaproveitado         : {0}" -f $reapAu }
     if ($reapC2 -gt 0) { $det += "Áudio E-AC-3/AC-3 Reaproveitado           : {0}" -f $reapC2 }
     if ($manAu  -gt 0) { $det += "Áudio Mantido a Pedido (sem converter)    : {0}" -f $manAu }
@@ -12253,6 +12355,15 @@ function Show-JanelaTexto([string]$Titulo, [string]$Conteudo, [bool]$DoTopo = $f
     if (-not $DoTopo) { $w.add_ContentRendered({ $tb.ScrollToEnd() }) }
     elseif ($w.Content -is [System.Windows.Controls.TextBox]) { $w.add_ContentRendered({ $tb.ScrollToHome() }) }
     if ($DoTopo) { $w.Width = 900; $w.Height = 620 }
+    <#  19.16 - ESC FECHA A JANELA DE TEXTO (Ferramentas, Log, Entenda).
+        Ela nao fechava: ESC ali nao fazia nada, e o Diego fechava no X e
+        apertava ESC de novo - que ai caia na janela principal, na pergunta
+        de cancelar a conversao (log de 25/09; a confirmacao segurou). Aqui o
+        ESC e consumido e fecha so esta janela. #>
+    $w.add_PreviewKeyDown({
+        param($s, $ev)
+        if ($ev.Key -eq "Escape") { $ev.Handled = $true; try { $s.Close() } catch { } }
+    })
     $w.ShowDialog() | Out-Null
 }
 
@@ -12603,15 +12714,38 @@ function Build-EscolhasManuais {
         # 16.81: true quando o usuario tirou do OCR uma PGS que o automatico
         # converteria - e a unica forma de dizer NAO ao motor (ver abaixo).
         $pgsRecusada = $false
+        <#  19.16 - A JANELA MANDAVA UMA ORDEM QUE O USUARIO NAO DEU (log de
+            25/09, 23:17, Fallout S02E01 ja convertido).
+
+            O Diego mexeu so na E-AC-3 (id 2). A janela mandou ao motor
+            "converter principal = NAO" - porque o verbo EFETIVO da principal
+            era o do automatico, e num arquivo com E-AC-3 pronta o automatico
+            e MANTER. O motor leu isso como "o usuario desligou a conversao",
+            pulou a busca pela faixa pronta e marcou o TrueHD como padrao:
+            "AUDIO PADRAO: faixa 1 (TrueHD Atmos 7.1)". Bastava mexer em
+            qualquer faixa do arquivo, ate numa legenda.
+
+            Chave presente e ORDEM (16.31). Entao a chave so vai quando a
+            ordem existe:
+              1. o usuario escolheu um verbo NA PRINCIPAL -> vai esse verbo;
+              2. nao escolheu, mas EXCLUIU a faixa pronta -> vai CONVERTER.
+                 E exatamente o que a coluna AUDIO ja mostra nesse caso
+                 (Get-ColunaAudioComEscolha: "TrueHD -> E-AC-3[ATMOS]"), e o
+                 motor, com a ordem de converter, ignora a faixa pronta;
+              3. nos outros casos a chave nao vai, e o motor decide sozinho. #>
+        $escolhaPrincipal = $null
+        $prontaExcluida = $false
         foreach ($f in @($v.Faixas)) {
             if ($f.Tipo -eq "video") { continue }
             $vb = Get-VerboEfetivo $v $f
             if ($f.Tipo -eq "audio") {
                 if ($vb -ne "EXCLUIR") { $aud += [int]$f.Id }
-                if ($f.Papel -eq "audio-principal") {
-                    if ($vb -eq "CONVERTER")   { $e["ConverterPrincipal"] = $true }
-                    elseif ($vb -eq "MANTER")  { $e["ConverterPrincipal"] = $false }
+                $tocada = ($null -ne $f.VerboUsuario) -and -not (Test-VerboBloqueado $f)
+                if ($f.Papel -eq "audio-principal" -and $tocada) {
+                    if ($vb -eq "CONVERTER")   { $escolhaPrincipal = $true }
+                    elseif ($vb -eq "MANTER")  { $escolhaPrincipal = $false }
                 }
+                if ($f.Papel -eq "audio-joc" -and $tocada -and $vb -eq "EXCLUIR") { $prontaExcluida = $true }
             } elseif ($f.Tipo -eq "subtitles") {
                 if ($vb -eq "MANTER")     { $leg += [int]$f.Id }
                 elseif ($vb -eq "CONVERTER") { $e["LegendaPgs"] = [int]$f.Id }
@@ -12633,6 +12767,8 @@ function Build-EscolhasManuais {
                 }
             }
         }
+        if ($null -ne $escolhaPrincipal) { $e["ConverterPrincipal"] = [bool]$escolhaPrincipal }
+        elseif ($prontaExcluida)         { $e["ConverterPrincipal"] = $true }
         if ($aud.Count -gt 0) { $e["AudioManter"] = $aud }
         # v16.31: BUG CORRIGIDO - antes so mandava LegendaManter quando $leg
         # tinha pelo menos 1 id (igual o audio, "if Count -gt 0"). Pra audio
@@ -12905,9 +13041,13 @@ function Set-DicaFaixas([string]$Texto) {
 }
 
 function Set-AbaDica([string]$Texto) {
+    # 19.16: a dica guardada fica em portugues (e a chave da tabela); o que
+    # vai para a tela passa pelo Traduzir. Antes nao passava, e com a tela em
+    # ingles saiam "Selecione um video na aba Fila." e "Este video nao pode
+    # ser lido." em portugues - as entradas existiam no IDIOMA_EN desde a 17.
     $script:DicaAntesDaEspera = $Texto
     if ($script:IniciarAposMedir) { return }
-    try { $UI.lblAbaDica.Text = $Texto } catch { }
+    try { $UI.lblAbaDica.Text = (Traduzir $Texto) } catch { }
 }
 
 <#  17.13: quem liga e desliga o aviso e esta funcao, e nao tres linhas
@@ -12947,7 +13087,7 @@ function Update-AvisoEspera {
 }
 
 function Restaurar-AbaDica {
-    try { $UI.lblAbaDica.Text = "$($script:DicaAntesDaEspera)" } catch { }
+    try { $UI.lblAbaDica.Text = (Traduzir "$($script:DicaAntesDaEspera)") } catch { }
 }
 
 <#  17.15 - ESPERAR POR UM ARQUIVO QUE NAO VAI CONVERTER E ESPERAR A TOA.
@@ -14020,6 +14160,12 @@ $script:TrocaVerbo = [System.Windows.Controls.SelectionChangedEventHandler]{
         tambem confere - a lista de opcoes e desenho, e desenho nao e regra. #>
     if ($novo -eq "CONVERTER" -and $f.Tipo -eq "subtitles" -and -not (Test-EhLegendaPtBr $f)) {
         Escrever-Log ("FAIXA recusada: id {0} nao e a legenda pt-BR - o OCR deste programa e pt-BR e so" -f $f.Id) "AVISO"
+        Fill-Faixas
+        return
+    }
+    # 19.16: a mesma segunda tranca para o audio que nao e o principal.
+    if ($novo -eq "CONVERTER" -and $f.Tipo -eq "audio" -and "$($f.Papel)" -ne "audio-principal") {
+        Escrever-Log ("FAIXA recusada: id {0} nao e o audio principal - o motor so converte a faixa principal" -f $f.Id) "AVISO"
         Fill-Faixas
         return
     }

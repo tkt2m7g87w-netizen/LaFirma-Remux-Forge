@@ -1,10 +1,21 @@
 ﻿<#
 ================================================================================
  LaFirma - Corretor_Legenda.ps1
- Versao 2.34
+ Versao 2.35
  --------------------------------------------------------------------------
  HISTORICO (entrada nova a cada mudanca de $Versao, na MESMA edicao)
  --------------------------------------------------------------------------
+  2.35  27/09/2026 - Conferido contra a legenda oficial do Ryan (27/09).
+        Regra S: minuscula lida como maiuscula no comeco da 2a linha quando
+        a de cima nao fecha a frase ("Principalmente / Se eu" - Ryan; "aqui
+        / Sob o meu comando" - Transformers). Regra Q: aspa de fechar curva
+        num arquivo de aspas retas, e a aspa lida duas vezes ('"TuFo"' -
+        Ryan; Se7en e Homem-Aranha no mesmo desenho). Linha nova "Blocos
+        corrigidos nesta rodada: N" para o motor escrever o numero no log.
+        Rodado nas 20 SRT: so mudam as linhas previstas. NAO entraram, pela
+        regra da casa (caso de um filme so nao vira regra, lista de excecao
+        nao e solucao): "lowa"->"Iowa", "E grave?"->"\u00c9 grave?",
+        "suti\u00e1"->"suti\u00e3".
   2.34  23/09/2026 - Fala inteira "Sel." -> "Sei." (GoT) e "Pal..." abrindo
         a fala -> "Pai..." (Troia, 3x). i lido como l.
   2.33  23/09/2026 - "- E Isso o que eu vejo" -> "- \u00c9 isso" (Transformers).
@@ -213,7 +224,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
-$Versao = "2.34"
+$Versao = "2.35"
 
 $script:Relatorio = New-Object System.Collections.Generic.List[string]
 function Diz {
@@ -2234,7 +2245,69 @@ function Repair-ErrosClassicos {
         }
     }
 
+    # ---- REGRAS S e Q (2.35): funcoes proprias logo abaixo - a bateria roda
+    # as duas isoladas, com as frases reais dos filmes.
+    $novoS = Repair-MinusculaNaSegundaLinha $resultado
+    if ($novoS -cne $resultado) { $resultado = $novoS; $script:RepairMexeu = $true }
+    if ($script:ArquivoAspasRetas) {
+        $novoQ = Repair-AspaCurvaNumArquivoReto $resultado
+        if ($novoQ -cne $resultado) { $resultado = $novoQ; $script:RepairMexeu = $true }
+    }
+
     return $resultado
+}
+
+<#  ---- REGRA S (2.35): MINUSCULA LIDA COMO MAIUSCULA NO COMECO DA 2a LINHA.
+    Ryan 305:        "Portanto, nao faca. Principalmente / Se eu estiver..."
+    Transformers 25: "se refugiou aqui / Sob o meu comando."
+    A frase continua da linha de cima (ela nao fecha com . ! ? : ... nem
+    aspa), entao a palavra de baixo e minuscula. As letras s, o, c tem o
+    MESMO desenho em maiuscula e minuscula - o Tesseract so separa pela
+    altura, e erra. Dois filmes de estudios diferentes: familia.
+    As travas, cada uma medida (20 SRT, 6 filmes: so estas 2 mudam):
+      - so a partir da 2a linha do bloco, e a de cima nao fecha a frase;
+      - fala com travessao e linha toda maiuscula ficam de fora;
+      - so conjuncao/preposicao da lista (Se, Sob, Sobre, Ou, Onde, Com,
+        Como, Sem) - possessivo e artigo abrem titulo e nome;
+      - a palavra seguinte tem que ser minuscula: "Sem Lei e Sem Alma",
+        "Sobre Meninos e Lobos" e "Como Treinar o Seu Dragao" ficam.
+    A mesma regra no MEIO da linha foi medida e estraga "Sexto do Seu Nome"
+    e "Sao Tomas" - por isso so o comeco da linha. #>
+function Repair-MinusculaNaSegundaLinha([string]$Texto) {
+    $linhasS = @($Texto -split "`n")
+    if ($linhasS.Count -lt 2) { return $Texto }
+    $mexeuS = $false
+    for ($i = 1; $i -lt $linhasS.Count; $i++) {
+        $cima = $linhasS[$i - 1].TrimEnd()
+        if ($cima -eq "") { continue }
+        if ($cima -match '[.!?:\u2026"\u201C\u201D]$') { continue }
+        $lnS = $linhasS[$i]
+        if ($lnS -match '^\s*[-\u2013\u2014]') { continue }
+        if ($lnS -cnotmatch '[\p{Ll}]') { continue }
+        $mS = [regex]::Match($lnS, '^(\s*)(Se|Sob|Sobre|Ou|Onde|Com|Como|Sem)(\s+)(?=[\p{Ll}])')
+        if (-not $mS.Success) { continue }
+        $pal = $mS.Groups[2].Value
+        $linhasS[$i] = $mS.Groups[1].Value + $pal.Substring(0,1).ToLowerInvariant() + $pal.Substring(1) + $lnS.Substring($mS.Groups[1].Length + $pal.Length)
+        $mexeuS = $true
+    }
+    if (-not $mexeuS) { return $Texto }
+    return ($linhasS -join "`n")
+}
+
+<#  ---- REGRA Q (2.35): ASPA CURVA NUM ARQUIVO DE ASPAS RETAS.
+    O disco usa aspa reta e o Tesseract devolve a de FECHAR curva:
+      Ryan 973   eles pensam: "Faz sentido(curva).
+      Ryan 1164  "TuFo(curva)(reta).      <- a mesma aspa lida duas vezes
+      Se7en (3 blocos) e Homem-Aranha (4 blocos): o mesmo desenho.
+    Tres filmes, estudios diferentes. Quem chama so chama quando o ARQUIVO
+    escreve com aspa reta (mais retas que curvas - $script:ArquivoAspasRetas,
+    contado uma vez no arquivo inteiro): legenda que usa aspas curvas de
+    ponta a ponta nao e tocada. A aspa repetida vira uma - aspa vazia nao
+    existe em fala. Medido nas 20 SRT: 9 blocos mudam, todos so no desenho
+    da aspa. #>
+function Repair-AspaCurvaNumArquivoReto([string]$Texto) {
+    $r = $Texto.Replace([string][char]0x201D, '"').Replace([string][char]0x201C, '"')
+    return ([regex]::Replace($r, '"{2,}', '"'))
 }
 
 # ============================================================== programa
@@ -2350,6 +2423,10 @@ try {
     # que uma palavra "garbled" (AiNda) e mesmo palavra (ainda). Ver Regra C.
     $script:MinusculasDoArquivo = New-Object 'System.Collections.Generic.HashSet[string]'
     foreach ($mm in [regex]::Matches($textoTodo, '(?<![\p{L}])[\p{Ll}]{2,}(?![\p{L}])')) { [void]$script:MinusculasDoArquivo.Add($mm.Value) }
+    # 2.35: o arquivo escreve com aspa reta? (Regra Q) - uma conta so, aqui.
+    $nAspaReta  = ([regex]::Matches($textoTodo, '"')).Count
+    $nAspaCurva = ([regex]::Matches($textoTodo, '[\u201C\u201D]')).Count
+    $script:ArquivoAspasRetas = ($nAspaReta -gt $nAspaCurva)
     # 2.32: quantas vezes cada palavra Capitalizada aparece - nome se repete,
     # maiuscula errada de OCR aparece uma vez (ver a regra no fim da Regra D).
     $script:ContagemCapitalizadas = @{}
@@ -2648,6 +2725,19 @@ try {
         $srtSaida = Join-Path $pastaSaida ($nomeBase + "_CORRIGIDO.srt")
         [System.IO.File]::WriteAllText($srtSaida, $sb.ToString(), (New-Object System.Text.UTF8Encoding($true)))
 
+        <#  2.35: O NUMERO DO QUE FOI CORRIGIDO, NUMA LINHA SO.
+            O motor escrevia "Revisou e Corrigiu Blocos-Lixo do OCR" sem
+            numero - e com nota EXCELENTE os relatorios sao apagados, entao
+            nao sobrava registro de quanto mudou. O Reocr ja dizia "Refez N".
+            Bloco mexido pela regra automatica e pela 2a opiniao conta UMA
+            vez (mesma chave de tempo); reparo de formato conta a parte. O
+            motor le esta linha pelo texto - mudar a frase e mudar o motor. #>
+        $chavesMexidas = New-Object 'System.Collections.Generic.HashSet[string]'
+        foreach ($t in $trocasAuto) { [void]$chavesMexidas.Add([string]$t.Chave) }
+        foreach ($t in $trocas)     { [void]$chavesMexidas.Add([string]$t.Chave) }
+        $totalCorrigido = $chavesMexidas.Count + [int]$script:ReparosEstrutura
+        Diz ""
+        Diz ("Blocos corrigidos nesta rodada: " + $totalCorrigido) "Green"
         Diz ""
         Diz ("SRT CORRIGIDO: " + $srtSaida) "Green"
         Diz ""

@@ -4,7 +4,7 @@
 #  ffmpeg + dovi_tool + mkvmerge (+ OCR de legenda PT-BR opcional via PgsToSrt)
 # ============================================================================
 #
-#  VERSAO: 14.14 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
+#  VERSAO: 14.15 (o valor efetivo esta em $SCRIPT_VERSION, mais abaixo)
 #  ----------------------------------------------------------------------
 #  REGRA DE VERSIONAMENTO (definida com o usuario):
 #    - Atualizacao GRANDE (muda comportamento/logica): sobe o numero maior
@@ -16,6 +16,11 @@
 #  Historico (v1.0 -> v2.0 reconstruido a partir das evidencias documentadas
 #  nos proprios comentarios do script; v3.0 em diante e registrado na hora).
 #
+#   v14.15 (2.0.1, auditoria de 27/09: faixa SRT gravada como "pt-BR"
+#           (era "por"); "Contexto do brilho" diz o L1 e a folga ("L1 216
+#           nits, 784 abaixo do pico do master"); a nota da legenda diz
+#           "bloco(s) ilegivel(is)"; o log diz quantos blocos o Corretor
+#           corrigiu - 27/09/2026)
 #   v14.14 (a pasta de saida recebe so .mkv + .srt: a copia do log ao
 #           lado do arquivo saiu - o log fica em _logs - 23/09/2026)
 #   v14.13 (espaco por DISCO: com origem e saida em discos diferentes a
@@ -1010,7 +1015,7 @@
 #         de video via ffmpeg, conversao Dolby Vision para Profile 8.1 via
 #         dovi_tool, remux final via mkvmerge, log via Start-Transcript.
 # ============================================================================
-$SCRIPT_VERSION  = "14.14"
+$SCRIPT_VERSION  = "14.15"
 $SCRIPT_CODINOME = "LaFirma"
 #
 #  PASTA TEMPORARIA: SEMPRE NO MESMO DISCO DO ARQUIVO DE ORIGEM
@@ -5352,6 +5357,8 @@ function Repara-AcentoBinaryOcr {
 #>
 function Invoke-CorretorLegenda {
     param([string]$MkvPath, [string]$SrtPath)
+    # 14.15: quantos blocos o Corretor corrigiu (-1 = ele nao disse).
+    $script:CorretorCorrigidos = -1
     if (-not $temCorretor) { return $null }
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -5433,6 +5440,12 @@ function Invoke-CorretorLegenda {
     if ($subOutCorretor) { Unregister-Event -SourceIdentifier $subOutCorretor.Name -ErrorAction SilentlyContinue }
     if ($subErrCorretor) { Unregister-Event -SourceIdentifier $subErrCorretor.Name -ErrorAction SilentlyContinue }
     Show-BarraFaixaFim
+    # 14.15: o Corretor 2.35 escreve "Blocos corrigidos nesta rodada: N" quando
+    # grava o _CORRIGIDO. Sem a linha (Corretor antigo), fica -1 e o log diz a
+    # frase de antes, sem numero.
+    foreach ($lnC in @($linhasCorretor)) {
+        if ("$lnC" -match 'Blocos corrigidos nesta rodada: (\d+)') { $script:CorretorCorrigidos = [int]$Matches[1] }
+    }
 
     # v14.7: BUG REAL, e dos grandes - o motor procurava o arquivo corrigido na
     # PASTA ERRADA desde a v14.1, ou seja, o Corretor_Legenda NUNCA foi usado
@@ -6210,7 +6223,11 @@ foreach ($f in $files) {
                         $partes += ("master {0} nits" -f ([double]$brilho.MasterMax).ToString("0", $inv))
                         $folga = [double]$brilho.MasterMax - [double]$diagEL.MaxCLL
                         if ($folga -gt 0) {
-                            $partes += ("L1 {0} nits ABAIXO do pico do master" -f ([double]$folga).ToString("0", $inv))
+                            # 14.15: "L1 784 nits ABAIXO do pico" parecia dizer que o L1
+                            # era 784 - e 784 era a folga (GoT: L1 216, master 1000).
+                            # Texto proposto na auditoria de 27/09, ok do Diego.
+                            $partes += ("L1 {0} nits, {1} abaixo do pico do master" -f `
+                                        ([double]$diagEL.MaxCLL).ToString("0", $inv), ([double]$folga).ToString("0", $inv))
                         } else {
                             $partes += ("L1 NO/ACIMA do pico do master - olhar este caso de perto")
                         }
@@ -7097,7 +7114,12 @@ foreach ($f in $files) {
                             $srtCorrigido = Invoke-CorretorLegenda -MkvPath $f.FullName -SrtPath $srtCandidate
                             if ($srtCorrigido) {
                                 $srtPtBr = $srtCorrigido
-                                SayOk "Corretor_Legenda Revisou e Corrigiu Blocos-Lixo do OCR"
+                                # 14.15: com o numero, como o Reocr ("Refez N").
+                                if ([int]$script:CorretorCorrigidos -ge 0) {
+                                    SayOk ("Corretor_Legenda Revisou e Corrigiu {0} Bloco(s) do OCR" -f [int]$script:CorretorCorrigidos)
+                                } else {
+                                    SayOk "Corretor_Legenda Revisou e Corrigiu Blocos-Lixo do OCR"
+                                }
                             }
                         }
                     }
@@ -7152,7 +7174,7 @@ foreach ($f in $files) {
                                 $script:NotaLegendaBlocos    = $reocrRes.NotaBlocos
                                 $txtNota = "Qualidade da Legenda: " + $reocrRes.Veredicto
                                 if ($reocrRes.NotaDefeitos -ge 0) {
-                                    $txtNota = $txtNota + " (" + $reocrRes.NotaDefeitos + " bloco(s) com defeito, " + $reocrRes.NotaPct + "%)"
+                                    $txtNota = $txtNota + " (" + $reocrRes.NotaDefeitos + " bloco(s) ilegivel(is), " + $reocrRes.NotaPct + "%)"   # 14.15: diz o que mede (proposta de 23/09, ok do Diego 27/09)
                                 }
                                 <#  v14.31: EXCELENTE CAIA NO ELSE E LEVAVA A FRASE DE RUIM.
                                     Este if tratava BOA e RAZOAVEL por nome e jogava TODO
@@ -7449,7 +7471,7 @@ foreach ($f in $files) {
             if ($null -ne $script:NotaLegendaVeredicto -and $script:NotaLegendaVeredicto -ne "") {
                 $linhaNota = "        Qualidade da Legenda Convertida: " + $script:NotaLegendaVeredicto
                 if ($script:NotaLegendaDefeitos -ge 0) {
-                    $linhaNota += (" - {0} de {1} bloco(s) com defeito ({2}%)" -f $script:NotaLegendaDefeitos, $script:NotaLegendaBlocos, $script:NotaLegendaPct)
+                    $linhaNota += (" - {0} de {1} bloco(s) ilegivel(is) ({2}%)" -f $script:NotaLegendaDefeitos, $script:NotaLegendaBlocos, $script:NotaLegendaPct)
                 }
                 if ($script:NotaLegendaVeredicto -ceq "EXCELENTE") {
                     # v14.31: mesmo defeito do ramo da sub-etapa - ver o
@@ -7554,7 +7576,11 @@ foreach ($f in $files) {
         }
         # 2.0.10: "Portugues" com acento no nome da faixa. O motor e ASCII puro,
         # entao o e-circunflexo vem de [char]0x00EA - o arquivo continua sem byte acentuado.
-        if ($srtPtBr) { $mkvArgs += @("--language", "0:por", "--track-name", ("0:Portugu" + [char]0x00EA + "s (Brasil) [OCR]"), "--default-track", "0:yes", "$srtPtBr") }
+        # 14.15: idioma "pt-BR" (IETF), igual a PGS de origem. Com "por" o
+        # MediaInfo mostrava so "Portugues" ao lado da PGS "Portugues (BR)". O
+        # mkvmerge grava "por" no campo antigo e "pt-BR" no IETF - quem le so o
+        # campo antigo continua vendo portugues.
+        if ($srtPtBr) { $mkvArgs += @("--language", "0:pt-BR", "--track-name", ("0:Portugu" + [char]0x00EA + "s (Brasil) [OCR]"), "--default-track", "0:yes", "$srtPtBr") }
         $exitCode = Invoke-MkvMergeComProgresso -ArgList $mkvArgs
         if ($exitCode -ne 0 -and $exitCode -ne 1) {
             # mkvmerge retorna 1 para "avisos" (nao fatal); qualquer coisa >=2 e erro real

@@ -285,6 +285,10 @@
  legenda com 100% de acerto, e o programa prefere dizer a nota do que
  fingir que saiu perfeito.
 
+ A nota conta os blocos que o OCR não conseguiu ler. Palavra lida errada
+ que vira outra palavra de verdade não entra na conta - é por isso que a
+ PGS original fica no arquivo.
+
 
 ------------------------------------------------------------------------------
  8. PERFIL 5 - o caminho dele é o container, não o perfil

@@ -294,6 +294,10 @@
  100% accurate, and the program would rather tell you the grade than pretend
  it came out perfect.
 
+ The grade counts the blocks the OCR could not read. A word misread into
+ another real word is not counted - that is why the original PGS stays in
+ the file.
+
 
 ------------------------------------------------------------------------------
  8. PROFILE 5 - its path is the container, not the profile

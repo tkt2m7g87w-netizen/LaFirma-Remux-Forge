@@ -17,6 +17,32 @@
 
 
 ==============================================================================
+ INSTALLER 2.0.1  -  27/09/2026
+==============================================================================
+ Components: ENGINE 14.15 | WINDOW 19.16 | CORRECTOR 2.35 | REOCR 1.30 | TESTAR_LAFIRMA 4.8 (1,381 tests)
+
+ Audit of the installed 2.0 (real conversion of GoT, Ryan and Troy on
+ 26/09, with the official Ryan subtitle as reference).
+
+ 1. Manual mode: touching any track of a file that already had a ready-made
+    E-AC-3 sent "convert main = NO" to the engine, which then left
+    TrueHD/DTS as the default. Now only real choices are sent. CONVERT is no
+    longer offered on audio tracks other than the main one.
+ 2. Screen and log: the final summary separates Atmos (TrueHD) from DTS;
+    the subtitle grade says "1 unreadable block in N"; "Brightness context"
+    states L1 and the headroom; the log says how many blocks the Corrector
+    fixed and when the RPU has no L5; Video Tracks hints translated; ESC
+    closes the Log, Tools and Understand windows.
+ 3. Estimates: size discounts 6% of the video on FEL (the EL that is
+    dropped); time calibration splits TrueHD (DeeZy) from DTS (ffmpeg).
+ 4. The SRT track is tagged "pt-BR" (was "por").
+ 5. Corrector 2.35: lowercase read as uppercase at the start of the second
+    line, and a curly closing quote in a straight-quote file. Checked on 20
+    subtitles: 11 lines changed in 4 films, all of them the expected ones;
+    GoT and Troy come out identical.
+
+
+==============================================================================
  INSTALLER 2.0  -  23/09/2026      *** PUBLIC RELEASE ***
 ==============================================================================
  Components: ENGINE 14.14 | WINDOW 19.15 | CORRECTOR 2.34 | REOCR 1.30 | TESTAR_LAFIRMA 4.7 (1,334 tests)

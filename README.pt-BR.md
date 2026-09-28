@@ -117,8 +117,8 @@ Antes de tocar no arquivo, ele lê o campo `el_type` dentro do RPU (com o `dovi_
 Medido em máquina real, sem consultar lista nenhuma:
 
 ```
-Troy (2004) Director's Cut  ->  MEL            303 nits de 1.000
-Game of Thrones S08E01      ->  SIMPLE FEL     153 nits de 1.000
+Troy (2004) Director's Cut  ->  MEL            349 nits de 1.000
+Game of Thrones S08E01      ->  SIMPLE FEL     216 nits de 1.000
 Saving Private Ryan (1998)  ->  COMPLEX FEL  1.608 nits de 1.000
 ```
 
@@ -152,7 +152,9 @@ Smart TVs e soundbars recusam os codecs sem perda que um Blu-ray carrega. O prog
   Os objetos de áudio sobrevivem: entra Atmos, sai Atmos.
 * **DTS**, **DTS-HD MA** e **DTS:X** → **E-AC-3 comum**, 640 kbps, via ffmpeg.
   **Sem Atmos na saída.** DTS e Atmos são de empresas diferentes, e os objetos do DTS:X não viram objetos Dolby. Nada no mundo converte um no outro.
-* **E-AC-3**, **AC-3** e **AAC** já são compatíveis e não são tocados.
+* **E-AC-3**, **AC-3** e **AAC** já são compatíveis e não são convertidos.
+
+**O que fica no arquivo.** No Automático, o arquivo final fica com a faixa de áudio principal — a original, mais a E-AC-3 nova ou reaproveitada, que vira a padrão — e descarta as outras faixas de áudio: dublagens, comentários e outros idiomas. Para manter alguma delas, use o Manual.
 
 ### 💬 Legenda PGS → SRT
 
@@ -160,7 +162,9 @@ Smart TVs e soundbars recusam os codecs sem perda que um Blu-ray carrega. O prog
 
 A legenda em imagem vira texto `.SRT` limpo, corrigido contra um dicionário de 1,3 milhão de palavras, e o programa **dá nota ao arquivo que ele mesmo gerou** — EXCELENTE, BOA, RAZOÁVEL ou RUIM — em vez de supor que deu certo.
 
-A faixa PGS original **continua no arquivo final**. O `.SRT` é uma faixa a mais, não uma troca.
+A faixa PGS original **continua no arquivo final**. O `.SRT` é uma faixa a mais, não uma troca. O arquivo também fica com uma legenda em inglês (a completa; a SDH só quando não há outra). No Automático, legendas em outros idiomas e as forçadas são descartadas; o Manual pode manter.
+
+A nota conta os blocos que o OCR não conseguiu ler. Palavra lida errada que vira outra palavra de verdade não entra na conta — é por isso que a PGS original fica no arquivo.
 
 ### 💾 Lote e espaço em disco
 
@@ -170,7 +174,7 @@ Quem não cabe **nem chega a começar** — sem pasta temporária, sem 20 minuto
 
 ### 🎛️ Automático ou manual
 
-Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**.
+Deixe o motor de decisão cuidar de tudo, ou abra a lista de faixas e escolha, uma por uma, o que **manter**, **converter** ou **excluir**. O Automático fica com as faixas descritas acima, em Áudio e Legenda, e descarta o resto; o Manual é o caminho para manter uma dublagem, um comentário ou outro idioma.
 
 ### 🏷️ O nome diz o que o arquivo é
 

@@ -117,8 +117,8 @@ Before touching the file, it reads the `el_type` field inside the RPU (with `dov
 Measured on a real machine, with no list consulted:
 
 ```
-Troy (2004) Director's Cut  ->  MEL              303 nits of 1,000
-Game of Thrones S08E01      ->  SIMPLE FEL       153 nits of 1,000
+Troy (2004) Director's Cut  ->  MEL              349 nits of 1,000
+Game of Thrones S08E01      ->  SIMPLE FEL       216 nits of 1,000
 Saving Private Ryan (1998)  ->  COMPLEX FEL    1,608 nits of 1,000
 ```
 
@@ -152,7 +152,9 @@ Smart TVs and soundbars refuse the lossless codecs a Blu-ray carries. The progra
   The audio objects survive: Atmos goes in, Atmos comes out.
 * **DTS**, **DTS-HD MA** and **DTS:X** → **plain E-AC-3**, 640 kbps, via ffmpeg.
   **No Atmos in the output.** DTS and Atmos come from different companies, and DTS:X objects do not become Dolby objects. Nothing on earth converts one into the other.
-* **E-AC-3**, **AC-3** and **AAC** are already compatible and are left untouched.
+* **E-AC-3**, **AC-3** and **AAC** are already compatible and are not converted.
+
+**What stays in the file.** In Auto mode the final file keeps the main audio track — the original, plus the new or reused E-AC-3, which becomes the default — and drops the other audio tracks: dubs, commentaries and other languages. Manual mode is how you keep any of them.
 
 ### 💬 PGS subtitles → SRT
 
@@ -160,7 +162,9 @@ Smart TVs and soundbars refuse the lossless codecs a Blu-ray carries. The progra
 
 Image-based PGS becomes clean `.SRT` text, spellchecked against a 1.3 million word dictionary, and the program **grades the file it generated** — EXCELLENT, GOOD, FAIR or POOR — instead of assuming it worked.
 
-The original PGS track **stays in the final file**. The `.SRT` is one extra track, not a replacement.
+The original PGS track **stays in the final file**. The `.SRT` is one extra track, not a replacement. The file also keeps one English subtitle (the full one; SDH only when there is no other). In Auto mode, subtitles in other languages and forced tracks are dropped; Manual mode can keep them.
+
+The grade counts the blocks the OCR could not read. A word misread into another real word is not counted — that is why the original PGS stays in the file.
 
 ### 💾 Batch and disk space
 
@@ -170,7 +174,7 @@ A file that does not fit **never even starts** — no temporary folder, no 20 mi
 
 ### 🎛️ Auto or manual
 
-Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**.
+Let the decision engine handle everything, or open the track list and choose, one by one, what to **keep**, **convert** or **drop**. Auto keeps the tracks described above under Audio and Subtitles and drops the rest; Manual is how you keep a dub, a commentary or another language.
 
 ### 🏷️ The name says what the file is
 

@@ -3,8 +3,8 @@
            + AUDIO Converter [Dolby TrueHD / DTS:HD / DTS:X -> E-AC-3]
  Profile 7/5/8 to Profile 8.1  (with automatic PT-BR PGS subtitle OCR)
  --------------------------------------------------------------------------
- WINDOW (GUI) 19.15  ·  ENGINE 14.14  ·  CORRECTOR 2.34  ·  REOCR 1.30
- Installer 2.0                                     -   "LaFirma"
+ WINDOW (GUI) 19.16  ·  ENGINE 14.15  ·  CORRECTOR 2.35  ·  REOCR 1.30
+ Installer 2.0.1                                   -   "LaFirma"
 ================================================================================
 
 HOW TO OPEN
@@ -255,13 +255,17 @@ change the outcome for a specific episode:
    said "Tick the video to edit" (greyed out), now shows "Mode: Automatic" -
    click it to switch to Manual.
 2. In the Video Tracks tab, every audio and subtitle row gets a
-   selector with three options:
-     CONVERT   - force conversion even if a ready-made track already
-                 exists to reuse.
+   selector. It only offers what the engine can do with that track:
+     CONVERT   - main audio and the PT-BR subtitle only: force conversion
+                 even if a ready-made track already exists to reuse.
      KEEP      - keep the track as-is from the source file, no
                  conversion (e.g. keep a dub the automatic rule would
                  have discarded).
-     DROP      - remove the track from the final file.
+     DROP      - remove the track from the final file (the main audio
+                 does not have this option: it always stays).
+   If you drop the ready-made E-AC-3 track and leave the main audio alone,
+   the main audio is converted - otherwise the file would come out with no
+   track the TV can play.
 3. If you don't touch any verb, the episode follows the automatic rule
    normally - Manual only kicks in where you chose something different.
 
